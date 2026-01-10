@@ -3,14 +3,21 @@ Started: January 2026
 
 ## Codebase Patterns
 - Backend code lives in `/backend` directory (Rails 7.2 API-mode)
+- Frontend code lives in `/frontend` directory (React 18 + TypeScript + Vite)
 - Use Ruby 3.4.4 for compatibility with latest gems
+- Use Node.js 22.13.1 for frontend (required by Vite v7)
 - Run backend commands from the `/backend` directory
+- Run frontend commands from the `/frontend` directory with `PATH="$HOME/.asdf/shims:$PATH"`
 - Docker Compose services: `docker-compose up -d` for PostgreSQL and Redis
 - RSpec tests: `bundle exec rspec`
 - Rubocop linting: `bundle exec rubocop` (auto-fix: `bundle exec rubocop -A`)
+- ESLint: `npm run lint` (auto-fix: `npm run lint -- --fix`)
+- Build frontend: `npm run build`
 - Rubocop uses `plugins:` syntax instead of `require:` for extensions
 - All Ruby files must have `# frozen_string_literal: true` at the top
 - Use double quotes for strings consistently
+- Frontend uses `@/` path alias for imports (e.g., `@/components/ui/button`)
+- shadcn/ui components live in `src/components/ui/`
 
 ---
 
@@ -29,4 +36,26 @@ Started: January 2026
   - Rails generates a nested .git directory - remove it for mono-repo structure
   - asdf uses `asdf set` command instead of `asdf local` in newer versions
   - Database names follow pattern: `entmoot_development`, `entmoot_test`
+---
+
+## 2026-01-10 - US-002
+- Implemented React 18 frontend project setup in /frontend directory
+- Files created/changed:
+  - `/frontend/` - Full React 18 + TypeScript + Vite application
+  - `/frontend/vite.config.ts` - Vite config with Tailwind, React, and proxy to Rails API
+  - `/frontend/src/index.css` - Tailwind CSS v4 with shadcn/ui theme variables
+  - `/frontend/src/App.tsx` - Main app with React Router and TanStack Query providers
+  - `/frontend/src/lib/api.ts` - API fetch utility and QueryClient configuration
+  - `/frontend/src/stores/auth.ts` - Zustand auth store with persistence
+  - `/frontend/src/pages/Home.tsx` - Landing page with shadcn Button component
+  - `/frontend/src/pages/NotFound.tsx` - 404 page
+  - `/frontend/src/components/ui/button.tsx` - shadcn Button component
+  - `/frontend/eslint.config.js` - ESLint with Prettier and React plugins
+  - `/frontend/.prettierrc` - Prettier config with Tailwind plugin
+- **Learnings for future iterations:**
+  - Vite v7 requires Node.js 20.19+ or 22.12+ - nvm may override asdf, use `PATH="$HOME/.asdf/shims:$PATH"` prefix
+  - shadcn/ui init requires `baseUrl` and `paths` in both tsconfig.json and tsconfig.app.json
+  - Tailwind CSS v4 uses `@import "tailwindcss"` instead of `@tailwind` directives
+  - shadcn/ui components export non-component items (like `buttonVariants`), add eslint-disable for `react-refresh/only-export-components`
+  - Prettier tailwind plugin auto-sorts class names
 ---

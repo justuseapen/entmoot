@@ -36,7 +36,7 @@
         "Basic App component renders without errors"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Frontend lives in /frontend directory. Use shadcn/ui for component primitives."
     },
     {
