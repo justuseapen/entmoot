@@ -1,0 +1,659 @@
+{
+  "project": "Entmoot",
+  "branchName": "feature/mvp-foundation",
+  "description": "Family multi-scale planning platform MVP - Phase 1 Foundation including family/member management, SMART goals, daily planning, weekly reviews, notifications, AI coaching, and gamification",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Rails API Project Setup",
+      "description": "As a developer, I need a properly configured Rails 7 API-mode application with PostgreSQL, Redis, and Sidekiq so that we have a solid foundation for the backend.",
+      "acceptanceCriteria": [
+        "Rails 7.x project initialized in API mode",
+        "PostgreSQL configured as primary database",
+        "Redis configured for caching and Sidekiq",
+        "Sidekiq configured for background jobs",
+        "RSpec configured for testing",
+        "Rubocop configured for linting",
+        "Docker Compose file for local development services",
+        "Basic health check endpoint returns 200 OK"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use Rails 7.1+ for modern defaults. Include devise and pundit gems but don't configure yet."
+    },
+    {
+      "id": "US-002",
+      "title": "React Frontend Project Setup",
+      "description": "As a developer, I need a React 18 frontend application with TypeScript, Tailwind CSS, and proper tooling so that we can build the user interface.",
+      "acceptanceCriteria": [
+        "React 18 project with TypeScript using Vite",
+        "Tailwind CSS configured with custom theme colors",
+        "React Router v6 configured with basic routes",
+        "TanStack Query configured for API state management",
+        "Zustand configured for client state",
+        "ESLint and Prettier configured",
+        "Proxy configured to Rails API in development",
+        "Basic App component renders without errors"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Frontend lives in /frontend directory. Use shadcn/ui for component primitives."
+    },
+    {
+      "id": "US-003",
+      "title": "User Authentication - Backend",
+      "description": "As a user, I want to create an account and log in securely so that my family's data is protected.",
+      "acceptanceCriteria": [
+        "Devise configured with JWT strategy for API auth",
+        "User model with email, password, name, avatar_url fields",
+        "Registration endpoint POST /api/v1/auth/register",
+        "Login endpoint POST /api/v1/auth/login returns JWT",
+        "Logout endpoint DELETE /api/v1/auth/logout",
+        "Current user endpoint GET /api/v1/auth/me",
+        "Password reset flow endpoints",
+        "JWT refresh token mechanism",
+        "All auth endpoints have request specs"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Use devise-jwt gem. Tokens expire in 24 hours, refresh tokens in 30 days."
+    },
+    {
+      "id": "US-004",
+      "title": "User Authentication - Frontend",
+      "description": "As a user, I want registration and login forms so that I can access my account from the web application.",
+      "acceptanceCriteria": [
+        "Registration page with email, password, name fields",
+        "Login page with email and password fields",
+        "Form validation with helpful error messages",
+        "JWT stored securely (httpOnly cookie or secure storage)",
+        "Auth state managed globally with Zustand",
+        "Protected route wrapper redirects unauthenticated users",
+        "Logout functionality clears auth state",
+        "Loading states during auth operations"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Use React Hook Form for form handling. Consider magic link login for Phase 2."
+    },
+    {
+      "id": "US-005",
+      "title": "Family Model and Management - Backend",
+      "description": "As a user, I want to create a family and invite members so that we can plan together.",
+      "acceptanceCriteria": [
+        "Family model with name, timezone, settings (jsonb) fields",
+        "FamilyMembership join model with role enum (admin, adult, teen, child, observer)",
+        "User belongs to many families through memberships",
+        "Family creation endpoint POST /api/v1/families",
+        "Creator automatically becomes admin member",
+        "Family update endpoint PATCH /api/v1/families/:id",
+        "Invite member endpoint POST /api/v1/families/:id/invitations",
+        "Invitation model with token, email, role, expires_at",
+        "Accept invitation endpoint POST /api/v1/invitations/:token/accept",
+        "Pundit policies restrict actions by role",
+        "Full request specs for all endpoints"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Admins can do everything. Adults can manage goals and invite. Teens have limited access. Observers are read-only."
+    },
+    {
+      "id": "US-006",
+      "title": "Family Management - Frontend",
+      "description": "As a family admin, I want a UI to manage my family settings and members so that I can control who has access.",
+      "acceptanceCriteria": [
+        "Family creation wizard for new users without a family",
+        "Family settings page showing name, timezone, members",
+        "Member list with role badges and management actions",
+        "Invite member modal with email and role selection",
+        "Pending invitations list with resend/cancel actions",
+        "Edit member role functionality (admin only)",
+        "Remove member functionality with confirmation",
+        "Family switcher for users in multiple families"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Default to user's browser timezone on family creation."
+    },
+    {
+      "id": "US-007",
+      "title": "Pet Profiles - Backend",
+      "description": "As a family member, I want to add pets to our family so that we can track their care schedules.",
+      "acceptanceCriteria": [
+        "Pet model with name, pet_type, avatar_url, birthday, notes fields",
+        "Pet belongs to family",
+        "CRUD endpoints for pets under /api/v1/families/:family_id/pets",
+        "Only admin and adult roles can manage pets",
+        "Pets can be assigned to goals (care tasks)",
+        "Request specs for all endpoints"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Keep pet_type as free text for flexibility (dog, cat, hamster, etc.)."
+    },
+    {
+      "id": "US-008",
+      "title": "Pet Profiles - Frontend",
+      "description": "As a family member, I want to see and manage our pets in the family hub.",
+      "acceptanceCriteria": [
+        "Pets section in family hub showing all pets",
+        "Add pet modal with name, type, photo upload, birthday",
+        "Pet card showing avatar, name, type",
+        "Edit pet details functionality",
+        "Delete pet with confirmation",
+        "Pet avatar fallback based on pet type"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Use emoji fallbacks for pet types without photos."
+    },
+    {
+      "id": "US-009",
+      "title": "SMART Goals Model - Backend",
+      "description": "As a user, I want to create goals with SMART criteria so that my goals are well-defined and achievable.",
+      "acceptanceCriteria": [
+        "Goal model with title, description, status enum fields",
+        "SMART fields: specific, measurable, achievable, relevant, time_bound (all text)",
+        "TimeScale enum: daily, weekly, monthly, quarterly, annual",
+        "Status enum: not_started, in_progress, at_risk, completed, abandoned",
+        "Visibility enum: personal, shared, family",
+        "Goal belongs to family and creator (user)",
+        "Parent goal self-referential association (optional loose linking)",
+        "GoalAssignment join model for multi-member assignment",
+        "Progress field (integer 0-100)",
+        "Due date field",
+        "CRUD endpoints under /api/v1/families/:family_id/goals",
+        "Filter goals by time_scale, status, assignee, visibility",
+        "Pundit policies enforce visibility rules",
+        "Request specs covering all scenarios"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Personal goals only visible to creator. Shared visible to assigned members. Family visible to all."
+    },
+    {
+      "id": "US-010",
+      "title": "SMART Goals - Frontend",
+      "description": "As a user, I want to create, view, and manage my goals through an intuitive interface.",
+      "acceptanceCriteria": [
+        "Goal browser page with filtering by time scale, status, assignee",
+        "Goal creation modal with all SMART fields",
+        "Guided SMART goal wizard (step by step)",
+        "Goal detail view showing all fields and progress",
+        "Edit goal functionality",
+        "Update progress slider/input",
+        "Change status dropdown",
+        "Link to parent goal selector",
+        "Assign family members to goal",
+        "Set visibility (personal/shared/family)",
+        "Delete goal with confirmation",
+        "Goal cards show title, due date, progress bar, assignees"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Make the SMART wizard optional - power users can use single form."
+    },
+    {
+      "id": "US-011",
+      "title": "Goal Hierarchy Visualization",
+      "description": "As a user, I want to see how my daily goals connect to annual goals so that I understand the bigger picture.",
+      "acceptanceCriteria": [
+        "Goal tree view showing hierarchy from annual down to daily",
+        "Expandable/collapsible tree nodes",
+        "Visual connectors between parent and child goals",
+        "Color coding by time scale",
+        "Click goal node to open detail view",
+        "Filter tree by family member",
+        "Empty state guidance for users without linked goals"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Use a tree visualization library. Keep it simple - don't over-engineer."
+    },
+    {
+      "id": "US-012",
+      "title": "Daily Planning - Backend",
+      "description": "As a user, I want to create a daily plan each morning so that I'm intentional about my day.",
+      "acceptanceCriteria": [
+        "DailyPlan model with date, user_id, family_id",
+        "DailyTask model with title, completed boolean, position, daily_plan_id",
+        "TopPriority model (max 3 per day) linked to daily plan",
+        "Intention field on DailyPlan (text)",
+        "GET /api/v1/daily_plans/today returns or creates today's plan",
+        "PATCH /api/v1/daily_plans/:id updates plan and tasks",
+        "Tasks can be reordered (position field)",
+        "Tasks can be linked to goals (optional goal_id)",
+        "Request specs for all scenarios"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Use the family's timezone to determine 'today'."
+    },
+    {
+      "id": "US-013",
+      "title": "Daily Planning - Frontend",
+      "description": "As a user, I want a morning planning interface to set my intentions and tasks for the day.",
+      "acceptanceCriteria": [
+        "Daily planner page accessible from dashboard",
+        "Today's date prominently displayed",
+        "Top 3 priorities input section",
+        "Daily intention/affirmation text field",
+        "Task checklist with add/remove/reorder",
+        "Drag and drop task reordering",
+        "Quick-add task input",
+        "Link task to existing goal (optional)",
+        "Task completion checkboxes",
+        "Progress indicator (X of Y tasks completed)",
+        "Previous day's incomplete tasks shown for carry-over"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Make it feel calm and focused. Morning planning should take < 5 minutes."
+    },
+    {
+      "id": "US-014",
+      "title": "Evening Reflection - Backend",
+      "description": "As a user, I want to reflect on my day each evening so that I learn and improve.",
+      "acceptanceCriteria": [
+        "Reflection model with daily_plan_id, reflection_type enum",
+        "Reflection types: evening, weekly, monthly, quarterly, annual",
+        "ReflectionResponse model with prompt, response text",
+        "Mood enum: great, good, okay, difficult, rough (optional)",
+        "Energy level 1-5 (optional)",
+        "Gratitude items array (jsonb)",
+        "CRUD endpoints for reflections",
+        "Endpoint to get reflection prompts GET /api/v1/reflection_prompts",
+        "Request specs"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Store standard prompts in config/reflection_prompts.yml initially."
+    },
+    {
+      "id": "US-015",
+      "title": "Evening Reflection - Frontend",
+      "description": "As a user, I want guided evening reflection prompts so that I process my day meaningfully.",
+      "acceptanceCriteria": [
+        "Evening reflection accessible from daily planner",
+        "Task completion summary shown first",
+        "Guided prompts displayed one at a time",
+        "What went well today? (text response)",
+        "What was challenging? (text response)",
+        "What am I grateful for? (3 items)",
+        "What will I do differently tomorrow? (text response)",
+        "Optional mood selector (emoji-based)",
+        "Optional energy level slider",
+        "Save and complete reflection",
+        "View past reflections in read-only mode"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Make reflection feel peaceful, not like a chore. Soft colors, generous spacing."
+    },
+    {
+      "id": "US-016",
+      "title": "Weekly Review - Backend",
+      "description": "As a user, I want to review my week so that I can adjust my approach and celebrate wins.",
+      "acceptanceCriteria": [
+        "WeeklyReview model with week_start_date, user_id, family_id",
+        "Aggregate daily task completion rate for the week",
+        "Aggregate goals progress changes for the week",
+        "Wins array (jsonb)",
+        "Challenges array (jsonb)",
+        "Next week priorities array (jsonb)",
+        "Lessons learned text field",
+        "GET /api/v1/weekly_reviews/current returns or creates this week's review",
+        "GET /api/v1/weekly_reviews/:id/metrics returns computed metrics",
+        "Request specs"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Week starts on Monday by default, configurable per family."
+    },
+    {
+      "id": "US-017",
+      "title": "Weekly Review - Frontend",
+      "description": "As a user, I want a guided weekly review workflow so that I reflect meaningfully on my week.",
+      "acceptanceCriteria": [
+        "Weekly review wizard with multiple steps",
+        "Step 1: Metrics overview (tasks completed, goals progressed)",
+        "Step 2: Wins - what went well this week (add multiple)",
+        "Step 3: Challenges - what was difficult (add multiple)",
+        "Step 4: Lessons learned (free text)",
+        "Step 5: Next week priorities (top 3-5)",
+        "Progress indicator showing current step",
+        "Save progress and resume later",
+        "View past weekly reviews",
+        "Weekly review reminder on Sunday evening"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Make it completable in 10-15 minutes. Don't overwhelm with metrics."
+    },
+    {
+      "id": "US-018",
+      "title": "Notification Preferences - Backend",
+      "description": "As a user, I want to configure when and how I receive notifications so that I'm reminded without being overwhelmed.",
+      "acceptanceCriteria": [
+        "NotificationPreference model belongs to user",
+        "Channel preferences: in_app, email, push (all boolean)",
+        "Reminder preferences: morning_planning, evening_reflection, weekly_review",
+        "Preferred times for each reminder type",
+        "Quiet hours start and end times",
+        "CRUD endpoint PATCH /api/v1/users/me/notification_preferences",
+        "Request specs"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Default morning planning to 7am, evening reflection to 8pm, weekly review to Sunday 6pm."
+    },
+    {
+      "id": "US-019",
+      "title": "Notification Preferences - Frontend",
+      "description": "As a user, I want to manage my notification settings in the app.",
+      "acceptanceCriteria": [
+        "Notification settings page in user settings",
+        "Toggle switches for each channel (in-app, email, push)",
+        "Toggle switches for each reminder type",
+        "Time pickers for reminder times",
+        "Quiet hours time range picker",
+        "Save preferences with success feedback",
+        "Preview of notification schedule"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Use the family timezone for time display."
+    },
+    {
+      "id": "US-020",
+      "title": "In-App Notifications",
+      "description": "As a user, I want to see notifications within the app so that I'm aware of reminders and updates.",
+      "acceptanceCriteria": [
+        "Notification model with user_id, title, body, read boolean, link",
+        "Notification bell icon in header with unread count badge",
+        "Notification dropdown showing recent notifications",
+        "Mark notification as read on click",
+        "Mark all as read action",
+        "Notification links navigate to relevant page",
+        "Real-time notification delivery via ActionCable",
+        "Request specs and system specs"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "Limit dropdown to 10 most recent. Link to full notifications page."
+    },
+    {
+      "id": "US-021",
+      "title": "Email Notifications",
+      "description": "As a user, I want to receive email reminders so that I don't forget to plan and reflect.",
+      "acceptanceCriteria": [
+        "Mailer for morning planning reminder",
+        "Mailer for evening reflection reminder",
+        "Mailer for weekly review reminder",
+        "Mailer for goal check-in reminders",
+        "Sidekiq jobs scheduled based on user preferences",
+        "Respect quiet hours settings",
+        "Unsubscribe link in all emails",
+        "Email templates are clean and mobile-friendly",
+        "Mailer specs"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Use SendGrid or Postmark in production. Letter Opener in development."
+    },
+    {
+      "id": "US-022",
+      "title": "AI SMART Goal Refinement - Backend",
+      "description": "As a user, I want AI to help me improve my goals so that they are truly SMART.",
+      "acceptanceCriteria": [
+        "Anthropic Claude API client service",
+        "GoalRefinementService takes goal and returns suggestions",
+        "Suggestions for each SMART criterion",
+        "Alternative title/description suggestions",
+        "Potential obstacles identification",
+        "Milestone recommendations",
+        "POST /api/v1/goals/:id/refine endpoint",
+        "Rate limiting to prevent API abuse",
+        "Error handling for API failures",
+        "Request specs with mocked API responses"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "Use Claude 3.5 Sonnet for cost efficiency. Cache common patterns."
+    },
+    {
+      "id": "US-023",
+      "title": "AI SMART Goal Refinement - Frontend",
+      "description": "As a user, I want an AI coaching interface to refine my goals.",
+      "acceptanceCriteria": [
+        "Refine with AI button on goal creation/edit forms",
+        "Loading state while AI processes",
+        "Suggestions displayed in organized sections (per SMART criterion)",
+        "Accept suggestion buttons to apply changes",
+        "Dismiss suggestion buttons",
+        "Alternative phrasings shown as clickable options",
+        "Obstacles shown as awareness items",
+        "Milestones can be added as sub-goals",
+        "Graceful error handling if AI unavailable"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Make AI feel like a helpful coach, not a critic."
+    },
+    {
+      "id": "US-024",
+      "title": "Gamification - Streaks Backend",
+      "description": "As a user, I want to track my planning streaks so that I'm motivated to be consistent.",
+      "acceptanceCriteria": [
+        "Streak model with user_id, streak_type enum, current_count, longest_count",
+        "Streak types: daily_planning, evening_reflection, weekly_review",
+        "StreakService calculates and updates streaks",
+        "Streak increments when activity completed",
+        "Streak resets if day/week missed (with grace period option)",
+        "GET /api/v1/users/me/streaks endpoint",
+        "Streak milestone notifications (7 days, 30 days, etc.)",
+        "Request specs"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "Consider 'freeze' feature to pause streaks during vacation. Phase 2."
+    },
+    {
+      "id": "US-025",
+      "title": "Gamification - Badges Backend",
+      "description": "As a user, I want to earn badges for achievements so that I feel rewarded for my efforts.",
+      "acceptanceCriteria": [
+        "Badge model with name, description, icon, criteria (jsonb)",
+        "UserBadge join model with earned_at timestamp",
+        "BadgeService checks and awards badges",
+        "Seed badges: First Goal, First Reflection, Week Warrior (7-day streak), etc.",
+        "GET /api/v1/users/me/badges endpoint",
+        "GET /api/v1/badges endpoint (all available badges)",
+        "Badge earned notification",
+        "Request specs"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "Start with ~10 badges. Easy to add more later."
+    },
+    {
+      "id": "US-026",
+      "title": "Gamification - Points Backend",
+      "description": "As a user, I want to earn points for activities so that I can see my overall engagement.",
+      "acceptanceCriteria": [
+        "Points ledger model: user_id, points, activity_type, created_at",
+        "PointsService awards points for activities",
+        "Point values: complete task (5), complete reflection (20), complete weekly review (50), etc.",
+        "User total_points computed field",
+        "GET /api/v1/users/me/points endpoint with recent activity",
+        "Request specs"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "Points are for fun engagement, not competitive. Keep values reasonable."
+    },
+    {
+      "id": "US-027",
+      "title": "Gamification - Family Leaderboard",
+      "description": "As a family, we want to see a friendly leaderboard so that we encourage each other.",
+      "acceptanceCriteria": [
+        "GET /api/v1/families/:id/leaderboard endpoint",
+        "Leaderboard shows family members ranked by points",
+        "Weekly and all-time views",
+        "Include streak counts",
+        "Include badge counts",
+        "Family leaderboard page in frontend",
+        "Member cards with avatar, name, points, streaks",
+        "Celebrate top performer",
+        "Encouraging messages for all positions"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Make it fun and supportive, not cutthroat competitive."
+    },
+    {
+      "id": "US-028",
+      "title": "Gamification - Frontend UI",
+      "description": "As a user, I want to see my streaks, badges, and points throughout the app.",
+      "acceptanceCriteria": [
+        "Streaks displayed on dashboard with flame icons",
+        "Streak at risk warning (haven't completed today's activity yet)",
+        "Badges showcase on user profile",
+        "Badge detail modal showing how badge was earned",
+        "Points total in header or profile",
+        "Points history page",
+        "Badge earned celebration animation/toast",
+        "Streak milestone celebration"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "Keep celebrations brief and delightful, not disruptive."
+    },
+    {
+      "id": "US-029",
+      "title": "Dashboard - Home Page",
+      "description": "As a user, I want a dashboard that shows me everything important at a glance.",
+      "acceptanceCriteria": [
+        "Today's date and greeting",
+        "Quick access to today's daily plan",
+        "Current streaks summary",
+        "Upcoming goals due soon",
+        "Recent family activity feed",
+        "Quick actions: Start planning, Reflect, Review week",
+        "Pending reminders/notifications",
+        "Weather widget (nice to have, can defer)",
+        "Responsive layout for mobile"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "Dashboard is the home base. Make it useful without being overwhelming."
+    },
+    {
+      "id": "US-030",
+      "title": "Navigation and Layout",
+      "description": "As a user, I want intuitive navigation so that I can easily access all features.",
+      "acceptanceCriteria": [
+        "Responsive sidebar navigation (collapsible on mobile)",
+        "Navigation items: Dashboard, Goals, Daily Planner, Reviews, Family, Settings",
+        "User avatar and dropdown menu in header",
+        "Family switcher in header (if multiple families)",
+        "Notification bell in header",
+        "Active state highlighting on current page",
+        "Breadcrumbs for nested pages",
+        "Mobile bottom navigation bar alternative"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "Consider mobile-first. Bottom nav might be better for phone users."
+    },
+    {
+      "id": "US-031",
+      "title": "User Profile and Settings",
+      "description": "As a user, I want to manage my profile and account settings.",
+      "acceptanceCriteria": [
+        "Profile page showing name, avatar, email, member since",
+        "Edit profile: name, avatar upload",
+        "Change password form",
+        "Notification preferences link",
+        "Account deletion with confirmation",
+        "Export my data option (GDPR prep)",
+        "Connected calendar accounts (placeholder for Phase 2)"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": "Avatar upload can use ActiveStorage with S3 in production."
+    },
+    {
+      "id": "US-032",
+      "title": "Error Handling and Loading States",
+      "description": "As a user, I want clear feedback when things are loading or when errors occur.",
+      "acceptanceCriteria": [
+        "Global loading indicator for page transitions",
+        "Skeleton loaders for content-heavy sections",
+        "Error boundary catches React errors",
+        "User-friendly error messages (not technical jargon)",
+        "Retry actions for failed requests",
+        "Offline indicator when connection lost",
+        "404 page for unknown routes",
+        "500 error page for server errors"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "Good UX polish. Users should never see raw error messages."
+    },
+    {
+      "id": "US-033",
+      "title": "Testing Infrastructure",
+      "description": "As a developer, I want comprehensive tests so that we can refactor with confidence.",
+      "acceptanceCriteria": [
+        "RSpec configured with FactoryBot, Faker, Shoulda Matchers",
+        "Request specs for all API endpoints",
+        "Model specs for validations and associations",
+        "Service specs for business logic",
+        "Frontend: Jest configured for unit tests",
+        "React Testing Library for component tests",
+        "At least 80% code coverage target",
+        "CI pipeline runs tests on every push"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": "Tests are essential for Ralph iterations to validate changes."
+    },
+    {
+      "id": "US-034",
+      "title": "CI/CD Pipeline",
+      "description": "As a developer, I want automated CI/CD so that code quality is maintained.",
+      "acceptanceCriteria": [
+        "GitHub Actions workflow for CI",
+        "Run RSpec tests on push",
+        "Run frontend tests on push",
+        "Run Rubocop linting on push",
+        "Run ESLint on push",
+        "Build check for frontend",
+        "Database migrations check",
+        "Branch protection requiring CI pass"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": "Essential for Ralph to have passing CI as a stop condition."
+    },
+    {
+      "id": "US-035",
+      "title": "Seed Data and Demo Mode",
+      "description": "As a developer, I want seed data so that I can test the application with realistic content.",
+      "acceptanceCriteria": [
+        "Seed file creates demo family with multiple members",
+        "Demo users with different roles",
+        "Sample goals across all time scales",
+        "Sample daily plans and reflections",
+        "Sample weekly reviews",
+        "Sample streaks, badges, points",
+        "Seed data is idempotent (can run multiple times)",
+        "rake db:seed works without errors"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": "Good seed data helps manual testing and demos."
+    }
+  ]
+}

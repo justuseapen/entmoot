@@ -1,0 +1,37 @@
+# Ralph
+.last-branch
+archive/
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Backend (Rails) - will be in /backend
+/backend/tmp/
+/backend/log/
+/backend/.bundle/
+/backend/vendor/bundle/
+/backend/coverage/
+/backend/node_modules/
+
+# Frontend (React) - will be in /frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/coverage/
+/frontend/.cache/
