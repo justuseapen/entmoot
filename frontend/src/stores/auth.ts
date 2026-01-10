@@ -47,6 +47,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "entmoot-auth",
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        refreshToken: state.refreshToken,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );

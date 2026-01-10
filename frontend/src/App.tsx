@@ -5,6 +5,9 @@ import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
+import { Families } from "./pages/Families";
+import { FamilySettings } from "./pages/FamilySettings";
+import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuthStore } from "./stores/auth";
@@ -47,6 +50,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/families"
+            element={
+              <ProtectedRoute>
+                <Families />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/families/:id"
+            element={
+              <ProtectedRoute>
+                <FamilySettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/invitations/:token" element={<AcceptInvitation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -8,18 +8,9 @@ module Api
           user = User.new(sign_up_params)
 
           if user.save
-            token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
-            response.headers["Authorization"] = "Bearer #{token}"
-
-            render json: {
-              message: "Signed up successfully.",
-              user: user_response(user)
-            }, status: :created
+            render_success_response(user)
           else
-            render json: {
-              error: "Sign up failed.",
-              errors: user.errors.full_messages
-            }, status: :unprocessable_content
+            render_error_response(user)
           end
         end
 
@@ -27,6 +18,26 @@ module Api
 
         def sign_up_params
           params.require(:user).permit(:email, :password, :password_confirmation, :name, :avatar_url)
+        end
+
+        def render_success_response(user)
+          token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
+          refresh = RefreshToken.create!(user: user, expires_at: 30.days.from_now)
+          response.headers["Authorization"] = "Bearer #{token}"
+
+          render json: {
+            message: "Signed up successfully.",
+            user: user_response(user),
+            token: token,
+            refresh_token: refresh.token
+          }, status: :created
+        end
+
+        def render_error_response(user)
+          render json: {
+            error: "Sign up failed.",
+            errors: user.errors.full_messages
+          }, status: :unprocessable_content
         end
 
         def user_response(user)
