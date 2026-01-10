@@ -36,3 +36,7 @@ en:
           attributes:
             family_id:
               user_already_member: "user is already a member"
+        pet:
+          attributes:
+            name:
+              taken_in_family: "has already been taken for this family"

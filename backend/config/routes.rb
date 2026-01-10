@@ -31,6 +31,7 @@ Rails.application.routes.draw do
           post "resend", on: :member
         end
         resources :memberships, only: %i[index update destroy]
+        resources :pets, only: %i[index show create update destroy]
       end
 
       # Accept invitation (public route with token)

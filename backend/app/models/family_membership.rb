@@ -27,4 +27,8 @@ class FamilyMembership < ApplicationRecord
   def can_manage_family?
     admin?
   end
+
+  def can_manage_pets?
+    admin? || adult?
+  end
 end

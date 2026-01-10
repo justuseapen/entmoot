@@ -12,6 +12,7 @@ RSpec.describe Family do
     it { is_expected.to have_many(:family_memberships).dependent(:destroy) }
     it { is_expected.to have_many(:members).through(:family_memberships).source(:user) }
     it { is_expected.to have_many(:invitations).dependent(:destroy) }
+    it { is_expected.to have_many(:pets).dependent(:destroy) }
   end
 
   describe "#admin_members" do

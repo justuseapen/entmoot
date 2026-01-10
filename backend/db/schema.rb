@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_10_193951) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_10_205446) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -55,6 +55,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_10_193951) do
     t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
   end
 
+  create_table "pets", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "pet_type"
+    t.string "avatar_url"
+    t.date "birthday"
+    t.text "notes"
+    t.bigint "family_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id", "name"], name: "index_pets_on_family_id_and_name", unique: true
+    t.index ["family_id"], name: "index_pets_on_family_id"
+  end
+
   create_table "refresh_tokens", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "token", null: false
@@ -84,5 +97,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_10_193951) do
   add_foreign_key "family_memberships", "users"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "pets", "families"
   add_foreign_key "refresh_tokens", "users"
 end
