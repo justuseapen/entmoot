@@ -73,7 +73,7 @@
         "Loading states during auth operations"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Use React Hook Form for form handling. Consider magic link login for Phase 2."
     },
     {

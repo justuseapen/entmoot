@@ -95,3 +95,29 @@ Started: January 2026
   - RefreshToken auto-generates token via `before_validation` callback, so presence validation doesn't work with shoulda-matchers
   - 72 tests pass covering all auth scenarios including token refresh, password reset, and revoked tokens
 ---
+
+## 2026-01-10 - US-004
+- Implemented User Authentication - Frontend with React Hook Form and Zod
+- Files created/changed:
+  - `/frontend/src/lib/auth.ts` - Auth API functions (login, register, logout, getCurrentUser, refreshToken)
+  - `/frontend/src/stores/auth.ts` - Updated Zustand store with refreshToken and loading state
+  - `/frontend/src/pages/Login.tsx` - Login page with form validation
+  - `/frontend/src/pages/Register.tsx` - Registration page with password strength validation
+  - `/frontend/src/pages/Dashboard.tsx` - Protected dashboard showing user info
+  - `/frontend/src/components/ProtectedRoute.tsx` - Auth guard component
+  - `/frontend/src/components/ui/input.tsx` - shadcn Input component
+  - `/frontend/src/components/ui/label.tsx` - shadcn Label component
+  - `/frontend/src/components/ui/card.tsx` - shadcn Card component
+  - `/frontend/src/App.tsx` - Updated routes with auth-aware redirects
+  - `/frontend/src/pages/Home.tsx` - Updated with auth-aware navigation
+  - `/frontend/package.json` - Added react-hook-form, @hookform/resolvers, zod
+- **Learnings for future iterations:**
+  - Use React Hook Form with Zod resolver for declarative form validation
+  - Zustand persist middleware stores state in localStorage under configured key name
+  - When logout function checks for token before API call, make sure to not early-return if token is null - still clear local state and navigate
+  - shadcn/ui components installed via `npx shadcn@latest add <component>` may need prettier auto-fix
+  - AuthenticatedRedirect wrapper prevents logged-in users from accessing login/register pages
+  - ProtectedRoute wrapper redirects unauthenticated users to login with return URL in state
+  - Vite proxy to Rails API is configured in vite.config.ts under server.proxy
+  - Rails server must be running on port 3000 for Vite proxy to work (default proxy target)
+---
