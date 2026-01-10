@@ -190,7 +190,7 @@
         "Goal cards show title, due date, progress bar, assignees"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Make the SMART wizard optional - power users can use single form."
     },
     {

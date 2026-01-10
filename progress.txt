@@ -224,3 +224,29 @@ Started: January 2026
   - TanStack Query key pattern for goals: `["goals", "list", familyId]`, `["goals", "detail", familyId, goalId]`
   - 102 new goal-related tests added, 305 total tests pass
 ---
+
+## 2026-01-10 - US-010
+- Implemented SMART Goals - Frontend
+- Files created/changed:
+  - `/frontend/src/pages/Goals.tsx` - Goal browser page with filtering by time scale, status, assignee
+  - `/frontend/src/components/GoalCard.tsx` - Goal card displaying title, description, time scale badge, status badge, progress bar, assignees, edit/delete buttons
+  - `/frontend/src/components/GoalModal.tsx` - Create/edit goal modal with Quick Form and SMART Wizard modes
+  - `/frontend/src/components/GoalDetailView.tsx` - Goal detail dialog showing all fields, progress slider, status dropdown
+  - `/frontend/src/hooks/useGoals.ts` - TanStack Query hooks for goal CRUD operations
+  - `/frontend/src/lib/goals.ts` - API functions, type definitions, and helper utilities
+  - `/frontend/src/components/ui/progress.tsx` - shadcn Progress component
+  - `/frontend/src/components/ui/slider.tsx` - shadcn Slider component
+  - `/frontend/src/components/ui/tabs.tsx` - shadcn Tabs component
+  - `/frontend/src/components/ui/textarea.tsx` - shadcn Textarea component
+  - `/frontend/src/App.tsx` - Added /families/:id/goals route
+  - `/frontend/src/pages/FamilySettings.tsx` - Added link to Goals page
+- **Learnings for future iterations:**
+  - Goal modal supports two modes: Quick Form (single form with tabs) and SMART Wizard (step-by-step)
+  - Wizard has 7 steps: Basic Info, Specific, Measurable, Achievable, Relevant, Time-Bound, Settings
+  - Parent goal selector filters out daily goals and the current goal being edited
+  - canManageGoals checks for admin/adult/teen roles
+  - Goal cards check if current user is the creator for edit/delete permissions
+  - GoalDetailView fetches goal details separately to get SMART fields (not included in list response)
+  - Progress update in detail view uses local state with cancel/save buttons
+  - Status change in detail view updates immediately on select change
+---
