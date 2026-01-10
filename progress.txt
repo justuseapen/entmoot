@@ -18,6 +18,11 @@ Started: January 2026
 - Use double quotes for strings consistently
 - Frontend uses `@/` path alias for imports (e.g., `@/components/ui/button`)
 - shadcn/ui components live in `src/components/ui/`
+- Auth endpoints under `/api/v1/auth/` namespace
+- Use `auth_headers(user)` helper in request specs for authenticated requests
+- JWT tokens generated with `Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first`
+- Prefer `:unprocessable_content` over `:unprocessable_entity` (Rack deprecation)
+- Use `Time.zone.at()` instead of `Time.at()` for timezone awareness
 
 ---
 
@@ -58,4 +63,35 @@ Started: January 2026
   - Tailwind CSS v4 uses `@import "tailwindcss"` instead of `@tailwind` directives
   - shadcn/ui components export non-component items (like `buttonVariants`), add eslint-disable for `react-refresh/only-export-components`
   - Prettier tailwind plugin auto-sorts class names
+---
+
+## 2026-01-10 - US-003
+- Implemented User Authentication - Backend with Devise and JWT
+- Files created/changed:
+  - `/backend/app/models/user.rb` - User model with devise + JWT authentication
+  - `/backend/app/models/jwt_denylist.rb` - JWT denylist for token revocation
+  - `/backend/app/models/refresh_token.rb` - Refresh token model with rotation
+  - `/backend/config/initializers/devise.rb` - Devise configuration with JWT
+  - `/backend/config/routes.rb` - Auth routes under /api/v1/auth namespace
+  - `/backend/app/controllers/api/v1/auth/registrations_controller.rb` - Registration endpoint
+  - `/backend/app/controllers/api/v1/auth/sessions_controller.rb` - Login/logout endpoints
+  - `/backend/app/controllers/api/v1/auth/users_controller.rb` - Current user endpoint
+  - `/backend/app/controllers/api/v1/auth/passwords_controller.rb` - Password reset endpoints
+  - `/backend/app/controllers/api/v1/auth/tokens_controller.rb` - Refresh token endpoint
+  - `/backend/app/controllers/api/v1/base_controller.rb` - Base controller with auth
+  - `/backend/db/migrate/` - Migrations for users, jwt_denylist, refresh_tokens
+  - `/backend/spec/factories/` - Factories for User and RefreshToken
+  - `/backend/spec/models/` - Model specs for User and RefreshToken
+  - `/backend/spec/requests/api/v1/auth/` - Request specs for all auth endpoints
+  - `/backend/spec/support/auth_helpers.rb` - Helper for generating auth headers in tests
+- **Learnings for future iterations:**
+  - Don't inherit from Devise controllers (RegistrationsController, SessionsController) for API-mode - use standalone controllers with Devise internals
+  - Use `User.find_for_database_authentication(email:)` and `user.valid_password?(password)` for manual login
+  - Use `Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first` to generate JWT tokens
+  - JWT denylist needs `jti` (JWT ID) and `exp` (expiration) fields for token revocation
+  - Devise routes need `devise_for :users, skip: %i[sessions registrations]` but keep `:passwords` for reset email URL helper
+  - Rubocop prefers `:unprocessable_content` over `:unprocessable_entity` (deprecation)
+  - Time.at requires timezone: use `Time.zone.at()` instead of `Time.at()`
+  - RefreshToken auto-generates token via `before_validation` callback, so presence validation doesn't work with shoulda-matchers
+  - 72 tests pass covering all auth scenarios including token refresh, password reset, and revoked tokens
 ---

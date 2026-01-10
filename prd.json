@@ -55,7 +55,7 @@
         "All auth endpoints have request specs"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Use devise-jwt gem. Tokens expire in 24 hours, refresh tokens in 30 days."
     },
     {
