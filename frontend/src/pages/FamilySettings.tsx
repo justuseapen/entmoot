@@ -39,6 +39,7 @@ import { useFamilyStore } from "@/stores/family";
 import { MembersList } from "@/components/MembersList";
 import { PendingInvitations } from "@/components/PendingInvitations";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
+import { PetsList } from "@/components/PetsList";
 import type { MemberRole } from "@/lib/families";
 
 const familySettingsSchema = z.object({
@@ -254,6 +255,9 @@ export function FamilySettings() {
             members={family.members}
             currentUserRole={currentUserRole}
           />
+
+          {/* Pets List */}
+          <PetsList familyId={familyId} currentUserRole={currentUserRole} />
 
           {/* Invite Button */}
           {canInvite && (
