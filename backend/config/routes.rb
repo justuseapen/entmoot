@@ -23,6 +23,18 @@ Rails.application.routes.draw do
         put "password", to: "passwords#update"
         post "refresh", to: "tokens#refresh"
       end
+
+      # Family routes
+      resources :families, only: %i[index show create update destroy] do
+        get "members", on: :member
+        resources :invitations, only: %i[index create destroy] do
+          post "resend", on: :member
+        end
+        resources :memberships, only: %i[index update destroy]
+      end
+
+      # Accept invitation (public route with token)
+      post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
     end
   end
 end

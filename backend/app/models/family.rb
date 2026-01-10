@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+class Family < ApplicationRecord
+  has_many :family_memberships, dependent: :destroy
+  has_many :members, through: :family_memberships, source: :user
+  has_many :invitations, dependent: :destroy
+
+  validates :name, presence: true
+  validates :timezone, presence: true
+
+  def admin_members
+    members.joins(:family_memberships).where(family_memberships: { role: :admin })
+  end
+end

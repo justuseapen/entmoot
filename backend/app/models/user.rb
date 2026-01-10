@@ -6,10 +6,30 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
   has_many :refresh_tokens, dependent: :destroy
+  has_many :family_memberships, dependent: :destroy
+  has_many :families, through: :family_memberships
+  has_many :sent_invitations, class_name: "Invitation", foreign_key: :inviter_id, dependent: :destroy,
+                              inverse_of: :inviter
 
   validates :name, presence: true
 
   def jwt_payload
     { user_id: id }
+  end
+
+  def membership_for(family)
+    family_memberships.find_by(family: family)
+  end
+
+  def role_in(family)
+    membership_for(family)&.role
+  end
+
+  def admin_of?(family)
+    role_in(family) == "admin"
+  end
+
+  def member_of?(family)
+    families.include?(family)
   end
 end

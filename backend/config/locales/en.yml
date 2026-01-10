@@ -29,3 +29,10 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    errors:
+      models:
+        family_membership:
+          attributes:
+            family_id:
+              user_already_member: "user is already a member"
