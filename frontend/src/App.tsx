@@ -7,6 +7,7 @@ import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { Families } from "./pages/Families";
 import { FamilySettings } from "./pages/FamilySettings";
+import { Goals } from "./pages/Goals";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FamilySettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/families/:id/goals"
+            element={
+              <ProtectedRoute>
+                <Goals />
               </ProtectedRoute>
             }
           />

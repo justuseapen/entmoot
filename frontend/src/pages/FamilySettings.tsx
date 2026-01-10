@@ -170,9 +170,14 @@ export function FamilySettings() {
             <h1 className="text-3xl font-bold">{family.name}</h1>
             <p className="text-muted-foreground">Family settings and members</p>
           </div>
-          <Button variant="outline" asChild>
-            <Link to="/dashboard">Back to Dashboard</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to={`/families/${familyId}/goals`}>View Goals</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/dashboard">Back to Dashboard</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">

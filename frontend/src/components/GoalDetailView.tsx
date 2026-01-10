@@ -1,0 +1,459 @@
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useUpdateGoal, useGoal } from "@/hooks/useGoals";
+import {
+  type Goal,
+  type GoalUser,
+  type GoalStatus,
+  formatDueDate,
+  getStatusLabel,
+  getTimeScaleLabel,
+  statusOptions,
+  isDueSoon,
+  isOverdue,
+} from "@/lib/goals";
+
+interface GoalDetailViewProps {
+  familyId: number;
+  goalId: number;
+  // familyMembers available for future assignee editing feature
+  familyMembers?: GoalUser[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: (goal: Goal) => void;
+  onDelete?: (goal: Goal) => void;
+  canManage: boolean;
+}
+
+function getStatusBadgeVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "completed":
+      return "default";
+    case "in_progress":
+      return "secondary";
+    case "at_risk":
+    case "abandoned":
+      return "destructive";
+    default:
+      return "outline";
+  }
+}
+
+function getTimeScaleBadgeColor(timeScale: string): string {
+  switch (timeScale) {
+    case "daily":
+      return "bg-purple-100 text-purple-800";
+    case "weekly":
+      return "bg-blue-100 text-blue-800";
+    case "monthly":
+      return "bg-green-100 text-green-800";
+    case "quarterly":
+      return "bg-yellow-100 text-yellow-800";
+    case "annual":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
+export function GoalDetailView({
+  familyId,
+  goalId,
+  open,
+  onOpenChange,
+  onEdit,
+  onDelete,
+  canManage,
+}: GoalDetailViewProps) {
+  const { data: goal, isLoading, error } = useGoal(familyId, goalId);
+  const updateGoal = useUpdateGoal(familyId, goalId);
+  const [localProgress, setLocalProgress] = useState<number | null>(null);
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  if (!open) return null;
+
+  const handleProgressChange = async (value: number[]) => {
+    setLocalProgress(value[0]);
+  };
+
+  const handleProgressSave = async () => {
+    if (localProgress === null || !goal) return;
+    setIsUpdatingProgress(true);
+    try {
+      await updateGoal.mutateAsync({ progress: localProgress });
+      setLocalProgress(null);
+    } finally {
+      setIsUpdatingProgress(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: GoalStatus) => {
+    if (!goal) return;
+    setIsUpdatingStatus(true);
+    try {
+      await updateGoal.mutateAsync({ status: newStatus });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const currentProgress = localProgress ?? goal?.progress ?? 0;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[700px]">
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Loading goal...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-destructive/10 text-destructive rounded-md p-4">
+            Failed to load goal details
+          </div>
+        )}
+
+        {goal && (
+          <>
+            <DialogHeader>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <DialogTitle className="text-xl">{goal.title}</DialogTitle>
+                  {goal.description && (
+                    <DialogDescription className="mt-2">
+                      {goal.description}
+                    </DialogDescription>
+                  )}
+                </div>
+                <div className="flex shrink-0 flex-col gap-1">
+                  <Badge
+                    className={`${getTimeScaleBadgeColor(goal.time_scale)}`}
+                    variant="outline"
+                  >
+                    {getTimeScaleLabel(goal.time_scale)}
+                  </Badge>
+                  <Badge variant={getStatusBadgeVariant(goal.status)}>
+                    {getStatusLabel(goal.status)}
+                  </Badge>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Progress Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Progress</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Progress value={currentProgress} className="h-3 flex-1" />
+                    <span className="w-12 text-right font-medium">
+                      {currentProgress}%
+                    </span>
+                  </div>
+                  {canManage && (
+                    <div className="space-y-2">
+                      <Slider
+                        value={[currentProgress]}
+                        onValueChange={handleProgressChange}
+                        max={100}
+                        step={5}
+                      />
+                      {localProgress !== null &&
+                        localProgress !== goal.progress && (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLocalProgress(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={handleProgressSave}
+                              disabled={isUpdatingProgress}
+                            >
+                              {isUpdatingProgress
+                                ? "Saving..."
+                                : "Save Progress"}
+                            </Button>
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Status Update */}
+              {canManage && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Update Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Select
+                      value={goal.status}
+                      onValueChange={(value) =>
+                        handleStatusChange(value as GoalStatus)
+                      }
+                      disabled={isUpdatingStatus}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Due Date & Visibility */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Due Date
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {goal.due_date ? (
+                      <span
+                        className={`font-medium ${
+                          isOverdue(goal.due_date)
+                            ? "text-destructive"
+                            : isDueSoon(goal.due_date)
+                              ? "text-yellow-600"
+                              : ""
+                        }`}
+                      >
+                        {formatDueDate(goal.due_date)}
+                        {isOverdue(goal.due_date) && " (Overdue)"}
+                        {isDueSoon(goal.due_date) &&
+                          !isOverdue(goal.due_date) &&
+                          " (Soon)"}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Not set</span>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Visibility
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <span className="capitalize">{goal.visibility}</span>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Creator & Assignees */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">People</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-muted-foreground mb-2 text-sm">
+                      Created by
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        {goal.creator.avatar_url && (
+                          <AvatarImage
+                            src={goal.creator.avatar_url}
+                            alt={goal.creator.name}
+                          />
+                        )}
+                        <AvatarFallback>
+                          {goal.creator.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{goal.creator.name}</span>
+                    </div>
+                  </div>
+
+                  {goal.assignees.length > 0 && (
+                    <>
+                      <Separator />
+                      <div>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                          Assigned to
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {goal.assignees.map((assignee) => (
+                            <div
+                              key={assignee.id}
+                              className="flex items-center gap-2 rounded-full bg-gray-100 py-1 pr-3 pl-1"
+                            >
+                              <Avatar className="h-6 w-6">
+                                {assignee.avatar_url && (
+                                  <AvatarImage
+                                    src={assignee.avatar_url}
+                                    alt={assignee.name}
+                                  />
+                                )}
+                                <AvatarFallback className="text-xs">
+                                  {assignee.name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm">{assignee.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* SMART Details */}
+              {(goal.specific ||
+                goal.measurable ||
+                goal.achievable ||
+                goal.relevant ||
+                goal.time_bound) && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">SMART Details</CardTitle>
+                    <CardDescription>
+                      Breaking down your goal with the SMART framework
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {goal.specific && (
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">
+                          Specific
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {goal.specific}
+                        </p>
+                      </div>
+                    )}
+                    {goal.measurable && (
+                      <div>
+                        <p className="text-sm font-medium text-green-600">
+                          Measurable
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {goal.measurable}
+                        </p>
+                      </div>
+                    )}
+                    {goal.achievable && (
+                      <div>
+                        <p className="text-sm font-medium text-yellow-600">
+                          Achievable
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {goal.achievable}
+                        </p>
+                      </div>
+                    )}
+                    {goal.relevant && (
+                      <div>
+                        <p className="text-sm font-medium text-purple-600">
+                          Relevant
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {goal.relevant}
+                        </p>
+                      </div>
+                    )}
+                    {goal.time_bound && (
+                      <div>
+                        <p className="text-sm font-medium text-red-600">
+                          Time-Bound
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {goal.time_bound}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Metadata */}
+              <div className="text-muted-foreground text-xs">
+                <p>
+                  Created:{" "}
+                  {new Date(goal.created_at).toLocaleDateString(undefined, {
+                    dateStyle: "long",
+                  })}
+                </p>
+                <p>
+                  Last updated:{" "}
+                  {new Date(goal.updated_at).toLocaleDateString(undefined, {
+                    dateStyle: "long",
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              {canManage && onEdit && (
+                <Button variant="outline" onClick={() => onEdit(goal)}>
+                  Edit Goal
+                </Button>
+              )}
+              {canManage && onDelete && (
+                <Button
+                  variant="outline"
+                  className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={() => onDelete(goal)}
+                >
+                  Delete
+                </Button>
+              )}
+              <Button onClick={() => onOpenChange(false)}>Close</Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
