@@ -168,7 +168,7 @@
         "Request specs covering all scenarios"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Personal goals only visible to creator. Shared visible to assigned members. Family visible to all."
     },
     {

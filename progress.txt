@@ -196,3 +196,31 @@ Started: January 2026
   - Form reset in modals: use useEffect with [open, pet, reset] dependencies to reset on open/close/pet change
   - Select component needs controlled value and onValueChange to work with react-hook-form
 ---
+
+## 2026-01-10 - US-009
+- Implemented SMART Goals Model - Backend
+- Files created/changed:
+  - `/backend/app/models/goal.rb` - Goal model with SMART fields, time_scale/status/visibility enums, parent-child hierarchy
+  - `/backend/app/models/goal_assignment.rb` - GoalAssignment join model for multi-member assignment
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Full CRUD endpoints with filtering
+  - `/backend/app/policies/goal_policy.rb` - Pundit policy with visibility rules (personal/shared/family)
+  - `/backend/db/migrate/20260110213749_create_goals.rb` - Goals table migration
+  - `/backend/db/migrate/20260110213814_create_goal_assignments.rb` - GoalAssignments table migration
+  - `/backend/config/routes.rb` - Added goals resource nested under families
+  - `/backend/config/locales/en.yml` - Added validation messages for goal_assignment
+  - `/backend/app/models/user.rb` - Added created_goals, goal_assignments, assigned_goals associations
+  - `/backend/app/models/family.rb` - Added goals association
+  - `/backend/spec/factories/goals.rb` - Goal factory with traits for all enums and SMART fields
+  - `/backend/spec/factories/goal_assignments.rb` - GoalAssignment factory
+  - `/backend/spec/models/goal_spec.rb` - Model specs (44 tests)
+  - `/backend/spec/models/goal_assignment_spec.rb` - Model specs (6 tests)
+  - `/backend/spec/requests/api/v1/goals_spec.rb` - Request specs (52 tests)
+- **Learnings for future iterations:**
+  - For Pundit policy scope with complex visibility rules, use raw SQL with heredoc format (<<~SQL.squish)
+  - Goal visibility: personal=creator only, shared=creator+assigned users, family=all family members
+  - Scope lambdas should be multi-line for readability when they have conditionals
+  - Split large controller response methods into smaller helper methods to satisfy ABC complexity metrics
+  - Use `params.dig(:goal, :assignee_ids)` instead of `params[:goal][:assignee_ids]` for safer nil handling
+  - TanStack Query key pattern for goals: `["goals", "list", familyId]`, `["goals", "detail", familyId, goalId]`
+  - 102 new goal-related tests added, 305 total tests pass
+---
