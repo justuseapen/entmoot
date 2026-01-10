@@ -10,6 +10,9 @@ class User < ApplicationRecord
   has_many :families, through: :family_memberships
   has_many :sent_invitations, class_name: "Invitation", foreign_key: :inviter_id, dependent: :destroy,
                               inverse_of: :inviter
+  has_many :created_goals, class_name: "Goal", foreign_key: :creator_id, dependent: :destroy, inverse_of: :creator
+  has_many :goal_assignments, dependent: :destroy
+  has_many :assigned_goals, through: :goal_assignments, source: :goal
 
   validates :name, presence: true
 

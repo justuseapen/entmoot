@@ -32,6 +32,7 @@ Rails.application.routes.draw do
         end
         resources :memberships, only: %i[index update destroy]
         resources :pets, only: %i[index show create update destroy]
+        resources :goals, only: %i[index show create update destroy]
       end
 
       # Accept invitation (public route with token)

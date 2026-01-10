@@ -40,3 +40,9 @@ en:
           attributes:
             name:
               taken_in_family: "has already been taken for this family"
+        goal_assignment:
+          attributes:
+            goal_id:
+              already_assigned: "user is already assigned to this goal"
+            user:
+              not_family_member: "must be a member of the goal's family"
