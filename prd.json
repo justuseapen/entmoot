@@ -18,7 +18,7 @@
         "Basic health check endpoint returns 200 OK"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Use Rails 7.1+ for modern defaults. Include devise and pundit gems but don't configure yet."
     },
     {

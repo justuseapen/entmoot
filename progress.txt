@@ -2,7 +2,31 @@
 Started: January 2026
 
 ## Codebase Patterns
-(Patterns will be added here as they are discovered during implementation)
+- Backend code lives in `/backend` directory (Rails 7.2 API-mode)
+- Use Ruby 3.4.4 for compatibility with latest gems
+- Run backend commands from the `/backend` directory
+- Docker Compose services: `docker-compose up -d` for PostgreSQL and Redis
+- RSpec tests: `bundle exec rspec`
+- Rubocop linting: `bundle exec rubocop` (auto-fix: `bundle exec rubocop -A`)
+- Rubocop uses `plugins:` syntax instead of `require:` for extensions
+- All Ruby files must have `# frozen_string_literal: true` at the top
+- Use double quotes for strings consistently
 
 ---
 
+## 2026-01-10 - US-001
+- Implemented Rails 7.2 API-mode project setup in /backend directory
+- Files created/changed:
+  - `/backend/` - Full Rails 7.2 API application
+  - `/backend/docker-compose.yml` - PostgreSQL 16 and Redis 7 services
+  - `/backend/app/controllers/health_controller.rb` - Health check endpoint
+  - `/backend/spec/requests/health_spec.rb` - Health endpoint tests
+  - `/backend/config/initializers/sidekiq.rb` - Sidekiq configuration
+  - `/backend/.rubocop.yml` - Custom Rubocop configuration
+- **Learnings for future iterations:**
+  - Ruby 3.3.0 has compatibility issues with `connection_pool` gem - use Ruby 3.4.4 instead
+  - Rubocop now uses `plugins:` instead of `require:` for loading extensions
+  - Rails generates a nested .git directory - remove it for mono-repo structure
+  - asdf uses `asdf set` command instead of `asdf local` in newer versions
+  - Database names follow pattern: `entmoot_development`, `entmoot_test`
+---
