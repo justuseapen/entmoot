@@ -128,7 +128,7 @@
         "Request specs for all endpoints"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Keep pet_type as free text for flexibility (dog, cat, hamster, etc.)."
     },
     {

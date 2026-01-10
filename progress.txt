@@ -154,3 +154,27 @@ Started: January 2026
   - For conditional SQL in Pundit scopes, use string interpolation with `<<~SQL.squish` heredoc
   - 163 total tests pass covering all family management scenarios
 ---
+
+## 2026-01-10 - US-007
+- Implemented Pet Profiles - Backend
+- Files created/changed:
+  - `/backend/app/models/pet.rb` - Pet model with name, pet_type, avatar_url, birthday, notes
+  - `/backend/app/models/family.rb` - Added has_many :pets association
+  - `/backend/app/models/family_membership.rb` - Added can_manage_pets? helper method
+  - `/backend/app/controllers/api/v1/pets_controller.rb` - Full CRUD endpoints for pets
+  - `/backend/app/policies/pet_policy.rb` - Pundit policy restricting to admin/adult roles
+  - `/backend/db/migrate/20260110205446_create_pets.rb` - Migration with unique index on family_id + name
+  - `/backend/config/routes.rb` - Added pets resource nested under families
+  - `/backend/config/locales/en.yml` - Added custom validation message for duplicate pet names
+  - `/backend/spec/factories/pets.rb` - Pet factory with dog/cat traits
+  - `/backend/spec/models/pet_spec.rb` - Model specs for validations and associations
+  - `/backend/spec/models/family_spec.rb` - Added pets association test
+  - `/backend/spec/requests/api/v1/pets_spec.rb` - Full request specs (40 new tests)
+- **Learnings for future iterations:**
+  - For nested resource policies, use `authorize @family, policy_class: PetPolicy` for index action
+  - Add unique index on composite keys (family_id, name) to enforce uniqueness at DB level
+  - Use I18n key `:taken_in_family` for custom uniqueness validation message
+  - RSpec's `pluck("id")` is preferred over `map { |p| p["id"] }` for extracting values
+  - Split specs with too many expectations (RSpec/MultipleExpectations cop) into separate tests
+  - 203 total tests pass (40 new pet-related tests)
+---
