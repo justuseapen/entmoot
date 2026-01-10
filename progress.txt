@@ -23,6 +23,11 @@ Started: January 2026
 - JWT tokens generated with `Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first`
 - Prefer `:unprocessable_content` over `:unprocessable_entity` (Rack deprecation)
 - Use `Time.zone.at()` instead of `Time.at()` for timezone awareness
+- Use `freeze_time` (from ActiveSupport::Testing::TimeHelpers) for time-related specs
+- Pundit policies go in `app/policies/` directory
+- Role enum in models: use `enum :role, { key: value }, validate: true` syntax
+- For custom validation messages, use I18n keys (e.g., `:user_already_member`) and add to `config/locales/en.yml`
+- Factory Bot factories should set auto-generated attributes (like token, expires_at) to avoid nil issues in `build` calls
 
 ---
 
@@ -120,4 +125,32 @@ Started: January 2026
   - ProtectedRoute wrapper redirects unauthenticated users to login with return URL in state
   - Vite proxy to Rails API is configured in vite.config.ts under server.proxy
   - Rails server must be running on port 3000 for Vite proxy to work (default proxy target)
+---
+
+## 2026-01-10 - US-005
+- Implemented Family Model and Management - Backend
+- Files created/changed:
+  - `/backend/app/models/family.rb` - Family model with name, timezone, settings (jsonb)
+  - `/backend/app/models/family_membership.rb` - FamilyMembership join model with role enum (admin, adult, teen, child, observer)
+  - `/backend/app/models/invitation.rb` - Invitation model with token, email, role, expires_at for member invites
+  - `/backend/app/models/user.rb` - Updated with family associations and role helpers
+  - `/backend/app/controllers/api/v1/families_controller.rb` - Family CRUD endpoints
+  - `/backend/app/controllers/api/v1/invitations_controller.rb` - Invitation management endpoints
+  - `/backend/app/controllers/api/v1/memberships_controller.rb` - Membership management endpoints
+  - `/backend/app/controllers/api/v1/base_controller.rb` - Added Pundit authorization
+  - `/backend/app/policies/` - Pundit policies for Family, FamilyMembership, Invitation
+  - `/backend/db/migrate/` - Migrations for families, family_memberships, invitations tables
+  - `/backend/config/routes.rb` - Added family, invitation, and membership routes
+  - `/backend/config/locales/en.yml` - Custom validation message for duplicate membership
+  - `/backend/spec/` - Factories, model specs, and request specs (91 new tests)
+  - `/backend/spec/rails_helper.rb` - Added ActiveSupport::Testing::TimeHelpers
+- **Learnings for future iterations:**
+  - Pundit policies need `include Pundit::Authorization` in base controller and `rescue_from Pundit::NotAuthorizedError`
+  - For join model scopes that reference same table twice, use raw SQL with aliased table names
+  - `accept!` method on Invitation returns boolean for success/failure, uses transaction for atomicity
+  - Factory Bot factories should provide values for auto-generated fields to avoid nil comparisons in tests
+  - Use `have_attributes` matcher for multiple attribute checks on single object
+  - RSpec/LetSetup cop prefers inline `create` in tests over unused `let!` declarations
+  - For conditional SQL in Pundit scopes, use string interpolation with `<<~SQL.squish` heredoc
+  - 163 total tests pass covering all family management scenarios
 ---

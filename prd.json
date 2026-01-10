@@ -94,7 +94,7 @@
         "Full request specs for all endpoints"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Admins can do everything. Adults can manage goals and invite. Teens have limited access. Observers are read-only."
     },
     {
