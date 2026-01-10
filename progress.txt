@@ -178,3 +178,21 @@ Started: January 2026
   - Split specs with too many expectations (RSpec/MultipleExpectations cop) into separate tests
   - 203 total tests pass (40 new pet-related tests)
 ---
+
+## 2026-01-10 - US-008
+- Implemented Pet Profiles - Frontend
+- Files created/changed:
+  - `/frontend/src/components/PetCard.tsx` - Pet card displaying avatar/emoji, name, type, birthday/age, notes
+  - `/frontend/src/components/PetModal.tsx` - Add/edit pet modal with form validation (name, type, photo URL, birthday, notes)
+  - `/frontend/src/components/PetsList.tsx` - Pet grid with add/edit/delete functionality and delete confirmation dialog
+  - `/frontend/src/hooks/usePets.ts` - TanStack Query hooks for CRUD operations with query key management
+  - `/frontend/src/lib/pets.ts` - API functions for pet endpoints and pet type emoji mapping
+  - `/frontend/src/pages/FamilySettings.tsx` - Added PetsList component to family hub
+- **Learnings for future iterations:**
+  - Pet emoji fallbacks use normalized lowercase with underscores (e.g., "guinea pig" -> "guinea_pig")
+  - Age calculation handles both years and months for young pets (< 1 year shows months)
+  - Role-based access: canManagePets checks for "admin" or "adult" roles
+  - TanStack Query key pattern: `["pets", "list", familyId]` for list, `["pets", "detail", familyId, petId]` for single
+  - Form reset in modals: use useEffect with [open, pet, reset] dependencies to reset on open/close/pet change
+  - Select component needs controlled value and onValueChange to work with react-hook-form
+---

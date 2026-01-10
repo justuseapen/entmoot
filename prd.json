@@ -144,7 +144,7 @@
         "Pet avatar fallback based on pet type"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Use emoji fallbacks for pet types without photos."
     },
     {
