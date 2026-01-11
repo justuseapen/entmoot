@@ -268,3 +268,36 @@ Started: January 2026
   - hasLinkedGoals check (any goal.parent_id !== null) determines whether to show empty state guidance
   - GoalDetailView can be reused from Goals page for clicking tree nodes
 ---
+
+## 2026-01-11 - US-012
+- Implemented Daily Planning - Backend
+- Files created/changed:
+  - `/backend/app/models/daily_plan.rb` - DailyPlan model with date, user, family, intention fields
+  - `/backend/app/models/daily_task.rb` - DailyTask model with title, completed, position, optional goal link
+  - `/backend/app/models/top_priority.rb` - TopPriority model (max 3) with priority_order validation
+  - `/backend/app/controllers/api/v1/daily_plans_controller.rb` - today/show/update endpoints
+  - `/backend/app/policies/daily_plan_policy.rb` - Pundit policy for daily plan authorization
+  - `/backend/db/migrate/20260111005438_create_daily_plans.rb` - DailyPlans table
+  - `/backend/db/migrate/20260111005453_create_daily_tasks.rb` - DailyTasks table
+  - `/backend/db/migrate/20260111005508_create_top_priorities.rb` - TopPriorities table
+  - `/backend/config/routes.rb` - Added daily_plans routes under families
+  - `/backend/config/locales/en.yml` - Added validation messages for daily planning
+  - `/backend/app/models/user.rb` - Added daily_plans association
+  - `/backend/app/models/family.rb` - Added daily_plans association
+  - `/backend/spec/factories/daily_plans.rb` - DailyPlan factory with traits
+  - `/backend/spec/factories/daily_tasks.rb` - DailyTask factory with traits
+  - `/backend/spec/factories/top_priorities.rb` - TopPriority factory with traits
+  - `/backend/spec/models/daily_plan_spec.rb` - Model specs (21 tests)
+  - `/backend/spec/models/daily_task_spec.rb` - Model specs (14 tests)
+  - `/backend/spec/models/top_priority_spec.rb` - Model specs (9 tests)
+  - `/backend/spec/requests/api/v1/daily_plans_spec.rb` - Request specs (26 tests)
+- **Learnings for future iterations:**
+  - DailyPlan.find_or_create_for_today uses family's timezone to determine "today"
+  - Use `Time.find_zone(family.timezone)&.today` for timezone-aware date calculation
+  - TopPriority has max of 3 per day, enforced by priority_order range (1..3) and custom validation
+  - DailyTask has auto-position via before_validation callback - don't validate presence of position
+  - accepts_nested_attributes_for enables updating tasks/priorities in single PATCH request
+  - Split controller response methods to satisfy ABC complexity metrics (plan_attributes + plan_associations)
+  - For shoulda-matchers on auto-generated fields, use explicit subject with build(:factory) to avoid false positives
+  - 371 total tests pass (66 new daily planning tests)
+---

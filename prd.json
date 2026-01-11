@@ -226,7 +226,7 @@
         "Request specs for all scenarios"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "Use the family's timezone to determine 'today'."
     },
     {
