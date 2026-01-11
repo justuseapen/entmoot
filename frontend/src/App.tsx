@@ -9,6 +9,7 @@ import { Families } from "./pages/Families";
 import { FamilySettings } from "./pages/FamilySettings";
 import { Goals } from "./pages/Goals";
 import { GoalTree } from "./pages/GoalTree";
+import { DailyPlanner } from "./pages/DailyPlanner";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -81,6 +82,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <GoalTree />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/families/:id/planner"
+            element={
+              <ProtectedRoute>
+                <DailyPlanner />
               </ProtectedRoute>
             }
           />

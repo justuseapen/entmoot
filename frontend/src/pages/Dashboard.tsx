@@ -120,12 +120,36 @@ export function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  <Button variant="outline" disabled className="justify-start">
-                    Start Daily Planning
-                  </Button>
-                  <Button variant="outline" disabled className="justify-start">
-                    Review Goals
-                  </Button>
+                  {currentFamily ? (
+                    <Button asChild variant="outline" className="justify-start">
+                      <Link to={`/families/${currentFamily.id}/planner`}>
+                        Start Daily Planning
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="justify-start"
+                    >
+                      Start Daily Planning
+                    </Button>
+                  )}
+                  {currentFamily ? (
+                    <Button asChild variant="outline" className="justify-start">
+                      <Link to={`/families/${currentFamily.id}/goals`}>
+                        Review Goals
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="justify-start"
+                    >
+                      Review Goals
+                    </Button>
+                  )}
                   <Button variant="outline" disabled className="justify-start">
                     Evening Reflection
                   </Button>
