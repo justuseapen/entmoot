@@ -327,7 +327,7 @@
         "Weekly review reminder on Sunday evening"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "Make it completable in 10-15 minutes. Don't overwhelm with metrics."
     },
     {

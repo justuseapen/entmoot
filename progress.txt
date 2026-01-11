@@ -396,3 +396,22 @@ Started: January 2026
   - visible_goals query: use named parameters in SQL string for readability
   - 486 total tests pass (51 new weekly review tests)
 ---
+
+## 2026-01-11 - US-017
+- Implemented Weekly Review - Frontend with guided wizard workflow
+- Files created/changed:
+  - `/frontend/src/lib/weeklyReviews.ts` - API functions, types, helper utilities (formatWeekRange, getWeekNumber, WEEKLY_REVIEW_STEPS)
+  - `/frontend/src/hooks/useWeeklyReviews.ts` - TanStack Query hooks for weekly review CRUD operations
+  - `/frontend/src/pages/WeeklyReview.tsx` - Main weekly review page with 5-step wizard
+  - `/frontend/src/App.tsx` - Added /families/:id/weekly-review route
+  - `/frontend/src/pages/Dashboard.tsx` - Added Weekly Review quick action link
+  - `/frontend/src/pages/DailyPlanner.tsx` - Added Weekly Review navigation link
+- **Learnings for future iterations:**
+  - Weekly review wizard follows same pattern as EveningReflection (local state, step navigation, save/resume)
+  - Metrics come from backend WeeklyReview.metrics method (task_completion, goal_progress)
+  - Use warm amber gradient (from-amber-50 to-orange-50) for weekly review atmosphere vs purple for evening reflection
+  - Array input pattern: keep an empty string at end to allow adding new items, filter empty strings before saving
+  - Priority inputs: ensure minimum of 3 shown, allow up to 5 with add/remove buttons
+  - Past reviews filtered by excluding currentReview?.id from the list
+  - formatWeekRange helper creates user-friendly date range display (e.g., "Jan 6 - Jan 12, 2026")
+---
