@@ -10,6 +10,7 @@ import { FamilySettings } from "./pages/FamilySettings";
 import { Goals } from "./pages/Goals";
 import { GoalTree } from "./pages/GoalTree";
 import { DailyPlanner } from "./pages/DailyPlanner";
+import { EveningReflection } from "./pages/EveningReflection";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -90,6 +91,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DailyPlanner />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/families/:id/reflection"
+            element={
+              <ProtectedRoute>
+                <EveningReflection />
               </ProtectedRoute>
             }
           />

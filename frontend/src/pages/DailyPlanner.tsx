@@ -495,6 +495,11 @@ export function DailyPlanner() {
           <Button asChild variant="outline">
             <Link to={`/families/${familyId}/goals`}>Goals</Link>
           </Button>
+          <Button asChild>
+            <Link to={`/families/${familyId}/reflection`}>
+              Evening Reflection
+            </Link>
+          </Button>
         </div>
       </div>
     </div>

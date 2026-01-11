@@ -150,9 +150,21 @@ export function Dashboard() {
                       Review Goals
                     </Button>
                   )}
-                  <Button variant="outline" disabled className="justify-start">
-                    Evening Reflection
-                  </Button>
+                  {currentFamily ? (
+                    <Button asChild variant="outline" className="justify-start">
+                      <Link to={`/families/${currentFamily.id}/reflection`}>
+                        Evening Reflection
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="justify-start"
+                    >
+                      Evening Reflection
+                    </Button>
+                  )}
                 </div>
                 <p className="text-muted-foreground mt-4 text-xs">
                   More features coming soon...
