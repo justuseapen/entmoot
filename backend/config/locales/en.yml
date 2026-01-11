@@ -64,3 +64,7 @@ en:
           attributes:
             prompt:
               already_answered: "has already been answered for this reflection"
+        weekly_review:
+          attributes:
+            week_start_date:
+              already_exists_for_week: "already has a review for this week"

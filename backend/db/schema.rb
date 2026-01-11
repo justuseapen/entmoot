@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_014633) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_064605) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -188,6 +188,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_014633) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "weekly_reviews", force: :cascade do |t|
+    t.date "week_start_date", null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.jsonb "wins", default: []
+    t.jsonb "challenges", default: []
+    t.jsonb "next_week_priorities", default: []
+    t.text "lessons_learned"
+    t.boolean "completed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_weekly_reviews_on_family_id"
+    t.index ["user_id", "family_id", "week_start_date"], name: "index_weekly_reviews_unique_week", unique: true
+    t.index ["user_id"], name: "index_weekly_reviews_on_user_id"
+  end
+
   add_foreign_key "daily_plans", "families"
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
@@ -207,4 +223,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_014633) do
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "top_priorities", "daily_plans"
   add_foreign_key "top_priorities", "goals"
+  add_foreign_key "weekly_reviews", "families"
+  add_foreign_key "weekly_reviews", "users"
 end

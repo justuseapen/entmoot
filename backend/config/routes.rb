@@ -37,6 +37,10 @@ Rails.application.routes.draw do
           get "today", on: :collection
         end
         resources :reflections, only: %i[index show create update destroy]
+        resources :weekly_reviews, only: %i[index show update destroy] do
+          get "current", on: :collection
+          get "metrics", on: :member
+        end
       end
 
       # Reflection prompts (public endpoint)
