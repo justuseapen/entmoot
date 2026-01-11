@@ -14,6 +14,7 @@ import { useFamilies } from "@/hooks/useFamilies";
 import { logout as logoutApi } from "@/lib/auth";
 import { FamilySwitcher } from "@/components/FamilySwitcher";
 import { FamilyCreationWizard } from "@/components/FamilyCreationWizard";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -46,9 +47,16 @@ export function Dashboard() {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             {!showCreationWizard && <FamilySwitcher />}
           </div>
-          <Button variant="outline" onClick={handleLogout} disabled={isLoading}>
-            {isLoading ? "Signing out..." : "Sign out"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing out..." : "Sign out"}
+            </Button>
+          </div>
         </div>
 
         {showCreationWizard ? (

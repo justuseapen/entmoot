@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_070235) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_203405) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -135,6 +135,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_070235) do
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title", null: false
+    t.text "body"
+    t.boolean "read", default: false, null: false
+    t.string "link"
+    t.string "notification_type", default: "general", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "pets", force: :cascade do |t|
     t.string "name", null: false
     t.string "pet_type"
@@ -237,6 +251,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_070235) do
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "notification_preferences", "users"
+  add_foreign_key "notifications", "users"
   add_foreign_key "pets", "families"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"

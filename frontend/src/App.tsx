@@ -13,10 +13,12 @@ import { DailyPlanner } from "./pages/DailyPlanner";
 import { EveningReflection } from "./pages/EveningReflection";
 import { WeeklyReview } from "./pages/WeeklyReview";
 import { NotificationSettings } from "./pages/NotificationSettings";
+import { NotificationsPage } from "./pages/Notifications";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuthStore } from "./stores/auth";
+import { useNotificationWebSocket } from "./hooks/useNotificationWebSocket";
 
 function AuthenticatedRedirect({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -26,10 +28,17 @@ function AuthenticatedRedirect({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Component that initializes WebSocket connection for authenticated users
+function NotificationWebSocketInitializer() {
+  useNotificationWebSocket();
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <NotificationWebSocketInitializer />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route
@@ -117,6 +126,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NotificationSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

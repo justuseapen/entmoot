@@ -48,6 +48,12 @@ Rails.application.routes.draw do
         resource :notification_preferences, only: %i[show update]
       end
 
+      # Notifications
+      resources :notifications, only: [:index] do
+        post "mark_as_read", on: :member
+        post "mark_all_as_read", on: :collection
+      end
+
       # Reflection prompts (public endpoint)
       resources :reflection_prompts, only: [:index]
 
