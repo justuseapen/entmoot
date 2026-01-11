@@ -31,6 +31,7 @@ import {
   timeScaleOptions,
   statusOptions,
 } from "@/lib/goals";
+import { TreePine } from "lucide-react";
 
 export function Goals() {
   const { id } = useParams<{ id: string }>();
@@ -175,6 +176,12 @@ export function Goals() {
             <p className="text-muted-foreground">{family.name}</p>
           </div>
           <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to={`/families/${familyId}/goals/tree`}>
+                <TreePine className="mr-2 h-4 w-4" />
+                Tree View
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to={`/families/${familyId}`}>Family Settings</Link>
             </Button>
