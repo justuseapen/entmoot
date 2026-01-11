@@ -247,7 +247,7 @@
         "Previous day's incomplete tasks shown for carry-over"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Make it feel calm and focused. Morning planning should take < 5 minutes."
     },
     {

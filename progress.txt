@@ -301,3 +301,26 @@ Started: January 2026
   - For shoulda-matchers on auto-generated fields, use explicit subject with build(:factory) to avoid false positives
   - 371 total tests pass (66 new daily planning tests)
 ---
+
+## 2026-01-11 - US-013
+- Implemented Daily Planning - Frontend
+- Files created/changed:
+  - `/frontend/src/pages/DailyPlanner.tsx` - Main daily planner page with all functionality
+  - `/frontend/src/components/SortableTaskItem.tsx` - Draggable task item component using @dnd-kit
+  - `/frontend/src/components/ui/checkbox.tsx` - shadcn/ui checkbox component
+  - `/frontend/src/hooks/useDailyPlans.ts` - TanStack Query hooks for daily plan API
+  - `/frontend/src/lib/dailyPlans.ts` - API functions and TypeScript types for daily plans
+  - `/frontend/src/App.tsx` - Added /families/:id/planner route
+  - `/frontend/src/pages/Dashboard.tsx` - Added "Start Daily Planning" quick action link
+  - `/frontend/package.json` - Added @dnd-kit/* and @radix-ui/react-checkbox dependencies
+- **Learnings for future iterations:**
+  - @dnd-kit requires SortableContext with items array of unique IDs (use `task-${task.id}` pattern)
+  - Use useSortable hook in child component for draggable items
+  - Local state pattern for optimistic updates: track localState separate from server state, merge with ?? operator
+  - Save on blur for text inputs (priorities, intention) to avoid excessive API calls
+  - Save immediately for task actions (add, toggle, remove, reorder) for responsive UX
+  - Use `_destroy: true` pattern with Rails accepts_nested_attributes_for to mark items for deletion
+  - Filter visibleTasks = tasks.filter(t => !t._destroy) to hide pending deletions from UI
+  - ensureThreePriorities helper ensures exactly 3 priority inputs always shown
+  - Progress bar calculation: Math.round((completed.length / total.length) * 100)
+---
