@@ -6,6 +6,7 @@ class Family < ApplicationRecord
   has_many :invitations, dependent: :destroy
   has_many :pets, dependent: :destroy
   has_many :goals, dependent: :destroy
+  has_many :daily_plans, dependent: :destroy
 
   validates :name, presence: true
   validates :timezone, presence: true

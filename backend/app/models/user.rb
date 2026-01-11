@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :created_goals, class_name: "Goal", foreign_key: :creator_id, dependent: :destroy, inverse_of: :creator
   has_many :goal_assignments, dependent: :destroy
   has_many :assigned_goals, through: :goal_assignments, source: :goal
+  has_many :daily_plans, dependent: :destroy
 
   validates :name, presence: true
 

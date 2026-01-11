@@ -46,3 +46,13 @@ en:
               already_assigned: "user is already assigned to this goal"
             user:
               not_family_member: "must be a member of the goal's family"
+        daily_plan:
+          attributes:
+            date:
+              already_exists_for_date: "already has a plan for this date"
+        top_priority:
+          attributes:
+            priority_order:
+              already_exists: "already has a priority at this position"
+            base:
+              max_priorities_reached: "cannot have more than 3 top priorities per day"

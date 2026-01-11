@@ -10,9 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_10_213814) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_005508) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "daily_plans", force: :cascade do |t|
+    t.date "date", null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.text "intention"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_daily_plans_on_family_id"
+    t.index ["user_id", "family_id", "date"], name: "index_daily_plans_on_user_id_and_family_id_and_date", unique: true
+    t.index ["user_id"], name: "index_daily_plans_on_user_id"
+  end
+
+  create_table "daily_tasks", force: :cascade do |t|
+    t.string "title", null: false
+    t.boolean "completed", default: false, null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "daily_plan_id", null: false
+    t.bigint "goal_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["daily_plan_id", "position"], name: "index_daily_tasks_on_daily_plan_id_and_position"
+    t.index ["daily_plan_id"], name: "index_daily_tasks_on_daily_plan_id"
+    t.index ["goal_id"], name: "index_daily_tasks_on_goal_id"
+  end
 
   create_table "families", force: :cascade do |t|
     t.string "name", null: false
@@ -115,6 +140,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_10_213814) do
     t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
   end
 
+  create_table "top_priorities", force: :cascade do |t|
+    t.string "title", null: false
+    t.integer "priority_order", null: false
+    t.bigint "daily_plan_id", null: false
+    t.bigint "goal_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["daily_plan_id", "priority_order"], name: "index_top_priorities_on_daily_plan_id_and_priority_order", unique: true
+    t.index ["daily_plan_id"], name: "index_top_priorities_on_daily_plan_id"
+    t.index ["goal_id"], name: "index_top_priorities_on_goal_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -129,6 +166,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_10_213814) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "daily_plans", "families"
+  add_foreign_key "daily_plans", "users"
+  add_foreign_key "daily_tasks", "daily_plans"
+  add_foreign_key "daily_tasks", "goals"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
   add_foreign_key "goal_assignments", "goals"
@@ -140,4 +181,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_10_213814) do
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "pets", "families"
   add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "top_priorities", "daily_plans"
+  add_foreign_key "top_priorities", "goals"
 end
