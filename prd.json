@@ -307,7 +307,7 @@
         "Request specs"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "Week starts on Monday by default, configurable per family."
     },
     {

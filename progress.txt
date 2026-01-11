@@ -373,3 +373,26 @@ Started: January 2026
   - Past reflections view is same component with showPastReflections state toggle
   - Soft purple gradient (from-indigo-50 to-purple-50) creates calm evening atmosphere
 ---
+
+## 2026-01-11 - US-016
+- Implemented Weekly Review - Backend
+- Files created/changed:
+  - `/backend/app/models/weekly_review.rb` - WeeklyReview model with metrics calculation methods
+  - `/backend/app/controllers/api/v1/weekly_reviews_controller.rb` - Full CRUD + /current + /metrics endpoints
+  - `/backend/app/policies/weekly_review_policy.rb` - Pundit policy for authorization
+  - `/backend/db/migrate/20260111064605_create_weekly_reviews.rb` - Migration with unique index
+  - `/backend/config/routes.rb` - Added weekly_reviews routes under families
+  - `/backend/config/locales/en.yml` - Added validation messages for weekly_review
+  - `/backend/app/models/user.rb` - Added weekly_reviews association
+  - `/backend/app/models/family.rb` - Added weekly_reviews association
+  - `/backend/spec/factories/weekly_reviews.rb` - Factory with traits
+  - `/backend/spec/models/weekly_review_spec.rb` - Model specs (22 tests)
+  - `/backend/spec/requests/api/v1/weekly_reviews_spec.rb` - Request specs (29 tests)
+- **Learnings for future iterations:**
+  - Week start day is configurable per family via settings["week_start_day"] (0=Sunday, 1=Monday)
+  - Use `(today.wday - week_start_day) % 7` to calculate days since week start
+  - For complex metrics methods, split into smaller private helpers to satisfy ABC complexity metrics
+  - jsonb arrays with defaults: `default: []` in migration prevents nil issues
+  - visible_goals query: use named parameters in SQL string for readability
+  - 486 total tests pass (51 new weekly review tests)
+---
