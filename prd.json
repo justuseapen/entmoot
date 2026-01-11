@@ -344,7 +344,7 @@
         "Request specs"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Default morning planning to 7am, evening reflection to 8pm, weekly review to Sunday 6pm."
     },
     {

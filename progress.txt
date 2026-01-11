@@ -415,3 +415,25 @@ Started: January 2026
   - Past reviews filtered by excluding currentReview?.id from the list
   - formatWeekRange helper creates user-friendly date range display (e.g., "Jan 6 - Jan 12, 2026")
 ---
+
+## 2026-01-11 - US-018
+- Implemented Notification Preferences - Backend
+- Files created/changed:
+  - `/backend/app/models/notification_preference.rb` - NotificationPreference model with channel/reminder/quiet hours preferences
+  - `/backend/app/controllers/api/v1/notification_preferences_controller.rb` - GET/PATCH endpoints for user preferences
+  - `/backend/db/migrate/20260111070235_create_notification_preferences.rb` - Migration with all preference fields
+  - `/backend/config/routes.rb` - Added /users/me/notification_preferences routes
+  - `/backend/config/locales/en.yml` - Added validation messages for time format
+  - `/backend/app/models/user.rb` - Added has_one :notification_preference association
+  - `/backend/spec/factories/notification_preferences.rb` - Factory with traits for different configurations
+  - `/backend/spec/models/notification_preference_spec.rb` - Model specs (37 tests)
+  - `/backend/spec/requests/api/v1/notification_preferences_spec.rb` - Request specs (31 tests)
+- **Learnings for future iterations:**
+  - User-scoped preferences route: use `scope "users/me"` with singular `resource` instead of `resources`
+  - Time format validation regex: `/\A([01]\d|2[0-3]):([0-5]\d)\z/` validates HH:MM format (00:00-23:59)
+  - Predicate private methods should end with `?` (e.g., `in_range?` not `check_within_range`)
+  - Split complex methods to satisfy ABC complexity (within_quiet_hours? and next_reminder_time)
+  - Use `find_or_create_for(user)` pattern for ensuring user has preferences on first access
+  - Response JSON structured with nested objects: channels, reminders (with enabled/time), quiet_hours
+  - 554 total tests pass (68 new notification preferences tests)
+---
