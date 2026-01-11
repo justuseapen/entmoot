@@ -437,3 +437,23 @@ Started: January 2026
   - Response JSON structured with nested objects: channels, reminders (with enabled/time), quiet_hours
   - 554 total tests pass (68 new notification preferences tests)
 ---
+
+## 2026-01-11 - US-019
+- Implemented Notification Preferences - Frontend
+- Files created/changed:
+  - `/frontend/src/lib/notificationPreferences.ts` - API functions, types, and helper utilities (formatTimeDisplay, generateTimeOptions, getSchedulePreview, DAYS_OF_WEEK)
+  - `/frontend/src/hooks/useNotificationPreferences.ts` - TanStack Query hooks for GET and PATCH operations
+  - `/frontend/src/pages/NotificationSettings.tsx` - Full notification settings page with channel toggles, reminder toggles with time pickers, quiet hours range picker, schedule preview
+  - `/frontend/src/components/ui/switch.tsx` - shadcn/ui Switch component
+  - `/frontend/src/App.tsx` - Added /settings/notifications route
+  - `/frontend/src/pages/Dashboard.tsx` - Added "Notification Settings" link in footer
+- **Learnings for future iterations:**
+  - Notification preferences API uses flat params for update but nested structure for response
+  - generateTimeOptions creates 30-minute intervals for time pickers (00:00 to 23:30)
+  - Use formatTimeDisplay helper to convert HH:MM to 12-hour format with AM/PM
+  - Schedule preview uses getSchedulePreview to show human-readable reminder schedule
+  - Switch component from shadcn/ui uses onCheckedChange instead of onChange
+  - DAYS_OF_WEEK array maps 0-6 to Sunday-Saturday for weekly review day selector
+  - Save on toggle change for immediate feedback (no form submit needed)
+  - Show success message with auto-clear timeout for better UX
+---

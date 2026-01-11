@@ -361,7 +361,7 @@
         "Preview of notification schedule"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "Use the family timezone for time display."
     },
     {
