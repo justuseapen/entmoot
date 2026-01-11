@@ -488,16 +488,21 @@ export function DailyPlanner() {
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
           <Button asChild variant="outline">
             <Link to="/dashboard">Dashboard</Link>
           </Button>
           <Button asChild variant="outline">
             <Link to={`/families/${familyId}/goals`}>Goals</Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant="outline">
             <Link to={`/families/${familyId}/reflection`}>
               Evening Reflection
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to={`/families/${familyId}/weekly-review`}>
+              Weekly Review
             </Link>
           </Button>
         </div>

@@ -165,10 +165,22 @@ export function Dashboard() {
                       Evening Reflection
                     </Button>
                   )}
+                  {currentFamily ? (
+                    <Button asChild variant="outline" className="justify-start">
+                      <Link to={`/families/${currentFamily.id}/weekly-review`}>
+                        Weekly Review
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="justify-start"
+                    >
+                      Weekly Review
+                    </Button>
+                  )}
                 </div>
-                <p className="text-muted-foreground mt-4 text-xs">
-                  More features coming soon...
-                </p>
               </CardContent>
             </Card>
           </div>
