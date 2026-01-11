@@ -324,3 +324,33 @@ Started: January 2026
   - ensureThreePriorities helper ensures exactly 3 priority inputs always shown
   - Progress bar calculation: Math.round((completed.length / total.length) * 100)
 ---
+
+## 2026-01-11 - US-014
+- Implemented Evening Reflection - Backend
+- Files created/changed:
+  - `/backend/app/models/reflection.rb` - Reflection model with reflection_type, mood, energy_level, gratitude_items
+  - `/backend/app/models/reflection_response.rb` - ReflectionResponse model for prompt-response pairs
+  - `/backend/app/controllers/api/v1/reflections_controller.rb` - CRUD endpoints for reflections
+  - `/backend/app/controllers/api/v1/reflection_prompts_controller.rb` - Public endpoint for prompts
+  - `/backend/app/policies/reflection_policy.rb` - Pundit policy for authorization
+  - `/backend/config/reflection_prompts.yml` - Prompts for evening, weekly, monthly, quarterly, annual reflections
+  - `/backend/db/migrate/20260111014621_create_reflections.rb` - Reflections table
+  - `/backend/db/migrate/20260111014633_create_reflection_responses.rb` - Reflection responses table
+  - `/backend/config/locales/en.yml` - Added validation messages for reflections
+  - `/backend/config/routes.rb` - Added reflections and reflection_prompts routes
+  - `/backend/spec/factories/reflections.rb` - Factory with traits for each reflection type
+  - `/backend/spec/factories/reflection_responses.rb` - Factory for reflection responses
+  - `/backend/spec/models/reflection_spec.rb` - Model specs (17 tests)
+  - `/backend/spec/models/reflection_response_spec.rb` - Model specs (7 tests)
+  - `/backend/spec/requests/api/v1/reflections_spec.rb` - Request specs (34 tests)
+  - `/backend/spec/requests/api/v1/reflection_prompts_spec.rb` - Request specs (6 tests)
+- **Learnings for future iterations:**
+  - Optional enum fields should NOT use `validate: true` - it prevents nil values
+  - Split large response builder methods (reflection_attributes, reflection_associations) to satisfy ABC metrics
+  - Use `backed_by_column_of_type(:integer)` in enum matchers when not validating
+  - Database default for enum fields (e.g., reflection_type default: 0) means presence validation always passes
+  - Reflection prompts can be public endpoint (skip_before_action :authenticate_user!)
+  - Use YAML file for configurable prompts - easy to update without code changes
+  - accepts_nested_attributes_for with allow_destroy enables full CRUD on responses in single request
+  - 435 total tests pass (64 new reflection tests)
+---

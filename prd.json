@@ -266,7 +266,7 @@
         "Request specs"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "Store standard prompts in config/reflection_prompts.yml initially."
     },
     {
