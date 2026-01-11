@@ -354,3 +354,22 @@ Started: January 2026
   - accepts_nested_attributes_for with allow_destroy enables full CRUD on responses in single request
   - 435 total tests pass (64 new reflection tests)
 ---
+
+## 2026-01-11 - US-015
+- Implemented Evening Reflection - Frontend
+- Files created/changed:
+  - `/frontend/src/lib/reflections.ts` - API functions, types, and constants for reflections (Mood, ReflectionType, prompts)
+  - `/frontend/src/hooks/useReflections.ts` - TanStack Query hooks for reflection CRUD operations
+  - `/frontend/src/pages/EveningReflection.tsx` - Main evening reflection page with guided prompts
+  - `/frontend/src/App.tsx` - Added /families/:id/reflection route
+  - `/frontend/src/pages/Dashboard.tsx` - Added Evening Reflection link in Quick Actions
+  - `/frontend/src/pages/DailyPlanner.tsx` - Added Evening Reflection navigation button
+- **Learnings for future iterations:**
+  - Reflection prompts API returns different structure for single type vs all types - check if array or object
+  - Use local state pattern for multi-step wizard (currentStep, showPastReflections)
+  - Reflection can be created/updated via same form - check for existingReflectionId
+  - Mood selector: use button group with emoji display, toggle on/off with same click
+  - Energy slider uses Slider component with value prop as array [energyLevel]
+  - Past reflections view is same component with showPastReflections state toggle
+  - Soft purple gradient (from-indigo-50 to-purple-50) creates calm evening atmosphere
+---
