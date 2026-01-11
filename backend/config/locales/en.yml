@@ -56,3 +56,11 @@ en:
               already_exists: "already has a priority at this position"
             base:
               max_priorities_reached: "cannot have more than 3 top priorities per day"
+        reflection:
+          attributes:
+            reflection_type:
+              already_exists: "already has a reflection of this type for this day"
+        reflection_response:
+          attributes:
+            prompt:
+              already_answered: "has already been answered for this reflection"

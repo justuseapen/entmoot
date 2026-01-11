@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_005508) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_014633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -129,6 +129,28 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_005508) do
     t.index ["family_id"], name: "index_pets_on_family_id"
   end
 
+  create_table "reflection_responses", force: :cascade do |t|
+    t.bigint "reflection_id", null: false
+    t.string "prompt", null: false
+    t.text "response"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reflection_id", "prompt"], name: "index_reflection_responses_on_reflection_id_and_prompt", unique: true
+    t.index ["reflection_id"], name: "index_reflection_responses_on_reflection_id"
+  end
+
+  create_table "reflections", force: :cascade do |t|
+    t.bigint "daily_plan_id", null: false
+    t.integer "reflection_type", default: 0, null: false
+    t.integer "mood"
+    t.integer "energy_level"
+    t.jsonb "gratitude_items", default: []
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["daily_plan_id", "reflection_type"], name: "index_reflections_on_daily_plan_id_and_reflection_type", unique: true
+    t.index ["daily_plan_id"], name: "index_reflections_on_daily_plan_id"
+  end
+
   create_table "refresh_tokens", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "token", null: false
@@ -180,6 +202,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_005508) do
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "pets", "families"
+  add_foreign_key "reflection_responses", "reflections"
+  add_foreign_key "reflections", "daily_plans"
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "top_priorities", "daily_plans"
   add_foreign_key "top_priorities", "goals"

@@ -36,7 +36,11 @@ Rails.application.routes.draw do
         resources :daily_plans, only: %i[show update] do
           get "today", on: :collection
         end
+        resources :reflections, only: %i[index show create update destroy]
       end
+
+      # Reflection prompts (public endpoint)
+      resources :reflection_prompts, only: [:index]
 
       # Accept invitation (public route with token)
       post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
