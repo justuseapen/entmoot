@@ -12,6 +12,7 @@ import { GoalTree } from "./pages/GoalTree";
 import { DailyPlanner } from "./pages/DailyPlanner";
 import { EveningReflection } from "./pages/EveningReflection";
 import { WeeklyReview } from "./pages/WeeklyReview";
+import { NotificationSettings } from "./pages/NotificationSettings";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -108,6 +109,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <WeeklyReview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationSettings />
               </ProtectedRoute>
             }
           />

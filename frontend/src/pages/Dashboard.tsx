@@ -96,7 +96,7 @@ export function Dashboard() {
                   </p>
                 ) : null}
               </CardContent>
-              <CardFooter className="flex gap-2">
+              <CardFooter className="flex flex-wrap gap-2">
                 {currentFamily && (
                   <Button asChild variant="outline">
                     <Link to={`/families/${currentFamily.id}`}>
@@ -106,6 +106,11 @@ export function Dashboard() {
                 )}
                 <Button asChild variant="outline">
                   <Link to="/families">Manage Families</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/settings/notifications">
+                    Notification Settings
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
