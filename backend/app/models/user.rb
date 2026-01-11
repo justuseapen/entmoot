@@ -15,6 +15,7 @@ class User < ApplicationRecord
   has_many :assigned_goals, through: :goal_assignments, source: :goal
   has_many :daily_plans, dependent: :destroy
   has_many :weekly_reviews, dependent: :destroy
+  has_one :notification_preference, dependent: :destroy
 
   validates :name, presence: true
 

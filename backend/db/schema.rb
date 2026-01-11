@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_064605) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_070235) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -116,6 +116,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_064605) do
     t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
   end
 
+  create_table "notification_preferences", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.boolean "in_app", default: true, null: false
+    t.boolean "email", default: true, null: false
+    t.boolean "push", default: false, null: false
+    t.boolean "morning_planning", default: true, null: false
+    t.boolean "evening_reflection", default: true, null: false
+    t.boolean "weekly_review", default: true, null: false
+    t.string "morning_planning_time", default: "07:00", null: false
+    t.string "evening_reflection_time", default: "20:00", null: false
+    t.string "weekly_review_time", default: "18:00", null: false
+    t.integer "weekly_review_day", default: 0, null: false
+    t.string "quiet_hours_start", default: "22:00", null: false
+    t.string "quiet_hours_end", default: "07:00", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
+  end
+
   create_table "pets", force: :cascade do |t|
     t.string "name", null: false
     t.string "pet_type"
@@ -217,6 +236,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_064605) do
   add_foreign_key "goals", "users", column: "creator_id"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "notification_preferences", "users"
   add_foreign_key "pets", "families"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"

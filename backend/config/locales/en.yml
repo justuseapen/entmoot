@@ -68,3 +68,15 @@ en:
           attributes:
             week_start_date:
               already_exists_for_week: "already has a review for this week"
+        notification_preference:
+          attributes:
+            morning_planning_time:
+              invalid_time_format: "must be in HH:MM format (00:00-23:59)"
+            evening_reflection_time:
+              invalid_time_format: "must be in HH:MM format (00:00-23:59)"
+            weekly_review_time:
+              invalid_time_format: "must be in HH:MM format (00:00-23:59)"
+            quiet_hours_start:
+              invalid_time_format: "must be in HH:MM format (00:00-23:59)"
+            quiet_hours_end:
+              invalid_time_format: "must be in HH:MM format (00:00-23:59)"

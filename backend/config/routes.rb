@@ -43,6 +43,11 @@ Rails.application.routes.draw do
         end
       end
 
+      # User preferences (scoped to current user via /users/me)
+      scope "users/me" do
+        resource :notification_preferences, only: %i[show update]
+      end
+
       # Reflection prompts (public endpoint)
       resources :reflection_prompts, only: [:index]
 
