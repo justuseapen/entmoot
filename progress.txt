@@ -250,3 +250,21 @@ Started: January 2026
   - Progress update in detail view uses local state with cancel/save buttons
   - Status change in detail view updates immediately on select change
 ---
+
+## 2026-01-10 - US-011
+- Implemented Goal Hierarchy Visualization
+- Files created/changed:
+  - `/frontend/src/pages/GoalTree.tsx` - Goal tree page with member filtering, time scale legend, empty state guidance
+  - `/frontend/src/components/GoalTreeNode.tsx` - Recursive tree node component with expand/collapse, visual connectors
+  - `/frontend/src/pages/Goals.tsx` - Added "Tree View" link button in header
+  - `/frontend/src/App.tsx` - Added /families/:id/goals/tree route
+- **Learnings for future iterations:**
+  - Tree visualization can be built with pure CSS connectors (no library needed)
+  - Use recursive component pattern for tree nodes with level prop for indentation
+  - Color-code by time scale using consistent color mapping (red=annual, yellow=quarterly, green=monthly, blue=weekly, purple=daily)
+  - Auto-expand first 2 levels (level < 2) for good UX on initial load
+  - TIME_SCALE_ORDER array useful for sorting goals from annual down to daily
+  - Filter by member should check both creator.id and assignees for goal ownership
+  - hasLinkedGoals check (any goal.parent_id !== null) determines whether to show empty state guidance
+  - GoalDetailView can be reused from Goals page for clicking tree nodes
+---
