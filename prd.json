@@ -379,7 +379,7 @@
         "Request specs and system specs"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": "Limit dropdown to 10 most recent. Link to full notifications page."
     },
     {

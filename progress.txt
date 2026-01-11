@@ -28,6 +28,9 @@ Started: January 2026
 - Role enum in models: use `enum :role, { key: value }, validate: true` syntax
 - For custom validation messages, use I18n keys (e.g., `:user_already_member`) and add to `config/locales/en.yml`
 - Factory Bot factories should set auto-generated attributes (like token, expires_at) to avoid nil issues in `build` calls
+- ActionCable WebSocket auth: pass JWT token as query param `?token=...` and decode with `Warden::JWTAuth::TokenDecoder`
+- Use `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout` for browser-compatible timeout types
+- NotificationService.create_and_broadcast handles both DB persistence and WebSocket broadcast
 
 ---
 
@@ -456,4 +459,41 @@ Started: January 2026
   - DAYS_OF_WEEK array maps 0-6 to Sunday-Saturday for weekly review day selector
   - Save on toggle change for immediate feedback (no form submit needed)
   - Show success message with auto-clear timeout for better UX
+---
+
+## 2026-01-11 - US-020
+- Implemented In-App Notifications with real-time delivery via ActionCable
+- Files created/changed:
+  - `/backend/app/models/notification.rb` - Notification model with user_id, title, body, read, link, notification_type
+  - `/backend/app/controllers/api/v1/notifications_controller.rb` - index, mark_as_read, mark_all_as_read endpoints
+  - `/backend/app/channels/notifications_channel.rb` - ActionCable channel for streaming to user
+  - `/backend/app/channels/application_cable/connection.rb` - JWT authentication for WebSocket connections
+  - `/backend/app/policies/notification_policy.rb` - Pundit policy for authorization
+  - `/backend/app/services/notification_service.rb` - Service for creating and broadcasting notifications
+  - `/backend/db/migrate/20260111203405_create_notifications.rb` - Migration with indexes
+  - `/backend/config/routes.rb` - Added notifications routes
+  - `/backend/app/models/user.rb` - Added has_many :notifications association
+  - `/backend/spec/factories/notifications.rb` - Factory with traits for all notification types
+  - `/backend/spec/models/notification_spec.rb` - Model specs (11 tests)
+  - `/backend/spec/requests/api/v1/notifications_spec.rb` - Request specs (20 tests)
+  - `/frontend/src/lib/notifications.ts` - API functions, types, and helper utilities
+  - `/frontend/src/hooks/useNotifications.ts` - TanStack Query hooks for notifications CRUD
+  - `/frontend/src/hooks/useNotificationWebSocket.ts` - WebSocket hook for real-time updates
+  - `/frontend/src/components/NotificationBell.tsx` - Bell icon with badge and dropdown
+  - `/frontend/src/pages/Notifications.tsx` - Full notifications page for "view all"
+  - `/frontend/src/App.tsx` - Added NotificationWebSocketInitializer and /notifications route
+  - `/frontend/src/pages/Dashboard.tsx` - Added NotificationBell to header
+  - `/frontend/src/components/ui/popover.tsx` - shadcn/ui popover component
+  - `/frontend/src/components/ui/dropdown-menu.tsx` - shadcn/ui dropdown menu component
+- **Learnings for future iterations:**
+  - ActionCable JWT auth: use Warden::JWTAuth::TokenDecoder to decode token from query params
+  - String enum (not integer): use `{ general: "general", ... }` format for notification_type
+  - WebSocket URL: use wsProtocol based on window.location.protocol (ws: vs wss:)
+  - Avoid useCallback recursive reference: define connect() as regular function inside useEffect
+  - Use `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout` for browser compatibility
+  - NotificationsChannel.broadcast_to_user is a class method that calls broadcast_to(user, data)
+  - Use update_all with rubocop disable for bulk updates (# rubocop:disable Rails/SkipsModelValidations)
+  - Popover from shadcn/ui works well for notification dropdown with controlled open state
+  - Refetch interval (30s) provides polling fallback when WebSocket disconnects
+  - 584 total tests pass (31 new notification tests)
 ---
