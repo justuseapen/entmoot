@@ -948,7 +948,7 @@
         "Subtle floating animation on decorative elements"
       ],
       "priority": 49,
-      "passes": false,
+      "passes": true,
       "notes": "Use CSS keyframes for floating animation. Consider adding illustrated floating islands later."
     },
     {
