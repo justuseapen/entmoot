@@ -6,6 +6,7 @@ import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -48,6 +49,9 @@ export function LandingPage() {
 
         {/* How It Works Section */}
         <HowItWorksSection />
+
+        {/* Testimonials Section */}
+        <TestimonialsSection />
 
         {/* Pricing section placeholder - for smooth scroll target */}
         <section
