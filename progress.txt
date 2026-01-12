@@ -905,3 +905,60 @@ Started: January 2026
   - Demo email domain: @demo.entmoot.family prevents collision with real users
   - 934 backend tests pass (no new tests needed for seed data)
 ---
+## 2026-01-12 - US-036
+- Implemented Guided Product Tour with react-joyride and tour preferences API
+- Files created/changed:
+  - `/backend/db/migrate/20260112191842_add_tour_preferences_to_users.rb` - Migration adding tour_completed_at, tour_dismissed_at to users
+  - `/backend/app/controllers/api/v1/tour_preferences_controller.rb` - GET /show, POST /complete, /dismiss, /restart endpoints
+  - `/backend/spec/requests/api/v1/tour_preferences_spec.rb` - 15 request specs for tour preferences
+  - `/backend/config/routes.rb` - Added tour_preferences routes under /users/me
+  - `/frontend/src/lib/tour.ts` - API functions, types, and TOUR_STEPS definition
+  - `/frontend/src/hooks/useTour.ts` - TanStack Query hooks (useTourPreferences, useCompleteTour, useDismissTour, useRestartTour)
+  - `/frontend/src/components/GuidedTour.tsx` - GuidedTour component with welcome dialog and react-joyride integration
+  - `/frontend/src/components/Sidebar.tsx` - Added data-tour attributes to nav items for tour targeting
+  - `/frontend/src/components/MainLayout.tsx` - Integrated GuidedTour component
+  - `/frontend/src/pages/UserProfile.tsx` - Added "Restart Tour" option in settings
+  - `/frontend/package.json` - Added react-joyride dependency
+- **Learnings for future iterations:**
+  - react-joyride doesn't officially support React 19 - use --legacy-peer-deps to install
+  - Use `import type { CallBackProps }` for TypeScript verbatimModuleSyntax compliance
+  - Tour step targets use data-tour attributes (e.g., `[data-tour="dashboard"]`)
+  - should_show_tour logic: false if completed, false if dismissed within 24 hours, otherwise true
+  - Tour prompt delayed 500ms after page load for better UX (let page render first)
+  - "Show me later" dismisses for 24 hours (stored as tour_dismissed_at timestamp)
+  - "Skip" marks tour as completed (won't show again until restart)
+  - Restart tour clears both completed_at and dismissed_at fields
+  - 949 total tests pass (15 new tour preferences specs)
+---
+## 2026-01-12 - US-037
+- Implemented First Goal Prompt with goal suggestions and AI refinement offer
+- Files created/changed:
+  - `/backend/db/migrate/20260112192820_add_first_goal_created_at_to_users.rb` - Migration adding first_goal_created_at, first_goal_prompt_dismissed_at to users
+  - `/backend/app/controllers/api/v1/first_goal_prompts_controller.rb` - GET /show, POST /dismiss, GET /suggestions endpoints
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Track first goal creation, return is_first_goal flag
+  - `/backend/spec/requests/api/v1/first_goal_prompt_spec.rb` - 12 request specs for first goal prompt
+  - `/backend/spec/requests/api/v1/goals_spec.rb` - 4 new specs for first goal tracking
+  - `/backend/config/routes.rb` - Added first_goal_prompt routes under /users/me
+  - `/frontend/src/lib/firstGoalPrompt.ts` - API functions and types for first goal prompt
+  - `/frontend/src/hooks/useFirstGoalPrompt.ts` - TanStack Query hooks (useFirstGoalPromptStatus, useDismissFirstGoalPrompt)
+  - `/frontend/src/lib/goals.ts` - Added CreateGoalResponse interface with is_first_goal
+  - `/frontend/src/hooks/useGoals.ts` - Invalidate firstGoalPrompt query on goal creation
+  - `/frontend/src/components/FirstGoalPrompt.tsx` - Modal with 4 goal suggestions and time scale badges
+  - `/frontend/src/components/GoalModal.tsx` - Added onGoalCreated callback, time_scale in defaultValues
+  - `/frontend/src/pages/Goals.tsx` - Integrated FirstGoalPrompt and AI refinement dialog
+  - `/frontend/tsconfig.app.json` - Exclude test files from build (pre-existing test infra issues)
+- **Goal suggestions:**
+  - "Have dinner together 3 times this week" (weekly)
+  - "Exercise as a family once this week" (weekly)
+  - "Complete a home project together" (monthly)
+  - "Start a new bedtime routine" (weekly)
+- **Learnings for future iterations:**
+  - Use GOAL_SUGGESTIONS constant to avoid Metrics/MethodLength rubocop violation
+  - First goal tracking uses first_goal_created_at != nil check (not goal count)
+  - `one?` is preferred over `count == 1` for collection queries (Style/CollectionQuerying)
+  - Use type-only imports (`import type { ... }`) for verbatimModuleSyntax compliance
+  - First session defined as within 30 minutes of user creation
+  - Dismissed prompt won't show again for 24 hours
+  - AI refinement dialog shown immediately after first goal creation (is_first_goal: true)
+  - 965 total tests pass (12 new first goal prompt specs + 4 first goal tracking specs)
+---

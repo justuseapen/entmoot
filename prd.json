@@ -654,6 +654,227 @@
       "priority": 35,
       "passes": true,
       "notes": "Good seed data helps manual testing and demos."
+    },
+    {
+      "id": "US-036",
+      "title": "Guided Product Tour",
+      "description": "As a new user, I want an optional guided tour of the application so that I can quickly understand how to use the key features.",
+      "acceptanceCriteria": [
+        "After family setup wizard, display 'Want a quick tour?' prompt",
+        "Tour highlights 4 key areas: Dashboard, Goal creation, Daily planning, Family members",
+        "Each tour step has a tooltip pointing to the relevant UI element",
+        "User can dismiss tour at any point with 'Skip' button",
+        "'Show me later' option saves preference and shows tour prompt on next login",
+        "Tour completion tracked in user preferences (tour_completed_at field)",
+        "Tour can be restarted from user settings page",
+        "Request specs for tour preference endpoints"
+      ],
+      "priority": 36,
+      "passes": true,
+      "notes": "Use react-joyride or similar tour library. Store tour state in User model."
+    },
+    {
+      "id": "US-037",
+      "title": "First Goal Prompt",
+      "description": "As a new user who hasn't created a goal in my first session, I want a gentle prompt with suggestions so that I can easily create my first meaningful goal.",
+      "acceptanceCriteria": [
+        "If user hasn't created a goal within first 30 minutes, show prompt modal",
+        "Modal displays: 'What's one thing you'd like to accomplish this week?'",
+        "Show 4 pre-filled goal suggestions as clickable options",
+        "Clicking a suggestion opens Goal creation modal with title pre-filled",
+        "'Create your own' button opens empty Goal creation modal",
+        "'Maybe later' dismisses modal (don't show again for 24 hours)",
+        "After creating first goal, offer AI refinement immediately",
+        "Track first_goal_created_at timestamp on User model",
+        "Request specs for first goal tracking"
+      ],
+      "priority": 37,
+      "passes": true,
+      "notes": "Suggestions: 'Have dinner together 3 times', 'Exercise as a family once', 'Complete a home project', 'Start a new bedtime routine'."
+    },
+    {
+      "id": "US-038",
+      "title": "First Reflection Prompt",
+      "description": "As a new user logging in for the first time, I want a contextual reflection prompt based on time of day so that I can start building the reflection habit immediately.",
+      "acceptanceCriteria": [
+        "On first login, show lightweight reflection prompt based on time of day",
+        "Morning (5am-12pm): 'What's your top priority for today?'",
+        "Afternoon (12pm-5pm): 'What's one thing you want to accomplish before the day ends?'",
+        "Evening (5pm-10pm): 'What's one thing that went well today?'",
+        "Night (10pm-5am): No prompt (respect bedtime)",
+        "Single-question format with text input and submit button",
+        "'Skip for now' option that doesn't show again for session",
+        "Response saves as a quick reflection (add 'quick' reflection type)",
+        "Track first_reflection_created_at timestamp on User model",
+        "Request specs for quick reflection type"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": "Use family timezone for time-of-day calculation. Keep it lightweight - single question only."
+    },
+    {
+      "id": "US-039",
+      "title": "First Action Celebration",
+      "description": "As a new user completing my first meaningful action, I want a celebratory moment so that I feel encouraged to continue using the app.",
+      "acceptanceCriteria": [
+        "Show confetti animation on first goal creation",
+        "Show confetti animation on first reflection completion",
+        "Show confetti animation on first daily plan completion",
+        "Show confetti animation on first family member invitation accepted",
+        "Display encouraging message: 'You're off to a great start!'",
+        "Suggest next step without being pushy (e.g., 'Ready to set another goal?')",
+        "Animation is gentle (2-3 seconds) and non-blocking",
+        "Each first action type only triggers celebration once per user",
+        "Track first actions in User model (first_actions jsonb field)"
+      ],
+      "priority": 39,
+      "passes": false,
+      "notes": "Use canvas-confetti or react-confetti library. Integrate with existing CelebrationToast component."
+    },
+    {
+      "id": "US-040",
+      "title": "Contextual In-App Tips",
+      "description": "As a user exploring features for the first time, I want contextual tooltips that teach me about features so that I can learn as I go.",
+      "acceptanceCriteria": [
+        "First time on Goals page: 'Pro tip: Link daily goals to weekly goals to see how small wins add up'",
+        "First reflection: 'Reflection is the secret sauce—even 2 minutes makes a difference'",
+        "First family member joins: 'Now you can share goals! Try creating a family goal together'",
+        "First daily plan: 'Morning planning sets you up for success. Start with your top 3 priorities.'",
+        "First weekly review: 'Weekly reviews help you learn from patterns and adjust course.'",
+        "Tips appear as dismissible tooltips near relevant UI elements",
+        "Each tip shows only once per user",
+        "Tips can be disabled globally in notification settings",
+        "Track shown_tips array in User model or NotificationPreference",
+        "Request specs for tip tracking endpoints"
+      ],
+      "priority": 40,
+      "passes": false,
+      "notes": "Create reusable TipTooltip component. Use localStorage as immediate fallback, sync to server."
+    },
+    {
+      "id": "US-041",
+      "title": "Onboarding Email Sequence",
+      "description": "As a new user, I want to receive helpful onboarding emails over my first 2 weeks so that I can learn features gradually and stay engaged.",
+      "acceptanceCriteria": [
+        "Day 1: Welcome + getting started recap email",
+        "Day 3: 'Have you tried morning planning?' email (skip if user has daily plans)",
+        "Day 5: 'Meet your AI coach' - highlight goal refinement feature",
+        "Day 7: 'Time for your first weekly review!' email",
+        "Day 14: 'How's it going?' - feedback request + feature highlights",
+        "Emails are conditional - skip if user already completed the action",
+        "Include unsubscribe link specific to onboarding emails",
+        "Track which emails have been sent per user (onboarding_emails_sent jsonb)",
+        "Create OnboardingMailer with 5 email methods",
+        "Create SendOnboardingEmailsJob that runs daily via Sidekiq scheduler",
+        "Respect email notification preferences",
+        "Mailer specs for all 5 email types"
+      ],
+      "priority": 41,
+      "passes": false,
+      "notes": "Add job to sidekiq.yml scheduler. Conditional logic checks user activity before sending."
+    },
+    {
+      "id": "US-042",
+      "title": "Empty State Guidance",
+      "description": "As a user viewing empty sections of the app, I want helpful prompts that guide me to take action so that I understand what to do next.",
+      "acceptanceCriteria": [
+        "No goals: 'Your goals will appear here. Ready to set your first one?' + Create Goal button",
+        "No reflections: 'Reflections help you learn from each day. Start your first one tonight?' + Start Reflection button",
+        "No family members (besides self): 'Entmoot is better together. Invite your family!' + Invite button",
+        "No daily plans: 'Morning planning sets you up for success. Start your day with intention.' + Start Planning button",
+        "No weekly reviews: 'Weekly reviews help you see the bigger picture. Start your first review.' + Start Review button",
+        "Empty states include relevant icon or illustration",
+        "CTA buttons lead directly to creation/action flows",
+        "Empty states are friendly and encouraging, not error-like",
+        "Create reusable EmptyState component with variants"
+      ],
+      "priority": 42,
+      "passes": false,
+      "notes": "Use emoji or simple icons initially. Consistent styling with app design system."
+    },
+    {
+      "id": "US-043",
+      "title": "Onboarding Metrics Tracking",
+      "description": "As a product owner, I want to track onboarding effectiveness metrics so that I can measure and improve the new user experience.",
+      "acceptanceCriteria": [
+        "Track wizard completion (onboarding_wizard_completed_at, onboarding_wizard_last_step)",
+        "Track time to first goal (first_goal_created_at from US-037)",
+        "Track time to first reflection (first_reflection_created_at from US-038)",
+        "Track time to first family invite (first_family_invite_sent_at)",
+        "Track tour completion status (tour_completed_at from US-036)",
+        "Create OnboardingMetricsService for aggregation",
+        "GET /api/v1/admin/onboarding_metrics endpoint (admin only)",
+        "Calculate derived metrics: day 7 retention, avg time to first goal, tour completion rate",
+        "Metrics can be queried by date range",
+        "Request specs for metrics endpoint"
+      ],
+      "priority": 43,
+      "passes": false,
+      "notes": "Admin-only endpoint. Add all tracking fields to User model via migration."
+    },
+    {
+      "id": "US-044",
+      "title": "In-App Bug Reporter",
+      "description": "As a user encountering an issue, I want to easily report bugs without leaving the app so that I can help improve the product.",
+      "acceptanceCriteria": [
+        "Floating feedback button in bottom-right corner (collapsible via settings)",
+        "Keyboard shortcut: Cmd/Ctrl + Shift + F opens reporter",
+        "'Report a Bug' option in user dropdown menu",
+        "Bug report form with: Type (Bug/Feature Request/Feedback), Title, Description, Severity (for bugs)",
+        "Screenshot attachment with auto-capture current screen option",
+        "'May we follow up?' checkbox with email pre-filled",
+        "Automatic context capture: current URL, browser/OS, screen size, user ID, timestamp, app version",
+        "Confirmation message after submission",
+        "FeedbackReport model with all fields per PRD section 6.4.1",
+        "POST /api/v1/feedback endpoint",
+        "GET /api/v1/feedback/:id for status check (user's own reports only)",
+        "Request specs for feedback endpoints"
+      ],
+      "priority": 44,
+      "passes": false,
+      "notes": "Use html2canvas for screenshot capture. Context capture disclosed to user. FeedbackReport model per PRD 6.4.1."
+    },
+    {
+      "id": "US-045",
+      "title": "Feedback Management Dashboard",
+      "description": "As an admin, I want to view and manage submitted feedback so that I can track and respond to user issues.",
+      "acceptanceCriteria": [
+        "Admin-only dashboard page at /admin/feedback",
+        "List view with columns: Type, Title, Severity, Status, User, Date",
+        "Filter by: type, severity, status, date range",
+        "Status workflow: New -> Acknowledged -> In Progress -> Resolved -> Closed",
+        "View individual feedback with all details and context",
+        "Add internal notes to feedback items (internal_notes field)",
+        "Mark feedback as duplicate with link to original (duplicate_of field)",
+        "Admin namespace routes for feedback management",
+        "Pundit policy restricts to admin users only",
+        "Request specs for admin feedback endpoints"
+      ],
+      "priority": 45,
+      "passes": false,
+      "notes": "Add status, assigned_to, internal_notes, duplicate_of fields to FeedbackReport model."
+    },
+    {
+      "id": "US-046",
+      "title": "Proactive Feedback Collection",
+      "description": "As a product owner, I want to proactively collect user feedback at key moments so that I can understand user satisfaction and improve the product.",
+      "acceptanceCriteria": [
+        "NPS Survey: trigger after 30 days of active use",
+        "NPS: 0-10 scale with 'How likely are you to recommend Entmoot?'",
+        "NPS: Follow-up question based on score (promoter/passive/detractor)",
+        "NPS: Maximum frequency once per quarter",
+        "Feature feedback: thumbs up/down after using new features first time",
+        "Feature feedback: optional 'Tell us more' expansion",
+        "Session feedback: occasional prompt after key flows (weekly review, goal completion)",
+        "Session feedback: 'How was this experience?' with emoji scale",
+        "All feedback non-blocking and easily dismissable",
+        "All responses stored in FeedbackReport with appropriate type",
+        "Track last NPS prompt date on User model",
+        "Request specs for proactive feedback endpoints"
+      ],
+      "priority": 46,
+      "passes": false,
+      "notes": "NPS and quick feedback types added to FeedbackReport. Respect frequency limits."
     }
   ]
 }
