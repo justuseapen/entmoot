@@ -1060,7 +1060,7 @@
         "Note below cards: 'All plans include a 14-day free trial of Sapling features'"
       ],
       "priority": 55,
-      "passes": false,
+      "passes": true,
       "notes": "Pricing is placeholder. Free tier CTA: 'Start Free', Sapling: 'Start Trial', Oak: 'Contact Us'."
     },
     {

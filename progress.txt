@@ -245,3 +245,28 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Testimonial card height fixed (h-[420px] mobile, h-[380px] desktop) to prevent layout shift
   - isActive prop controls opacity-100 vs opacity-0 + pointer-events-none for card visibility
 ---
+
+## 2026-01-12 - US-055 Landing Page Pricing Section
+- What was implemented:
+  - Created PricingSection component at /frontend/src/components/landing/PricingSection.tsx
+  - Section headline: "Choose Your Adventure" with subheadline about upgrading when ready
+  - 3 pricing tier cards: Seedling (Free), Sapling ($9/mo), Mighty Oak ($19/mo)
+  - PricingCard component with tier name, price, member limit, feature checklist, CTA button
+  - Sapling tier marked as POPULAR with leafGreen outline and badge
+  - Each tier has distinct feature list with Check icons in leafGreen
+  - Responsive grid: 1 column on mobile, 3 columns on desktop
+  - CTA buttons: "Start Free" (outline), "Start Trial" (filled forest green), "Contact Us" (outline)
+  - Trial note below cards: "All plans include a 14-day free trial of Sapling features"
+  - Replaced placeholder pricing section in LandingPage.tsx with real component
+
+- Files changed:
+  - frontend/src/components/landing/PricingSection.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (updated import and replaced placeholder)
+
+- **Learnings for future iterations:**
+  - Use `outline` CSS property instead of Tailwind `ring` classes when you need inline style control
+  - Popular card uses boxShadow for elevated appearance + outline for highlighted border
+  - CTA buttons use onMouseEnter/onMouseLeave for hover background effects on non-popular tiers
+  - Feature list uses flex-1 to push CTA button to bottom of card for consistent alignment
+  - Price display uses large font (text-4xl/text-5xl) with smaller "/month" or "forever" suffix
+---
