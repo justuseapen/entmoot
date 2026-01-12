@@ -8,6 +8,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { FAQSection } from "@/components/landing/FAQSection";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -56,6 +57,9 @@ export function LandingPage() {
 
         {/* Pricing Section */}
         <PricingSection />
+
+        {/* FAQ Section */}
+        <FAQSection />
       </main>
     </div>
   );
