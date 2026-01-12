@@ -324,3 +324,28 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Prettier sorts Tailwind classes, so pt-XX must come before pb-XX (pt-20 pb-40 becomes pt-20 pb-40)
   - Using bull HTML entity (&bull;) for bullet separator in trust text
 ---
+
+## 2026-01-12 - US-058 Landing Page Footer
+- What was implemented:
+  - Created LandingFooter component at /frontend/src/components/landing/LandingFooter.tsx
+  - Dark forest green (#1B3A1A) background as specified in design system
+  - Entmoot logo with TreePine icon and tagline "Building family adventures since 2026"
+  - 4 link columns: Product (Features, Pricing, Roadmap, Changelog), Company (About, Blog, Careers, Contact), Legal (Privacy, Terms, Cookies, COPPA), Social/Connect
+  - Social media icons: Twitter, Instagram, Facebook, Discord (custom SVG icon for Discord)
+  - FooterLink component with light colored links that hover to leaf green
+  - SocialIcon component with circular hover background effect
+  - Responsive grid layout: stacks on mobile, 5 columns on desktop
+  - Copyright text with divider above: "© 2026 Entmoot. All rights reserved."
+  - Added LandingFooter to LandingPage.tsx after main content
+
+- Files changed:
+  - frontend/src/components/landing/LandingFooter.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (added import and LandingFooter usage)
+
+- **Learnings for future iterations:**
+  - Lucide doesn't have Discord icon - need custom SVG component
+  - Use hex color with opacity suffix (e.g., #FFF8E7B3) for inline style opacity
+  - FooterColumn reusable component for consistent link list styling
+  - Prettier requires `tracking-wider uppercase` order (not `uppercase tracking-wider`)
+  - Footer is placed outside main element, after </main> closing tag
+---

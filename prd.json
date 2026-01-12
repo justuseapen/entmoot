@@ -1115,7 +1115,7 @@
         "Responsive: columns stack on mobile"
       ],
       "priority": 58,
-      "passes": false,
+      "passes": true,
       "notes": "Most links can be placeholder (#) for now. Legal pages are important for production."
     },
     {
