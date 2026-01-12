@@ -563,7 +563,7 @@
         "Mobile bottom navigation bar alternative"
       ],
       "priority": 30,
-      "passes": false,
+      "passes": true,
       "notes": "Consider mobile-first. Bottom nav might be better for phone users."
     },
     {

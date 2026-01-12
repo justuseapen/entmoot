@@ -748,3 +748,28 @@ Started: January 2026
   - Filter goals by isDueSoon || isOverdue and exclude completed/abandoned for upcoming goals
   - 896 total tests pass (21 new activity feed tests)
 ---
+
+## 2026-01-12 - US-030
+- Implemented Navigation and Layout with responsive sidebar, header, breadcrumbs, and mobile navigation
+- Files created/changed:
+  - `/frontend/src/components/MainLayout.tsx` - Main layout wrapper with sidebar, header, mobile nav
+  - `/frontend/src/components/Sidebar.tsx` - Navigation sidebar with nav items and icons
+  - `/frontend/src/components/Breadcrumbs.tsx` - Breadcrumb navigation for nested pages
+  - `/frontend/src/components/MobileNav.tsx` - Bottom navigation bar for mobile devices
+  - `/frontend/src/components/ui/sheet.tsx` - shadcn/ui Sheet component for mobile sidebar
+  - `/frontend/src/pages/UserProfile.tsx` - Basic profile page placeholder
+  - `/frontend/src/App.tsx` - Updated to wrap all protected routes with MainLayout
+  - `/frontend/src/pages/Dashboard.tsx` - Removed duplicate header elements
+  - `/frontend/src/pages/*.tsx` - Updated page wrappers from min-h-screen to p-4 md:p-6
+- **Learnings for future iterations:**
+  - MainLayout pattern: sidebar on left (desktop), Sheet for mobile, header sticky at top
+  - NavLink from react-router-dom has isActive prop for active state highlighting
+  - Mobile breakpoint: use md:hidden/md:block to show/hide desktop vs mobile elements
+  - Sheet component slides in from left for mobile sidebar overlay
+  - Breadcrumbs: parse location.pathname, skip numeric IDs, use family name from store
+  - MobileNav uses fixed inset-x-0 bottom-0 for sticky bottom bar
+  - Avatar fallback: generate initials from user name with getInitials helper
+  - User avatar_url can be null - use `|| undefined` to convert null to undefined for src prop
+  - Page content needs pb-20 (mobile) or md:pb-6 (desktop) to account for bottom nav
+  - All 896 tests continue to pass (no new backend tests needed)
+---
