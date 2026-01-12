@@ -31,6 +31,9 @@ Started: January 2026
 - ActionCable WebSocket auth: pass JWT token as query param `?token=...` and decode with `Warden::JWTAuth::TokenDecoder`
 - Use `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout` for browser-compatible timeout types
 - NotificationService.create_and_broadcast handles both DB persistence and WebSocket broadcast
+- Anthropic gem (alexrudall/anthropic v0.4.1) uses Faraday errors, not custom error classes
+- Rack::Attack rate limiting: configure in initializer, add middleware in config/application.rb
+- Service specs: mock at class level when service creates dependencies in initialize
 
 ---
 
@@ -534,4 +537,31 @@ Started: January 2026
   - Use `find_each` for batch processing users to avoid loading all into memory
   - Split complex job methods into smaller private helpers (build_context, should_skip?, send_email) to satisfy ABC complexity
   - 638 total tests pass (53 new email notification tests)
+---
+
+## 2026-01-11 - US-022
+- Implemented AI SMART Goal Refinement Backend with Anthropic Claude API integration
+- Files created/changed:
+  - `/backend/app/services/anthropic_client.rb` - Claude API client with error handling for Faraday errors
+  - `/backend/app/services/goal_refinement_service.rb` - Service to generate SMART goal suggestions with structured JSON response
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Added `refine` action for POST /api/v1/families/:family_id/goals/:id/refine
+  - `/backend/app/policies/goal_policy.rb` - Added `refine?` policy method
+  - `/backend/config/routes.rb` - Added refine member route to goals resource
+  - `/backend/config/initializers/rack_attack.rb` - Rate limiting for AI refinement (10/user/hour, 5/IP/hour)
+  - `/backend/config/application.rb` - Added Rack::Attack middleware
+  - `/backend/Gemfile` - Added anthropic and rack-attack gems
+  - `/backend/.rubocop.yml` - Adjusted RSpec cop limits for service specs
+  - `/backend/spec/services/anthropic_client_spec.rb` - 7 tests for API client
+  - `/backend/spec/services/goal_refinement_service_spec.rb` - 12 tests for refinement service
+  - `/backend/spec/requests/api/v1/goals_spec.rb` - 19 new tests for refine endpoint
+- **Learnings for future iterations:**
+  - The alexrudall/anthropic gem (v0.4.1) uses Faraday errors, not custom Anthropic:: errors
+  - Use Faraday::TooManyRequestsError for rate limiting, Faraday::BadRequestError for content filtering
+  - Rack::Attack initializer: check if cache_store is Array before calling .first (it can be a Symbol)
+  - When testing services that create other services in initialize, mock at the class level (allow(ServiceClass).to receive(:new))
+  - Use instance_double for verified doubles, but use `double()` with rubocop:disable when no constant exists
+  - GoalRefinementService returns structured hash with: smart_suggestions, alternative_titles, alternative_descriptions, potential_obstacles, milestones, overall_feedback
+  - AI response parsing handles JSON in markdown code blocks (```json...```)
+  - Break large heredocs into constants (SYSTEM_PROMPT, RESPONSE_FORMAT) to satisfy method length cops
+  - 672 total tests pass (34 new AI refinement tests)
 ---
