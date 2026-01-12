@@ -37,7 +37,9 @@ module Api
           :weekly_review_day,
           # Quiet hours
           :quiet_hours_start,
-          :quiet_hours_end
+          :quiet_hours_end,
+          # Tips
+          :tips_enabled
         )
       end
 
@@ -47,6 +49,7 @@ module Api
           channels: channel_preferences(prefs),
           reminders: reminder_preferences(prefs),
           quiet_hours: quiet_hours_preferences(prefs),
+          tips: tips_preferences(prefs),
           created_at: prefs.created_at,
           updated_at: prefs.updated_at
         }
@@ -82,6 +85,12 @@ module Api
         {
           start: prefs.quiet_hours_start,
           end: prefs.quiet_hours_end
+        }
+      end
+
+      def tips_preferences(prefs)
+        {
+          enabled: prefs.tips_enabled
         }
       end
     end

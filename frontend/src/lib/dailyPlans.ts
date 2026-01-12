@@ -106,17 +106,22 @@ export async function updateDailyPlan(
   planId: number,
   data: UpdateDailyPlanData,
   token: string
-): Promise<{ message: string; daily_plan: DailyPlan }> {
-  return apiFetch<{ message: string; daily_plan: DailyPlan }>(
-    `/families/${familyId}/daily_plans/${planId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ daily_plan: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+): Promise<{
+  message: string;
+  daily_plan: DailyPlan;
+  is_first_action: boolean;
+}> {
+  return apiFetch<{
+    message: string;
+    daily_plan: DailyPlan;
+    is_first_action: boolean;
+  }>(`/families/${familyId}/daily_plans/${planId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ daily_plan: data }),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 }
 
 // Helper function to format today's date nicely

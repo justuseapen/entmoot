@@ -6,6 +6,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  tourId?: string;
 }
 
 // Icon components for navigation items
@@ -144,6 +145,7 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
       label: "Dashboard",
       href: "/dashboard",
       icon: <HomeIcon className="h-5 w-5" />,
+      tourId: "dashboard",
     },
   ];
 
@@ -154,11 +156,13 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
         label: "Goals",
         href: `/families/${familyId}/goals`,
         icon: <TargetIcon className="h-5 w-5" />,
+        tourId: "goals",
       },
       {
         label: "Daily Planner",
         href: `/families/${familyId}/planner`,
         icon: <CalendarIcon className="h-5 w-5" />,
+        tourId: "daily-planner",
       },
       {
         label: "Reviews",
@@ -169,6 +173,7 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
         label: "Family",
         href: `/families/${familyId}`,
         icon: <UsersIcon className="h-5 w-5" />,
+        tourId: "family",
       }
     );
   }
@@ -187,6 +192,7 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
           key={item.href}
           to={item.href}
           onClick={onItemClick}
+          data-tour={item.tourId}
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",

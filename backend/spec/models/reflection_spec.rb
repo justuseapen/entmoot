@@ -4,7 +4,10 @@ require "rails_helper"
 
 RSpec.describe Reflection do
   describe "associations" do
-    it { is_expected.to belong_to(:daily_plan) }
+    # NOTE: daily_plan is optional at the model level but required for non-quick reflections via validation
+    it { is_expected.to belong_to(:daily_plan).without_validating_presence }
+    it { is_expected.to belong_to(:user).without_validating_presence }
+    it { is_expected.to belong_to(:family).without_validating_presence }
     it { is_expected.to have_many(:reflection_responses).dependent(:destroy) }
   end
 
@@ -31,6 +34,19 @@ RSpec.describe Reflection do
     end
 
     it { is_expected.to validate_numericality_of(:energy_level).is_in(1..5).allow_nil }
+
+    context "with non-quick reflection" do
+      subject { build(:reflection, reflection_type: :evening) }
+
+      it { is_expected.to validate_presence_of(:daily_plan) }
+    end
+
+    context "with quick reflection" do
+      subject { build(:reflection, :quick) }
+
+      it { is_expected.to validate_presence_of(:user) }
+      it { is_expected.to validate_presence_of(:family) }
+    end
   end
 
   describe "enums" do
@@ -38,7 +54,7 @@ RSpec.describe Reflection do
 
     it "defines reflection_type enum" do
       expect(reflection).to define_enum_for(:reflection_type)
-        .with_values(evening: 0, weekly: 1, monthly: 2, quarterly: 3, annual: 4)
+        .with_values(evening: 0, weekly: 1, monthly: 2, quarterly: 3, annual: 4, quick: 5)
     end
 
     it "defines mood enum with prefix" do
@@ -98,18 +114,34 @@ RSpec.describe Reflection do
     end
   end
 
-  describe "delegation" do
-    let(:user) { create(:user) }
-    let(:family) { create(:family) }
-    let(:daily_plan) { create(:daily_plan, user: user, family: family) }
-    let(:reflection) { create(:reflection, daily_plan: daily_plan) }
+  describe "#effective_user and #effective_family" do
+    context "with daily_plan-based reflection" do
+      let(:user) { create(:user) }
+      let(:family) { create(:family) }
+      let(:daily_plan) { create(:daily_plan, user: user, family: family) }
+      let(:reflection) { create(:reflection, daily_plan: daily_plan) }
 
-    it "delegates user to daily_plan" do
-      expect(reflection.user).to eq(user)
+      it "returns user from daily_plan" do
+        expect(reflection.effective_user).to eq(user)
+      end
+
+      it "returns family from daily_plan" do
+        expect(reflection.effective_family).to eq(family)
+      end
     end
 
-    it "delegates family to daily_plan" do
-      expect(reflection.family).to eq(family)
+    context "with quick reflection" do
+      let(:user) { create(:user) }
+      let(:family) { create(:family) }
+      let(:reflection) { create(:reflection, :quick, user: user, family: family) }
+
+      it "returns direct user association" do
+        expect(reflection.effective_user).to eq(user)
+      end
+
+      it "returns direct family association" do
+        expect(reflection.effective_family).to eq(family)
+      end
     end
   end
 

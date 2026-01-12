@@ -28,6 +28,13 @@ FactoryBot.define do
       reflection_type { :annual }
     end
 
+    trait :quick do
+      daily_plan { nil }
+      user
+      family
+      reflection_type { :quick }
+    end
+
     trait :with_mood do
       mood { :good }
     end

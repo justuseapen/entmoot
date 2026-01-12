@@ -31,3 +31,9 @@
       class: SendGoalCheckInRemindersJob
       queue: default
       description: "Send goal check-in reminders for goals with upcoming due dates"
+
+    send_onboarding_emails:
+      cron: '0 9 * * *'
+      class: SendOnboardingEmailsJob
+      queue: default
+      description: "Send onboarding email sequence to new users"

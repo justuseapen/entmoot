@@ -335,6 +335,40 @@ RSpec.describe "Api::V1::Goals" do
           "visibility" => "personal"
         )
       end
+
+      context "with first goal tracking" do
+        it "sets first_goal_created_at when creating first goal" do
+          expect(user.first_goal_created_at).to be_nil
+
+          post "/api/v1/families/#{family.id}/goals", params: valid_params, headers: auth_headers(user)
+
+          expect(response).to have_http_status(:created)
+          expect(user.reload.first_goal_created_at).to be_present
+        end
+
+        it "returns is_first_goal true when creating first goal" do
+          post "/api/v1/families/#{family.id}/goals", params: valid_params, headers: auth_headers(user)
+
+          expect(json_response["is_first_goal"]).to be true
+        end
+
+        it "does not update first_goal_created_at on subsequent goals" do
+          first_time = 1.day.ago
+          user.update!(first_goal_created_at: first_time)
+
+          post "/api/v1/families/#{family.id}/goals", params: valid_params, headers: auth_headers(user)
+
+          expect(user.reload.first_goal_created_at).to be_within(1.second).of(first_time)
+        end
+
+        it "returns is_first_goal false on subsequent goals" do
+          create(:goal, family: family, creator: user)
+
+          post "/api/v1/families/#{family.id}/goals", params: valid_params, headers: auth_headers(user)
+
+          expect(json_response["is_first_goal"]).to be false
+        end
+      end
     end
 
     context "when user is adult" do

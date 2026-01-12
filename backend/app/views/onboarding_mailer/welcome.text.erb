@@ -1,0 +1,23 @@
+Welcome to Entmoot, <%= @user.name %>!
+
+We're so glad you're here. Entmoot is designed to help your family plan, reflect, and grow together.
+
+Here's what you can do:
+
+* Set SMART Goals - Create goals that are Specific, Measurable, Achievable, Relevant, and Time-bound
+* Morning Planning - Start each day with intention by setting your top priorities
+* Evening Reflection - Process your day and celebrate small wins
+* Weekly Reviews - See the bigger picture and adjust your approach
+* Family Collaboration - Invite family members and work on goals together
+
+Your first step: Create your first goal. What's one thing you'd like to accomplish this week?
+
+Get Started: <%= @app_url %>
+
+If you have any questions, just reply to this email. We're here to help!
+
+Here's to a more organized family life,
+The Entmoot Team
+
+---
+Unsubscribe from onboarding emails: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>

@@ -28,6 +28,8 @@ Started: January 2026
 - Role enum in models: use `enum :role, { key: value }, validate: true` syntax
 - For custom validation messages, use I18n keys (e.g., `:user_already_member`) and add to `config/locales/en.yml`
 - Factory Bot factories should set auto-generated attributes (like token, expires_at) to avoid nil issues in `build` calls
+- For conditional associations (e.g., optional daily_plan for quick reflections), use `belongs_to :x, optional: true` with validates :x, presence: true, unless: :some_condition?
+- Use `without_validating_presence` in shoulda-matchers when testing optional associations with conditional validation
 - ActionCable WebSocket auth: pass JWT token as query param `?token=...` and decode with `Warden::JWTAuth::TokenDecoder`
 - Use `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout` for browser-compatible timeout types
 - NotificationService.create_and_broadcast handles both DB persistence and WebSocket broadcast
@@ -904,4 +906,309 @@ Started: January 2026
   - Disable multiple rubocop cops for seed files (ModuleLength, ClassLength, ParameterLists, LineLength)
   - Demo email domain: @demo.entmoot.family prevents collision with real users
   - 934 backend tests pass (no new tests needed for seed data)
+---
+## 2026-01-12 - US-036
+- Implemented Guided Product Tour with react-joyride and tour preferences API
+- Files created/changed:
+  - `/backend/db/migrate/20260112191842_add_tour_preferences_to_users.rb` - Migration adding tour_completed_at, tour_dismissed_at to users
+  - `/backend/app/controllers/api/v1/tour_preferences_controller.rb` - GET /show, POST /complete, /dismiss, /restart endpoints
+  - `/backend/spec/requests/api/v1/tour_preferences_spec.rb` - 15 request specs for tour preferences
+  - `/backend/config/routes.rb` - Added tour_preferences routes under /users/me
+  - `/frontend/src/lib/tour.ts` - API functions, types, and TOUR_STEPS definition
+  - `/frontend/src/hooks/useTour.ts` - TanStack Query hooks (useTourPreferences, useCompleteTour, useDismissTour, useRestartTour)
+  - `/frontend/src/components/GuidedTour.tsx` - GuidedTour component with welcome dialog and react-joyride integration
+  - `/frontend/src/components/Sidebar.tsx` - Added data-tour attributes to nav items for tour targeting
+  - `/frontend/src/components/MainLayout.tsx` - Integrated GuidedTour component
+  - `/frontend/src/pages/UserProfile.tsx` - Added "Restart Tour" option in settings
+  - `/frontend/package.json` - Added react-joyride dependency
+- **Learnings for future iterations:**
+  - react-joyride doesn't officially support React 19 - use --legacy-peer-deps to install
+  - Use `import type { CallBackProps }` for TypeScript verbatimModuleSyntax compliance
+  - Tour step targets use data-tour attributes (e.g., `[data-tour="dashboard"]`)
+  - should_show_tour logic: false if completed, false if dismissed within 24 hours, otherwise true
+  - Tour prompt delayed 500ms after page load for better UX (let page render first)
+  - "Show me later" dismisses for 24 hours (stored as tour_dismissed_at timestamp)
+  - "Skip" marks tour as completed (won't show again until restart)
+  - Restart tour clears both completed_at and dismissed_at fields
+  - 949 total tests pass (15 new tour preferences specs)
+---
+## 2026-01-12 - US-037
+- Implemented First Goal Prompt with goal suggestions and AI refinement offer
+- Files created/changed:
+  - `/backend/db/migrate/20260112192820_add_first_goal_created_at_to_users.rb` - Migration adding first_goal_created_at, first_goal_prompt_dismissed_at to users
+  - `/backend/app/controllers/api/v1/first_goal_prompts_controller.rb` - GET /show, POST /dismiss, GET /suggestions endpoints
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Track first goal creation, return is_first_goal flag
+  - `/backend/spec/requests/api/v1/first_goal_prompt_spec.rb` - 12 request specs for first goal prompt
+  - `/backend/spec/requests/api/v1/goals_spec.rb` - 4 new specs for first goal tracking
+  - `/backend/config/routes.rb` - Added first_goal_prompt routes under /users/me
+  - `/frontend/src/lib/firstGoalPrompt.ts` - API functions and types for first goal prompt
+  - `/frontend/src/hooks/useFirstGoalPrompt.ts` - TanStack Query hooks (useFirstGoalPromptStatus, useDismissFirstGoalPrompt)
+  - `/frontend/src/lib/goals.ts` - Added CreateGoalResponse interface with is_first_goal
+  - `/frontend/src/hooks/useGoals.ts` - Invalidate firstGoalPrompt query on goal creation
+  - `/frontend/src/components/FirstGoalPrompt.tsx` - Modal with 4 goal suggestions and time scale badges
+  - `/frontend/src/components/GoalModal.tsx` - Added onGoalCreated callback, time_scale in defaultValues
+  - `/frontend/src/pages/Goals.tsx` - Integrated FirstGoalPrompt and AI refinement dialog
+  - `/frontend/tsconfig.app.json` - Exclude test files from build (pre-existing test infra issues)
+- **Goal suggestions:**
+  - "Have dinner together 3 times this week" (weekly)
+  - "Exercise as a family once this week" (weekly)
+  - "Complete a home project together" (monthly)
+  - "Start a new bedtime routine" (weekly)
+- **Learnings for future iterations:**
+  - Use GOAL_SUGGESTIONS constant to avoid Metrics/MethodLength rubocop violation
+  - First goal tracking uses first_goal_created_at != nil check (not goal count)
+  - `one?` is preferred over `count == 1` for collection queries (Style/CollectionQuerying)
+  - Use type-only imports (`import type { ... }`) for verbatimModuleSyntax compliance
+  - First session defined as within 30 minutes of user creation
+  - Dismissed prompt won't show again for 24 hours
+  - AI refinement dialog shown immediately after first goal creation (is_first_goal: true)
+  - 965 total tests pass (12 new first goal prompt specs + 4 first goal tracking specs)
+---
+## 2026-01-12 - US-038
+- Implemented First Reflection Prompt with contextual time-based prompts for first-time users
+- Files created/changed:
+  - `/backend/db/migrate/20260112194705_add_first_reflection_fields_to_users.rb` - Migration adding first_reflection_created_at, first_reflection_prompt_dismissed_at
+  - `/backend/db/migrate/20260112194808_add_user_and_family_to_reflections.rb` - Migration adding user_id, family_id to reflections
+  - `/backend/db/migrate/20260112195105_allow_null_daily_plan_on_reflections.rb` - Migration allowing null daily_plan_id
+  - `/backend/app/controllers/api/v1/first_reflection_prompts_controller.rb` - GET /show, POST /dismiss, POST /create endpoints
+  - `/backend/app/models/reflection.rb` - Added 'quick' reflection type (value: 5), optional daily_plan, direct user/family associations
+  - `/backend/app/models/user.rb` - Added has_many :reflections association
+  - `/backend/app/models/family.rb` - Added has_many :reflections association
+  - `/backend/app/policies/reflection_policy.rb` - Updated to handle quick reflections with direct associations
+  - `/backend/spec/requests/api/v1/first_reflection_prompts_spec.rb` - 15 request specs for first reflection prompt
+  - `/backend/spec/factories/reflections.rb` - Added :quick trait with user/family associations
+  - `/backend/spec/models/reflection_spec.rb` - Updated tests for optional daily_plan and effective_user/effective_family methods
+  - `/frontend/src/lib/firstReflectionPrompt.ts` - API functions, types, and time period helpers
+  - `/frontend/src/hooks/useFirstReflectionPrompt.ts` - TanStack Query hooks for status, dismiss, submit
+  - `/frontend/src/components/FirstReflectionPrompt.tsx` - Modal with time-based greeting and prompt
+  - `/frontend/src/pages/Dashboard.tsx` - Integrated FirstReflectionPrompt component
+- **Learnings for future iterations:**
+  - Quick reflections bypass daily_plan requirement - use direct user/family associations
+  - Reflection model needs `optional: true` on belongs_to associations for conditional validation
+  - Use `effective_user` and `effective_family` methods to abstract over quick vs daily_plan-based reflections
+  - ReflectionPolicy.Scope needs left_joins to handle both quick and daily_plan reflections
+  - Time period calculation uses family timezone: Time.find_zone(family.timezone)&.now&.hour
+  - Session-based dismiss uses 1.hour.ago as session boundary
+  - Night time (22:00-05:00) returns nil prompt and should_show: false
+  - 987 backend tests + 69 frontend tests = 1056 total tests pass (22 new specs)
+---
+## 2026-01-12 - US-039
+- Implemented First Action Celebration with confetti animation for first-time user actions
+- Files created/changed:
+  - `/backend/db/migrate/20260112200038_add_first_actions_to_users.rb` - Migration adding first_actions jsonb field to users
+  - `/backend/app/models/user.rb` - Added FIRST_ACTION_TYPES constant, first_action_completed?, record_first_action? methods
+  - `/backend/app/controllers/api/v1/first_actions_controller.rb` - GET /api/v1/users/me/first_actions endpoint
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Track first goal creation, return is_first_action flag
+  - `/backend/app/controllers/api/v1/reflections_controller.rb` - Track first reflection completion, return is_first_action flag
+  - `/backend/app/controllers/api/v1/daily_plans_controller.rb` - Track first daily plan completion, return is_first_action flag
+  - `/backend/app/controllers/api/v1/invitations_controller.rb` - Track first invitation acceptance, return is_first_action flag
+  - `/backend/config/routes.rb` - Added first_actions route under /users/me
+  - `/backend/spec/models/user_spec.rb` - 8 new specs for first action methods
+  - `/backend/spec/requests/api/v1/first_actions_spec.rb` - 4 request specs for first_actions endpoint
+  - `/frontend/src/components/CelebrationToast.tsx` - Extended with first action celebration types and confetti animation via canvas-confetti
+  - `/frontend/src/lib/goals.ts` - Added is_first_action to CreateGoalResponse
+  - `/frontend/src/lib/reflections.ts` - Added is_first_action to create/update reflection responses
+  - `/frontend/src/lib/dailyPlans.ts` - Added is_first_action to updateDailyPlan response
+  - `/frontend/src/lib/families.ts` - Added is_first_action to AcceptInvitationResponse
+  - `/frontend/src/pages/Goals.tsx` - Integrated celebrateFirstAction on first goal creation
+  - `/frontend/src/pages/EveningReflection.tsx` - Integrated celebrateFirstAction on first reflection
+  - `/frontend/src/pages/DailyPlanner.tsx` - Integrated celebrateFirstAction on first daily plan
+  - `/frontend/src/pages/AcceptInvitation.tsx` - Integrated celebrateFirstAction on first invitation accepted
+  - `/frontend/package.json` - Added canvas-confetti and @types/canvas-confetti dependencies
+- **First action types tracked:**
+  - goal_created: First goal created by user
+  - reflection_completed: First reflection completed by user
+  - daily_plan_completed: First daily plan with content
+  - invitation_accepted: First family invitation accepted
+- **Learnings for future iterations:**
+  - Predicate methods in Ruby should end with `?` (record_first_action? not record_first_action)
+  - Rubocop method length can be satisfied by extracting helper methods (handle_plan_content_update?, render_updated_plan)
+  - canvas-confetti has peer dependency issues with react-joyride - use --legacy-peer-deps for npm install
+  - FIRST_ACTION_CELEBRATIONS config maps action types to celebration messages and next step suggestions
+  - fireConfetti uses requestAnimationFrame for smooth animation timing
+  - Confetti duration is ~2.5 seconds (particleCount: 100, spread: 70, origin y: 0.6)
+  - 1000 backend tests + 69 frontend tests = 1069 total tests pass (13 new specs)
+---
+
+## 2026-01-12 - US-040
+- Implemented Contextual In-App Tips feature
+- Files created:
+  - `/backend/app/controllers/api/v1/tips_controller.rb` - Tips API endpoints
+  - `/backend/db/migrate/20260112201000_add_tips_fields_to_notification_preferences.rb` - Migration
+  - `/backend/spec/requests/api/v1/tips_spec.rb` - Request specs for tips API
+  - `/frontend/src/components/TipTooltip.tsx` - Reusable TipTooltip and StandaloneTip components
+  - `/frontend/src/hooks/useTips.ts` - React hooks for tips state management
+  - `/frontend/src/lib/tips.ts` - Tips API functions and content configuration
+- Files modified:
+  - `/backend/app/models/notification_preference.rb` - Added tip tracking methods
+  - `/backend/config/routes.rb` - Added tips routes
+  - `/frontend/src/lib/notificationPreferences.ts` - Added tips types
+  - `/frontend/src/pages/Goals.tsx` - Added goals_page tip
+  - `/frontend/src/pages/EveningReflection.tsx` - Added first_reflection tip
+  - `/frontend/src/pages/DailyPlanner.tsx` - Added first_daily_plan tip
+  - `/frontend/src/pages/WeeklyReview.tsx` - Added first_weekly_review tip
+  - `/frontend/src/pages/FamilySettings.tsx` - Added first_family_member tip
+  - `/frontend/src/pages/NotificationSettings.tsx` - Added tips toggle
+- **Learnings for future iterations:**
+  - Tips stored in NotificationPreference model (tips_enabled, shown_tips jsonb array)
+  - TipsController provides GET show, POST mark_shown, PATCH toggle endpoints
+  - StandaloneTip component for standalone tip cards (used in page headers)
+  - TipTooltip component wraps elements for popover-style tips
+  - Tips use amber color scheme (amber-50 bg, amber-200 border, amber-900 text)
+  - Each tip has configurable title, message, and optional emoji icon
+  - useTip hook returns { shouldShow, dismissTip, isLoading, tipsEnabled }
+---
+
+## 2026-01-12 - US-041
+- Implemented Onboarding Email Sequence with 5 scheduled emails for new users
+- Files created:
+  - `/backend/app/mailers/onboarding_mailer.rb` - OnboardingMailer with 5 email methods (welcome, morning_planning_intro, ai_coach_intro, weekly_review_intro, two_week_check_in)
+  - `/backend/app/jobs/send_onboarding_emails_job.rb` - Daily job to process and send onboarding emails
+  - `/backend/app/views/onboarding_mailer/*.html.erb` - HTML email templates (5 files)
+  - `/backend/app/views/onboarding_mailer/*.text.erb` - Plain text email templates (5 files)
+  - `/backend/db/migrate/20260112203722_add_onboarding_emails_sent_to_users.rb` - Migration for tracking fields
+  - `/backend/spec/mailers/onboarding_mailer_spec.rb` - Mailer specs (27 tests)
+  - `/backend/spec/jobs/send_onboarding_emails_job_spec.rb` - Job specs (15 tests)
+- Files modified:
+  - `/backend/app/controllers/api/v1/email_subscriptions_controller.rb` - Added onboarding unsubscribe handling
+  - `/backend/config/sidekiq.yml` - Added send_onboarding_emails job running daily at 9am
+  - `/backend/spec/requests/api/v1/email_subscriptions_spec.rb` - Added onboarding unsubscribe test
+- **Email schedule:**
+  - Day 1: Welcome + getting started recap
+  - Day 3: Morning planning introduction (skipped if user has daily plans)
+  - Day 5: AI coach feature highlight
+  - Day 7: Weekly review introduction (skipped if user has weekly reviews)
+  - Day 14: Feedback request and feature highlights
+- **Learnings for future iterations:**
+  - Use word-based keys (day_one, day_three) instead of numeric (day_1) to avoid Naming/VariableNumber rubocop cop
+  - OnboardingMailer uses "type" key in JWT token for unsubscribe, not "reminder_type" like ReminderMailer
+  - Update email_subscriptions_controller to check both "type" and "reminder_type" in token payload
+  - change_table with bulk: true is preferred over multiple add_column calls for efficiency
+  - Boolean columns need null: false for Rails/ThreeStateBooleanColumn cop
+  - Onboarding emails track sent status in User model (onboarding_emails_sent jsonb, onboarding_unsubscribed boolean)
+  - 1064 total tests pass (49 new onboarding email tests)
+---
+
+## 2026-01-12 - US-042
+- Implemented Empty State Guidance with reusable EmptyState component
+- Files created:
+  - `/frontend/src/components/EmptyState.tsx` - EmptyState and InlineEmptyState components with pre-configured variants
+- Files modified:
+  - `/frontend/src/pages/Goals.tsx` - Updated empty state to use EmptyState component with filter-aware messaging
+  - `/frontend/src/pages/EveningReflection.tsx` - Updated past reflections empty state to use InlineEmptyState
+  - `/frontend/src/pages/FamilySettings.tsx` - Added prompt to invite members when family has only one member
+  - `/frontend/src/pages/DailyPlanner.tsx` - Updated empty tasks state to use InlineEmptyState
+  - `/frontend/src/pages/WeeklyReview.tsx` - Updated past reviews empty state to use InlineEmptyState
+- **EmptyState component features:**
+  - Pre-configured variants: goals, reflections, family_members, daily_plans, weekly_reviews, custom
+  - Customizable props: icon, emoji, title, description, actionLabel, showAction, onAction
+  - Card-based EmptyState for standalone usage
+  - InlineEmptyState for use within existing cards
+  - Each variant has consistent icon, colors, and encouraging messaging
+- **Learnings for future iterations:**
+  - Use `import type { ReactNode }` for verbatimModuleSyntax compliance
+  - EmptyState variants store config (icon, emoji, title, description, actionLabel, iconColor, iconBgColor)
+  - Use ?? for emoji fallback (null coalescing) vs || for string fallback
+  - InlineEmptyState is simpler version without Card wrapper - useful inside existing CardContent
+  - Goals page needs two empty states: one for no goals, one for filtered view with no matches
+  - Family "empty state" is actually "only one member" state encouraging invitations
+  - 1064 backend tests + 69 frontend tests = 1133 total tests pass
+---
+
+## 2026-01-12 - US-043
+- Implemented Onboarding Metrics Tracking for admin dashboard analytics
+- Files created:
+  - `/backend/db/migrate/20260112205046_add_onboarding_metrics_fields_to_users.rb` - Migration adding onboarding_wizard_completed_at, onboarding_wizard_last_step, first_family_invite_sent_at to users
+  - `/backend/app/services/onboarding_metrics_service.rb` - Service for aggregating all onboarding metrics
+  - `/backend/app/controllers/api/v1/admin/onboarding_metrics_controller.rb` - Admin-only endpoint for metrics
+  - `/backend/spec/services/onboarding_metrics_service_spec.rb` - 21 service specs
+  - `/backend/spec/requests/api/v1/admin/onboarding_metrics_spec.rb` - 9 request specs
+- Files modified:
+  - `/backend/app/controllers/api/v1/invitations_controller.rb` - Track first_family_invite_sent_at on invitation create
+  - `/backend/config/routes.rb` - Added admin namespace with onboarding_metrics resource
+- **Metrics provided:**
+  - Summary: total_signups, wizard_completions, tour_completions, first_goals, first_reflections, first_invites
+  - Derived: wizard_completion_rate, tour_completion_rate, day_7_retention, avg_time_to_first_goal_hours, avg_time_to_first_reflection_hours
+  - Funnel: signup_to_wizard, wizard_to_first_goal, first_goal_to_first_reflection, first_reflection_to_first_invite
+- **Learnings for future iterations:**
+  - Use `change_table :users, bulk: true` for multiple column additions (more efficient)
+  - Admin namespace goes under api/v1 with its own controller directory
+  - Admin authorization: check if user has any family_membership with role: :admin
+  - Use `where(created_at: ..7.days.ago)` for Rails/WhereRange cop compliance
+  - Use `exists?(created_at: range)` instead of `where(created_at: range).exists?` for Rails/WhereExists cop
+  - Date range parameters should use parse_date helper with rescue for invalid formats
+  - Day 7 retention checks for activity in days 6-8 after signup (window around day 7)
+  - 1094 backend tests pass (30 new onboarding metrics tests)
+---
+
+## 2026-01-12 - US-044
+- Implemented In-App Bug Reporter for user feedback collection
+- Files created:
+  - `/backend/db/migrate/20260112205713_create_feedback_reports.rb` - Migration for FeedbackReport table
+  - `/backend/db/migrate/20260112210002_create_active_storage_tables.active_storage.rb` - Active Storage for screenshot uploads
+  - `/backend/app/models/feedback_report.rb` - FeedbackReport model with report_type, severity, status enums
+  - `/backend/app/controllers/api/v1/feedback_controller.rb` - POST /api/v1/feedback and GET /api/v1/feedback/:id endpoints
+  - `/backend/spec/factories/feedback_reports.rb` - Factory with traits for all report types
+  - `/backend/spec/models/feedback_report_spec.rb` - 22 model specs
+  - `/backend/spec/requests/api/v1/feedback_spec.rb` - 18 request specs
+  - `/frontend/src/lib/feedback.ts` - API functions, types, and context capture helpers
+  - `/frontend/src/hooks/useFeedback.ts` - TanStack Query hooks for feedback CRUD and keyboard shortcut
+  - `/frontend/src/components/FeedbackReporter.tsx` - Feedback modal with type selection, severity, contact options
+- Files modified:
+  - `/backend/app/models/user.rb` - Added has_many :feedback_reports association
+  - `/backend/config/routes.rb` - Added feedback resource route
+  - `/frontend/src/components/MainLayout.tsx` - Added FeedbackButton and FeedbackReporter integration
+- **FeedbackReport features:**
+  - Report types: bug, feature_request, feedback, nps, quick_feedback
+  - Severity levels for bugs: blocker, major, minor, cosmetic
+  - Status workflow: new, acknowledged, in_progress, resolved, closed
+  - Auto-captured context: url, browser, os, screen_resolution, app_version, timestamp
+  - Screenshot attachment support via Active Storage
+  - Optional contact email with validation
+- **Frontend features:**
+  - Floating feedback button in bottom-right corner
+  - Keyboard shortcut: Cmd/Ctrl + Shift + F
+  - "Send Feedback" option in user dropdown menu
+  - Type selector with Bug/Feature Request/Feedback options
+  - Success confirmation with thank you message
+- **Learnings for future iterations:**
+  - Active Storage requires installation via `rails active_storage:install` for screenshot attachments
+  - t.references with foreign_key: true automatically creates an index
+  - FormReportType subset type for UI (excludes nps/quick_feedback from manual form)
+  - Re-exporting hooks from component files violates react-refresh/only-export-components - keep hooks in separate files
+  - split_report_attributes helper method to avoid Metrics/MethodLength cop
+  - 1134 backend tests pass (40 new feedback-related tests)
+---
+
+## 2026-01-12 - US-045
+- Implemented Feedback Management Dashboard for admin users
+- Files created:
+  - `/backend/db/migrate/20260112210815_add_management_fields_to_feedback_reports.rb` - Migration adding assigned_to_id, internal_notes, duplicate_of_id to feedback_reports
+  - `/backend/app/controllers/api/v1/admin/feedback_controller.rb` - Admin feedback controller with list, show, update endpoints
+  - `/backend/spec/requests/api/v1/admin/feedback_spec.rb` - 32 request specs for admin feedback endpoints
+  - `/frontend/src/lib/adminFeedback.ts` - API functions, types, and helper utilities
+  - `/frontend/src/hooks/useAdminFeedback.ts` - TanStack Query hooks for admin feedback operations
+  - `/frontend/src/pages/AdminFeedback.tsx` - Admin feedback dashboard page with filtering and detail view
+- Files modified:
+  - `/backend/app/models/feedback_report.rb` - Added assigned_to, duplicate_of associations and new scopes
+  - `/backend/config/routes.rb` - Added admin feedback routes under /api/v1/admin/feedback
+  - `/backend/spec/models/feedback_report_spec.rb` - Added specs for new associations and scopes
+  - `/frontend/src/App.tsx` - Added /admin/feedback route
+- **Admin feedback features:**
+  - List view with pagination (manual limit/offset, no gem required)
+  - Filtering by type, status, severity, date range
+  - Detail dialog with full feedback context
+  - Status workflow management (New -> Acknowledged -> In Progress -> Resolved -> Closed)
+  - Internal notes for admin team collaboration
+  - Mark as duplicate functionality
+  - User info display (or anonymous indicator)
+- **Learnings for future iterations:**
+  - Use `change_table :table, bulk: true` with `t.references` for efficient column additions
+  - Self-referential associations: `belongs_to :duplicate_of, class_name: "FeedbackReport", optional: true`
+  - Inverse associations need `inverse_of:` to avoid N+1 and ensure proper ActiveRecord caching
+  - For multiline lambdas in scopes, use `lambda { |args|` syntax instead of `->` for Rubocop compliance
+  - Admin authorization uses same pattern as OnboardingMetricsController: check family_memberships.exists?(role: "admin")
+  - Pagination without gem: use limit/offset with calculated meta (current_page, total_pages, total_count, per_page)
+  - Split complex spec contexts to avoid RSpec/MultipleMemoizedHelpers cop (max 7 helpers per context)
+  - 1178 backend tests pass (44 new feedback management tests)
 ---

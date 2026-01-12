@@ -1,0 +1,20 @@
+Meet your AI coach, <%= @user.name %>!
+
+Did you know Entmoot has a built-in AI coach to help you create better goals?
+
+Our AI coach can help you:
+
+* Refine your goals - Get suggestions to make them more specific and achievable
+* Identify obstacles - Anticipate challenges before they happen
+* Create milestones - Break big goals into manageable steps
+* Improve your SMART criteria - Ensure your goals are truly actionable
+
+How to use it:
+When creating or editing a goal, look for the "Refine with AI" button. Click it, and your AI coach will analyze your goal and offer personalized suggestions.
+
+Try the AI Coach: <%= @app_url %>
+
+Think of it as having a personal coach available 24/7, helping you set goals that you'll actually achieve.
+
+---
+Unsubscribe from onboarding emails: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>

@@ -12,7 +12,8 @@ module Api
         user = User.find_by(id: payload["user_id"])
         return render_user_not_found unless user
 
-        reminder_type = payload["reminder_type"]&.to_sym
+        # Support both "reminder_type" and "type" keys in token payload
+        reminder_type = (payload["reminder_type"] || payload["type"])&.to_sym
         unsubscribe_from_reminder(user, reminder_type)
 
         render json: {
@@ -37,6 +38,15 @@ module Api
       end
 
       def unsubscribe_from_reminder(user, reminder_type)
+        case reminder_type
+        when :onboarding
+          user.update!(onboarding_unsubscribed: true)
+        else
+          unsubscribe_from_regular_reminder(user, reminder_type)
+        end
+      end
+
+      def unsubscribe_from_regular_reminder(user, reminder_type)
         preference = NotificationPreference.find_or_create_for(user)
 
         case reminder_type

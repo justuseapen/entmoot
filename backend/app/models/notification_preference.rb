@@ -19,6 +19,33 @@ class NotificationPreference < ApplicationRecord
     find_or_create_by(user: user)
   end
 
+  # Contextual tip types
+  TIP_TYPES = %w[
+    goals_page
+    first_reflection
+    first_family_member
+    first_daily_plan
+    first_weekly_review
+  ].freeze
+
+  # Check if a specific tip has been shown
+  def tip_shown?(tip_type)
+    shown_tips.include?(tip_type.to_s)
+  end
+
+  # Mark a tip as shown
+  def mark_tip_shown!(tip_type)
+    return false unless TIP_TYPES.include?(tip_type.to_s)
+    return false if tip_shown?(tip_type)
+
+    update(shown_tips: shown_tips + [tip_type.to_s])
+  end
+
+  # Check if tips should be shown for a given type
+  def should_show_tip?(tip_type)
+    tips_enabled && !tip_shown?(tip_type)
+  end
+
   # Check if a given time is within quiet hours
   def within_quiet_hours?(time)
     current_mins = time_to_minutes(time.hour, time.min)

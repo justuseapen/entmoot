@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { useTodaysPlan } from "@/hooks/useDailyPlans";
 import { useFamily } from "@/hooks/useFamilies";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   useReflections,
   useReflectionPrompts,
@@ -35,6 +36,8 @@ import {
   History,
   ArrowLeft,
 } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
+import { InlineEmptyState } from "@/components/EmptyState";
 
 // Step interface
 interface Step {
@@ -49,6 +52,7 @@ export function EveningReflection() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const navigate = useNavigate();
+  const { celebrateFirstAction } = useCelebration();
 
   // Fetch data
   const { data: plan, isLoading: loadingPlan } = useTodaysPlan(familyId);
@@ -220,7 +224,7 @@ export function EveningReflection() {
 
       if (existingReflectionId) {
         // Update existing reflection
-        await updateReflection.mutateAsync({
+        const result = await updateReflection.mutateAsync({
           reflectionId: existingReflectionId,
           data: {
             mood: mood || undefined,
@@ -229,6 +233,9 @@ export function EveningReflection() {
             reflection_responses_attributes: reflectionResponses,
           },
         });
+        if (result.is_first_action) {
+          celebrateFirstAction("first_reflection");
+        }
       } else {
         // Create new reflection
         const result = await createReflection.mutateAsync({
@@ -242,6 +249,9 @@ export function EveningReflection() {
           dailyPlanId: plan.id,
         });
         setExistingReflectionId(result.reflection.id);
+        if (result.is_first_action) {
+          celebrateFirstAction("first_reflection");
+        }
       }
 
       setSaveSuccess(true);
@@ -261,6 +271,7 @@ export function EveningReflection() {
     existingReflectionId,
     createReflection,
     updateReflection,
+    celebrateFirstAction,
   ]);
 
   // Navigate between steps
@@ -285,12 +296,12 @@ export function EveningReflection() {
 
     if (pastReflections.length === 0) {
       return (
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground">No past reflections yet.</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Complete your first evening reflection to see it here.
-          </p>
-        </div>
+        <InlineEmptyState
+          variant="reflections"
+          title="No past reflections yet"
+          description="Complete your first evening reflection to see it here."
+          showAction={false}
+        />
       );
     }
 
@@ -549,6 +560,9 @@ export function EveningReflection() {
             Take a moment to reflect on your day
           </p>
         </div>
+
+        {/* Tip for first reflection */}
+        <StandaloneTip tipType="first_reflection" className="mb-4" />
 
         {/* Progress indicator */}
         <div className="mb-6">

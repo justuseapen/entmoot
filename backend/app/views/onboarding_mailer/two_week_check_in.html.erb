@@ -1,0 +1,29 @@
+<h1>How's it going, <%= @user.name %>?</h1>
+
+<p>You've been with Entmoot for two weeks now! We'd love to hear how things are going.</p>
+
+<p><strong>A few questions to consider:</strong></p>
+<ul>
+  <li>Have you found a routine that works for you?</li>
+  <li>Which features do you find most valuable?</li>
+  <li>Is there anything that's been confusing or frustrating?</li>
+</ul>
+
+<p><strong>Your feedback matters.</strong> We're constantly improving Entmoot based on what families like yours tell us. If something isn't working or if you have ideas for new features, we want to hear about it.</p>
+
+<p style="text-align: center;">
+  <a href="mailto:feedback@entmoot.app?subject=Feedback%20from%20<%= @user.name %>" class="button">Share Your Feedback</a>
+</p>
+
+<p><strong>In case you missed it, here's what else you can explore:</strong></p>
+<ul>
+  <li><strong>Gamification</strong> - Earn points, badges, and build streaks to stay motivated</li>
+  <li><strong>Family Leaderboard</strong> - See how everyone's doing (friendly competition encouraged!)</li>
+  <li><strong>Goal Hierarchy</strong> - Link daily goals to weekly, monthly, and annual goals</li>
+</ul>
+
+<p style="text-align: center;">
+  <a href="<%= @app_url %>" class="button">Explore Entmoot</a>
+</p>
+
+<p>Thanks for being part of the Entmoot family!</p>

@@ -33,16 +33,8 @@ module Api
         @reflection = @daily_plan.reflections.build(reflection_params)
 
         if @reflection.save
-          # Record evening reflection streak if it's an evening reflection with content
-          if @reflection.evening? && @reflection.completed?
-            record_evening_reflection_streak
-            PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
-          end
-
-          render json: {
-            message: "Reflection created successfully.",
-            reflection: reflection_response(@reflection)
-          }, status: :created
+          is_first_action = handle_completed_reflection if reflection_completed?
+          render_created_reflection(is_first_action || false)
         else
           render_errors(@reflection.errors.full_messages)
         end
@@ -50,20 +42,11 @@ module Api
 
       def update
         authorize @reflection
-
         was_completed_before = @reflection.completed?
 
         if @reflection.update(reflection_params)
-          # Record evening reflection streak and award points if it just completed
-          if @reflection.evening? && @reflection.completed? && !was_completed_before
-            record_evening_reflection_streak
-            PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
-          end
-
-          render json: {
-            message: "Reflection updated successfully.",
-            reflection: reflection_response(@reflection)
-          }
+          is_first_action = handle_completed_reflection unless was_completed_before
+          render_updated_reflection(is_first_action || false)
         else
           render_errors(@reflection.errors.full_messages)
         end
@@ -156,6 +139,34 @@ module Api
 
       def record_evening_reflection_streak
         StreakService.record_evening_reflection(user: current_user, date: @reflection.daily_plan.date)
+      end
+
+      def reflection_completed?
+        @reflection.evening? && @reflection.completed?
+      end
+
+      def handle_completed_reflection
+        return unless reflection_completed?
+
+        record_evening_reflection_streak
+        PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
+        current_user.record_first_action?(:reflection_completed)
+      end
+
+      def render_created_reflection(is_first_action)
+        render json: {
+          message: "Reflection created successfully.",
+          reflection: reflection_response(@reflection),
+          is_first_action: is_first_action
+        }, status: :created
+      end
+
+      def render_updated_reflection(is_first_action)
+        render json: {
+          message: "Reflection updated successfully.",
+          reflection: reflection_response(@reflection),
+          is_first_action: is_first_action
+        }
       end
     end
   end

@@ -22,20 +22,12 @@ module Api
 
       def update
         authorize @daily_plan
-
         tasks_before = tasks_completion_state
 
         if @daily_plan.update(daily_plan_params)
-          # Record daily planning streak if plan has meaningful content
-          record_daily_planning_streak if plan_has_content?
-
-          # Award points for newly completed tasks
+          is_first_action = handle_plan_content_update?
           award_task_completion_points(tasks_before)
-
-          render json: {
-            message: "Daily plan updated successfully.",
-            daily_plan: daily_plan_response(@daily_plan)
-          }
+          render_updated_plan(is_first_action)
         else
           render_errors(@daily_plan.errors.full_messages)
         end
@@ -132,6 +124,21 @@ module Api
           # Award points only if task changed from not completed to completed
           PointsService.award_task_completion(user: current_user, task: task) if task.completed && !was_completed
         end
+      end
+
+      def handle_plan_content_update?
+        return false unless plan_has_content?
+
+        record_daily_planning_streak
+        current_user.record_first_action?(:daily_plan_completed)
+      end
+
+      def render_updated_plan(is_first_action)
+        render json: {
+          message: "Daily plan updated successfully.",
+          daily_plan: daily_plan_response(@daily_plan),
+          is_first_action: is_first_action
+        }
       end
     end
   end

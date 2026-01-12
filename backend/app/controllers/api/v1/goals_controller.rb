@@ -110,10 +110,8 @@ module Api
         ids.each { |user_id| @goal.goal_assignments.find_or_create_by(user_id: user_id) }
       end
 
-      def render_created_goal
-        @goal.reload
-        render json: { message: "Goal created successfully.", goal: goal_response(@goal, include_smart: true) },
-               status: :created
+      def first_goal?
+        current_user.created_goals.one?
       end
 
       def render_updated_goal
@@ -160,7 +158,30 @@ module Api
       def handle_goal_creation
         assign_users if params.dig(:goal, :assignee_ids).present?
         PointsService.award_goal_creation(user: current_user, goal: @goal)
+        track_first_goal
+        track_first_action_goal
         render_created_goal
+      end
+
+      def track_first_goal
+        return if current_user.first_goal_created_at.present?
+
+        current_user.update!(first_goal_created_at: Time.current)
+      end
+
+      def track_first_action_goal
+        @is_first_action_goal = current_user.record_first_action?(:goal_created)
+      end
+
+      def render_created_goal
+        @goal.reload
+        response = {
+          message: "Goal created successfully.",
+          goal: goal_response(@goal, include_smart: true),
+          is_first_goal: first_goal?,
+          is_first_action: @is_first_action_goal || false
+        }
+        render json: response, status: :created
       end
     end
   end

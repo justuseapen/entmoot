@@ -30,6 +30,7 @@ import {
   useDeleteAccount,
   useExportUserDataMutation,
 } from "@/hooks/useProfile";
+import { useTourPreferences, useRestartTour } from "@/hooks/useTour";
 import { downloadJson } from "@/lib/profile";
 
 // Validation schemas
@@ -72,6 +73,8 @@ export function UserProfile() {
   const changePassword = useChangePassword();
   const deleteAccount = useDeleteAccount();
   const exportData = useExportUserDataMutation();
+  const { data: tourPrefs } = useTourPreferences();
+  const restartTour = useRestartTour();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -169,6 +172,18 @@ export function UserProfile() {
       const filename = `entmoot-export-${new Date().toISOString().split("T")[0]}.json`;
       downloadJson(data, filename);
       showSuccessMessage("Data exported successfully");
+    } catch {
+      // Error is handled by the mutation
+    }
+  };
+
+  // Handle restart tour
+  const handleRestartTour = async () => {
+    try {
+      await restartTour.mutateAsync();
+      showSuccessMessage(
+        "Tour has been reset. Return to the Dashboard to start the tour."
+      );
     } catch {
       // Error is handled by the mutation
     }
@@ -414,6 +429,35 @@ export function UserProfile() {
             <Button asChild variant="outline" className="w-full justify-start">
               <Link to="/points">Points History</Link>
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* App Tour */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">App Tour</CardTitle>
+            <CardDescription>
+              Get a guided tour of Entmoot&apos;s features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Guided Tour</p>
+                <p className="text-muted-foreground text-sm">
+                  {tourPrefs?.tour_preferences?.can_restart_tour
+                    ? "Restart the app tour to learn about features"
+                    : "Take a tour to learn about the app features"}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleRestartTour}
+                disabled={restartTour.isPending}
+              >
+                {restartTour.isPending ? "Resetting..." : "Restart Tour"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

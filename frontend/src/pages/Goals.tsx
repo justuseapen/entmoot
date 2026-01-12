@@ -20,9 +20,11 @@ import {
 import { GoalCard } from "@/components/GoalCard";
 import { GoalModal } from "@/components/GoalModal";
 import { GoalDetailView } from "@/components/GoalDetailView";
+import { FirstGoalPrompt } from "@/components/FirstGoalPrompt";
 import { useGoals, useDeleteGoal } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
 import { useAuthStore } from "@/stores/auth";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   type Goal,
   type GoalFilters,
@@ -31,12 +33,16 @@ import {
   timeScaleOptions,
   statusOptions,
 } from "@/lib/goals";
-import { TreePine } from "lucide-react";
+import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
+import { TreePine, Sparkles } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
+import { EmptyState } from "@/components/EmptyState";
 
 export function Goals() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const { user } = useAuthStore();
+  const { celebrateFirstAction } = useCelebration();
 
   // Filter state
   const [filters, setFilters] = useState<GoalFilters>({});
@@ -52,6 +58,12 @@ export function Goals() {
     title: string;
     description: string | null;
   } | null>(null);
+
+  // First goal prompt state
+  const [pendingSuggestion, setPendingSuggestion] =
+    useState<GoalSuggestion | null>(null);
+  const [showFirstGoalAIPrompt, setShowFirstGoalAIPrompt] = useState(false);
+  const [firstGoalId, setFirstGoalId] = useState<number | null>(null);
 
   // Fetch data
   const {
@@ -166,6 +178,48 @@ export function Goals() {
     setShowCreateModal(true);
   };
 
+  // First goal prompt handlers
+  const handleSelectSuggestion = (suggestion: GoalSuggestion) => {
+    setPendingSuggestion(suggestion);
+    setShowCreateModal(true);
+  };
+
+  const handleCreateOwn = () => {
+    setPendingSuggestion(null);
+    setShowCreateModal(true);
+  };
+
+  const handleGoalCreated = (
+    goalId: number,
+    isFirstGoal: boolean,
+    isFirstAction: boolean
+  ) => {
+    if (isFirstAction) {
+      celebrateFirstAction("first_goal");
+    }
+    if (isFirstGoal) {
+      setFirstGoalId(goalId);
+      setShowFirstGoalAIPrompt(true);
+    }
+  };
+
+  const handleRefineFirstGoal = () => {
+    setShowFirstGoalAIPrompt(false);
+    if (firstGoalId && goals) {
+      const goal = goals.find((g) => g.id === firstGoalId);
+      if (goal) {
+        setShowAITab(true);
+        setEditingGoal(goal);
+      }
+    }
+    setFirstGoalId(null);
+  };
+
+  const handleSkipFirstGoalRefinement = () => {
+    setShowFirstGoalAIPrompt(false);
+    setFirstGoalId(null);
+  };
+
   const hasActiveFilters =
     filters.time_scale || filters.status || filters.assignee_id;
 
@@ -225,6 +279,9 @@ export function Goals() {
             )}
           </div>
         </div>
+
+        {/* Pro tip for first time on Goals page */}
+        <StandaloneTip tipType="goals_page" className="mb-4" />
 
         {/* Filters */}
         <Card className="mb-6">
@@ -318,26 +375,23 @@ export function Goals() {
               />
             ))}
           </div>
+        ) : hasActiveFilters ? (
+          <EmptyState
+            variant="custom"
+            emoji="🔍"
+            title="No goals match your filters"
+            description="Try adjusting your filters to see more goals."
+            actionLabel="Clear Filters"
+            onAction={clearFilters}
+          />
         ) : (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">
-                {hasActiveFilters
-                  ? "No goals match your filters"
-                  : "No goals yet"}
-              </p>
-              {canManageGoals && !hasActiveFilters && (
-                <Button onClick={() => setShowCreateModal(true)}>
-                  Create Your First Goal
-                </Button>
-              )}
-              {hasActiveFilters && (
-                <Button variant="outline" onClick={clearFilters}>
-                  Clear Filters
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <EmptyState
+            variant="goals"
+            onAction={
+              canManageGoals ? () => setShowCreateModal(true) : undefined
+            }
+            showAction={canManageGoals}
+          />
         )}
 
         {/* Goal count */}
@@ -348,6 +402,14 @@ export function Goals() {
           </p>
         )}
       </div>
+
+      {/* First Goal Prompt */}
+      {canManageGoals && (
+        <FirstGoalPrompt
+          onSelectSuggestion={handleSelectSuggestion}
+          onCreateOwn={handleCreateOwn}
+        />
+      )}
 
       {/* Create/Edit Modal */}
       <GoalModal
@@ -361,10 +423,12 @@ export function Goals() {
             setEditingGoal(null);
             setShowAITab(false);
             setPendingSubGoal(null);
+            setPendingSuggestion(null);
           }
         }}
         initialTab={showAITab ? "ai" : "basic"}
         onCreateSubGoal={canManageGoals ? handleCreateSubGoal : undefined}
+        onGoalCreated={handleGoalCreated}
         defaultValues={
           pendingSubGoal
             ? {
@@ -372,9 +436,46 @@ export function Goals() {
                 description: pendingSubGoal.description || undefined,
                 parent_id: pendingSubGoal.parentId,
               }
-            : undefined
+            : pendingSuggestion
+              ? {
+                  title: pendingSuggestion.title,
+                  description: pendingSuggestion.description,
+                  time_scale: pendingSuggestion.time_scale,
+                }
+              : undefined
         }
       />
+
+      {/* First Goal AI Refinement Prompt */}
+      <Dialog
+        open={showFirstGoalAIPrompt}
+        onOpenChange={setShowFirstGoalAIPrompt}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="mb-2 flex items-center gap-2 text-indigo-600">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <DialogTitle>Great job on your first goal!</DialogTitle>
+            <DialogDescription className="pt-2">
+              Would you like our AI coach to help you refine it? We can suggest
+              ways to make your goal more specific, measurable, and achievable.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={handleSkipFirstGoalRefinement}>
+              Maybe later
+            </Button>
+            <Button
+              onClick={handleRefineFirstGoal}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Refine with AI
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Detail View Modal */}
       {viewingGoalId && (

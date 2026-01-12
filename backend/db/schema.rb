@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_210815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "badges", force: :cascade do |t|
     t.string "name", null: false
@@ -68,6 +96,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
     t.index ["family_id", "user_id"], name: "index_family_memberships_on_family_id_and_user_id", unique: true
     t.index ["family_id"], name: "index_family_memberships_on_family_id"
     t.index ["user_id"], name: "index_family_memberships_on_user_id"
+  end
+
+  create_table "feedback_reports", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "report_type", default: "bug", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "severity"
+    t.string "status", default: "new", null: false
+    t.jsonb "context_data", default: {}, null: false
+    t.boolean "allow_contact", default: false, null: false
+    t.string "contact_email"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "assigned_to_id"
+    t.text "internal_notes"
+    t.bigint "duplicate_of_id"
+    t.index ["assigned_to_id"], name: "index_feedback_reports_on_assigned_to_id"
+    t.index ["created_at"], name: "index_feedback_reports_on_created_at"
+    t.index ["duplicate_of_id"], name: "index_feedback_reports_on_duplicate_of_id"
+    t.index ["report_type"], name: "index_feedback_reports_on_report_type"
+    t.index ["status"], name: "index_feedback_reports_on_status"
+    t.index ["user_id"], name: "index_feedback_reports_on_user_id"
   end
 
   create_table "goal_assignments", force: :cascade do |t|
@@ -144,6 +196,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
     t.string "quiet_hours_end", default: "07:00", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "tips_enabled", default: true, null: false
+    t.jsonb "shown_tips", default: [], null: false
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 
@@ -198,15 +252,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
   end
 
   create_table "reflections", force: :cascade do |t|
-    t.bigint "daily_plan_id", null: false
+    t.bigint "daily_plan_id"
     t.integer "reflection_type", default: 0, null: false
     t.integer "mood"
     t.integer "energy_level"
     t.jsonb "gratitude_items", default: []
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.bigint "family_id"
     t.index ["daily_plan_id", "reflection_type"], name: "index_reflections_on_daily_plan_id_and_reflection_type", unique: true
     t.index ["daily_plan_id"], name: "index_reflections_on_daily_plan_id"
+    t.index ["family_id"], name: "index_reflections_on_family_id"
+    t.index ["user_id"], name: "index_reflections_on_user_id"
   end
 
   create_table "refresh_tokens", force: :cascade do |t|
@@ -265,6 +323,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
     t.string "avatar_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "tour_completed_at"
+    t.datetime "tour_dismissed_at"
+    t.datetime "first_goal_created_at"
+    t.datetime "first_goal_prompt_dismissed_at"
+    t.datetime "first_reflection_created_at"
+    t.datetime "first_reflection_prompt_dismissed_at"
+    t.jsonb "first_actions", default: {}
+    t.jsonb "onboarding_emails_sent", default: {}
+    t.boolean "onboarding_unsubscribed", default: false
+    t.datetime "onboarding_wizard_completed_at"
+    t.integer "onboarding_wizard_last_step"
+    t.datetime "first_family_invite_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -285,12 +355,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
     t.index ["user_id"], name: "index_weekly_reviews_on_user_id"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "daily_plans", "families"
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
   add_foreign_key "daily_tasks", "goals"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
+  add_foreign_key "feedback_reports", "feedback_reports", column: "duplicate_of_id"
+  add_foreign_key "feedback_reports", "users"
+  add_foreign_key "feedback_reports", "users", column: "assigned_to_id"
   add_foreign_key "goal_assignments", "goals"
   add_foreign_key "goal_assignments", "users"
   add_foreign_key "goals", "families"
@@ -304,6 +379,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
   add_foreign_key "points_ledger_entries", "users"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"
+  add_foreign_key "reflections", "families"
+  add_foreign_key "reflections", "users"
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "streaks", "users"
   add_foreign_key "top_priorities", "daily_plans"

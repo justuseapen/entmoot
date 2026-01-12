@@ -194,6 +194,7 @@ export interface AcceptInvitationParams {
 export interface AcceptInvitationResponse {
   message: string;
   family: Family;
+  is_first_action: boolean;
 }
 
 export interface InvitationRequiresAuthResponse {

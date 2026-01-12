@@ -26,6 +26,7 @@ module Api
         end
 
         if @invitation.save
+          track_first_family_invite
           render json: {
             message: "Invitation sent successfully.",
             invitation: invitation_response(@invitation)
@@ -98,7 +99,12 @@ module Api
 
       def accept_and_render(user)
         if @invitation.accept!(user)
-          render json: { message: "Invitation accepted successfully.", family: family_response(@invitation.family) }
+          is_first_action = user.record_first_action?(:invitation_accepted)
+          render json: {
+            message: "Invitation accepted successfully.",
+            family: family_response(@invitation.family),
+            is_first_action: is_first_action
+          }
         else
           render_error("Failed to accept invitation")
         end
@@ -152,6 +158,12 @@ module Api
 
       def user_params_for_invitation
         { email: @invitation.email }.merge(params[:user].permit(:password, :password_confirmation, :name).to_h)
+      end
+
+      def track_first_family_invite
+        return if current_user.first_family_invite_sent_at.present?
+
+        current_user.update(first_family_invite_sent_at: Time.current)
       end
 
       def invitation_response(invitation)

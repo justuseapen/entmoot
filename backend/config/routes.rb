@@ -57,6 +57,28 @@ Rails.application.routes.draw do
         patch "password", to: "profile#update_password"
         delete "/", to: "profile#destroy"
         get "export", to: "profile#export"
+        # Tour preferences
+        resource :tour_preferences, only: [:show] do
+          post "complete", on: :member
+          post "dismiss", on: :member
+          post "restart", on: :member
+        end
+        # First goal prompt
+        resource :first_goal_prompt, only: [:show] do
+          post "dismiss", on: :member
+          get "suggestions", on: :member
+        end
+        # First reflection prompt
+        resource :first_reflection_prompt, only: %i[show create] do
+          post "dismiss", on: :member
+        end
+        # First actions status
+        resource :first_actions, only: [:show]
+        # Contextual tips
+        resource :tips, only: [:show] do
+          post "mark_shown", on: :member
+          patch "toggle", on: :member
+        end
       end
 
       # All badges (public-ish, requires auth)
@@ -71,11 +93,20 @@ Rails.application.routes.draw do
       # Reflection prompts (public endpoint)
       resources :reflection_prompts, only: [:index]
 
+      # Feedback (public for create, authenticated for show)
+      resources :feedback, only: %i[create show], controller: "feedback"
+
       # Accept invitation (public route with token)
       post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
 
       # Email unsubscribe (public route with token)
       get "unsubscribe", to: "email_subscriptions#unsubscribe", as: :unsubscribe
+
+      # Admin routes
+      namespace :admin do
+        resource :onboarding_metrics, only: [:show]
+        resources :feedback, only: %i[index show update], controller: "feedback"
+      end
     end
   end
 end
