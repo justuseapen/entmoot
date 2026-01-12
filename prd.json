@@ -1041,7 +1041,7 @@
         "Auto-advances every 5 seconds, pauses on hover"
       ],
       "priority": 54,
-      "passes": false,
+      "passes": true,
       "notes": "Use a lightweight carousel library like Embla or build simple CSS carousel. Testimonials are realistic but fictional."
     },
     {

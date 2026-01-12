@@ -217,3 +217,31 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Step number badge positioned absolute -top-3 over the icon container
   - Stone waypoint effect uses inset box-shadows for depth and outer shadow for elevation
 ---
+
+## 2026-01-12 - US-054 Landing Page Testimonials Section
+- What was implemented:
+  - Created TestimonialsSection component at /frontend/src/components/landing/TestimonialsSection.tsx
+  - Section headline: "Tales from Fellow Adventurers"
+  - Carousel with 3 testimonial cards featuring fictional but realistic testimonials
+  - Testimonial 1: Marcus T. (Dad of 2) - kid reminds about morning planning
+  - Testimonial 2: Jennifer & David K. (Blended family of 6) - coordination across households
+  - Testimonial 3: Priya S. (Mom of a 16-year-old) - teenager goal hierarchy revelation
+  - BlockyAvatar component with pixelated style (colored rounded squares with initials)
+  - StarRating component showing 5 filled star icons
+  - Auto-advance every 5 seconds, pauses on hover using useEffect + setInterval
+  - CarouselDots component for navigation indicators
+  - NavArrow buttons for prev/next navigation
+  - Mobile layout: arrows below carousel; Desktop: arrows flanking carousel
+
+- Files changed:
+  - frontend/src/components/landing/TestimonialsSection.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (added import and TestimonialsSection usage)
+
+- **Learnings for future iterations:**
+  - Simple CSS carousel built with absolute positioned cards and opacity transition
+  - useCallback for goToNext/goToPrev to avoid dependency issues in useEffect
+  - isPaused state controlled via onMouseEnter/onMouseLeave on carousel container
+  - Blocky avatar effect: inset box-shadows + corner accent divs for pixelated look
+  - Testimonial card height fixed (h-[420px] mobile, h-[380px] desktop) to prevent layout shift
+  - isActive prop controls opacity-100 vs opacity-0 + pointer-events-none for card visibility
+---
