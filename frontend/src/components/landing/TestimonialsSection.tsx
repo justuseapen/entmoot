@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -266,7 +267,7 @@ export function TestimonialsSection() {
   }, [isPaused, goToNext]);
 
   return (
-    <section
+    <AnimatedSection
       className="py-16 sm:py-20 lg:py-24"
       style={{ backgroundColor: LANDING_COLORS.creamWhite }}
     >
@@ -328,6 +329,6 @@ export function TestimonialsSection() {
           </div>
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }

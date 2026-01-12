@@ -1,4 +1,5 @@
 import { Target, Map, Sun, Moon, Trophy, Users } from "lucide-react";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -113,7 +114,7 @@ function FeatureCard({
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-16 sm:py-20 lg:py-24">
+    <AnimatedSection id="features" className="py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section headline */}
         <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
@@ -143,6 +144,6 @@ export function FeaturesSection() {
           ))}
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }

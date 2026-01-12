@@ -1,5 +1,6 @@
 import { Home, Map, Rocket, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -175,7 +176,7 @@ function PathwayConnector({ isVertical = false }: { isVertical?: boolean }) {
 
 export function HowItWorksSection() {
   return (
-    <section
+    <AnimatedSection
       id="how-it-works"
       className="py-16 sm:py-20 lg:py-24"
       style={{ backgroundColor: LANDING_COLORS.leafGreen + "15" }}
@@ -233,6 +234,6 @@ export function HowItWorksSection() {
           </Link>
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }

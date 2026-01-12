@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -70,7 +71,7 @@ function BlockyTree({
 
 export function FinalCTASection() {
   return (
-    <section className="relative overflow-hidden">
+    <AnimatedSection className="relative overflow-hidden">
       {/* Sunset gradient background - orange to purple */}
       <div
         className="absolute inset-0"
@@ -142,6 +143,6 @@ export function FinalCTASection() {
           </div>
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Star, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -69,14 +70,20 @@ function BlockyTree({
 }
 
 // Floating island decorative element
-function FloatingIsland({ className = "" }: { className?: string }) {
+function FloatingIsland({
+  className = "",
+  animate = true,
+}: {
+  className?: string;
+  animate?: boolean;
+}) {
   return (
     <div className={`absolute ${className}`}>
       <svg
         width="80"
         height="60"
         viewBox="0 0 80 60"
-        className="animate-float"
+        className={animate ? "animate-float" : ""}
         style={{ color: LANDING_COLORS.leafGreen }}
       >
         {/* Island base */}
@@ -111,6 +118,8 @@ function FloatingIsland({ className = "" }: { className?: string }) {
 }
 
 export function HeroSection() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <section className="relative flex min-h-screen flex-col overflow-hidden pt-16">
       {/* Gradient background - dawn pink/orange to sky blue */}
@@ -127,9 +136,18 @@ export function HeroSection() {
       />
 
       {/* Floating decorative elements */}
-      <FloatingIsland className="top-[20%] left-[5%] hidden opacity-60 lg:block" />
-      <FloatingIsland className="top-[25%] right-[10%] hidden scale-75 opacity-50 lg:block" />
-      <FloatingIsland className="top-[35%] left-[15%] hidden scale-50 opacity-40 lg:block" />
+      <FloatingIsland
+        className="top-[20%] left-[5%] hidden opacity-60 lg:block"
+        animate={!prefersReducedMotion}
+      />
+      <FloatingIsland
+        className="top-[25%] right-[10%] hidden scale-75 opacity-50 lg:block"
+        animate={!prefersReducedMotion}
+      />
+      <FloatingIsland
+        className="top-[35%] left-[15%] hidden scale-50 opacity-40 lg:block"
+        animate={!prefersReducedMotion}
+      />
 
       {/* Main content */}
       <div className="relative z-10 mx-auto flex flex-1 flex-col items-center justify-center px-4 pb-32 text-center sm:px-6 lg:px-8">

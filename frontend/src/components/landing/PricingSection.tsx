@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -190,7 +191,7 @@ function PricingCard({
 
 export function PricingSection() {
   return (
-    <section
+    <AnimatedSection
       id="pricing"
       className="py-16 sm:py-20 lg:py-24"
       style={{ backgroundColor: LANDING_COLORS.creamWhite }}
@@ -227,6 +228,6 @@ export function PricingSection() {
           All plans include a 14-day free trial of Sapling features
         </p>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }

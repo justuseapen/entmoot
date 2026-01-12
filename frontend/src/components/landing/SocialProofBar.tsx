@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { TreePine, Star, Quote } from "lucide-react";
+import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -79,10 +80,17 @@ function StarRating({ rating }: { rating: number }) {
 
 export function SocialProofBar() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  // If user prefers reduced motion, start visible
+  const [isVisible, setIsVisible] = useState(prefersReducedMotion);
 
   // Intersection Observer to trigger count-up when scrolled into view
   useEffect(() => {
+    // If user prefers reduced motion, content is already visible via initial state
+    if (prefersReducedMotion) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !isVisible) {
@@ -97,10 +105,19 @@ export function SocialProofBar() {
     }
 
     return () => observer.disconnect();
-  }, [isVisible]);
+  }, [isVisible, prefersReducedMotion]);
 
-  const familyCount = useCountUp(2847, 2000, isVisible);
-  const reviewCount = useCountUp(500, 1500, isVisible);
+  // If user prefers reduced motion, show final values immediately without animation
+  const familyCount = useCountUp(
+    2847,
+    prefersReducedMotion ? 0 : 2000,
+    isVisible
+  );
+  const reviewCount = useCountUp(
+    500,
+    prefersReducedMotion ? 0 : 1500,
+    isVisible
+  );
 
   return (
     <section

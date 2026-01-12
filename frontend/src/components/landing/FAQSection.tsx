@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { AnimatedSection } from "./AnimatedSection";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -59,7 +60,7 @@ const faqItems = [
 
 export function FAQSection() {
   return (
-    <section
+    <AnimatedSection
       id="faq"
       className="py-16 sm:py-20 lg:py-24"
       style={{ backgroundColor: LANDING_COLORS.creamWhite }}
@@ -100,6 +101,6 @@ export function FAQSection() {
           ))}
         </Accordion>
       </div>
-    </section>
+    </AnimatedSection>
   );
 }
