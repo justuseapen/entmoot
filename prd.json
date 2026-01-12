@@ -809,7 +809,7 @@
         "Request specs for metrics endpoint"
       ],
       "priority": 43,
-      "passes": false,
+      "passes": true,
       "notes": "Admin-only endpoint. Add all tracking fields to User model via migration."
     },
     {

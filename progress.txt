@@ -1114,3 +1114,29 @@ Started: January 2026
   - Family "empty state" is actually "only one member" state encouraging invitations
   - 1064 backend tests + 69 frontend tests = 1133 total tests pass
 ---
+
+## 2026-01-12 - US-043
+- Implemented Onboarding Metrics Tracking for admin dashboard analytics
+- Files created:
+  - `/backend/db/migrate/20260112205046_add_onboarding_metrics_fields_to_users.rb` - Migration adding onboarding_wizard_completed_at, onboarding_wizard_last_step, first_family_invite_sent_at to users
+  - `/backend/app/services/onboarding_metrics_service.rb` - Service for aggregating all onboarding metrics
+  - `/backend/app/controllers/api/v1/admin/onboarding_metrics_controller.rb` - Admin-only endpoint for metrics
+  - `/backend/spec/services/onboarding_metrics_service_spec.rb` - 21 service specs
+  - `/backend/spec/requests/api/v1/admin/onboarding_metrics_spec.rb` - 9 request specs
+- Files modified:
+  - `/backend/app/controllers/api/v1/invitations_controller.rb` - Track first_family_invite_sent_at on invitation create
+  - `/backend/config/routes.rb` - Added admin namespace with onboarding_metrics resource
+- **Metrics provided:**
+  - Summary: total_signups, wizard_completions, tour_completions, first_goals, first_reflections, first_invites
+  - Derived: wizard_completion_rate, tour_completion_rate, day_7_retention, avg_time_to_first_goal_hours, avg_time_to_first_reflection_hours
+  - Funnel: signup_to_wizard, wizard_to_first_goal, first_goal_to_first_reflection, first_reflection_to_first_invite
+- **Learnings for future iterations:**
+  - Use `change_table :users, bulk: true` for multiple column additions (more efficient)
+  - Admin namespace goes under api/v1 with its own controller directory
+  - Admin authorization: check if user has any family_membership with role: :admin
+  - Use `where(created_at: ..7.days.ago)` for Rails/WhereRange cop compliance
+  - Use `exists?(created_at: range)` instead of `where(created_at: range).exists?` for Rails/WhereExists cop
+  - Date range parameters should use parse_date helper with rescue for invalid formats
+  - Day 7 retention checks for activity in days 6-8 after signup (window around day 7)
+  - 1094 backend tests pass (30 new onboarding metrics tests)
+---
