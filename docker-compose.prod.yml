@@ -1,0 +1,137 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: entmoot_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-entmoot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-entmoot_production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-entmoot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - entmoot_network
+
+  # Redis for Sidekiq and ActionCable
+  redis:
+    image: redis:7-alpine
+    container_name: entmoot_redis_prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - entmoot_network
+
+  # Rails Web Application
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: entmoot_web_prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?RAILS_MASTER_KEY is required}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
+      DATABASE_URL: postgres://${POSTGRES_USER:-entmoot}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-entmoot_production}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://localhost}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      MAILER_FROM: ${MAILER_FROM:-noreply@entmoot.app}
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - rails_storage:/rails/storage
+    networks:
+      - entmoot_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Sidekiq Background Job Processor
+  sidekiq:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: entmoot_sidekiq_prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      DATABASE_URL: postgres://${POSTGRES_USER:-entmoot}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-entmoot_production}
+      REDIS_URL: redis://redis:6379/0
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      MAILER_FROM: ${MAILER_FROM:-noreply@entmoot.app}
+      DOMAIN: ${DOMAIN:-localhost}
+      SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+    volumes:
+      - rails_storage:/rails/storage
+    networks:
+      - entmoot_network
+
+  # Caddy Reverse Proxy with Automatic HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: entmoot_caddy_prod
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/dist:/srv/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - entmoot_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  rails_storage:
+  caddy_data:
+  caddy_config:
+
+networks:
+  entmoot_network:
+    driver: bridge
