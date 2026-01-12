@@ -1088,3 +1088,29 @@ Started: January 2026
   - Onboarding emails track sent status in User model (onboarding_emails_sent jsonb, onboarding_unsubscribed boolean)
   - 1064 total tests pass (49 new onboarding email tests)
 ---
+
+## 2026-01-12 - US-042
+- Implemented Empty State Guidance with reusable EmptyState component
+- Files created:
+  - `/frontend/src/components/EmptyState.tsx` - EmptyState and InlineEmptyState components with pre-configured variants
+- Files modified:
+  - `/frontend/src/pages/Goals.tsx` - Updated empty state to use EmptyState component with filter-aware messaging
+  - `/frontend/src/pages/EveningReflection.tsx` - Updated past reflections empty state to use InlineEmptyState
+  - `/frontend/src/pages/FamilySettings.tsx` - Added prompt to invite members when family has only one member
+  - `/frontend/src/pages/DailyPlanner.tsx` - Updated empty tasks state to use InlineEmptyState
+  - `/frontend/src/pages/WeeklyReview.tsx` - Updated past reviews empty state to use InlineEmptyState
+- **EmptyState component features:**
+  - Pre-configured variants: goals, reflections, family_members, daily_plans, weekly_reviews, custom
+  - Customizable props: icon, emoji, title, description, actionLabel, showAction, onAction
+  - Card-based EmptyState for standalone usage
+  - InlineEmptyState for use within existing cards
+  - Each variant has consistent icon, colors, and encouraging messaging
+- **Learnings for future iterations:**
+  - Use `import type { ReactNode }` for verbatimModuleSyntax compliance
+  - EmptyState variants store config (icon, emoji, title, description, actionLabel, iconColor, iconBgColor)
+  - Use ?? for emoji fallback (null coalescing) vs || for string fallback
+  - InlineEmptyState is simpler version without Card wrapper - useful inside existing CardContent
+  - Goals page needs two empty states: one for no goals, one for filtered view with no matches
+  - Family "empty state" is actually "only one member" state encouraging invitations
+  - 1064 backend tests + 69 frontend tests = 1133 total tests pass
+---
