@@ -770,7 +770,7 @@
         "Mailer specs for all 5 email types"
       ],
       "priority": 41,
-      "passes": false,
+      "passes": true,
       "notes": "Add job to sidekiq.yml scheduler. Conditional logic checks user activity before sending."
     },
     {

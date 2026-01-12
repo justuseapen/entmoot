@@ -1058,3 +1058,33 @@ Started: January 2026
   - Each tip has configurable title, message, and optional emoji icon
   - useTip hook returns { shouldShow, dismissTip, isLoading, tipsEnabled }
 ---
+
+## 2026-01-12 - US-041
+- Implemented Onboarding Email Sequence with 5 scheduled emails for new users
+- Files created:
+  - `/backend/app/mailers/onboarding_mailer.rb` - OnboardingMailer with 5 email methods (welcome, morning_planning_intro, ai_coach_intro, weekly_review_intro, two_week_check_in)
+  - `/backend/app/jobs/send_onboarding_emails_job.rb` - Daily job to process and send onboarding emails
+  - `/backend/app/views/onboarding_mailer/*.html.erb` - HTML email templates (5 files)
+  - `/backend/app/views/onboarding_mailer/*.text.erb` - Plain text email templates (5 files)
+  - `/backend/db/migrate/20260112203722_add_onboarding_emails_sent_to_users.rb` - Migration for tracking fields
+  - `/backend/spec/mailers/onboarding_mailer_spec.rb` - Mailer specs (27 tests)
+  - `/backend/spec/jobs/send_onboarding_emails_job_spec.rb` - Job specs (15 tests)
+- Files modified:
+  - `/backend/app/controllers/api/v1/email_subscriptions_controller.rb` - Added onboarding unsubscribe handling
+  - `/backend/config/sidekiq.yml` - Added send_onboarding_emails job running daily at 9am
+  - `/backend/spec/requests/api/v1/email_subscriptions_spec.rb` - Added onboarding unsubscribe test
+- **Email schedule:**
+  - Day 1: Welcome + getting started recap
+  - Day 3: Morning planning introduction (skipped if user has daily plans)
+  - Day 5: AI coach feature highlight
+  - Day 7: Weekly review introduction (skipped if user has weekly reviews)
+  - Day 14: Feedback request and feature highlights
+- **Learnings for future iterations:**
+  - Use word-based keys (day_one, day_three) instead of numeric (day_1) to avoid Naming/VariableNumber rubocop cop
+  - OnboardingMailer uses "type" key in JWT token for unsubscribe, not "reminder_type" like ReminderMailer
+  - Update email_subscriptions_controller to check both "type" and "reminder_type" in token payload
+  - change_table with bulk: true is preferred over multiple add_column calls for efficiency
+  - Boolean columns need null: false for Rails/ThreeStateBooleanColumn cop
+  - Onboarding emails track sent status in User model (onboarding_emails_sent jsonb, onboarding_unsubscribed boolean)
+  - 1064 total tests pass (49 new onboarding email tests)
+---
