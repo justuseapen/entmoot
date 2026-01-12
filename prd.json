@@ -831,7 +831,7 @@
         "Request specs for feedback endpoints"
       ],
       "priority": 44,
-      "passes": false,
+      "passes": true,
       "notes": "Use html2canvas for screenshot capture. Context capture disclosed to user. FeedbackReport model per PRD 6.4.1."
     },
     {

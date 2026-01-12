@@ -1140,3 +1140,42 @@ Started: January 2026
   - Day 7 retention checks for activity in days 6-8 after signup (window around day 7)
   - 1094 backend tests pass (30 new onboarding metrics tests)
 ---
+
+## 2026-01-12 - US-044
+- Implemented In-App Bug Reporter for user feedback collection
+- Files created:
+  - `/backend/db/migrate/20260112205713_create_feedback_reports.rb` - Migration for FeedbackReport table
+  - `/backend/db/migrate/20260112210002_create_active_storage_tables.active_storage.rb` - Active Storage for screenshot uploads
+  - `/backend/app/models/feedback_report.rb` - FeedbackReport model with report_type, severity, status enums
+  - `/backend/app/controllers/api/v1/feedback_controller.rb` - POST /api/v1/feedback and GET /api/v1/feedback/:id endpoints
+  - `/backend/spec/factories/feedback_reports.rb` - Factory with traits for all report types
+  - `/backend/spec/models/feedback_report_spec.rb` - 22 model specs
+  - `/backend/spec/requests/api/v1/feedback_spec.rb` - 18 request specs
+  - `/frontend/src/lib/feedback.ts` - API functions, types, and context capture helpers
+  - `/frontend/src/hooks/useFeedback.ts` - TanStack Query hooks for feedback CRUD and keyboard shortcut
+  - `/frontend/src/components/FeedbackReporter.tsx` - Feedback modal with type selection, severity, contact options
+- Files modified:
+  - `/backend/app/models/user.rb` - Added has_many :feedback_reports association
+  - `/backend/config/routes.rb` - Added feedback resource route
+  - `/frontend/src/components/MainLayout.tsx` - Added FeedbackButton and FeedbackReporter integration
+- **FeedbackReport features:**
+  - Report types: bug, feature_request, feedback, nps, quick_feedback
+  - Severity levels for bugs: blocker, major, minor, cosmetic
+  - Status workflow: new, acknowledged, in_progress, resolved, closed
+  - Auto-captured context: url, browser, os, screen_resolution, app_version, timestamp
+  - Screenshot attachment support via Active Storage
+  - Optional contact email with validation
+- **Frontend features:**
+  - Floating feedback button in bottom-right corner
+  - Keyboard shortcut: Cmd/Ctrl + Shift + F
+  - "Send Feedback" option in user dropdown menu
+  - Type selector with Bug/Feature Request/Feedback options
+  - Success confirmation with thank you message
+- **Learnings for future iterations:**
+  - Active Storage requires installation via `rails active_storage:install` for screenshot attachments
+  - t.references with foreign_key: true automatically creates an index
+  - FormReportType subset type for UI (excludes nps/quick_feedback from manual form)
+  - Re-exporting hooks from component files violates react-refresh/only-export-components - keep hooks in separate files
+  - split_report_attributes helper method to avoid Metrics/MethodLength cop
+  - 1134 backend tests pass (40 new feedback-related tests)
+---
