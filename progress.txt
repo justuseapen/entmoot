@@ -643,3 +643,33 @@ Started: January 2026
   - Badge stats include total_badges, earned_badges, completion_percentage
   - 793 total tests pass (50 new badge-related tests)
 ---
+
+## 2026-01-12 - US-026
+- Implemented Gamification - Points Backend for user engagement tracking
+- Files created/changed:
+  - `/backend/app/models/points_ledger_entry.rb` - PointsLedgerEntry model with user_id, points, activity_type, metadata (jsonb)
+  - `/backend/app/services/points_service.rb` - PointsService with award methods for all activity types and query methods
+  - `/backend/app/controllers/api/v1/points_controller.rb` - GET /api/v1/users/me/points endpoint with total, weekly, breakdown, and recent activity
+  - `/backend/app/controllers/api/v1/daily_plans_controller.rb` - Integrated task completion points (tracks which tasks changed to completed)
+  - `/backend/app/controllers/api/v1/reflections_controller.rb` - Integrated reflection completion points
+  - `/backend/app/controllers/api/v1/weekly_reviews_controller.rb` - Integrated weekly review completion points
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Integrated goal creation and completion points
+  - `/backend/app/services/badge_service.rb` - Added points for earning badges
+  - `/backend/app/services/streak_service.rb` - Added points for streak milestones
+  - `/backend/app/models/user.rb` - Added points_ledger_entries association and total_points/weekly_points methods
+  - `/backend/config/routes.rb` - Added points route under /users/me
+  - `/backend/db/migrate/20260112150002_create_points_ledger_entries.rb` - Migration with indexes
+  - `/backend/spec/factories/points_ledger_entries.rb` - Factory with traits for all activity types
+  - `/backend/spec/models/points_ledger_entry_spec.rb` - Model specs (14 tests)
+  - `/backend/spec/services/points_service_spec.rb` - Service specs (24 tests)
+  - `/backend/spec/requests/api/v1/points_spec.rb` - Request specs (13 tests)
+- **Learnings for future iterations:**
+  - Point values: complete_task=5, complete_daily_plan=10, complete_reflection=20, complete_weekly_review=50, create_goal=15, complete_goal=30, earn_badge=25, streak_milestone=50
+  - PointsLedgerEntry stores metadata as jsonb for contextual information (task_id, goal_title, etc.)
+  - Use Time.zone.now.all_day and Time.zone.now.all_week for Rails/ExpandedDateRange cop compliance
+  - Track task completion state before update to detect newly completed tasks (avoid double-awarding)
+  - Integrate points where streaks are already recorded (same trigger conditions)
+  - Points endpoint returns total, this_week, breakdown by activity type, and recent_activity array
+  - Use activity_label helper to convert activity_type to human-readable strings
+  - 854 total tests pass (61 new points-related tests)
+---

@@ -489,7 +489,7 @@
         "Request specs"
       ],
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "notes": "Points are for fun engagement, not competitive. Keep values reasonable."
     },
     {
