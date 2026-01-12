@@ -1022,7 +1022,7 @@
         "Horizontal layout on desktop, vertical on mobile"
       ],
       "priority": 53,
-      "passes": false,
+      "passes": true,
       "notes": "The pathway visual can be CSS borders/SVG connecting the step cards."
     },
     {

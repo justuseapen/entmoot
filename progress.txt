@@ -194,3 +194,26 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Responsive grid: grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8
   - White background cards with rounded-xl and default shadow give clean card appearance
 ---
+
+## 2026-01-12 - US-053 Landing Page How It Works Section
+- What was implemented:
+  - Created HowItWorksSection component at /frontend/src/components/landing/HowItWorksSection.tsx
+  - Section headline: "Begin Your Adventure in 3 Simple Steps"
+  - 3 StepCard components with icons: Home (Gather Your Party), Map (Chart Your Course), Rocket (Adventure Awaits!)
+  - PathwayConnector component with stone brick styling (earthBrown color with brick pattern)
+  - Vertical layout on mobile, horizontal on tablet/desktop
+  - Each step has numbered badge, stone-styled icon container, title, and description
+  - CTA button at bottom: "Begin Your Free Quest" linking to /register with hover effects
+  - Replaced placeholder How It Works section in LandingPage.tsx with real component
+
+- Files changed:
+  - frontend/src/components/landing/HowItWorksSection.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (updated import and replaced placeholder)
+
+- **Learnings for future iterations:**
+  - Separate mobile and desktop layouts using flex-col md:flex-row and hidden/md:hidden classes
+  - Stone brick pathway effect uses earthBrown color with 30% opacity background and 60% opacity brick divs
+  - ChevronRight icon rotated 90deg for vertical connectors, normal for horizontal
+  - Step number badge positioned absolute -top-3 over the icon container
+  - Stone waypoint effect uses inset box-shadows for depth and outer shadow for elevation
+---
