@@ -35,6 +35,7 @@ import {
 } from "@/lib/goals";
 import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
 import { TreePine, Sparkles } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
 
 export function Goals() {
   const { id } = useParams<{ id: string }>();
@@ -277,6 +278,9 @@ export function Goals() {
             )}
           </div>
         </div>
+
+        {/* Pro tip for first time on Goals page */}
+        <StandaloneTip tipType="goals_page" className="mb-4" />
 
         {/* Filters */}
         <Card className="mb-6">

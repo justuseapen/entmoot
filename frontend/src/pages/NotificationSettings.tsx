@@ -436,6 +436,34 @@ export function NotificationSettings() {
             </CardContent>
           </Card>
 
+          {/* In-App Tips */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">In-App Tips</CardTitle>
+              <CardDescription>
+                Contextual tips to help you get the most out of Entmoot
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="tips">Show Helpful Tips</Label>
+                  <p className="text-muted-foreground text-sm">
+                    Display contextual tips as you use the app
+                  </p>
+                </div>
+                <Switch
+                  id="tips"
+                  checked={prefs.tips?.enabled ?? true}
+                  onCheckedChange={(checked) =>
+                    handleUpdate({ tips_enabled: checked })
+                  }
+                  disabled={updatePreferences.isPending}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Schedule Preview */}
           <Card>
             <CardHeader>

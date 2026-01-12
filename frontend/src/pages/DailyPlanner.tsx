@@ -40,6 +40,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
 
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
@@ -327,6 +328,9 @@ export function DailyPlanner() {
             Start your day with intention
           </p>
         </div>
+
+        {/* Tip for first daily plan */}
+        <StandaloneTip tipType="first_daily_plan" className="mb-4" />
 
         {/* Progress Indicator */}
         {visibleTasks.length > 0 && (

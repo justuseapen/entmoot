@@ -40,6 +40,7 @@ import { MembersList } from "@/components/MembersList";
 import { PendingInvitations } from "@/components/PendingInvitations";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
 import { PetsList } from "@/components/PetsList";
+import { StandaloneTip } from "@/components/TipTooltip";
 import type { MemberRole } from "@/lib/families";
 
 const familySettingsSchema = z.object({
@@ -256,6 +257,11 @@ export function FamilySettings() {
               )}
             </form>
           </Card>
+
+          {/* Tip for when family has more than one member */}
+          {family.members.length > 1 && (
+            <StandaloneTip tipType="first_family_member" />
+          )}
 
           {/* Members List */}
           <MembersList

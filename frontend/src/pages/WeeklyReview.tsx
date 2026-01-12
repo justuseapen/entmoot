@@ -34,6 +34,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
 
 export function WeeklyReview() {
   const { id } = useParams<{ id: string }>();
@@ -612,6 +613,9 @@ export function WeeklyReview() {
               : "Review your week"}
           </p>
         </div>
+
+        {/* Tip for first weekly review */}
+        <StandaloneTip tipType="first_weekly_review" className="mb-4" />
 
         {/* Progress indicator */}
         <div className="mb-6">

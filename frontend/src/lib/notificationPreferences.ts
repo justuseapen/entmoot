@@ -42,12 +42,18 @@ export interface QuietHoursPreferences {
   end: string; // HH:MM format
 }
 
+// Tips preferences
+export interface TipsPreferences {
+  enabled: boolean;
+}
+
 // Full notification preferences from API
 export interface NotificationPreferences {
   id: number;
   channels: ChannelPreferences;
   reminders: ReminderPreferences;
   quiet_hours: QuietHoursPreferences;
+  tips?: TipsPreferences;
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +76,8 @@ export interface UpdateNotificationPreferencesData {
   // Quiet hours
   quiet_hours_start?: string;
   quiet_hours_end?: string;
+  // Tips
+  tips_enabled?: boolean;
 }
 
 // Get notification preferences

@@ -74,6 +74,11 @@ Rails.application.routes.draw do
         end
         # First actions status
         resource :first_actions, only: [:show]
+        # Contextual tips
+        resource :tips, only: [:show] do
+          post "mark_shown", on: :member
+          patch "toggle", on: :member
+        end
       end
 
       # All badges (public-ish, requires auth)

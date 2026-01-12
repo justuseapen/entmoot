@@ -36,6 +36,7 @@ import {
   History,
   ArrowLeft,
 } from "lucide-react";
+import { StandaloneTip } from "@/components/TipTooltip";
 
 // Step interface
 interface Step {
@@ -558,6 +559,9 @@ export function EveningReflection() {
             Take a moment to reflect on your day
           </p>
         </div>
+
+        {/* Tip for first reflection */}
+        <StandaloneTip tipType="first_reflection" className="mb-4" />
 
         {/* Progress indicator */}
         <div className="mb-6">

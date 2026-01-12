@@ -212,5 +212,65 @@ RSpec.describe NotificationPreference do
       prefs = described_class.new
       expect(prefs).to have_attributes(morning_planning: true, evening_reflection: true, weekly_review: true)
     end
+
+    it "uses default tips values" do
+      prefs = described_class.new
+      expect(prefs).to have_attributes(tips_enabled: true, shown_tips: [])
+    end
+  end
+
+  describe "#tip_shown?" do
+    let(:prefs) { create(:notification_preference, shown_tips: %w[goals_page first_reflection]) }
+
+    it "returns true for shown tips" do
+      expect(prefs.tip_shown?("goals_page")).to be true
+      expect(prefs.tip_shown?(:first_reflection)).to be true
+    end
+
+    it "returns false for tips not shown" do
+      expect(prefs.tip_shown?("first_daily_plan")).to be false
+    end
+  end
+
+  describe "#mark_tip_shown!" do
+    let(:prefs) { create(:notification_preference, shown_tips: []) }
+
+    it "adds a valid tip type to shown_tips" do
+      expect(prefs.mark_tip_shown!("goals_page")).to be true
+      expect(prefs.reload.shown_tips).to include("goals_page")
+    end
+
+    it "returns false for already shown tips" do
+      prefs.update(shown_tips: ["goals_page"])
+      expect(prefs.mark_tip_shown!("goals_page")).to be false
+    end
+
+    it "returns false for invalid tip types" do
+      expect(prefs.mark_tip_shown!("invalid_tip")).to be false
+      expect(prefs.reload.shown_tips).to be_empty
+    end
+
+    it "appends to existing shown_tips" do
+      prefs.update(shown_tips: ["goals_page"])
+      prefs.mark_tip_shown!("first_reflection")
+      expect(prefs.reload.shown_tips).to contain_exactly("goals_page", "first_reflection")
+    end
+  end
+
+  describe "#should_show_tip?" do
+    let(:prefs) { create(:notification_preference, tips_enabled: true, shown_tips: ["goals_page"]) }
+
+    it "returns true for tips not yet shown when tips are enabled" do
+      expect(prefs.should_show_tip?("first_reflection")).to be true
+    end
+
+    it "returns false for already shown tips" do
+      expect(prefs.should_show_tip?("goals_page")).to be false
+    end
+
+    it "returns false when tips are disabled" do
+      prefs.update(tips_enabled: false)
+      expect(prefs.should_show_tip?("first_reflection")).to be false
+    end
   end
 end
