@@ -270,3 +270,33 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Feature list uses flex-1 to push CTA button to bottom of card for consistent alignment
   - Price display uses large font (text-4xl/text-5xl) with smaller "/month" or "forever" suffix
 ---
+
+## 2026-01-12 - US-056 Landing Page FAQ Section
+- What was implemented:
+  - Created FAQSection component at /frontend/src/components/landing/FAQSection.tsx
+  - Section headline: "Questions from the Council"
+  - Accordion-style FAQ with 6 questions using shadcn/ui Accordion component (Radix primitives)
+  - Q1: Is Entmoot safe for kids? (COPPA compliant, role permissions)
+  - Q2: Can I use Entmoot for just myself? (Yes, works for solo)
+  - Q3: What happens to my data? (Never sold, export anytime)
+  - Q4: Do I need to download an app? (Web-based, mobile apps coming)
+  - Q5: Can grandparents or babysitters join? (Yes, as Observers)
+  - Q6: What if my family doesn't stick with it? (Gamification helps, cancel anytime)
+  - type="single" collapsible ensures only one item open at a time
+  - Smooth expand/collapse animation built into Radix Accordion
+  - ChevronDown icon rotates to indicate open/closed state
+  - Added shadcn/ui Accordion component (installed @radix-ui/react-accordion dependency)
+
+- Files changed:
+  - frontend/src/components/landing/FAQSection.tsx (new)
+  - frontend/src/components/ui/accordion.tsx (new - shadcn component)
+  - frontend/src/pages/LandingPage.tsx (added import and FAQSection usage)
+  - frontend/package.json (added @radix-ui/react-accordion dependency)
+
+- **Learnings for future iterations:**
+  - shadcn/ui Accordion generates code that needs Prettier fixing (missing semicolons)
+  - Run `npm run lint -- --fix` after adding shadcn components to fix formatting
+  - Accordion type="single" collapsible allows only one item open, can close all
+  - AccordionTrigger has built-in hover:underline that needs to be overridden with hover:no-underline
+  - Border color styling on AccordionItem uses inline style with opacity suffix (e.g., `${color}30`)
+---
