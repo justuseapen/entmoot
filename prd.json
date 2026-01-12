@@ -652,7 +652,7 @@
         "rake db:seed works without errors"
       ],
       "priority": 35,
-      "passes": false,
+      "passes": true,
       "notes": "Good seed data helps manual testing and demos."
     }
   ]

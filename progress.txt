@@ -878,3 +878,30 @@ Started: January 2026
   - Branch protection requiring CI pass must be configured manually in GitHub repo settings
   - All 1003 tests pass (934 backend + 69 frontend)
 ---
+
+## 2026-01-12 - US-035
+- Implemented Seed Data and Demo Mode with comprehensive sample data
+- Files created/changed:
+  - `/backend/db/seeds/demo_data.rb` - Comprehensive demo seed file with DemoSeed module
+  - `/backend/db/seeds.rb` - Updated to load demo_data.rb
+- **Demo data includes:**
+  - Demo family "The Demo Family" with timezone and settings
+  - 5 demo users: Alex (admin), Sam (adult), Taylor (teen), Jordan (child), Pat (observer)
+  - All users have password: DemoPassword123!
+  - 3 pets: Buddy (dog), Whiskers (cat), Goldie (fish)
+  - 8 goals across all time scales with SMART fields and hierarchy (annual->quarterly->monthly->weekly->daily)
+  - Daily plans for past 7 days with tasks, priorities, and intentions
+  - Evening reflections with mood, energy, gratitude items, and prompt responses
+  - Weekly review with wins, challenges, and lessons learned
+  - Streaks for Alex (12-day planning, 8-day reflection, 3-week review)
+  - 8 badges awarded across Alex and Sam
+  - Points history for gamification demonstration
+- **Learnings for future iterations:**
+  - Use find_or_initialize_by for idempotent seeds - updates existing or creates new records
+  - TopPriority model uses `title` not `content` field
+  - Family association is `members` not `users` (through family_memberships)
+  - Points idempotency: check for existing demo entries via metadata jsonb field
+  - Disable multiple rubocop cops for seed files (ModuleLength, ClassLength, ParameterLists, LineLength)
+  - Demo email domain: @demo.entmoot.family prevents collision with real users
+  - 934 backend tests pass (no new tests needed for seed data)
+---
