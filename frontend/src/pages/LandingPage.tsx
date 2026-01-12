@@ -7,6 +7,7 @@ import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSect
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { PricingSection } from "@/components/landing/PricingSection";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -53,26 +54,8 @@ export function LandingPage() {
         {/* Testimonials Section */}
         <TestimonialsSection />
 
-        {/* Pricing section placeholder - for smooth scroll target */}
-        <section
-          id="pricing"
-          className="min-h-[50vh] px-4 py-16 sm:px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-7xl text-center">
-            <h2
-              className="text-3xl font-bold sm:text-4xl"
-              style={{ color: LANDING_COLORS.darkForest }}
-            >
-              Pricing
-            </h2>
-            <p
-              className="mt-4 text-lg"
-              style={{ color: LANDING_COLORS.earthBrown }}
-            >
-              Coming soon in US-055
-            </p>
-          </div>
-        </section>
+        {/* Pricing Section */}
+        <PricingSection />
       </main>
     </div>
   );
