@@ -1,0 +1,286 @@
+{
+  "project": "Entmoot Landing Page",
+  "branchName": "feature/landing-page",
+  "description": "Marketing landing page for Entmoot with LOTR-meets-Minecraft aesthetic. Fun, bright, whimsical design featuring blocky trees, floating islands, and adventure-themed copy. Converts visitors to signups.",
+  "designSystem": {
+    "colors": {
+      "forestGreen": "#2D5A27",
+      "leafGreen": "#7CB342",
+      "skyBlue": "#64B5F6",
+      "warmGold": "#FFD54F",
+      "earthBrown": "#795548",
+      "creamWhite": "#FFF8E7",
+      "sunsetOrange": "#FF7043",
+      "darkForest": "#1B3A1A"
+    },
+    "theme": "LOTR meets Minecraft - ancient tree wisdom meets blocky buildable adventures",
+    "visualElements": [
+      "Blocky/pixelated stylized trees",
+      "Floating islands representing goal levels",
+      "Stone brick pathways connecting sections",
+      "Treasure chests for achievements",
+      "Simple blocky family avatar silhouettes",
+      "Dawn-to-sunset gradient backgrounds"
+    ]
+  },
+  "userStories": [
+    {
+      "id": "LP-001",
+      "title": "Landing Page Route and Structure",
+      "description": "As a visitor, I want to see a beautiful landing page at the root URL so that I understand what Entmoot is.",
+      "acceptanceCriteria": [
+        "New LandingPage component created at /frontend/src/pages/LandingPage.tsx",
+        "Landing page renders at / route for unauthenticated users",
+        "Authenticated users at / are redirected to /dashboard",
+        "Page uses cream white (#FFF8E7) as base background color",
+        "All landing page components live in /frontend/src/components/landing/",
+        "Page is fully responsive (mobile, tablet, desktop breakpoints)",
+        "Lighthouse performance score > 90"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Update App.tsx routing to show LandingPage for unauthenticated users instead of current Home component."
+    },
+    {
+      "id": "LP-002",
+      "title": "Navigation Bar",
+      "description": "As a visitor, I want a navigation bar so that I can access different sections and sign up.",
+      "acceptanceCriteria": [
+        "Navbar component with Entmoot logo (tree icon + text)",
+        "Navigation links: Features, How It Works, Pricing (scroll to sections)",
+        "Sign In button links to /login",
+        "Get Started CTA button (forest green #2D5A27) links to /register",
+        "Navbar is transparent over hero, becomes solid cream on scroll",
+        "Mobile: hamburger menu with slide-out drawer",
+        "Sticky positioning on scroll",
+        "Smooth scroll to sections when nav links clicked"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Use Lucide icons. Logo can be TreePine or TreeDeciduous icon for now."
+    },
+    {
+      "id": "LP-003",
+      "title": "Hero Section",
+      "description": "As a visitor, I want an engaging hero section so that I immediately understand Entmoot's value proposition.",
+      "acceptanceCriteria": [
+        "Background gradient from dawn pink/orange to sky blue",
+        "Silhouetted blocky forest at bottom of hero",
+        "Headline: 'Build Your Family's Adventure, One Goal at a Time'",
+        "Subheadline: 'Transform chaotic days into epic quests. Entmoot helps families plan together, celebrate wins, and grow as a team.'",
+        "Primary CTA button: 'Start Your Free Adventure' (forest green with star icon)",
+        "Secondary CTA: 'Watch Demo' with play icon (outlined style)",
+        "Trust badges below CTAs: 'No credit card required • Free for families up to 5'",
+        "Hero is full viewport height on desktop, auto height on mobile",
+        "Subtle floating animation on decorative elements"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Use CSS keyframes for floating animation. Consider adding illustrated floating islands later."
+    },
+    {
+      "id": "LP-004",
+      "title": "Social Proof Bar",
+      "description": "As a visitor, I want to see social proof so that I trust Entmoot is legitimate.",
+      "acceptanceCriteria": [
+        "Horizontal bar below hero with soft green gradient background",
+        "Stats displayed: '2,847 Families Adventuring' with tree icon",
+        "Star rating: '4.9/5 from 500+ reviews' with star icons",
+        "Featured quote: 'Finally, a planning app my kids actually WANT to use!' — Sarah M., Mom of 3",
+        "Responsive: stats stack on mobile",
+        "Numbers use animated count-up effect when scrolled into view"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Stats are placeholder/aspirational for now. Use Intersection Observer for count-up trigger."
+    },
+    {
+      "id": "LP-005",
+      "title": "Problem/Solution Section",
+      "description": "As a visitor, I want to see the problem Entmoot solves so that I relate to the pain points.",
+      "acceptanceCriteria": [
+        "Section headline: 'Sound Familiar?'",
+        "Two-column layout: 'Without Entmoot' vs 'With Entmoot'",
+        "Without column (red-tinted): 4 pain points with emoji icons",
+        "Pain points: 'Did anyone feed the dog?', 'I forgot about soccer!', 'Who's picking up grandma?', 'We never do anything fun'",
+        "With column (green-tinted): 4 solutions with checkmark icons",
+        "Solutions: 'Quests assigned & tracked', 'Everyone sees the map', 'Goals connected to dreams', 'Celebrations built in'",
+        "Transition text below: 'Every family deserves to feel like a team on an epic quest—not a group of strangers sharing a calendar.'",
+        "Cards have subtle blocky/pixelated border style"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Use grid layout. Consider adding simple illustrations later."
+    },
+    {
+      "id": "LP-006",
+      "title": "Features Section",
+      "description": "As a visitor, I want to see Entmoot's features so that I understand what I get.",
+      "acceptanceCriteria": [
+        "Section headline: 'Your Family's Toolkit for Epic Adventures'",
+        "Subheadline: 'Everything you need to plan, play, and grow together'",
+        "6 feature cards in 3x2 grid (2x3 on tablet, 1x6 on mobile)",
+        "Feature 1: SMART Quest Builder (Target icon) - AI-powered goal creation",
+        "Feature 2: Goal Hierarchy Map (Map icon) - Visual goal connections",
+        "Feature 3: Morning Planning Ritual (Sun icon) - Daily intention setting",
+        "Feature 4: Evening Reflection (Moon icon) - Gratitude and wins",
+        "Feature 5: Family Leaderboard (Trophy icon) - Gamification",
+        "Feature 6: Role-Based Permissions (Users icon) - Age-appropriate access",
+        "Each card has: icon (warm gold #FFD54F background circle), title, description",
+        "Cards lift with shadow on hover"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Use Lucide icons: Target, Map, Sun, Moon, Trophy, Users. Keep descriptions concise."
+    },
+    {
+      "id": "LP-007",
+      "title": "How It Works Section",
+      "description": "As a visitor, I want to see how easy it is to get started so that I feel confident signing up.",
+      "acceptanceCriteria": [
+        "Section headline: 'Begin Your Adventure in 3 Simple Steps'",
+        "Visual pathway with 3 connected waypoints/checkpoints",
+        "Step 1: 'Gather Your Party' (Home icon) - Create family, invite members",
+        "Step 2: 'Chart Your Course' (Map icon) - Set first goals with SMART builder",
+        "Step 3: 'Adventure Awaits!' (Rocket icon) - Start planning rituals",
+        "Each step has icon, title, and short description",
+        "Pathway styled like stone brick road connecting steps",
+        "CTA button at bottom: 'Begin Your Free Quest'",
+        "Horizontal layout on desktop, vertical on mobile"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "The pathway visual can be CSS borders/SVG connecting the step cards."
+    },
+    {
+      "id": "LP-008",
+      "title": "Testimonials Section",
+      "description": "As a visitor, I want to read testimonials so that I see real families benefit from Entmoot.",
+      "acceptanceCriteria": [
+        "Section headline: 'Tales from Fellow Adventurers'",
+        "Carousel with 3 testimonial cards",
+        "Each card has: quote text, author name, role (e.g., 'Dad of 2'), 5-star rating, usage duration",
+        "Testimonial 1: Marcus T. - kid reminds about morning planning",
+        "Testimonial 2: Jennifer & David K. - blended family coordination",
+        "Testimonial 3: Priya S. - teenager goal hierarchy revelation",
+        "Avatar placeholders with blocky/pixelated style (colored circles with initials)",
+        "Carousel has dots indicator and prev/next arrows",
+        "Auto-advances every 5 seconds, pauses on hover"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Use a lightweight carousel library like Embla or build simple CSS carousel. Testimonials are realistic but fictional."
+    },
+    {
+      "id": "LP-009",
+      "title": "Pricing Section",
+      "description": "As a visitor, I want to see pricing options so that I understand the cost.",
+      "acceptanceCriteria": [
+        "Section headline: 'Choose Your Adventure'",
+        "Subheadline: 'Start free, upgrade when you're ready for more'",
+        "3 pricing cards side by side",
+        "Tier 1 - Seedling (Free): Up to 5 members, core quests, daily plans, streaks, basic badges",
+        "Tier 2 - Sapling ($9/month): Up to 10 members, AI coaching, all badges, weekly summaries, data export - marked as 'POPULAR'",
+        "Tier 3 - Mighty Oak ($19/month): Unlimited members, priority support, custom badges, API access, multiple families",
+        "Popular tier has highlighted border (leaf green) and 'POPULAR' badge",
+        "Each card has: tier name, price, member limit, feature list with checkmarks, CTA button",
+        "Note below cards: 'All plans include a 14-day free trial of Sapling features'"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Pricing is placeholder. Free tier CTA: 'Start Free', Sapling: 'Start Trial', Oak: 'Contact Us'."
+    },
+    {
+      "id": "LP-010",
+      "title": "FAQ Section",
+      "description": "As a visitor, I want answers to common questions so that my concerns are addressed.",
+      "acceptanceCriteria": [
+        "Section headline: 'Questions from the Council'",
+        "Accordion-style FAQ with 6 questions",
+        "Q1: Is Entmoot safe for kids? (COPPA compliant, role permissions)",
+        "Q2: Can I use Entmoot for just myself? (Yes, works for solo)",
+        "Q3: What happens to my data? (Never sold, export anytime)",
+        "Q4: Do I need to download an app? (Web-based, mobile apps coming)",
+        "Q5: Can grandparents or babysitters join? (Yes, as Observers)",
+        "Q6: What if my family doesn't stick with it? (Gamification helps, cancel anytime)",
+        "Only one accordion item open at a time",
+        "Smooth expand/collapse animation",
+        "Plus/minus or chevron icon indicates open/closed state"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Use Radix Accordion component from shadcn/ui."
+    },
+    {
+      "id": "LP-011",
+      "title": "Final CTA Section",
+      "description": "As a visitor, I want a final call-to-action so that I'm encouraged to sign up.",
+      "acceptanceCriteria": [
+        "Full-width section with sunset gradient background (orange to purple)",
+        "Silhouetted forest at bottom",
+        "Headline: 'Your Family's Adventure Starts Today'",
+        "Subheadline: 'Join thousands of families building dreams together.'",
+        "Large CTA button: 'Start Your Free Adventure' (white text on forest green)",
+        "Trust text below: 'No credit card required • Setup in 2 minutes'",
+        "Section has generous padding and centered content"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "This should feel like a triumphant ending to the page journey."
+    },
+    {
+      "id": "LP-012",
+      "title": "Footer",
+      "description": "As a visitor, I want a footer with links so that I can find more information.",
+      "acceptanceCriteria": [
+        "Dark forest green background (#1B3A1A)",
+        "Entmoot logo and tagline: 'Building family adventures since 2026'",
+        "4 link columns: Product (Features, Pricing, Roadmap, Changelog), Company (About, Blog, Careers, Contact), Legal (Privacy, Terms, Cookies, COPPA), empty/social",
+        "Social media icons: Twitter, Instagram, Facebook, Discord",
+        "Copyright: '© 2026 Entmoot. All rights reserved.'",
+        "Links are light colored, hover to leaf green",
+        "Responsive: columns stack on mobile"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Most links can be placeholder (#) for now. Legal pages are important for production."
+    },
+    {
+      "id": "LP-013",
+      "title": "Animations and Polish",
+      "description": "As a visitor, I want subtle animations so that the page feels alive and premium.",
+      "acceptanceCriteria": [
+        "Fade-in on scroll for each section (Intersection Observer)",
+        "Floating animation on hero decorative elements (CSS keyframes)",
+        "Button hover effects: slight scale up and shadow",
+        "Feature cards: lift and shadow on hover",
+        "Smooth scroll behavior for anchor links",
+        "Stats count-up animation when scrolled into view",
+        "Testimonial carousel auto-advances smoothly",
+        "FAQ accordion has smooth height transition",
+        "No animation if user prefers-reduced-motion"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Use CSS transitions where possible. Framer Motion optional but not required."
+    },
+    {
+      "id": "LP-014",
+      "title": "SEO and Meta Tags",
+      "description": "As a marketer, I want proper SEO setup so that the landing page ranks well.",
+      "acceptanceCriteria": [
+        "Page title: 'Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together'",
+        "Meta description: 'Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5.'",
+        "Open Graph tags for social sharing (og:title, og:description, og:image, og:type)",
+        "Twitter card meta tags",
+        "Canonical URL set",
+        "Semantic HTML (header, main, section, footer, nav, article)",
+        "Proper heading hierarchy (single h1, logical h2/h3 structure)",
+        "Alt text on all images"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Use React Helmet or update index.html directly. OG image can be a placeholder for now."
+    }
+  ]
+}
