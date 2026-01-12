@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   DndContext,
@@ -39,6 +39,9 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
+  Save,
+  Loader2,
+  Check,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -60,6 +63,14 @@ export function DailyPlanner() {
 
   // Local state for new task input
   const [newTaskTitle, setNewTaskTitle] = useState("");
+
+  // Save status state
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
+  const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Derive initial values from plan data
   const initialIntention = plan?.intention || "";
@@ -86,6 +97,15 @@ export function DailyPlanner() {
     })
   );
 
+  // Clear save status timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimeoutRef.current) {
+        clearTimeout(saveStatusTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Save changes to the server
   const saveChanges = useCallback(
     async (
@@ -94,6 +114,13 @@ export function DailyPlanner() {
       newIntention?: string
     ) => {
       if (!plan) return;
+
+      // Clear any existing timeout
+      if (saveStatusTimeoutRef.current) {
+        clearTimeout(saveStatusTimeoutRef.current);
+      }
+
+      setSaveStatus("saving");
 
       const tasksToSave = newTasks ?? tasks;
       const prioritiesToSave = newPriorities ?? priorities;
@@ -133,12 +160,20 @@ export function DailyPlanner() {
         setLocalIntention(null);
         setLocalTasks(null);
         setLocalPriorities(null);
+
+        // Show saved status
+        setSaveStatus("saved");
+        saveStatusTimeoutRef.current = setTimeout(() => {
+          setSaveStatus("idle");
+        }, 2000);
+
         // Celebrate first daily plan completion
         if (result.is_first_action) {
           celebrateFirstAction("first_daily_plan");
         }
       } catch (error) {
         console.error("Failed to save changes:", error);
+        setSaveStatus("idle");
       }
     },
     [plan, tasks, priorities, intention, updatePlan, celebrateFirstAction]
@@ -268,6 +303,19 @@ export function DailyPlanner() {
     }
   };
 
+  // Check if there are unsaved changes
+  const hasUnsavedChanges =
+    localIntention !== null || localTasks !== null || localPriorities !== null;
+
+  // Manual save handler
+  const handleManualSave = () => {
+    saveChanges(
+      localTasks ?? undefined,
+      localPriorities ?? undefined,
+      localIntention ?? undefined
+    );
+  };
+
   // Carry over incomplete tasks from yesterday
   const handleCarryOverTask = (task: DailyTask) => {
     const newTask: DailyTask = {
@@ -328,6 +376,47 @@ export function DailyPlanner() {
           <p className="text-muted-foreground mt-2">
             Start your day with intention
           </p>
+        </div>
+
+        {/* Save Status Bar */}
+        <div className="mb-6 flex items-center justify-between rounded-lg border bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            {saveStatus === "saving" && (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                <span className="text-sm text-blue-600">Saving...</span>
+              </>
+            )}
+            {saveStatus === "saved" && (
+              <>
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600">Saved</span>
+              </>
+            )}
+            {saveStatus === "idle" && !hasUnsavedChanges && (
+              <>
+                <Check className="h-4 w-4 text-gray-400" />
+                <span className="text-muted-foreground text-sm">
+                  All changes saved
+                </span>
+              </>
+            )}
+            {saveStatus === "idle" && hasUnsavedChanges && (
+              <>
+                <div className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="text-sm text-amber-600">Unsaved changes</span>
+              </>
+            )}
+          </div>
+          <Button
+            onClick={handleManualSave}
+            disabled={saveStatus === "saving" || !hasUnsavedChanges}
+            size="sm"
+            variant={hasUnsavedChanges ? "default" : "outline"}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
         </div>
 
         {/* Tip for first daily plan */}
