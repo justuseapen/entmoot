@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { useTodaysPlan } from "@/hooks/useDailyPlans";
 import { useFamily } from "@/hooks/useFamilies";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   useReflections,
   useReflectionPrompts,
@@ -49,6 +50,7 @@ export function EveningReflection() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const navigate = useNavigate();
+  const { celebrateFirstAction } = useCelebration();
 
   // Fetch data
   const { data: plan, isLoading: loadingPlan } = useTodaysPlan(familyId);
@@ -220,7 +222,7 @@ export function EveningReflection() {
 
       if (existingReflectionId) {
         // Update existing reflection
-        await updateReflection.mutateAsync({
+        const result = await updateReflection.mutateAsync({
           reflectionId: existingReflectionId,
           data: {
             mood: mood || undefined,
@@ -229,6 +231,9 @@ export function EveningReflection() {
             reflection_responses_attributes: reflectionResponses,
           },
         });
+        if (result.is_first_action) {
+          celebrateFirstAction("first_reflection");
+        }
       } else {
         // Create new reflection
         const result = await createReflection.mutateAsync({
@@ -242,6 +247,9 @@ export function EveningReflection() {
           dailyPlanId: plan.id,
         });
         setExistingReflectionId(result.reflection.id);
+        if (result.is_first_action) {
+          celebrateFirstAction("first_reflection");
+        }
       }
 
       setSaveSuccess(true);
@@ -261,6 +269,7 @@ export function EveningReflection() {
     existingReflectionId,
     createReflection,
     updateReflection,
+    celebrateFirstAction,
   ]);
 
   // Navigate between steps

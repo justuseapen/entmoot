@@ -24,6 +24,7 @@ import { FirstGoalPrompt } from "@/components/FirstGoalPrompt";
 import { useGoals, useDeleteGoal } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
 import { useAuthStore } from "@/stores/auth";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   type Goal,
   type GoalFilters,
@@ -39,6 +40,7 @@ export function Goals() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const { user } = useAuthStore();
+  const { celebrateFirstAction } = useCelebration();
 
   // Filter state
   const [filters, setFilters] = useState<GoalFilters>({});
@@ -185,7 +187,14 @@ export function Goals() {
     setShowCreateModal(true);
   };
 
-  const handleGoalCreated = (goalId: number, isFirstGoal: boolean) => {
+  const handleGoalCreated = (
+    goalId: number,
+    isFirstGoal: boolean,
+    isFirstAction: boolean
+  ) => {
+    if (isFirstAction) {
+      celebrateFirstAction("first_goal");
+    }
     if (isFirstGoal) {
       setFirstGoalId(goalId);
       setShowFirstGoalAIPrompt(true);

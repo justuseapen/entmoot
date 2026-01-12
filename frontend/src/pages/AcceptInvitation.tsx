@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { useFamilyStore } from "@/stores/family";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   acceptInvitation,
   getInvitationDetails,
@@ -64,6 +65,7 @@ export function AcceptInvitation() {
   const navigate = useNavigate();
   const { token: authToken, isAuthenticated } = useAuthStore();
   const { setCurrentFamily } = useFamilyStore();
+  const { celebrateFirstAction } = useCelebration();
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -167,6 +169,9 @@ export function AcceptInvitation() {
         },
       });
       setCurrentFamily(result.family);
+      if (result.is_first_action) {
+        celebrateFirstAction("first_invitation_accepted");
+      }
       setPageState("success");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
@@ -188,6 +193,9 @@ export function AcceptInvitation() {
         },
       });
       setCurrentFamily(result.family);
+      if (result.is_first_action) {
+        celebrateFirstAction("first_invitation_accepted");
+      }
       setPageState("success");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {

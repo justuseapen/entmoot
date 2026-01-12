@@ -98,7 +98,12 @@ module Api
 
       def accept_and_render(user)
         if @invitation.accept!(user)
-          render json: { message: "Invitation accepted successfully.", family: family_response(@invitation.family) }
+          is_first_action = user.record_first_action?(:invitation_accepted)
+          render json: {
+            message: "Invitation accepted successfully.",
+            family: family_response(@invitation.family),
+            is_first_action: is_first_action
+          }
         else
           render_error("Failed to accept invitation")
         end

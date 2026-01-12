@@ -88,7 +88,11 @@ interface GoalModalProps {
     parent_id?: number;
     time_scale?: TimeScale;
   };
-  onGoalCreated?: (goalId: number, isFirstGoal: boolean) => void;
+  onGoalCreated?: (
+    goalId: number,
+    isFirstGoal: boolean,
+    isFirstAction: boolean
+  ) => void;
 }
 
 const wizardSteps = [
@@ -304,7 +308,11 @@ export function GoalModal({
       } else {
         const result = await createGoal.mutateAsync(goalData);
         if (onGoalCreated) {
-          onGoalCreated(result.goal.id, result.is_first_goal);
+          onGoalCreated(
+            result.goal.id,
+            result.is_first_goal,
+            result.is_first_action
+          );
         }
       }
       onOpenChange(false);

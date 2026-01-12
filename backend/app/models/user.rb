@@ -52,4 +52,18 @@ class User < ApplicationRecord
   def weekly_points
     PointsService.weekly_points(self)
   end
+
+  # First action tracking methods
+  FIRST_ACTION_TYPES = %w[goal_created reflection_completed daily_plan_completed invitation_accepted].freeze
+
+  def first_action_completed?(action_type)
+    first_actions&.key?(action_type.to_s)
+  end
+
+  def record_first_action?(action_type)
+    return false unless FIRST_ACTION_TYPES.include?(action_type.to_s)
+    return false if first_action_completed?(action_type)
+
+    update(first_actions: (first_actions || {}).merge(action_type.to_s => Time.current.iso8601))
+  end
 end

@@ -124,6 +124,7 @@ export interface CreateGoalResponse {
   message: string;
   goal: Goal;
   is_first_goal: boolean;
+  is_first_action: boolean;
 }
 
 export async function createGoal(

@@ -24,6 +24,7 @@ import { SortableTaskItem } from "@/components/SortableTaskItem";
 import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
+import { useCelebration } from "@/components/CelebrationToast";
 import {
   formatTodayDate,
   type DailyTask,
@@ -43,6 +44,7 @@ import {
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
+  const { celebrateFirstAction } = useCelebration();
 
   // Fetch data
   const {
@@ -117,7 +119,7 @@ export function DailyPlanner() {
       );
 
       try {
-        await updatePlan.mutateAsync({
+        const result = await updatePlan.mutateAsync({
           planId: plan.id,
           data: {
             intention: intentionToSave,
@@ -129,11 +131,15 @@ export function DailyPlanner() {
         setLocalIntention(null);
         setLocalTasks(null);
         setLocalPriorities(null);
+        // Celebrate first daily plan completion
+        if (result.is_first_action) {
+          celebrateFirstAction("first_daily_plan");
+        }
       } catch (error) {
         console.error("Failed to save changes:", error);
       }
     },
-    [plan, tasks, priorities, intention, updatePlan]
+    [plan, tasks, priorities, intention, updatePlan, celebrateFirstAction]
   );
 
   // Handle drag end for task reordering

@@ -72,6 +72,8 @@ Rails.application.routes.draw do
         resource :first_reflection_prompt, only: %i[show create] do
           post "dismiss", on: :member
         end
+        # First actions status
+        resource :first_actions, only: [:show]
       end
 
       # All badges (public-ish, requires auth)

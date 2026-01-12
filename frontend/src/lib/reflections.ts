@@ -154,7 +154,11 @@ export async function createReflection(
   data: CreateReflectionData,
   token: string,
   dailyPlanId?: number
-): Promise<{ message: string; reflection: Reflection }> {
+): Promise<{
+  message: string;
+  reflection: Reflection;
+  is_first_action: boolean;
+}> {
   const url = dailyPlanId
     ? `/families/${familyId}/reflections?daily_plan_id=${dailyPlanId}`
     : `/families/${familyId}/reflections`;
@@ -174,7 +178,11 @@ export async function updateReflection(
   reflectionId: number,
   data: UpdateReflectionData,
   token: string
-): Promise<{ message: string; reflection: Reflection }> {
+): Promise<{
+  message: string;
+  reflection: Reflection;
+  is_first_action: boolean;
+}> {
   return apiFetch(`/families/${familyId}/reflections/${reflectionId}`, {
     method: "PATCH",
     body: JSON.stringify({ reflection: data }),

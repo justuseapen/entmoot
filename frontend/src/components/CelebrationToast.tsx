@@ -6,16 +6,33 @@ import {
   createContext,
   useContext,
 } from "react";
+import confetti from "canvas-confetti";
+
+export type CelebrationType =
+  | "badge"
+  | "streak_milestone"
+  | "first_goal"
+  | "first_reflection"
+  | "first_daily_plan"
+  | "first_invitation_accepted";
 
 interface CelebrationData {
-  type: "badge" | "streak_milestone";
+  type: CelebrationType;
   title: string;
   description: string;
   icon: string;
+  nextStep?: string;
 }
 
 interface CelebrationContextType {
   celebrate: (data: CelebrationData) => void;
+  celebrateFirstAction: (
+    actionType:
+      | "first_goal"
+      | "first_reflection"
+      | "first_daily_plan"
+      | "first_invitation_accepted"
+  ) => void;
 }
 
 const CelebrationContext = createContext<CelebrationContextType | null>(null);
@@ -26,6 +43,77 @@ export function useCelebration() {
     throw new Error("useCelebration must be used within a CelebrationProvider");
   }
   return context;
+}
+
+// First action celebration configurations
+const FIRST_ACTION_CELEBRATIONS: Record<
+  | "first_goal"
+  | "first_reflection"
+  | "first_daily_plan"
+  | "first_invitation_accepted",
+  CelebrationData
+> = {
+  first_goal: {
+    type: "first_goal",
+    title: "You're off to a great start!",
+    description: "You created your first goal!",
+    icon: "🎯",
+    nextStep: "Ready to set another goal?",
+  },
+  first_reflection: {
+    type: "first_reflection",
+    title: "You're off to a great start!",
+    description: "You completed your first reflection!",
+    icon: "🌟",
+    nextStep: "Reflection is a powerful habit!",
+  },
+  first_daily_plan: {
+    type: "first_daily_plan",
+    title: "You're off to a great start!",
+    description: "You completed your first daily plan!",
+    icon: "📝",
+    nextStep: "Planning helps you stay focused!",
+  },
+  first_invitation_accepted: {
+    type: "first_invitation_accepted",
+    title: "Welcome to the family!",
+    description: "You joined your first family!",
+    icon: "👨‍👩‍👧‍👦",
+    nextStep: "Together you can achieve more!",
+  },
+};
+
+// Fire confetti animation
+function fireConfetti() {
+  const duration = 2500;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+  function randomInRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+
+    // Confetti from both sides
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+    });
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+    });
+  }, 250);
 }
 
 export function CelebrationProvider({
@@ -39,7 +127,28 @@ export function CelebrationProvider({
   const celebrate = useCallback((data: CelebrationData) => {
     setCelebration(data);
     setIsVisible(true);
+
+    // Fire confetti for first action celebrations
+    if (data.type.startsWith("first_")) {
+      fireConfetti();
+    }
   }, []);
+
+  const celebrateFirstAction = useCallback(
+    (
+      actionType:
+        | "first_goal"
+        | "first_reflection"
+        | "first_daily_plan"
+        | "first_invitation_accepted"
+    ) => {
+      const celebrationData = FIRST_ACTION_CELEBRATIONS[actionType];
+      if (celebrationData) {
+        celebrate(celebrationData);
+      }
+    },
+    [celebrate]
+  );
 
   useEffect(() => {
     if (isVisible) {
@@ -51,7 +160,7 @@ export function CelebrationProvider({
   }, [isVisible]);
 
   return (
-    <CelebrationContext.Provider value={{ celebrate }}>
+    <CelebrationContext.Provider value={{ celebrate, celebrateFirstAction }}>
       {children}
       {isVisible && celebration && (
         <CelebrationToast
@@ -70,10 +179,16 @@ function CelebrationToast({
   celebration: CelebrationData;
   onClose: () => void;
 }) {
+  const isFirstAction = celebration.type.startsWith("first_");
   const isBadge = celebration.type === "badge";
-  const bgColor = isBadge
-    ? "from-purple-500 to-indigo-600"
-    : "from-orange-500 to-amber-600";
+
+  // Different gradient for first actions vs badges vs streaks
+  let bgColor = "from-orange-500 to-amber-600"; // default for streaks
+  if (isFirstAction) {
+    bgColor = "from-green-500 to-emerald-600";
+  } else if (isBadge) {
+    bgColor = "from-purple-500 to-indigo-600";
+  }
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center pt-20">
@@ -87,6 +202,11 @@ function CelebrationToast({
             <p className="text-muted-foreground text-sm">
               {celebration.description}
             </p>
+            {celebration.nextStep && (
+              <p className="mt-1 text-xs text-green-600">
+                {celebration.nextStep}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
