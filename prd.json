@@ -1098,7 +1098,7 @@
         "Section has generous padding and centered content"
       ],
       "priority": 57,
-      "passes": false,
+      "passes": true,
       "notes": "This should feel like a triumphant ending to the page journey."
     },
     {
