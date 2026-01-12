@@ -964,7 +964,7 @@
         "Numbers use animated count-up effect when scrolled into view"
       ],
       "priority": 50,
-      "passes": false,
+      "passes": true,
       "notes": "Stats are placeholder/aspirational for now. Use Intersection Observer for count-up trigger."
     },
     {
