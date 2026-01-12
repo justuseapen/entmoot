@@ -1,7 +1,28 @@
 {
   "project": "Entmoot",
-  "branchName": "feature/mvp-foundation",
-  "description": "Family multi-scale planning platform MVP - Phase 1 Foundation including family/member management, SMART goals, daily planning, weekly reviews, notifications, AI coaching, and gamification",
+  "branchName": "feature/landing-page",
+  "description": "Family multi-scale planning platform MVP - Phase 1 Foundation including family/member management, SMART goals, daily planning, weekly reviews, notifications, AI coaching, gamification, and marketing landing page",
+  "landingPageDesignSystem": {
+    "colors": {
+      "forestGreen": "#2D5A27",
+      "leafGreen": "#7CB342",
+      "skyBlue": "#64B5F6",
+      "warmGold": "#FFD54F",
+      "earthBrown": "#795548",
+      "creamWhite": "#FFF8E7",
+      "sunsetOrange": "#FF7043",
+      "darkForest": "#1B3A1A"
+    },
+    "theme": "LOTR meets Minecraft - ancient tree wisdom meets blocky buildable adventures",
+    "visualElements": [
+      "Blocky/pixelated stylized trees",
+      "Floating islands representing goal levels",
+      "Stone brick pathways connecting sections",
+      "Treasure chests for achievements",
+      "Simple blocky family avatar silhouettes",
+      "Dawn-to-sunset gradient backgrounds"
+    ]
+  },
   "userStories": [
     {
       "id": "US-001",
@@ -873,8 +894,698 @@
         "Request specs for proactive feedback endpoints"
       ],
       "priority": 46,
-      "passes": false,
+      "passes": true,
       "notes": "NPS and quick feedback types added to FeedbackReport. Respect frequency limits."
+    },
+    {
+      "id": "US-047",
+      "title": "Landing Page Route and Structure",
+      "description": "As a visitor, I want to see a beautiful landing page at the root URL so that I understand what Entmoot is.",
+      "acceptanceCriteria": [
+        "New LandingPage component created at /frontend/src/pages/LandingPage.tsx",
+        "Landing page renders at / route for unauthenticated users",
+        "Authenticated users at / are redirected to /dashboard",
+        "Page uses cream white (#FFF8E7) as base background color",
+        "All landing page components live in /frontend/src/components/landing/",
+        "Page is fully responsive (mobile, tablet, desktop breakpoints)",
+        "Lighthouse performance score > 90"
+      ],
+      "priority": 47,
+      "passes": false,
+      "notes": "Update App.tsx routing to show LandingPage for unauthenticated users instead of current Home component."
+    },
+    {
+      "id": "US-048",
+      "title": "Landing Page Navigation Bar",
+      "description": "As a visitor, I want a navigation bar so that I can access different sections and sign up.",
+      "acceptanceCriteria": [
+        "Navbar component with Entmoot logo (tree icon + text)",
+        "Navigation links: Features, How It Works, Pricing (scroll to sections)",
+        "Sign In button links to /login",
+        "Get Started CTA button (forest green #2D5A27) links to /register",
+        "Navbar is transparent over hero, becomes solid cream on scroll",
+        "Mobile: hamburger menu with slide-out drawer",
+        "Sticky positioning on scroll",
+        "Smooth scroll to sections when nav links clicked"
+      ],
+      "priority": 48,
+      "passes": false,
+      "notes": "Use Lucide icons. Logo can be TreePine or TreeDeciduous icon for now."
+    },
+    {
+      "id": "US-049",
+      "title": "Landing Page Hero Section",
+      "description": "As a visitor, I want an engaging hero section so that I immediately understand Entmoot's value proposition.",
+      "acceptanceCriteria": [
+        "Background gradient from dawn pink/orange to sky blue",
+        "Silhouetted blocky forest at bottom of hero",
+        "Headline: 'Build Your Family's Adventure, One Goal at a Time'",
+        "Subheadline: 'Transform chaotic days into epic quests. Entmoot helps families plan together, celebrate wins, and grow as a team.'",
+        "Primary CTA button: 'Start Your Free Adventure' (forest green with star icon)",
+        "Secondary CTA: 'Watch Demo' with play icon (outlined style)",
+        "Trust badges below CTAs: 'No credit card required • Free for families up to 5'",
+        "Hero is full viewport height on desktop, auto height on mobile",
+        "Subtle floating animation on decorative elements"
+      ],
+      "priority": 49,
+      "passes": false,
+      "notes": "Use CSS keyframes for floating animation. Consider adding illustrated floating islands later."
+    },
+    {
+      "id": "US-050",
+      "title": "Landing Page Social Proof Bar",
+      "description": "As a visitor, I want to see social proof so that I trust Entmoot is legitimate.",
+      "acceptanceCriteria": [
+        "Horizontal bar below hero with soft green gradient background",
+        "Stats displayed: '2,847 Families Adventuring' with tree icon",
+        "Star rating: '4.9/5 from 500+ reviews' with star icons",
+        "Featured quote: 'Finally, a planning app my kids actually WANT to use!' — Sarah M., Mom of 3",
+        "Responsive: stats stack on mobile",
+        "Numbers use animated count-up effect when scrolled into view"
+      ],
+      "priority": 50,
+      "passes": false,
+      "notes": "Stats are placeholder/aspirational for now. Use Intersection Observer for count-up trigger."
+    },
+    {
+      "id": "US-051",
+      "title": "Landing Page Problem/Solution Section",
+      "description": "As a visitor, I want to see the problem Entmoot solves so that I relate to the pain points.",
+      "acceptanceCriteria": [
+        "Section headline: 'Sound Familiar?'",
+        "Two-column layout: 'Without Entmoot' vs 'With Entmoot'",
+        "Without column (red-tinted): 4 pain points with emoji icons",
+        "Pain points: 'Did anyone feed the dog?', 'I forgot about soccer!', 'Who's picking up grandma?', 'We never do anything fun'",
+        "With column (green-tinted): 4 solutions with checkmark icons",
+        "Solutions: 'Quests assigned & tracked', 'Everyone sees the map', 'Goals connected to dreams', 'Celebrations built in'",
+        "Transition text below: 'Every family deserves to feel like a team on an epic quest—not a group of strangers sharing a calendar.'",
+        "Cards have subtle blocky/pixelated border style"
+      ],
+      "priority": 51,
+      "passes": false,
+      "notes": "Use grid layout. Consider adding simple illustrations later."
+    },
+    {
+      "id": "US-052",
+      "title": "Landing Page Features Section",
+      "description": "As a visitor, I want to see Entmoot's features so that I understand what I get.",
+      "acceptanceCriteria": [
+        "Section headline: 'Your Family's Toolkit for Epic Adventures'",
+        "Subheadline: 'Everything you need to plan, play, and grow together'",
+        "6 feature cards in 3x2 grid (2x3 on tablet, 1x6 on mobile)",
+        "Feature 1: SMART Quest Builder (Target icon) - AI-powered goal creation",
+        "Feature 2: Goal Hierarchy Map (Map icon) - Visual goal connections",
+        "Feature 3: Morning Planning Ritual (Sun icon) - Daily intention setting",
+        "Feature 4: Evening Reflection (Moon icon) - Gratitude and wins",
+        "Feature 5: Family Leaderboard (Trophy icon) - Gamification",
+        "Feature 6: Role-Based Permissions (Users icon) - Age-appropriate access",
+        "Each card has: icon (warm gold #FFD54F background circle), title, description",
+        "Cards lift with shadow on hover"
+      ],
+      "priority": 52,
+      "passes": false,
+      "notes": "Use Lucide icons: Target, Map, Sun, Moon, Trophy, Users. Keep descriptions concise."
+    },
+    {
+      "id": "US-053",
+      "title": "Landing Page How It Works Section",
+      "description": "As a visitor, I want to see how easy it is to get started so that I feel confident signing up.",
+      "acceptanceCriteria": [
+        "Section headline: 'Begin Your Adventure in 3 Simple Steps'",
+        "Visual pathway with 3 connected waypoints/checkpoints",
+        "Step 1: 'Gather Your Party' (Home icon) - Create family, invite members",
+        "Step 2: 'Chart Your Course' (Map icon) - Set first goals with SMART builder",
+        "Step 3: 'Adventure Awaits!' (Rocket icon) - Start planning rituals",
+        "Each step has icon, title, and short description",
+        "Pathway styled like stone brick road connecting steps",
+        "CTA button at bottom: 'Begin Your Free Quest'",
+        "Horizontal layout on desktop, vertical on mobile"
+      ],
+      "priority": 53,
+      "passes": false,
+      "notes": "The pathway visual can be CSS borders/SVG connecting the step cards."
+    },
+    {
+      "id": "US-054",
+      "title": "Landing Page Testimonials Section",
+      "description": "As a visitor, I want to read testimonials so that I see real families benefit from Entmoot.",
+      "acceptanceCriteria": [
+        "Section headline: 'Tales from Fellow Adventurers'",
+        "Carousel with 3 testimonial cards",
+        "Each card has: quote text, author name, role (e.g., 'Dad of 2'), 5-star rating, usage duration",
+        "Testimonial 1: Marcus T. - kid reminds about morning planning",
+        "Testimonial 2: Jennifer & David K. - blended family coordination",
+        "Testimonial 3: Priya S. - teenager goal hierarchy revelation",
+        "Avatar placeholders with blocky/pixelated style (colored circles with initials)",
+        "Carousel has dots indicator and prev/next arrows",
+        "Auto-advances every 5 seconds, pauses on hover"
+      ],
+      "priority": 54,
+      "passes": false,
+      "notes": "Use a lightweight carousel library like Embla or build simple CSS carousel. Testimonials are realistic but fictional."
+    },
+    {
+      "id": "US-055",
+      "title": "Landing Page Pricing Section",
+      "description": "As a visitor, I want to see pricing options so that I understand the cost.",
+      "acceptanceCriteria": [
+        "Section headline: 'Choose Your Adventure'",
+        "Subheadline: 'Start free, upgrade when you're ready for more'",
+        "3 pricing cards side by side",
+        "Tier 1 - Seedling (Free): Up to 5 members, core quests, daily plans, streaks, basic badges",
+        "Tier 2 - Sapling ($9/month): Up to 10 members, AI coaching, all badges, weekly summaries, data export - marked as 'POPULAR'",
+        "Tier 3 - Mighty Oak ($19/month): Unlimited members, priority support, custom badges, API access, multiple families",
+        "Popular tier has highlighted border (leaf green) and 'POPULAR' badge",
+        "Each card has: tier name, price, member limit, feature list with checkmarks, CTA button",
+        "Note below cards: 'All plans include a 14-day free trial of Sapling features'"
+      ],
+      "priority": 55,
+      "passes": false,
+      "notes": "Pricing is placeholder. Free tier CTA: 'Start Free', Sapling: 'Start Trial', Oak: 'Contact Us'."
+    },
+    {
+      "id": "US-056",
+      "title": "Landing Page FAQ Section",
+      "description": "As a visitor, I want answers to common questions so that my concerns are addressed.",
+      "acceptanceCriteria": [
+        "Section headline: 'Questions from the Council'",
+        "Accordion-style FAQ with 6 questions",
+        "Q1: Is Entmoot safe for kids? (COPPA compliant, role permissions)",
+        "Q2: Can I use Entmoot for just myself? (Yes, works for solo)",
+        "Q3: What happens to my data? (Never sold, export anytime)",
+        "Q4: Do I need to download an app? (Web-based, mobile apps coming)",
+        "Q5: Can grandparents or babysitters join? (Yes, as Observers)",
+        "Q6: What if my family doesn't stick with it? (Gamification helps, cancel anytime)",
+        "Only one accordion item open at a time",
+        "Smooth expand/collapse animation",
+        "Plus/minus or chevron icon indicates open/closed state"
+      ],
+      "priority": 56,
+      "passes": false,
+      "notes": "Use Radix Accordion component from shadcn/ui."
+    },
+    {
+      "id": "US-057",
+      "title": "Landing Page Final CTA Section",
+      "description": "As a visitor, I want a final call-to-action so that I'm encouraged to sign up.",
+      "acceptanceCriteria": [
+        "Full-width section with sunset gradient background (orange to purple)",
+        "Silhouetted forest at bottom",
+        "Headline: 'Your Family's Adventure Starts Today'",
+        "Subheadline: 'Join thousands of families building dreams together.'",
+        "Large CTA button: 'Start Your Free Adventure' (white text on forest green)",
+        "Trust text below: 'No credit card required • Setup in 2 minutes'",
+        "Section has generous padding and centered content"
+      ],
+      "priority": 57,
+      "passes": false,
+      "notes": "This should feel like a triumphant ending to the page journey."
+    },
+    {
+      "id": "US-058",
+      "title": "Landing Page Footer",
+      "description": "As a visitor, I want a footer with links so that I can find more information.",
+      "acceptanceCriteria": [
+        "Dark forest green background (#1B3A1A)",
+        "Entmoot logo and tagline: 'Building family adventures since 2026'",
+        "4 link columns: Product (Features, Pricing, Roadmap, Changelog), Company (About, Blog, Careers, Contact), Legal (Privacy, Terms, Cookies, COPPA), empty/social",
+        "Social media icons: Twitter, Instagram, Facebook, Discord",
+        "Copyright: '© 2026 Entmoot. All rights reserved.'",
+        "Links are light colored, hover to leaf green",
+        "Responsive: columns stack on mobile"
+      ],
+      "priority": 58,
+      "passes": false,
+      "notes": "Most links can be placeholder (#) for now. Legal pages are important for production."
+    },
+    {
+      "id": "US-059",
+      "title": "Landing Page Animations and Polish",
+      "description": "As a visitor, I want subtle animations so that the page feels alive and premium.",
+      "acceptanceCriteria": [
+        "Fade-in on scroll for each section (Intersection Observer)",
+        "Floating animation on hero decorative elements (CSS keyframes)",
+        "Button hover effects: slight scale up and shadow",
+        "Feature cards: lift and shadow on hover",
+        "Smooth scroll behavior for anchor links",
+        "Stats count-up animation when scrolled into view",
+        "Testimonial carousel auto-advances smoothly",
+        "FAQ accordion has smooth height transition",
+        "No animation if user prefers-reduced-motion"
+      ],
+      "priority": 59,
+      "passes": false,
+      "notes": "Use CSS transitions where possible. Framer Motion optional but not required."
+    },
+    {
+      "id": "US-060",
+      "title": "Landing Page SEO and Meta Tags",
+      "description": "As a marketer, I want proper SEO setup so that the landing page ranks well.",
+      "acceptanceCriteria": [
+        "Page title: 'Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together'",
+        "Meta description: 'Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5.'",
+        "Open Graph tags for social sharing (og:title, og:description, og:image, og:type)",
+        "Twitter card meta tags",
+        "Canonical URL set",
+        "Semantic HTML (header, main, section, footer, nav, article)",
+        "Proper heading hierarchy (single h1, logical h2/h3 structure)",
+        "Alt text on all images"
+      ],
+      "priority": 60,
+      "passes": false,
+      "notes": "Use React Helmet or update index.html directly. OG image can be a placeholder for now."
+    },
+    {
+      "id": "US-061",
+      "title": "React Native Project Setup with Expo",
+      "description": "As a developer, I need a React Native mobile app project using Expo so that we can build iOS and Android apps.",
+      "acceptanceCriteria": [
+        "Expo project created in /mobile directory with TypeScript template",
+        "Environment configuration for dev/staging/prod API endpoints",
+        "React Navigation configured with tab and stack navigators",
+        "Shared type definitions between web and mobile in /shared/types",
+        "iOS build working in Expo Go",
+        "Android build working in Expo Go",
+        "Basic App component renders without errors",
+        "ESLint and Prettier configured matching web frontend"
+      ],
+      "priority": 61,
+      "passes": false,
+      "notes": "Use Expo managed workflow for OTA updates. Structure: /mobile/src/{screens,components,hooks,lib,stores,navigation}"
+    },
+    {
+      "id": "US-062",
+      "title": "Mobile Authentication Flow",
+      "description": "As a mobile user, I want to log in and register securely so that I can access my family's data from my phone.",
+      "acceptanceCriteria": [
+        "Login screen with email and password fields",
+        "Registration screen with name, email, and password fields",
+        "Secure token storage using expo-secure-store (iOS Keychain / Android Keystore)",
+        "Auto-refresh of expired access tokens using refresh token",
+        "Logout clears all stored credentials",
+        "Forgot Password flow triggers email reset",
+        "Form validation with helpful error messages",
+        "Loading states during auth operations"
+      ],
+      "priority": 62,
+      "passes": false,
+      "notes": "Mirror web auth patterns from frontend/src/stores/auth.ts. Use expo-secure-store for secure storage."
+    },
+    {
+      "id": "US-063",
+      "title": "Push Notification Infrastructure - Backend",
+      "description": "As a developer, I need backend infrastructure to send push notifications via Firebase Cloud Messaging so that we can reach mobile users.",
+      "acceptanceCriteria": [
+        "Add fcm or firebase-admin gem to Gemfile",
+        "Configure FCM service account credentials in Rails credentials",
+        "Create DeviceToken model with user_id, token, platform, device_name, last_used_at fields",
+        "API endpoint POST /api/v1/device_tokens to register device tokens",
+        "API endpoint DELETE /api/v1/device_tokens/:id to unregister tokens",
+        "Create PushNotificationService class that sends via FCM HTTP v1 API",
+        "Update NotificationService to dispatch push when user has push:true preference",
+        "Handle invalid/expired device tokens gracefully (auto-cleanup)",
+        "Request specs for device token endpoints",
+        "Service specs for PushNotificationService"
+      ],
+      "priority": 63,
+      "passes": false,
+      "notes": "FCM HTTP v1 API supports both iOS (APNs) and Android. Device tokens should be unique per user+token."
+    },
+    {
+      "id": "US-064",
+      "title": "Push Notification Infrastructure - Mobile",
+      "description": "As a mobile user, I want to receive push notifications so that I'm reminded about planning and reflections.",
+      "acceptanceCriteria": [
+        "Request push notification permissions on first login",
+        "Register device token with backend after successful login",
+        "Handle foreground notifications with in-app alert",
+        "Handle background notifications with system notification",
+        "Handle notification tap with deep link to relevant screen",
+        "Unregister device token on logout",
+        "Configure app.json with FCM sender ID and APNs entitlements",
+        "Test push notifications work on both iOS and Android"
+      ],
+      "priority": 64,
+      "passes": false,
+      "notes": "Use expo-notifications package. Map notification link field to React Navigation routes for deep linking."
+    },
+    {
+      "id": "US-065",
+      "title": "Mobile Dashboard Screen",
+      "description": "As a mobile user, I want a dashboard showing today's summary so that I can quickly see what needs attention.",
+      "acceptanceCriteria": [
+        "Display user greeting with name",
+        "Show current family with family switcher modal",
+        "Display today's date prominently",
+        "Show quick stats: tasks completed today, current streak count",
+        "Quick action buttons: Start Morning Planning, Evening Reflection, Weekly Review",
+        "Recent notifications section",
+        "Pull-to-refresh functionality",
+        "Loading skeleton while data loads"
+      ],
+      "priority": 65,
+      "passes": false,
+      "notes": "Reuse dashboard data fetching patterns from web. API: GET /api/v1/families, GET /api/v1/auth/me, GET /api/v1/users/me/streaks"
+    },
+    {
+      "id": "US-066",
+      "title": "Mobile Daily Planner Screen",
+      "description": "As a mobile user, I want to create and manage my daily plan from my phone.",
+      "acceptanceCriteria": [
+        "Display today's date with date navigation",
+        "Top 3 priorities section with add/edit/complete functionality",
+        "Task list with drag-to-reorder using react-native-reanimated",
+        "Task completion toggle (checkbox)",
+        "Link tasks to goals via goal picker modal",
+        "Daily intention text input",
+        "Auto-save with debounce (save on blur or after 2 seconds idle)",
+        "Save indicator showing sync status",
+        "Yesterday's incomplete tasks with carry-over option"
+      ],
+      "priority": 66,
+      "passes": false,
+      "notes": "API: GET /api/v1/families/:id/daily_plans/today, PUT /api/v1/families/:id/daily_plans/:id"
+    },
+    {
+      "id": "US-067",
+      "title": "Mobile Goals Screen",
+      "description": "As a mobile user, I want to view and manage my goals from my phone.",
+      "acceptanceCriteria": [
+        "Goals list with filtering by time scale (daily/weekly/monthly/quarterly/annual)",
+        "Filter by status (not_started/in_progress/at_risk/completed/abandoned)",
+        "Filter by assignee",
+        "Goal card showing title, progress bar, due date, status badge",
+        "Goal detail view with all SMART criteria displayed",
+        "Progress slider to update goal progress",
+        "Create new goal form with all required fields",
+        "AI refinement integration (Refine with AI button)",
+        "Goal hierarchy visualization showing parent/child relationships"
+      ],
+      "priority": 67,
+      "passes": false,
+      "notes": "API: GET/POST /api/v1/families/:id/goals, PUT /api/v1/families/:id/goals/:id, POST /api/v1/goals/:id/refine"
+    },
+    {
+      "id": "US-068",
+      "title": "Mobile Settings Screen",
+      "description": "As a mobile user, I want to manage my settings and notification preferences from my phone.",
+      "acceptanceCriteria": [
+        "User profile display showing name, email, avatar",
+        "Edit profile functionality (name, avatar)",
+        "Family management section showing current family",
+        "Notification channel toggles: in-app, email, push, SMS",
+        "Reminder preferences with time pickers for morning planning, evening reflection, weekly review",
+        "Quiet hours configuration with start/end time pickers",
+        "Check-in frequency selector (daily, weekly, monthly, as-needed)",
+        "Logout functionality with confirmation",
+        "App version display"
+      ],
+      "priority": 68,
+      "passes": false,
+      "notes": "API: GET/PUT /api/v1/users/me/notification_preferences. Use native time pickers for iOS/Android."
+    },
+    {
+      "id": "US-069",
+      "title": "User Activity Tracking",
+      "description": "As a product owner, I want to track user activity so that we can detect and re-engage inactive users.",
+      "acceptanceCriteria": [
+        "Add last_active_at timestamp column to users table",
+        "Update last_active_at on authenticated API requests (debounced to 1 hour to avoid excessive writes)",
+        "Add last_daily_plan_at timestamp to track last daily planning activity",
+        "Add last_reflection_at timestamp to track last reflection activity",
+        "Add last_weekly_review_at timestamp to track last weekly review activity",
+        "Create UserActivity concern to encapsulate tracking logic",
+        "Add database indexes on activity timestamp columns for efficient querying",
+        "Request specs verifying activity tracking"
+      ],
+      "priority": 69,
+      "passes": false,
+      "notes": "Use before_action callback in BaseController. Only update if last update was > 1 hour ago."
+    },
+    {
+      "id": "US-070",
+      "title": "Twilio SMS Integration",
+      "description": "As a user, I want to receive SMS reminders so that I don't miss important check-ins even when not using the app.",
+      "acceptanceCriteria": [
+        "Add twilio-ruby gem to Gemfile",
+        "Create SmsService class with send_message capability",
+        "Store Twilio credentials in Rails credentials",
+        "Add phone_number and phone_verified columns to users table",
+        "Add sms boolean column to notification_preferences table",
+        "Phone number validation using E.164 format",
+        "API endpoint POST /api/v1/users/me/phone_number to add/update phone",
+        "API endpoint DELETE /api/v1/users/me/phone_number to remove phone",
+        "SMS opt-out handling (STOP keyword webhook)",
+        "Rate limiting for SMS sends (max 5 per day per user)",
+        "Request specs for phone number endpoints",
+        "Service specs for SmsService"
+      ],
+      "priority": 70,
+      "passes": false,
+      "notes": "Use Twilio Messaging Service for better deliverability. Handle webhook at POST /api/v1/webhooks/twilio."
+    },
+    {
+      "id": "US-071",
+      "title": "Re-engagement Detection Service",
+      "description": "As a product owner, I want to automatically detect users who need re-engagement so that we can proactively reach out.",
+      "acceptanceCriteria": [
+        "Create ReengagementDetectionService class",
+        "Detect missed check-ins: user scheduled morning planning but no daily plan created by noon (user timezone)",
+        "Detect missed reflections: daily plan exists but no evening reflection by 10pm (user timezone)",
+        "Detect inactivity: no API activity for configurable threshold (3, 7, 14, 30 days)",
+        "Exclude users who have disabled re-engagement notifications",
+        "Respect quiet hours when detecting",
+        "Return prioritized list of users for outreach with reason",
+        "Service specs with comprehensive test coverage"
+      ],
+      "priority": 71,
+      "passes": false,
+      "notes": "Consider user timezone for all time-based checks. Add reengagement_enabled boolean to notification_preferences."
+    },
+    {
+      "id": "US-072",
+      "title": "Multi-Channel Outreach Service",
+      "description": "As a user, I want to receive re-engagement messages through my preferred channel so that I'm reminded to check in.",
+      "acceptanceCriteria": [
+        "Create OutreachService class for multi-channel delivery",
+        "Channel cascade: try push first, then email, then SMS (based on user preferences)",
+        "Message templates for missed check-in outreach",
+        "Message templates for inactivity outreach",
+        "Personalized messages including user name and context",
+        "Create OutreachHistory model to track sends (user_id, outreach_type, channel, sent_at)",
+        "Prevent spam: max 1 outreach per type per day per user",
+        "Include deep links in messages to relevant app sections",
+        "Service specs with mocked notification services"
+      ],
+      "priority": 72,
+      "passes": false,
+      "notes": "SMS should be reserved for high-priority re-engagement (7+ days inactive). Push and email for daily check-ins."
+    },
+    {
+      "id": "US-073",
+      "title": "Re-engagement Scheduled Jobs",
+      "description": "As a product owner, I want automated jobs to detect and reach out to inactive users.",
+      "acceptanceCriteria": [
+        "Create DetectMissedCheckInsJob - runs at 12:00 and 14:00 per major timezone",
+        "Create DetectMissedReflectionsJob - runs at 21:00 and 22:00 per major timezone",
+        "Create DetectInactiveUsersJob - runs daily at 10:00 UTC for configurable day thresholds",
+        "Jobs dispatch to OutreachService for notification delivery",
+        "Jobs configurable via environment variables (enable/disable)",
+        "Add jobs to sidekiq.yml scheduler",
+        "Job specs with time travel testing"
+      ],
+      "priority": 73,
+      "passes": false,
+      "notes": "Similar pattern to existing reminder jobs. Group users by timezone for efficient processing."
+    },
+    {
+      "id": "US-074",
+      "title": "Re-engagement Preferences UI",
+      "description": "As a user, I want to control my re-engagement notification settings so that I receive helpful reminders without being spammed.",
+      "acceptanceCriteria": [
+        "Add reengagement_enabled boolean to notification_preferences (default true)",
+        "Add missed_checkin_reminder boolean to notification_preferences (default true)",
+        "Add inactivity_reminder boolean to notification_preferences (default true)",
+        "Add inactivity_threshold_days integer to notification_preferences (default 7)",
+        "Backend API returns and accepts re-engagement preferences",
+        "Web frontend: Add Re-engagement section to NotificationSettings page",
+        "Mobile: Add re-engagement settings to Settings screen",
+        "Inactivity threshold selector with options: 3, 7, 14, 30 days",
+        "Request specs for updated preferences endpoint"
+      ],
+      "priority": 74,
+      "passes": false,
+      "notes": "Update both web and mobile notification settings UI."
+    },
+    {
+      "id": "US-075",
+      "title": "Monthly Review Model and API",
+      "description": "As a user, I want to conduct monthly reviews so that I can reflect on and plan at a broader time scale.",
+      "acceptanceCriteria": [
+        "Create MonthlyReview model with fields: month (date), user_id, family_id, completed (boolean)",
+        "Add highlights jsonb array field for month highlights",
+        "Add challenges jsonb array field for month challenges",
+        "Add lessons_learned text field",
+        "Add next_month_focus jsonb array field",
+        "Calculate metrics: task completion rate, goal progress, reflection consistency for the month",
+        "API endpoint GET /api/v1/families/:id/monthly_reviews/current (find or create)",
+        "API endpoint GET /api/v1/families/:id/monthly_reviews/:id",
+        "API endpoint PUT /api/v1/families/:id/monthly_reviews/:id",
+        "MonthlyReviewPolicy restricting to family members",
+        "Request specs for all endpoints"
+      ],
+      "priority": 75,
+      "passes": false,
+      "notes": "Month identified by first day of month. Similar structure to WeeklyReview model."
+    },
+    {
+      "id": "US-076",
+      "title": "Quarterly Review Model and API",
+      "description": "As a user, I want to conduct quarterly reviews so that I can assess progress toward larger goals.",
+      "acceptanceCriteria": [
+        "Create QuarterlyReview model with fields: quarter_start_date, user_id, family_id, completed",
+        "Add achievements jsonb array field",
+        "Add obstacles jsonb array field",
+        "Add insights text field",
+        "Add next_quarter_objectives jsonb array field",
+        "Calculate metrics: goal completion rate, habit consistency, monthly review completion",
+        "API endpoint GET /api/v1/families/:id/quarterly_reviews/current",
+        "API endpoint GET/PUT /api/v1/families/:id/quarterly_reviews/:id",
+        "Link to quarterly goals (time_scale: quarterly)",
+        "QuarterlyReviewPolicy restricting to family members",
+        "Request specs for all endpoints"
+      ],
+      "priority": 76,
+      "passes": false,
+      "notes": "Quarter start dates: Q1=Jan 1, Q2=Apr 1, Q3=Jul 1, Q4=Oct 1."
+    },
+    {
+      "id": "US-077",
+      "title": "Annual Review Model and API",
+      "description": "As a user, I want to conduct annual reviews so that I can reflect on the year and set intentions for the next.",
+      "acceptanceCriteria": [
+        "Create AnnualReview model with fields: year (integer), user_id, family_id, completed",
+        "Add year_highlights jsonb array field",
+        "Add year_challenges jsonb array field",
+        "Add lessons_learned text field",
+        "Add gratitude jsonb array field",
+        "Add next_year_theme string field",
+        "Add next_year_goals jsonb array field",
+        "Calculate metrics: goals achieved, streaks maintained, review consistency for year",
+        "API endpoint GET /api/v1/families/:id/annual_reviews/current",
+        "API endpoint GET/PUT /api/v1/families/:id/annual_reviews/:id",
+        "AnnualReviewPolicy restricting to family members",
+        "Request specs for all endpoints"
+      ],
+      "priority": 77,
+      "passes": false,
+      "notes": "Year identified by integer (e.g., 2026). Aggregate from quarterly reviews and annual goals."
+    },
+    {
+      "id": "US-078",
+      "title": "Monthly Review UI - Web",
+      "description": "As a web user, I want a monthly review workflow so that I can complete my monthly reflection.",
+      "acceptanceCriteria": [
+        "Monthly Review page at /families/:id/monthly-review",
+        "Step-by-step wizard with progress indicator",
+        "Step 1: Month Metrics (task completion, goal progress, reflection count)",
+        "Step 2: Highlights - add multiple highlights for the month",
+        "Step 3: Challenges - add multiple challenges faced",
+        "Step 4: Lessons Learned - text input",
+        "Step 5: Next Month Focus - add focus areas for next month",
+        "Save progress on each step (can resume later)",
+        "Mark complete functionality",
+        "Past monthly reviews list with quick view",
+        "Add Monthly Review to Reviews section in sidebar"
+      ],
+      "priority": 78,
+      "passes": false,
+      "notes": "Follow same patterns as WeeklyReview.tsx. Create useMonthlyReviews.ts hook and monthlyReviews.ts lib."
+    },
+    {
+      "id": "US-079",
+      "title": "Quarterly Review UI - Web",
+      "description": "As a web user, I want a quarterly review workflow so that I can assess and plan at the quarterly level.",
+      "acceptanceCriteria": [
+        "Quarterly Review page at /families/:id/quarterly-review",
+        "Step-by-step wizard",
+        "Step 1: Quarter Metrics (goal completion, monthly review completion, habits)",
+        "Step 2: Achievements - add multiple achievements",
+        "Step 3: Obstacles - add multiple obstacles faced",
+        "Step 4: Insights - text input for key learnings",
+        "Step 5: Next Quarter Objectives - add objectives",
+        "Display quarterly goals with progress",
+        "AI suggestions for next quarter based on performance",
+        "Past quarterly reviews with year-over-year comparison",
+        "Add Quarterly Review to Reviews section in sidebar"
+      ],
+      "priority": 79,
+      "passes": false,
+      "notes": "Create useQuarterlyReviews.ts hook and quarterlyReviews.ts lib."
+    },
+    {
+      "id": "US-080",
+      "title": "Annual Review UI - Web",
+      "description": "As a web user, I want an annual review workflow so that I can reflect on the year and set next year intentions.",
+      "acceptanceCriteria": [
+        "Annual Review page at /families/:id/annual-review",
+        "Comprehensive wizard with multiple steps",
+        "Step 1: Year Metrics (goals achieved, streaks, reviews completed)",
+        "Step 2: Year Highlights - add highlights",
+        "Step 3: Year Challenges - add challenges",
+        "Step 4: Lessons Learned - text input",
+        "Step 5: Gratitude - add things grateful for",
+        "Step 6: Next Year Theme - single theme/word for year",
+        "Step 7: Next Year Goals - add goals for next year",
+        "Year-in-review visual summary (charts, progress rings)",
+        "Goal cascade visualization (annual -> quarterly -> monthly)",
+        "Add Annual Review to Reviews section in sidebar"
+      ],
+      "priority": 80,
+      "passes": false,
+      "notes": "Create useAnnualReviews.ts hook and annualReviews.ts lib. Consider shareable year summary feature for Phase 2."
+    },
+    {
+      "id": "US-081",
+      "title": "Review Cadence Reminders",
+      "description": "As a user, I want reminders for monthly, quarterly, and annual reviews so that I don't forget to complete them.",
+      "acceptanceCriteria": [
+        "Add monthly_review boolean to notification_preferences (default true)",
+        "Add monthly_review_day integer (1-28, default 1 = first of month)",
+        "Add quarterly_review boolean to notification_preferences (default true)",
+        "Add annual_review boolean to notification_preferences (default true)",
+        "Create SendMonthlyReviewRemindersJob - runs on configured day of month",
+        "Create SendQuarterlyReviewRemindersJob - runs during last week of quarter",
+        "Create SendAnnualReviewRemindersJob - runs December 20-31",
+        "Add email templates for monthly, quarterly, annual review reminders",
+        "Push notification support for review reminders",
+        "Add jobs to sidekiq.yml scheduler",
+        "Job specs for all reminder jobs"
+      ],
+      "priority": 81,
+      "passes": false,
+      "notes": "Update ReminderMailer with new templates. Respect user notification preferences."
+    },
+    {
+      "id": "US-082",
+      "title": "Flexible Check-in Frequency",
+      "description": "As a user, I want to choose my check-in cadence so that the app fits my planning style.",
+      "acceptanceCriteria": [
+        "Add check_in_frequency enum to notification_preferences: daily, as_needed, weekly, monthly, quarterly, annual",
+        "Daily frequency (default): Morning planning + evening reflection reminders daily",
+        "Weekly frequency: Weekly planning session reminder instead of daily",
+        "Monthly frequency: Monthly review focus, simplified daily tracking optional",
+        "Quarterly frequency: Quarterly-focused planning",
+        "Annual frequency: Annual-focused planning",
+        "As-needed: Disable all automatic reminders, user-initiated only",
+        "UI to select check-in frequency in notification settings (web and mobile)",
+        "Update all reminder jobs to respect check_in_frequency preference",
+        "Dashboard adapts based on frequency (e.g., hide daily planner for monthly users)",
+        "Request specs verifying reminder filtering by frequency"
+      ],
+      "priority": 82,
+      "passes": false,
+      "notes": "Consider family-level defaults with user override capability."
     }
   ]
 }

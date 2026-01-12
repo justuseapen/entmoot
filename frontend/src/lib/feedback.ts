@@ -156,3 +156,135 @@ export const STATUS_LABELS: Record<FeedbackStatus, string> = {
   resolved: "Resolved",
   closed: "Closed",
 };
+
+// NPS-specific types
+export type NPSCategory = "promoter" | "passive" | "detractor" | "unknown";
+
+export interface FeedbackEligibility {
+  nps_eligible: boolean;
+  days_until_nps_eligible: number;
+  last_nps_date: string | null;
+}
+
+export interface NPSFollowUpResponse {
+  question: string;
+  category: NPSCategory;
+}
+
+export interface DismissNPSResponse {
+  success: boolean;
+  next_eligible_date: string;
+}
+
+// Proactive feedback API functions
+export async function getFeedbackEligibility(
+  token: string
+): Promise<FeedbackEligibility> {
+  return apiFetch<FeedbackEligibility>("/feedback/eligibility", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function dismissNPS(token: string): Promise<DismissNPSResponse> {
+  return apiFetch<DismissNPSResponse>("/feedback/dismiss_nps", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function getNPSFollowUp(
+  score: number,
+  token: string
+): Promise<NPSFollowUpResponse> {
+  return apiFetch<NPSFollowUpResponse>(
+    `/feedback/nps_follow_up?score=${score}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+}
+
+// Helper to submit NPS feedback
+export async function submitNPSFeedback(
+  score: number,
+  followUp: string,
+  token: string
+): Promise<CreateFeedbackResponse> {
+  return createFeedback(
+    {
+      report_type: "nps",
+      title: "NPS Survey Response",
+      description: followUp || undefined,
+      context_data: {
+        ...captureContext(),
+        score,
+        follow_up: followUp,
+      },
+    },
+    token
+  );
+}
+
+// Helper to submit feature feedback
+export async function submitFeatureFeedback(
+  feature: string,
+  rating: "positive" | "negative",
+  additionalFeedback: string | undefined,
+  token: string
+): Promise<CreateFeedbackResponse> {
+  return createFeedback(
+    {
+      report_type: "quick_feedback",
+      title: `Feature Feedback: ${feature}`,
+      description: additionalFeedback,
+      context_data: {
+        ...captureContext(),
+        feature,
+        rating,
+      },
+    },
+    token
+  );
+}
+
+// Helper to submit session feedback
+export type SessionRating = 1 | 2 | 3 | 4 | 5;
+
+export async function submitSessionFeedback(
+  flowType: string,
+  rating: SessionRating,
+  additionalFeedback: string | undefined,
+  token: string
+): Promise<CreateFeedbackResponse> {
+  return createFeedback(
+    {
+      report_type: "quick_feedback",
+      title: `Session Feedback: ${flowType}`,
+      description: additionalFeedback,
+      context_data: {
+        ...captureContext(),
+        feature: flowType,
+        rating: rating >= 4 ? "positive" : "negative",
+      },
+    },
+    token
+  );
+}
+
+// Session feedback emoji options
+export const SESSION_RATING_EMOJIS: Record<
+  SessionRating,
+  { emoji: string; label: string }
+> = {
+  1: { emoji: "😞", label: "Very Poor" },
+  2: { emoji: "😕", label: "Poor" },
+  3: { emoji: "😐", label: "Okay" },
+  4: { emoji: "😊", label: "Good" },
+  5: { emoji: "😍", label: "Excellent" },
+};

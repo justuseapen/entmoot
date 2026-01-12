@@ -94,7 +94,13 @@ Rails.application.routes.draw do
       resources :reflection_prompts, only: [:index]
 
       # Feedback (public for create, authenticated for show)
-      resources :feedback, only: %i[create show], controller: "feedback"
+      resources :feedback, only: %i[create show], controller: "feedback" do
+        collection do
+          get "eligibility"
+          post "dismiss_nps"
+          get "nps_follow_up"
+        end
+      end
 
       # Accept invitation (public route with token)
       post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
