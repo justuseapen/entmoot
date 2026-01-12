@@ -77,7 +77,7 @@ export function Families() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-4xl">
           <p className="text-muted-foreground">Loading families...</p>
         </div>
@@ -87,7 +87,7 @@ export function Families() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardHeader>
@@ -109,7 +109,7 @@ export function Families() {
   // No families - show creation wizard inline
   if (!families || families.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold">Welcome to Entmoot</h1>
@@ -126,7 +126,7 @@ export function Families() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="p-4 md:p-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <div>

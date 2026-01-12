@@ -17,8 +17,10 @@ import { NotificationSettings } from "./pages/NotificationSettings";
 import { NotificationsPage } from "./pages/Notifications";
 import { PointsHistory } from "./pages/PointsHistory";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
+import { UserProfile } from "./pages/UserProfile";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { MainLayout } from "./components/MainLayout";
 import {
   CelebrationProvider,
   useCelebrationListener,
@@ -69,7 +71,9 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -77,7 +81,9 @@ function App() {
               path="/families"
               element={
                 <ProtectedRoute>
-                  <Families />
+                  <MainLayout>
+                    <Families />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -85,7 +91,9 @@ function App() {
               path="/families/:id"
               element={
                 <ProtectedRoute>
-                  <FamilySettings />
+                  <MainLayout>
+                    <FamilySettings />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -93,7 +101,9 @@ function App() {
               path="/families/:id/goals"
               element={
                 <ProtectedRoute>
-                  <Goals />
+                  <MainLayout>
+                    <Goals />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -101,7 +111,9 @@ function App() {
               path="/families/:id/goals/tree"
               element={
                 <ProtectedRoute>
-                  <GoalTree />
+                  <MainLayout>
+                    <GoalTree />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -109,7 +121,9 @@ function App() {
               path="/families/:id/planner"
               element={
                 <ProtectedRoute>
-                  <DailyPlanner />
+                  <MainLayout>
+                    <DailyPlanner />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -117,7 +131,9 @@ function App() {
               path="/families/:id/reflection"
               element={
                 <ProtectedRoute>
-                  <EveningReflection />
+                  <MainLayout>
+                    <EveningReflection />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -125,7 +141,9 @@ function App() {
               path="/families/:id/weekly-review"
               element={
                 <ProtectedRoute>
-                  <WeeklyReview />
+                  <MainLayout>
+                    <WeeklyReview />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -133,7 +151,9 @@ function App() {
               path="/families/:id/leaderboard"
               element={
                 <ProtectedRoute>
-                  <Leaderboard />
+                  <MainLayout>
+                    <Leaderboard />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -141,7 +161,9 @@ function App() {
               path="/settings/notifications"
               element={
                 <ProtectedRoute>
-                  <NotificationSettings />
+                  <MainLayout>
+                    <NotificationSettings />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -149,7 +171,9 @@ function App() {
               path="/notifications"
               element={
                 <ProtectedRoute>
-                  <NotificationsPage />
+                  <MainLayout>
+                    <NotificationsPage />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -157,7 +181,19 @@ function App() {
               path="/points"
               element={
                 <ProtectedRoute>
-                  <PointsHistory />
+                  <MainLayout>
+                    <PointsHistory />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <UserProfile />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />

@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +15,6 @@ import { useTodaysPlan } from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
-import { logout as logoutApi } from "@/lib/auth";
 import { formatTodayDate } from "@/lib/dailyPlans";
 import {
   isDueSoon,
@@ -28,9 +27,7 @@ import {
   getActivityColor,
   formatActivityTime,
 } from "@/lib/activityFeed";
-import { FamilySwitcher } from "@/components/FamilySwitcher";
 import { FamilyCreationWizard } from "@/components/FamilyCreationWizard";
-import { NotificationBell } from "@/components/NotificationBell";
 import { StreaksSummary } from "@/components/StreaksSummary";
 import { BadgeShowcase } from "@/components/BadgeShowcase";
 import { PointsDisplay } from "@/components/PointsDisplay";
@@ -44,8 +41,7 @@ function getGreeting(): string {
 }
 
 export function Dashboard() {
-  const navigate = useNavigate();
-  const { user, token, logout, setLoading, isLoading } = useAuthStore();
+  const { user } = useAuthStore();
   const { currentFamily } = useFamilyStore();
   const { data: families, isLoading: familiesLoading } = useFamilies();
 
@@ -67,20 +63,6 @@ export function Dashboard() {
     currentFamily?.id ?? 0,
     5
   );
-
-  const handleLogout = async () => {
-    setLoading(true);
-    try {
-      if (token) {
-        await logoutApi(token);
-      }
-    } catch {
-      // Even if logout fails on server, clear local state
-    } finally {
-      logout();
-      navigate("/login", { replace: true });
-    }
-  };
 
   const showCreationWizard =
     !familiesLoading && (!families || families.length === 0);
@@ -106,31 +88,14 @@ export function Dashboard() {
     notifications?.notifications.filter((n) => !n.read) ?? [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="p-4 md:p-6">
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold sm:text-3xl">
-                {getGreeting()}, {user?.name?.split(" ")[0]}!
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                {formatTodayDate()}
-              </p>
-            </div>
-            {!showCreationWizard && <FamilySwitcher />}
-          </div>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing out..." : "Sign out"}
-            </Button>
-          </div>
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold sm:text-3xl">
+            {getGreeting()}, {user?.name?.split(" ")[0]}!
+          </h1>
+          <p className="text-muted-foreground text-sm">{formatTodayDate()}</p>
         </div>
 
         {showCreationWizard ? (
@@ -595,7 +560,7 @@ export function Dashboard() {
               <Card>
                 <CardContent className="py-8 text-center">
                   <p className="text-muted-foreground">
-                    Select a family from the switcher above to see your
+                    Select a family from the switcher in the header to see your
                     dashboard.
                   </p>
                 </CardContent>

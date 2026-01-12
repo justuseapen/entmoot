@@ -130,7 +130,7 @@ export function FamilySettings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-4xl">
           <p className="text-muted-foreground">Loading family settings...</p>
         </div>
@@ -140,7 +140,7 @@ export function FamilySettings() {
 
   if (loadError || !family) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardHeader>
@@ -163,7 +163,7 @@ export function FamilySettings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="p-4 md:p-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <div>

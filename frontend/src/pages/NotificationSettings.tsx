@@ -57,7 +57,7 @@ export function NotificationSettings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-2xl">
           <p className="text-muted-foreground">
             Loading notification settings...
@@ -69,7 +69,7 @@ export function NotificationSettings() {
 
   if (error || !prefs) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="p-4 md:p-6">
         <div className="mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -94,7 +94,7 @@ export function NotificationSettings() {
   const schedulePreview = getSchedulePreview(prefs, currentFamily?.timezone);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="p-4 md:p-6">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
