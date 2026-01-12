@@ -27,6 +27,9 @@ RSpec.describe FeedbackReport do
 
   describe "associations" do
     it { is_expected.to belong_to(:user).optional }
+    it { is_expected.to belong_to(:assigned_to).class_name("User").optional }
+    it { is_expected.to belong_to(:duplicate_of).class_name("FeedbackReport").optional }
+    it { is_expected.to have_many(:duplicates).class_name("FeedbackReport").with_foreign_key(:duplicate_of_id) }
 
     it "can attach a screenshot" do
       report = build(:feedback_report)
@@ -140,6 +143,78 @@ RSpec.describe FeedbackReport do
         expect(described_class.recent.last).to eq(old_report)
       end
     end
+
+    describe ".by_severity" do
+      let!(:blocker_report) { create(:feedback_report, :bug, :blocker) }
+      let!(:minor_report) { create(:feedback_report, :bug, :minor) }
+
+      it "returns reports of the specified severity" do
+        expect(described_class.by_severity("blocker")).to include(blocker_report)
+        expect(described_class.by_severity("blocker")).not_to include(minor_report)
+      end
+
+      it "returns all reports when severity is nil" do
+        expect(described_class.by_severity(nil)).to include(blocker_report, minor_report)
+      end
+    end
+
+    describe ".by_date_range" do
+      let!(:old_report) { create(:feedback_report, created_at: 10.days.ago) }
+      let!(:recent_report) { create(:feedback_report, created_at: 2.days.ago) }
+
+      it "filters by start_date" do
+        result = described_class.by_date_range(5.days.ago, nil)
+        expect(result).to include(recent_report)
+        expect(result).not_to include(old_report)
+      end
+
+      it "filters by end_date" do
+        result = described_class.by_date_range(nil, 5.days.ago)
+        expect(result).to include(old_report)
+        expect(result).not_to include(recent_report)
+      end
+
+      it "filters by both dates" do
+        result = described_class.by_date_range(5.days.ago, 1.day.ago)
+        expect(result).to include(recent_report)
+        expect(result).not_to include(old_report)
+      end
+    end
+
+    describe ".unassigned" do
+      let!(:unassigned_report) { create(:feedback_report) }
+      let!(:assigned_report) { create(:feedback_report, assigned_to: create(:user)) }
+
+      it "returns only unassigned reports" do
+        expect(described_class.unassigned).to include(unassigned_report)
+        expect(described_class.unassigned).not_to include(assigned_report)
+      end
+    end
+
+    describe ".assigned_to_user" do
+      let(:user) { create(:user) }
+      let!(:assigned_report) { create(:feedback_report, assigned_to: user) }
+      let!(:other_report) { create(:feedback_report) }
+
+      it "returns reports assigned to specified user" do
+        expect(described_class.assigned_to_user(user.id)).to include(assigned_report)
+        expect(described_class.assigned_to_user(user.id)).not_to include(other_report)
+      end
+
+      it "returns all reports when user_id is nil" do
+        expect(described_class.assigned_to_user(nil)).to include(assigned_report, other_report)
+      end
+    end
+
+    describe ".not_duplicates" do
+      let!(:original_report) { create(:feedback_report) }
+      let!(:duplicate_report) { create(:feedback_report, duplicate_of: original_report) }
+
+      it "excludes duplicate reports" do
+        expect(described_class.not_duplicates).to include(original_report)
+        expect(described_class.not_duplicates).not_to include(duplicate_report)
+      end
+    end
   end
 
   describe "#resolve!" do
@@ -153,6 +228,36 @@ RSpec.describe FeedbackReport do
       freeze_time do
         expect { report.resolve! }.to change { report.reload.resolved_at }.from(nil).to(Time.current)
       end
+    end
+  end
+
+  describe "#mark_as_duplicate!" do
+    let(:original) { create(:feedback_report) }
+    let(:duplicate) { create(:feedback_report) }
+
+    it "sets duplicate_of_id" do
+      expect { duplicate.mark_as_duplicate!(original.id) }
+        .to change { duplicate.reload.duplicate_of_id }.from(nil).to(original.id)
+    end
+
+    it "sets status to closed" do
+      expect { duplicate.mark_as_duplicate!(original.id) }
+        .to change { duplicate.reload.status }.from("new").to("closed")
+    end
+  end
+
+  describe "#duplicate?" do
+    it "returns true when duplicate_of_id is present" do
+      original = create(:feedback_report)
+      duplicate = create(:feedback_report, duplicate_of: original)
+
+      expect(duplicate.duplicate?).to be(true)
+    end
+
+    it "returns false when duplicate_of_id is nil" do
+      report = create(:feedback_report)
+
+      expect(report.duplicate?).to be(false)
     end
   end
 end

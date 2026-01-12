@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_210002) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_210815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -111,7 +111,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_210002) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "assigned_to_id"
+    t.text "internal_notes"
+    t.bigint "duplicate_of_id"
+    t.index ["assigned_to_id"], name: "index_feedback_reports_on_assigned_to_id"
     t.index ["created_at"], name: "index_feedback_reports_on_created_at"
+    t.index ["duplicate_of_id"], name: "index_feedback_reports_on_duplicate_of_id"
     t.index ["report_type"], name: "index_feedback_reports_on_report_type"
     t.index ["status"], name: "index_feedback_reports_on_status"
     t.index ["user_id"], name: "index_feedback_reports_on_user_id"
@@ -358,7 +363,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_210002) do
   add_foreign_key "daily_tasks", "goals"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
+  add_foreign_key "feedback_reports", "feedback_reports", column: "duplicate_of_id"
   add_foreign_key "feedback_reports", "users"
+  add_foreign_key "feedback_reports", "users", column: "assigned_to_id"
   add_foreign_key "goal_assignments", "goals"
   add_foreign_key "goal_assignments", "users"
   add_foreign_key "goals", "families"

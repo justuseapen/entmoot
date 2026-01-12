@@ -18,6 +18,7 @@ import { NotificationsPage } from "./pages/Notifications";
 import { PointsHistory } from "./pages/PointsHistory";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { UserProfile } from "./pages/UserProfile";
+import { AdminFeedback } from "./pages/AdminFeedback";
 import { NotFound } from "./pages/NotFound";
 import { ServerError } from "./pages/ServerError";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -200,6 +201,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <UserProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/feedback"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AdminFeedback />
                     </MainLayout>
                   </ProtectedRoute>
                 }

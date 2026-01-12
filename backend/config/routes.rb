@@ -105,6 +105,7 @@ Rails.application.routes.draw do
       # Admin routes
       namespace :admin do
         resource :onboarding_metrics, only: [:show]
+        resources :feedback, only: %i[index show update], controller: "feedback"
       end
     end
   end
