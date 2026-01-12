@@ -2,7 +2,7 @@
 
 ## Product Requirements Document (PRD)
 
-**Version:** 1.0
+**Version:** 1.1
 **Last Updated:** January 2026
 **Status:** Draft
 
@@ -52,30 +52,354 @@ Existing tools (Notion, Todoist, paper planners) lack:
 
 ---
 
-## 4. Core Features
+## 4. Landing Page & Marketing
 
-### 4.1 Family & Member Management
+### 4.1 Public Landing Page
 
-#### 4.1.1 Family Account Setup
+The landing page is the first impression for potential users. It should clearly communicate value and drive sign-ups.
+
+#### 4.1.1 Hero Section
+- **Headline:** "Your Family's Goals, Finally In Sync"
+- **Subheadline:** "From morning routines to yearly dreams—Entmoot helps your family plan together, reflect together, and grow together."
+- **Primary CTA:** "Start Your Family's Journey" (leads to registration)
+- **Secondary CTA:** "See How It Works" (scrolls to features)
+- **Hero visual:** Warm illustration of a family gathered around a tree (the Entmoot), with goal bubbles floating upward
+
+#### 4.1.2 Problem/Solution Section
+- **Header:** "Sound Familiar?"
+- Pain points presented as relatable scenarios:
+  - "Monday's chaos erases Sunday's best intentions"
+  - "Everyone's calendar is full, but nothing important gets done"
+  - "Kids have goals too—but they're stuck in your head, not a system"
+  - "You meant to do that annual review... six months ago"
+- **Transition:** "Entmoot brings calm to the chaos"
+
+#### 4.1.3 Features Overview
+Present key features with icons and brief descriptions:
+
+1. **Multi-Scale Planning**
+   - "From today's to-dos to this year's dreams"
+   - Daily, weekly, monthly, quarterly, and annual planning in one place
+
+2. **Family-First Design**
+   - "Everyone has a seat at the table"
+   - Age-appropriate interfaces for kids, teens, and adults
+   - Shared family goals alongside personal ones
+
+3. **AI-Powered Coaching**
+   - "Your family's personal goal coach"
+   - Smart goal refinement, personalized reflection prompts
+   - Pattern recognition to help you improve
+
+4. **Morning & Evening Rituals**
+   - "Start and end each day with intention"
+   - Guided planning and reflection flows
+   - Build habits that stick
+
+5. **Celebrate Together**
+   - "Make progress visible and fun"
+   - Streaks, badges, points, and family leaderboards
+   - Turn goal-setting into a family tradition
+
+#### 4.1.4 Social Proof Section
+- Testimonial placeholders (to be populated post-launch)
+- "Trusted by X families" counter (once metrics available)
+- Family-friendly trust badges (privacy-focused, COPPA-aware)
+
+#### 4.1.5 How It Works
+Three-step visual flow:
+1. **Create Your Family** - "Set up your family in minutes. Invite everyone from grandparents to teens."
+2. **Set Goals Together** - "Choose what matters—from daily habits to annual dreams. AI helps make them SMART."
+3. **Reflect & Grow** - "Morning planning, evening reflection. Watch your family transform."
+
+#### 4.1.6 Pricing Preview
+- "Free to start" badge prominently displayed
+- Simple tier overview (details TBD):
+  - **Free:** Up to 4 family members, core features
+  - **Family:** Unlimited members, AI coaching, integrations
+  - **Extended:** Multi-family support, priority support
+
+#### 4.1.7 Final CTA Section
+- **Header:** "Ready to help your family thrive?"
+- **Subtext:** "Join thousands of families turning chaos into calm"
+- **CTA Button:** "Create Your Free Family Account"
+- **Reassurance:** "No credit card required. Set up in 2 minutes."
+
+#### 4.1.8 Footer
+- Links: About, Blog, Help Center, Privacy, Terms
+- Social media links
+- Contact email
+- *"Don't be hasty." - Treebeard* tagline
+
+---
+
+## 5. Onboarding Flow
+
+### 5.1 Registration
+
+#### 5.1.1 Sign-Up Form
+- Email address
+- Password (with strength indicator)
+- First name
+- "How did you hear about us?" (optional, for analytics)
+- Terms of service and privacy policy checkbox
+- "Create Account" button
+- OAuth alternatives: "Continue with Google" / "Continue with Apple"
+
+#### 5.1.2 Email Verification
+- Send verification email immediately
+- Show "Check your email" screen with:
+  - Resend option (with cooldown)
+  - "Wrong email?" edit option
+  - What to expect next
+
+### 5.2 Family Setup Wizard
+
+After email verification, guide users through family creation with a friendly, step-by-step wizard.
+
+#### 5.2.1 Welcome Screen
+- Warm greeting: "Welcome to Entmoot, [First Name]!"
+- Brief explanation: "Let's set up your family in just a few steps"
+- Progress indicator showing 4-5 steps ahead
+- "Let's Go" button
+
+#### 5.2.2 Step 1: Name Your Family
+- Input: Family name (e.g., "The Smiths", "Team Garcia", "Our Crew")
+- Optional: Upload family photo/avatar
+- Helpful suggestion: "This is how your family will appear in the app"
+- Skip option for photo
+
+#### 5.2.3 Step 2: Set Your Timezone
+- Auto-detect timezone with confirmation
+- Dropdown to change if incorrect
+- Explanation: "We'll use this for your morning and evening planning reminders"
+
+#### 5.2.4 Step 3: Your Role
+- Confirm user's role (defaults to Admin)
+- Brief explanation of what Admin can do
+- Option to add birthday (for age-appropriate features)
+
+#### 5.2.5 Step 4: Invite Family Members (Optional)
+- "Who else is in your family?"
+- Add members by email with role selection:
+  - Adult, Teen (13-17), Child (under 13), Observer
+- Bulk invite option: paste multiple emails
+- "I'll do this later" skip option
+- Note: Child accounts require parental management
+
+#### 5.2.6 Step 5: Choose Your Starting Point
+Present options based on current date/time:
+- **"Start with today"** - Jump into daily planning
+- **"Set a weekly goal"** - Begin with a 7-day focus
+- **"Create your first big goal"** - Start with something meaningful
+- **"Just explore"** - Free exploration mode
+
+### 5.3 First-Run Experience
+
+After the wizard, provide contextual guidance within the app.
+
+#### 5.3.1 Guided Tour (Optional)
+- Offer a quick product tour: "Want a quick tour?"
+- Highlight key areas:
+  1. Dashboard overview
+  2. How to create a goal
+  3. Daily planning flow
+  4. Where to find family members
+- Dismissable at any point
+- "Show me later" option saves preference
+
+#### 5.3.2 First Goal Prompt
+If user hasn't created a goal within first session:
+- Gentle prompt: "What's one thing you'd like to accomplish this week?"
+- Pre-filled suggestions based on common family goals:
+  - "Have dinner together 3 times"
+  - "Exercise as a family once"
+  - "Complete a home project"
+  - "Start a new bedtime routine"
+- AI refinement offered immediately
+
+#### 5.3.3 First Reflection Prompt
+Based on time of day at first login:
+- **Morning:** "What's your top priority for today?"
+- **Evening:** "What's one thing that went well today?"
+- Lightweight, single-question to reduce friction
+
+#### 5.3.4 Progress Celebration
+After first meaningful action (goal created, reflection completed):
+- Celebratory animation (confetti, gentle)
+- Encouraging message: "You're off to a great start!"
+- Suggest next step without being pushy
+
+### 5.4 Ongoing Onboarding (Drip Education)
+
+Spread learning over the first 2 weeks via contextual tips and emails.
+
+#### 5.4.1 In-App Tips
+- Contextual tooltips that appear once:
+  - First time on Goals page: "Pro tip: Link daily goals to weekly goals to see how small wins add up"
+  - First reflection: "Reflection is the secret sauce—even 2 minutes makes a difference"
+  - First family member joins: "Now you can share goals! Try creating a family goal together"
+
+#### 5.4.2 Onboarding Email Sequence
+- **Day 1:** Welcome + getting started recap
+- **Day 3:** "Have you tried morning planning?" (if not used)
+- **Day 5:** "Meet your AI coach" - highlight goal refinement
+- **Day 7:** "Time for your first weekly review!"
+- **Day 14:** "How's it going?" - feedback request + feature highlights
+
+#### 5.4.3 Empty State Guidance
+When sections are empty, provide helpful prompts:
+- **No goals:** "Your goals will appear here. Ready to set your first one?"
+- **No reflections:** "Reflections help you learn from each day. Start your first one tonight?"
+- **No family members:** "Entmoot is better together. Invite your family!"
+
+### 5.5 Onboarding Metrics
+
+Track to measure onboarding effectiveness:
+- Wizard completion rate (per step)
+- Time to first goal creation
+- Time to first reflection
+- Day 7 retention rate
+- Family member invite rate
+- Tour completion rate
+
+---
+
+## 6. Bug Reporting & Feedback System
+
+### 6.1 In-App Bug Reporter
+
+A persistent, accessible bug reporting mechanism available throughout the application.
+
+#### 6.1.1 Access Points
+- **Floating Feedback Button:** Small, unobtrusive button in bottom-right corner
+  - Icon: Speech bubble or flag
+  - Label: "Feedback" or "Help"
+  - Collapsible/hideable via settings
+- **Help Menu:** "Report a Bug" option in user dropdown/settings
+- **Keyboard Shortcut:** Ctrl/Cmd + Shift + F for power users
+- **Error Boundaries:** Automatic prompt when app crashes
+
+#### 6.1.2 Bug Report Form
+Quick, friction-free form:
+- **Type selector:** Bug / Feature Request / General Feedback
+- **Title:** Brief summary (required)
+- **Description:** What happened? What did you expect? (required for bugs)
+- **Screenshot attachment:**
+  - Auto-capture current screen option
+  - Upload from device option
+  - Annotation tools (highlight, redact)
+- **Severity:** (for bugs) Blocker / Major / Minor / Cosmetic
+- **Contact preference:** "May we follow up?" checkbox + email (pre-filled)
+
+#### 6.1.3 Automatic Context Capture
+Automatically include (with user consent disclosure):
+- Current page/URL
+- Browser and OS info
+- Screen resolution
+- User ID (anonymized option available)
+- Recent console errors (sanitized)
+- Timestamp
+- App version
+
+#### 6.1.4 Submission Flow
+1. User opens feedback widget
+2. Selects type (Bug/Feature/Feedback)
+3. Fills form (2-3 fields max for quick bugs)
+4. Optional: annotate screenshot
+5. Submit
+6. Confirmation: "Thanks! We've received your feedback."
+7. Optional: Email confirmation with ticket reference
+
+### 6.2 Feedback Management (Internal)
+
+#### 6.2.1 Feedback Dashboard
+Admin interface to manage incoming feedback:
+- List view with filters (type, severity, status, date)
+- Status workflow: New → Acknowledged → In Progress → Resolved → Closed
+- Assignment to team members
+- Tagging/categorization system
+- Duplicate detection
+
+#### 6.2.2 User Communication
+- Auto-response on submission
+- Status update notifications (optional, user preference)
+- Resolution notification: "Your reported issue has been fixed!"
+
+### 6.3 Proactive Feedback Collection
+
+#### 6.3.1 NPS Surveys
+- Trigger after 30 days of active use
+- Simple 0-10 scale: "How likely are you to recommend Entmoot?"
+- Follow-up question based on score
+- Maximum frequency: Once per quarter
+
+#### 6.3.2 Feature-Specific Feedback
+- After using new features for first time
+- Thumbs up/down quick reaction
+- Optional: "Tell us more" expansion
+
+#### 6.3.3 Session Feedback
+- Occasional prompt after completing key flows (weekly review, goal completion)
+- "How was this experience?" with emoji scale
+- Non-blocking, easily dismissable
+
+### 6.4 Technical Implementation
+
+#### 6.4.1 Data Model
+```
+FeedbackReport
+├── type (bug, feature_request, feedback)
+├── title
+├── description
+├── severity (for bugs)
+├── status (new, acknowledged, in_progress, resolved, closed)
+├── user_id (optional, for anonymous)
+├── context_data (JSON: url, browser, etc.)
+├── screenshots (attachments)
+├── created_at
+├── resolved_at
+└── internal_notes
+```
+
+#### 6.4.2 API Endpoints
+- `POST /api/v1/feedback` - Submit feedback
+- `GET /api/v1/feedback/:id` - Get status (for user's own reports)
+- Admin endpoints for management (separate admin namespace)
+
+#### 6.4.3 Third-Party Integration Options
+Consider integration with:
+- **Sentry:** For automatic error capture and correlation
+- **Linear/Jira:** For bug tracking workflow
+- **Intercom/Zendesk:** For user communication
+- Build custom initially, integrate as needed
+
+---
+
+## 7. Core Features
+
+### 7.1 Family & Member Management
+
+#### 7.1.1 Family Account Setup
 - Family registration with admin user
 - Family profile (name, photo, timezone, preferences)
 - Subscription management (free tier initially)
 
-#### 4.1.2 Member Management
+#### 7.1.2 Member Management
 - Invite members via email/link
 - Member roles: Admin, Adult, Teen, Child (managed), Observer (extended family)
 - Member profiles: name, avatar, birthday, role, notification preferences
 - Pet profiles: name, type, photo, care schedule
 
-#### 4.1.3 Visibility & Sharing Controls
+#### 7.1.3 Visibility & Sharing Controls
 - Personal goals (private to individual)
 - Shared goals (visible to selected members)
 - Family goals (visible to all members)
 - Role-based default visibility settings
 
-### 4.2 Multi-Scale Planning System
+### 7.2 Multi-Scale Planning System
 
-#### 4.2.1 Annual Planning & Review
+#### 7.2.1 Annual Planning & Review
 - Annual theme/word of the year
 - Long-term vision statements (personal and family)
 - Annual SMART goals (3-7 recommended)
@@ -85,7 +409,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
   - Extract lessons learned
   - Set intentions for next year
 
-#### 4.2.2 Quarterly Planning & Review
+#### 7.2.2 Quarterly Planning & Review
 - Quarterly objectives derived from annual goals (loose linking)
 - Key results for each objective
 - 90-day sprint mentality
@@ -94,7 +418,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
   - Adjust annual goals if needed
   - Plan next quarter priorities
 
-#### 4.2.3 Monthly Planning & Review
+#### 7.2.3 Monthly Planning & Review
 - Monthly focus areas
 - Habit tracking setup/adjustment
 - Monthly review workflow:
@@ -102,7 +426,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
   - Habit streaks and patterns
   - Upcoming month preview
 
-#### 4.2.4 Weekly Planning & Review
+#### 7.2.4 Weekly Planning & Review
 - Weekly priorities (top 3-5 items)
 - Calendar review and time blocking
 - Weekly review workflow:
@@ -111,7 +435,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
   - Wins and gratitude
   - Next week intentions
 
-#### 4.2.5 Daily Planning & Reflection
+#### 7.2.5 Daily Planning & Reflection
 
 **Morning Planning:**
 - Today's top 3 priorities
@@ -129,9 +453,9 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - Mood/energy tracking (optional)
 - Tomorrow preview
 
-### 4.3 SMART Goal System
+### 7.3 SMART Goal System
 
-#### 4.3.1 Goal Creation
+#### 7.3.1 Goal Creation
 - Goal title and description
 - SMART criteria fields:
   - **Specific**: Clear, well-defined objective
@@ -144,27 +468,27 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - Assigned family members
 - Visibility settings
 
-#### 4.3.2 Goal Tracking
+#### 7.3.2 Goal Tracking
 - Progress percentage or milestone tracking
 - Check-in reminders
 - Status: Not Started, In Progress, At Risk, Completed, Abandoned
 - Notes and updates log
 
-#### 4.3.3 Goal Relationships
+#### 7.3.3 Goal Relationships
 - Loose linking to parent goals (daily → weekly → monthly → quarterly → annual)
 - Visual goal tree/hierarchy view
 - Impact analysis (how daily actions connect to annual vision)
 
-### 4.4 AI Coaching Features
+### 7.4 AI Coaching Features
 
-#### 4.4.1 SMART Goal Refinement
+#### 7.4.1 SMART Goal Refinement
 - AI analyzes draft goals
 - Suggests improvements for each SMART criterion
 - Offers alternative phrasings
 - Identifies potential obstacles
 - Recommends measurable milestones
 
-#### 4.4.2 Reflection Prompts
+#### 7.4.2 Reflection Prompts
 - Personalized prompts based on:
   - Recent goal progress
   - Historical patterns
@@ -173,7 +497,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - Adaptive difficulty (deeper prompts as user matures)
 - Themed prompt sets (gratitude, growth, relationships, etc.)
 
-#### 4.4.3 Progress Analysis
+#### 7.4.3 Progress Analysis
 - Pattern recognition across time
 - Identify peak productivity times
 - Spot recurring blockers
@@ -181,35 +505,35 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - Celebrate consistency and streaks
 - Gentle accountability nudges
 
-#### 4.4.4 Family Insights
+#### 7.4.4 Family Insights
 - Cross-member goal alignment suggestions
 - Family meeting agenda generation
 - Conflict detection (overcommitment, competing priorities)
 - Shared celebration prompts
 
-### 4.5 Calendar Integration
+### 7.5 Calendar Integration
 
-#### 4.5.1 Supported Calendars
+#### 7.5.1 Supported Calendars
 - Google Calendar (read/write)
 - Apple Calendar via iCloud (read/write)
 - Outlook/Microsoft 365 (read/write)
 - CalDAV generic support
 
-#### 4.5.2 Sync Features
+#### 7.5.2 Sync Features
 - Two-way sync for planning blocks
 - Import existing events for context
 - Export goals/tasks as calendar events
 - Time blocking suggestions based on goals
 
-### 4.6 Notifications & Reminders
+### 7.6 Notifications & Reminders
 
-#### 4.6.1 Notification Channels
+#### 7.6.1 Notification Channels
 - In-app notifications
 - Email digests (daily, weekly, monthly)
 - Push notifications (web and mobile)
 - SMS for critical reminders (optional, future)
 
-#### 4.6.2 Reminder Types
+#### 7.6.2 Reminder Types
 - Morning planning prompt
 - Evening reflection prompt
 - Goal check-in reminders
@@ -217,7 +541,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - Shared goal updates from family members
 - Streak maintenance alerts
 
-#### 4.6.3 Notification Preferences
+#### 7.6.3 Notification Preferences
 - Per-channel toggle
 - Quiet hours
 - Frequency controls
@@ -225,9 +549,9 @@ Existing tools (Notion, Todoist, paper planners) lack:
 
 ---
 
-## 5. Technical Architecture
+## 8. Technical Architecture
 
-### 5.1 Technology Stack
+### 8.1 Technology Stack
 
 #### Backend
 - **Framework:** Ruby on Rails 7.x (API mode + some server-rendered views)
@@ -258,7 +582,7 @@ Existing tools (Notion, Todoist, paper planners) lack:
 - **Email:** SendGrid or Postmark
 - **Monitoring:** Sentry, LogRocket
 
-### 5.2 Data Models (High-Level)
+### 8.2 Data Models (High-Level)
 
 ```
 Family
@@ -295,7 +619,7 @@ Review
 └── NextPeriodIntentions
 ```
 
-### 5.3 API Design
+### 8.3 API Design
 - RESTful JSON API for CRUD operations
 - GraphQL consideration for complex family data fetching (evaluate in Phase 2)
 - WebSocket/ActionCable for real-time updates
@@ -303,19 +627,23 @@ Review
 
 ---
 
-## 6. User Experience
+## 9. User Experience
 
-### 6.1 Key Screens
+### 9.1 Key Screens
 
-1. **Dashboard** - Today's plan, upcoming reviews, family activity feed
-2. **Goal Browser** - Filter by time scale, member, status; visual hierarchy
-3. **Daily Planner** - Morning planning and evening reflection interface
-4. **Review Wizard** - Guided review flows for each cadence
-5. **Family Hub** - Member management, shared goals, family calendar
-6. **AI Coach** - Chat interface for goal refinement and advice
-7. **Settings** - Profile, notifications, integrations, family admin
+1. **Landing Page** - Public marketing page with value proposition and sign-up CTAs
+2. **Registration/Login** - Sign-up form, OAuth options, email verification
+3. **Onboarding Wizard** - Family setup flow for new users
+4. **Dashboard** - Today's plan, upcoming reviews, family activity feed
+5. **Goal Browser** - Filter by time scale, member, status; visual hierarchy
+6. **Daily Planner** - Morning planning and evening reflection interface
+7. **Review Wizard** - Guided review flows for each cadence
+8. **Family Hub** - Member management, shared goals, family calendar
+9. **AI Coach** - Chat interface for goal refinement and advice
+10. **Settings** - Profile, notifications, integrations, family admin
+11. **Feedback Widget** - Persistent bug report/feedback form (accessible from all screens)
 
-### 6.2 Design Principles
+### 9.2 Design Principles
 - **Calm and focused** - Reduce overwhelm, progressive disclosure
 - **Family-friendly** - Warm colors, approachable typography, optional playful elements for kids
 - **Mobile-first** - Responsive design, touch-friendly targets
@@ -323,38 +651,38 @@ Review
 
 ---
 
-## 7. Security & Privacy
+## 10. Security & Privacy
 
-### 7.1 Authentication
+### 10.1 Authentication
 - Email/password with strong password requirements
 - Magic link login option
 - OAuth (Google, Apple) for convenience
 - Two-factor authentication (TOTP)
 
-### 7.2 Data Privacy
+### 10.2 Data Privacy
 - Family data strictly isolated (multi-tenant)
 - End-to-end encryption for sensitive reflections (consideration)
 - GDPR-compliant data export and deletion
 - Clear data retention policies
 - AI prompts do not store personal data beyond session
 
-### 7.3 Child Safety
+### 10.3 Child Safety
 - COPPA considerations for users under 13
 - Parental consent workflows
 - Age-appropriate content filtering
 
 ---
 
-## 8. Success Metrics
+## 11. Success Metrics
 
-### 8.1 Engagement Metrics
+### 11.1 Engagement Metrics
 - Daily active users (DAU) per family
 - Reflection completion rate
 - Goal completion rate by time scale
 - Review completion rate
 - Streak lengths (daily planning consistency)
 
-### 8.2 Outcome Metrics
+### 11.2 Outcome Metrics
 - User-reported goal achievement satisfaction
 - Family alignment score (shared goal participation)
 - Retention rate (weekly, monthly)
@@ -362,9 +690,12 @@ Review
 
 ---
 
-## 9. Phased Rollout
+## 12. Phased Rollout
 
 ### Phase 1: Foundation (MVP)
+- Public landing page with marketing copy
+- User registration and authentication
+- Family setup wizard (onboarding flow)
 - Family and member management
 - SMART goal CRUD with loose linking
 - Daily planning and reflection (hybrid: checklist + prompts)
@@ -372,6 +703,7 @@ Review
 - Basic notifications (in-app + email)
 - AI SMART goal refinement (Anthropic Claude)
 - Gamification system (streaks, badges, points, family leaderboards)
+- In-app bug reporting and feedback system
 
 ### Phase 2: Full Cadences
 - Monthly, quarterly, annual planning and reviews
@@ -395,17 +727,20 @@ Review
 
 ---
 
-## 10. Decisions Made
+## 13. Decisions Made
 
 1. **AI Provider:** Anthropic Claude - better at nuanced reflection prompts
 2. **Gamification:** Full system in MVP - streaks, badges, points, family leaderboards
 3. **Offline Support:** Defer to Phase 2+ (PWA service worker)
 4. **Child Accounts:** Basic support in MVP, full COPPA compliance in Phase 2+
 5. **Family Templates:** Defer to Phase 3+
+6. **Onboarding:** Step-by-step wizard in MVP, drip email education over 2 weeks
+7. **Feedback System:** Custom in-app widget in MVP, third-party integration (Sentry/Linear) as needed
+8. **Landing Page:** Single-page marketing site in MVP, separate marketing site consideration in Phase 4
 
 ---
 
-## 11. Appendix
+## 14. Appendix
 
 ### A. Competitor Analysis
 - **Notion:** Flexible but requires DIY setup, no family-specific features
