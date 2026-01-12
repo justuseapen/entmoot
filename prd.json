@@ -911,7 +911,7 @@
         "Lighthouse performance score > 90"
       ],
       "priority": 47,
-      "passes": false,
+      "passes": true,
       "notes": "Update App.tsx routing to show LandingPage for unauthenticated users instead of current Home component."
     },
     {
