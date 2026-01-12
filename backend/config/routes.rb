@@ -93,6 +93,9 @@ Rails.application.routes.draw do
       # Reflection prompts (public endpoint)
       resources :reflection_prompts, only: [:index]
 
+      # Feedback (public for create, authenticated for show)
+      resources :feedback, only: %i[create show], controller: "feedback"
+
       # Accept invitation (public route with token)
       post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
 

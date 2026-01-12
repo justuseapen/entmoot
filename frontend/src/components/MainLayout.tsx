@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +20,8 @@ import { MobileNav } from "./MobileNav";
 import { FamilySwitcher } from "./FamilySwitcher";
 import { NotificationBell } from "./NotificationBell";
 import { GuidedTour } from "./GuidedTour";
+import { FeedbackReporter, FeedbackButton } from "./FeedbackReporter";
+import { useFeedbackShortcut } from "@/hooks/useFeedback";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -102,6 +105,11 @@ export function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
   const { user, token, logout, setLoading, isLoading } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  // Keyboard shortcut: Cmd/Ctrl + Shift + F
+  const handleOpenFeedback = useCallback(() => setFeedbackOpen(true), []);
+  useFeedbackShortcut(handleOpenFeedback);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -232,6 +240,13 @@ export function MainLayout({ children }: MainLayoutProps) {
                     Notification Settings
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setFeedbackOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Send Feedback
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
@@ -255,6 +270,12 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Guided Tour */}
       <GuidedTour />
+
+      {/* Floating Feedback Button */}
+      <FeedbackButton onClick={() => setFeedbackOpen(true)} />
+
+      {/* Feedback Reporter Modal */}
+      <FeedbackReporter open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   );
 }
