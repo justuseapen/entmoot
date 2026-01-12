@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth";
 import { LandingNav } from "@/components/landing/LandingNav";
+import { LandingPageSEO } from "@/components/landing/LandingPageSEO";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
@@ -37,6 +38,7 @@ export function LandingPage() {
       className="min-h-screen scroll-smooth"
       style={{ backgroundColor: LANDING_COLORS.creamWhite }}
     >
+      <LandingPageSEO />
       <LandingNav />
       <main className="flex flex-col">
         {/* Hero Section */}

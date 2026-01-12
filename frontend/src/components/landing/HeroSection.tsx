@@ -34,6 +34,8 @@ function BlockyTree({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       style={{ color: LANDING_COLORS.darkForest }}
+      aria-hidden="true"
+      role="presentation"
     >
       {/* Tree crown - blocky/pixelated style with stacked rectangles */}
       <rect
@@ -78,13 +80,14 @@ function FloatingIsland({
   animate?: boolean;
 }) {
   return (
-    <div className={`absolute ${className}`}>
+    <div className={`absolute ${className}`} aria-hidden="true">
       <svg
         width="80"
         height="60"
         viewBox="0 0 80 60"
         className={animate ? "animate-float" : ""}
         style={{ color: LANDING_COLORS.leafGreen }}
+        role="presentation"
       >
         {/* Island base */}
         <ellipse
@@ -208,10 +211,11 @@ export function HeroSection() {
         </p>
       </div>
 
-      {/* Blocky forest silhouette at bottom */}
+      {/* Blocky forest silhouette at bottom - decorative */}
       <div
         className="absolute right-0 bottom-0 left-0 z-0"
         style={{ backgroundColor: LANDING_COLORS.darkForest }}
+        aria-hidden="true"
       >
         <div className="relative h-32 sm:h-40 lg:h-48">
           {/* Forest silhouette - varying heights */}

@@ -34,6 +34,8 @@ function BlockyTree({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       style={{ color: LANDING_COLORS.darkForest }}
+      aria-hidden="true"
+      role="presentation"
     >
       {/* Tree crown - blocky/pixelated style with stacked rectangles */}
       <rect
@@ -119,10 +121,11 @@ export function FinalCTASection() {
         </p>
       </div>
 
-      {/* Blocky forest silhouette at bottom */}
+      {/* Blocky forest silhouette at bottom - decorative */}
       <div
         className="absolute right-0 bottom-0 left-0 z-0"
         style={{ backgroundColor: LANDING_COLORS.darkForest }}
+        aria-hidden="true"
       >
         <div className="relative h-28 sm:h-36 lg:h-44">
           {/* Forest silhouette - varying heights */}

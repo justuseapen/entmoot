@@ -43,6 +43,7 @@
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.70.0",
     "react-joyride": "^2.9.3",
     "react-router-dom": "^7.12.0",
