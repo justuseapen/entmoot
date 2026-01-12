@@ -598,7 +598,7 @@
         "500 error page for server errors"
       ],
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "notes": "Good UX polish. Users should never see raw error messages."
     },
     {

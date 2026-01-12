@@ -796,3 +796,29 @@ Started: January 2026
   - Profile form uses react-hook-form reset() with user data when cancel is clicked
   - 934 total tests pass (38 new profile-related tests)
 ---
+
+## 2026-01-12 - US-032
+- Implemented Error Handling and Loading States for improved UX polish
+- Files created/changed:
+  - `/frontend/src/components/LoadingIndicator.tsx` - GlobalLoadingIndicator (top bar), PageLoading, LoadingSpinner components
+  - `/frontend/src/components/Skeleton.tsx` - Skeleton base component plus CardSkeleton, ListSkeleton, TableSkeleton, GoalCardSkeleton, DashboardSkeleton, ProfileSkeleton
+  - `/frontend/src/components/ErrorBoundary.tsx` - React error boundary class with retry/refresh actions, dev-mode error display
+  - `/frontend/src/components/ErrorMessage.tsx` - ErrorMessage with variants (inline, card, full-page), user-friendly message mapping, QueryError helper
+  - `/frontend/src/components/OfflineIndicator.tsx` - Network status indicator with online/offline detection and reconnection notice
+  - `/frontend/src/hooks/useOnlineStatus.ts` - Hook for checking network connectivity
+  - `/frontend/src/pages/NotFound.tsx` - Enhanced 404 page with Go Back, Dashboard buttons, better styling
+  - `/frontend/src/pages/ServerError.tsx` - 500 error page for server errors and error boundary fallback
+  - `/frontend/src/index.css` - Added CSS animations for loading-bar and fade-out
+  - `/frontend/src/App.tsx` - Integrated ErrorBoundary, GlobalLoadingIndicator, OfflineIndicator
+  - `/backend/spec/factories/pets.rb` - Fixed flaky test with unique pet names via sequence
+- **Learnings for future iterations:**
+  - Use `import.meta.env.DEV` instead of `process.env.NODE_ENV` for Vite environment checks
+  - TanStack Query provides useIsFetching() and useIsMutating() for global loading state
+  - CSS animation for loading bar: translateX from -100% to 100% creates smooth progress effect
+  - ErrorBoundary must be class component (no hook equivalent for getDerivedStateFromError)
+  - Move hooks out of component files that export both components and hooks (react-refresh warning)
+  - User-friendly error mapping: map technical errors like "Failed to fetch" to "Unable to connect to the server"
+  - Offline indicator uses window.addEventListener for "online" and "offline" events
+  - Pet factory needed sequence to avoid duplicate name validation errors when creating multiple pets
+  - 934 total tests pass (no new backend tests needed for frontend-only story)
+---
