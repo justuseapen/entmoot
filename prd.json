@@ -1003,7 +1003,7 @@
         "Cards lift with shadow on hover"
       ],
       "priority": 52,
-      "passes": false,
+      "passes": true,
       "notes": "Use Lucide icons: Target, Map, Sun, Moon, Trophy, Users. Keep descriptions concise."
     },
     {
