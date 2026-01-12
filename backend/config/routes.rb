@@ -44,6 +44,7 @@ Rails.application.routes.draw do
           get "metrics", on: :member
         end
         resource :leaderboard, only: [:show]
+        resource :activity_feed, only: [:show]
       end
 
       # User preferences (scoped to current user via /users/me)
