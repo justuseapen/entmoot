@@ -728,7 +728,7 @@
         "Track first actions in User model (first_actions jsonb field)"
       ],
       "priority": 39,
-      "passes": false,
+      "passes": true,
       "notes": "Use canvas-confetti or react-confetti library. Integrate with existing CelebrationToast component."
     },
     {
@@ -748,7 +748,7 @@
         "Request specs for tip tracking endpoints"
       ],
       "priority": 40,
-      "passes": false,
+      "passes": true,
       "notes": "Create reusable TipTooltip component. Use localStorage as immediate fallback, sync to server."
     },
     {

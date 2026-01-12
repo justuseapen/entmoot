@@ -992,3 +992,69 @@ Started: January 2026
   - Night time (22:00-05:00) returns nil prompt and should_show: false
   - 987 backend tests + 69 frontend tests = 1056 total tests pass (22 new specs)
 ---
+## 2026-01-12 - US-039
+- Implemented First Action Celebration with confetti animation for first-time user actions
+- Files created/changed:
+  - `/backend/db/migrate/20260112200038_add_first_actions_to_users.rb` - Migration adding first_actions jsonb field to users
+  - `/backend/app/models/user.rb` - Added FIRST_ACTION_TYPES constant, first_action_completed?, record_first_action? methods
+  - `/backend/app/controllers/api/v1/first_actions_controller.rb` - GET /api/v1/users/me/first_actions endpoint
+  - `/backend/app/controllers/api/v1/goals_controller.rb` - Track first goal creation, return is_first_action flag
+  - `/backend/app/controllers/api/v1/reflections_controller.rb` - Track first reflection completion, return is_first_action flag
+  - `/backend/app/controllers/api/v1/daily_plans_controller.rb` - Track first daily plan completion, return is_first_action flag
+  - `/backend/app/controllers/api/v1/invitations_controller.rb` - Track first invitation acceptance, return is_first_action flag
+  - `/backend/config/routes.rb` - Added first_actions route under /users/me
+  - `/backend/spec/models/user_spec.rb` - 8 new specs for first action methods
+  - `/backend/spec/requests/api/v1/first_actions_spec.rb` - 4 request specs for first_actions endpoint
+  - `/frontend/src/components/CelebrationToast.tsx` - Extended with first action celebration types and confetti animation via canvas-confetti
+  - `/frontend/src/lib/goals.ts` - Added is_first_action to CreateGoalResponse
+  - `/frontend/src/lib/reflections.ts` - Added is_first_action to create/update reflection responses
+  - `/frontend/src/lib/dailyPlans.ts` - Added is_first_action to updateDailyPlan response
+  - `/frontend/src/lib/families.ts` - Added is_first_action to AcceptInvitationResponse
+  - `/frontend/src/pages/Goals.tsx` - Integrated celebrateFirstAction on first goal creation
+  - `/frontend/src/pages/EveningReflection.tsx` - Integrated celebrateFirstAction on first reflection
+  - `/frontend/src/pages/DailyPlanner.tsx` - Integrated celebrateFirstAction on first daily plan
+  - `/frontend/src/pages/AcceptInvitation.tsx` - Integrated celebrateFirstAction on first invitation accepted
+  - `/frontend/package.json` - Added canvas-confetti and @types/canvas-confetti dependencies
+- **First action types tracked:**
+  - goal_created: First goal created by user
+  - reflection_completed: First reflection completed by user
+  - daily_plan_completed: First daily plan with content
+  - invitation_accepted: First family invitation accepted
+- **Learnings for future iterations:**
+  - Predicate methods in Ruby should end with `?` (record_first_action? not record_first_action)
+  - Rubocop method length can be satisfied by extracting helper methods (handle_plan_content_update?, render_updated_plan)
+  - canvas-confetti has peer dependency issues with react-joyride - use --legacy-peer-deps for npm install
+  - FIRST_ACTION_CELEBRATIONS config maps action types to celebration messages and next step suggestions
+  - fireConfetti uses requestAnimationFrame for smooth animation timing
+  - Confetti duration is ~2.5 seconds (particleCount: 100, spread: 70, origin y: 0.6)
+  - 1000 backend tests + 69 frontend tests = 1069 total tests pass (13 new specs)
+---
+
+## 2026-01-12 - US-040
+- Implemented Contextual In-App Tips feature
+- Files created:
+  - `/backend/app/controllers/api/v1/tips_controller.rb` - Tips API endpoints
+  - `/backend/db/migrate/20260112201000_add_tips_fields_to_notification_preferences.rb` - Migration
+  - `/backend/spec/requests/api/v1/tips_spec.rb` - Request specs for tips API
+  - `/frontend/src/components/TipTooltip.tsx` - Reusable TipTooltip and StandaloneTip components
+  - `/frontend/src/hooks/useTips.ts` - React hooks for tips state management
+  - `/frontend/src/lib/tips.ts` - Tips API functions and content configuration
+- Files modified:
+  - `/backend/app/models/notification_preference.rb` - Added tip tracking methods
+  - `/backend/config/routes.rb` - Added tips routes
+  - `/frontend/src/lib/notificationPreferences.ts` - Added tips types
+  - `/frontend/src/pages/Goals.tsx` - Added goals_page tip
+  - `/frontend/src/pages/EveningReflection.tsx` - Added first_reflection tip
+  - `/frontend/src/pages/DailyPlanner.tsx` - Added first_daily_plan tip
+  - `/frontend/src/pages/WeeklyReview.tsx` - Added first_weekly_review tip
+  - `/frontend/src/pages/FamilySettings.tsx` - Added first_family_member tip
+  - `/frontend/src/pages/NotificationSettings.tsx` - Added tips toggle
+- **Learnings for future iterations:**
+  - Tips stored in NotificationPreference model (tips_enabled, shown_tips jsonb array)
+  - TipsController provides GET show, POST mark_shown, PATCH toggle endpoints
+  - StandaloneTip component for standalone tip cards (used in page headers)
+  - TipTooltip component wraps elements for popover-style tips
+  - Tips use amber color scheme (amber-50 bg, amber-200 border, amber-900 text)
+  - Each tip has configurable title, message, and optional emoji icon
+  - useTip hook returns { shouldShow, dismissTip, isLoading, tipsEnabled }
+---
