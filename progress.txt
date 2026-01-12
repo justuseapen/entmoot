@@ -12,6 +12,10 @@ Started: Mon Jan 12 17:13:26 EST 2026
 - useScrollAnimation hook pattern: use Intersection Observer with initial state from prefersReducedMotion
 - To avoid setState-in-effect lint error: initialize useState with the condition value, not set it in useEffect
 - AnimatedSection wrapper provides consistent fade-in animation for landing sections
+- Mobile app: Use @/ for src imports, @shared/ for shared types. Structure: /mobile/src/{screens,components,hooks,lib,stores,navigation}
+- Mobile navigation: AuthNavigator (stack), MainTabNavigator (tabs), RootNavigator (root) - types in navigation/types.ts
+- Shared types in /shared/types/index.ts can be imported by both web and mobile apps
+- ESLint 9 requires flat config format (eslint.config.js), not .eslintrc.* files
 ---
 
 ## 2026-01-12 17:30 - US-046 Proactive Feedback Collection
@@ -415,4 +419,40 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Decorative SVGs should have aria-hidden="true" and role="presentation" for accessibility
   - AnimatedSection component already uses <section> by default - good semantic HTML
   - The OG image path is placeholder (/og-image.png) - actual image needs to be created later
+---
+
+## 2026-01-12 - US-061 React Native Project Setup with Expo
+- What was implemented:
+  - Created Expo project in /mobile directory with TypeScript template (React 19, Expo ~54)
+  - Set up environment configuration in src/lib/config.ts for dev/staging/prod API endpoints
+  - Configured React Navigation with AuthNavigator (stack), MainTabNavigator (bottom tabs), and RootNavigator (root stack)
+  - Created shared type definitions in /shared/types/index.ts (User, Family, Goal, DailyPlan, Notification, etc.)
+  - ESLint flat config and Prettier configured matching web frontend style
+  - Updated app.json with Entmoot branding, iOS/Android bundle identifiers, design system colors
+  - Created navigation types for type-safe navigation throughout the app
+
+- Files created/changed:
+  - mobile/package.json (with scripts: start, ios, android, lint, typecheck)
+  - mobile/app.json (Entmoot branding, bundle identifiers)
+  - mobile/tsconfig.json (strict mode, path aliases for @/ and @shared/)
+  - mobile/eslint.config.js (ESLint 9 flat config)
+  - mobile/.prettierrc (matching web frontend)
+  - mobile/App.tsx (NavigationContainer, SafeAreaProvider, RootNavigator)
+  - mobile/src/lib/config.ts (environment configuration)
+  - mobile/src/navigation/types.ts (type-safe navigation param lists)
+  - mobile/src/navigation/AuthNavigator.tsx (Login, Register, ForgotPassword)
+  - mobile/src/navigation/MainTabNavigator.tsx (Dashboard, Goals, DailyPlanner, Family, Settings tabs)
+  - mobile/src/navigation/RootNavigator.tsx (auth flow switching)
+  - mobile/src/navigation/index.ts (exports)
+  - shared/types/index.ts (all shared type definitions)
+
+- **Learnings for future iterations:**
+  - Expo 54 with React Native 0.81 requires Node >= 20.19.4 officially, but works with Node 18 (with warnings)
+  - ESLint 9 uses flat config format (eslint.config.js) not .eslintrc.* files
+  - React Navigation 7 with native-stack and bottom-tabs works well together
+  - Use NavigatorScreenParams for nested navigators in type definitions
+  - For React Navigation global type declarations, need to disable both @typescript-eslint/no-namespace and @typescript-eslint/no-empty-object-type
+  - Mobile structure: /mobile/src/{screens,components,hooks,lib,stores,navigation}
+  - Shared types allow code reuse between web and mobile but need tsconfig paths configured
+  - Design system colors should be consistent: creamWhite #FFF8E7 for background, forestGreen #2D5A27 for primary
 ---

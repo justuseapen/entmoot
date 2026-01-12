@@ -1170,7 +1170,7 @@
         "ESLint and Prettier configured matching web frontend"
       ],
       "priority": 61,
-      "passes": false,
+      "passes": true,
       "notes": "Use Expo managed workflow for OTA updates. Structure: /mobile/src/{screens,components,hooks,lib,stores,navigation}"
     },
     {
