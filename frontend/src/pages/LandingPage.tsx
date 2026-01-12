@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/auth";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
+import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -36,6 +37,9 @@ export function LandingPage() {
 
         {/* Social Proof Bar - immediately below hero */}
         <SocialProofBar />
+
+        {/* Problem/Solution Section */}
+        <ProblemSolutionSection />
 
         {/* Features section placeholder - for smooth scroll target */}
         <section
