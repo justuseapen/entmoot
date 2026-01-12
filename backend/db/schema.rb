@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_192820) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_195105) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -198,15 +198,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_192820) do
   end
 
   create_table "reflections", force: :cascade do |t|
-    t.bigint "daily_plan_id", null: false
+    t.bigint "daily_plan_id"
     t.integer "reflection_type", default: 0, null: false
     t.integer "mood"
     t.integer "energy_level"
     t.jsonb "gratitude_items", default: []
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.bigint "family_id"
     t.index ["daily_plan_id", "reflection_type"], name: "index_reflections_on_daily_plan_id_and_reflection_type", unique: true
     t.index ["daily_plan_id"], name: "index_reflections_on_daily_plan_id"
+    t.index ["family_id"], name: "index_reflections_on_family_id"
+    t.index ["user_id"], name: "index_reflections_on_user_id"
   end
 
   create_table "refresh_tokens", force: :cascade do |t|
@@ -269,6 +273,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_192820) do
     t.datetime "tour_dismissed_at"
     t.datetime "first_goal_created_at"
     t.datetime "first_goal_prompt_dismissed_at"
+    t.datetime "first_reflection_created_at"
+    t.datetime "first_reflection_prompt_dismissed_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -308,6 +314,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_192820) do
   add_foreign_key "points_ledger_entries", "users"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"
+  add_foreign_key "reflections", "families"
+  add_foreign_key "reflections", "users"
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "streaks", "users"
   add_foreign_key "top_priorities", "daily_plans"

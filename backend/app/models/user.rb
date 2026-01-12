@@ -21,6 +21,7 @@ class User < ApplicationRecord
   has_many :user_badges, dependent: :destroy
   has_many :badges, through: :user_badges
   has_many :points_ledger_entries, dependent: :destroy
+  has_many :reflections, dependent: :destroy
 
   validates :name, presence: true
 

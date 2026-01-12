@@ -31,6 +31,7 @@ import { FamilyCreationWizard } from "@/components/FamilyCreationWizard";
 import { StreaksSummary } from "@/components/StreaksSummary";
 import { BadgeShowcase } from "@/components/BadgeShowcase";
 import { PointsDisplay } from "@/components/PointsDisplay";
+import { FirstReflectionPrompt } from "@/components/FirstReflectionPrompt";
 
 // Get time-based greeting
 function getGreeting(): string {
@@ -569,6 +570,9 @@ export function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* First Reflection Prompt - shown on first login */}
+      {currentFamily && <FirstReflectionPrompt familyId={currentFamily.id} />}
     </div>
   );
 }

@@ -68,6 +68,10 @@ Rails.application.routes.draw do
           post "dismiss", on: :member
           get "suggestions", on: :member
         end
+        # First reflection prompt
+        resource :first_reflection_prompt, only: %i[show create] do
+          post "dismiss", on: :member
+        end
       end
 
       # All badges (public-ish, requires auth)
