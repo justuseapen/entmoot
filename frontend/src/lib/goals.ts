@@ -120,21 +120,24 @@ export async function getGoal(
   });
 }
 
+export interface CreateGoalResponse {
+  message: string;
+  goal: Goal;
+  is_first_goal: boolean;
+}
+
 export async function createGoal(
   familyId: number,
   data: CreateGoalData,
   token: string
-): Promise<{ message: string; goal: Goal }> {
-  return apiFetch<{ message: string; goal: Goal }>(
-    `/families/${familyId}/goals`,
-    {
-      method: "POST",
-      body: JSON.stringify({ goal: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+): Promise<CreateGoalResponse> {
+  return apiFetch<CreateGoalResponse>(`/families/${familyId}/goals`, {
+    method: "POST",
+    body: JSON.stringify({ goal: data }),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 }
 
 export async function updateGoal(

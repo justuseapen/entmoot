@@ -63,6 +63,11 @@ Rails.application.routes.draw do
           post "dismiss", on: :member
           post "restart", on: :member
         end
+        # First goal prompt
+        resource :first_goal_prompt, only: [:show] do
+          post "dismiss", on: :member
+          get "suggestions", on: :member
+        end
       end
 
       # All badges (public-ish, requires auth)

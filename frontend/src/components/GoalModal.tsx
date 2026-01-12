@@ -86,7 +86,9 @@ interface GoalModalProps {
     title?: string;
     description?: string;
     parent_id?: number;
+    time_scale?: TimeScale;
   };
+  onGoalCreated?: (goalId: number, isFirstGoal: boolean) => void;
 }
 
 const wizardSteps = [
@@ -136,6 +138,7 @@ export function GoalModal({
   initialTab = "basic",
   onCreateSubGoal,
   defaultValues,
+  onGoalCreated,
 }: GoalModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"single" | "wizard">("single");
@@ -224,7 +227,7 @@ export function GoalModal({
           achievable: "",
           relevant: "",
           time_bound: "",
-          time_scale: "weekly",
+          time_scale: defaultValues?.time_scale || "weekly",
           status: "not_started",
           visibility: "family",
           progress: 0,
@@ -299,7 +302,10 @@ export function GoalModal({
       if (isEditing) {
         await updateGoal.mutateAsync(goalData);
       } else {
-        await createGoal.mutateAsync(goalData);
+        const result = await createGoal.mutateAsync(goalData);
+        if (onGoalCreated) {
+          onGoalCreated(result.goal.id, result.is_first_goal);
+        }
       }
       onOpenChange(false);
     } catch (err) {

@@ -53,6 +53,8 @@ export function useCreateGoal(familyId: number) {
     mutationFn: (data: CreateGoalData) => createGoal(familyId, data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
+      // Also invalidate first goal prompt status since user may have created their first goal
+      queryClient.invalidateQueries({ queryKey: ["firstGoalPrompt"] });
     },
   });
 }
