@@ -98,6 +98,11 @@ Rails.application.routes.draw do
 
       # Email unsubscribe (public route with token)
       get "unsubscribe", to: "email_subscriptions#unsubscribe", as: :unsubscribe
+
+      # Admin routes
+      namespace :admin do
+        resource :onboarding_metrics, only: [:show]
+      end
     end
   end
 end

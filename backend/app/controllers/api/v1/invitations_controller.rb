@@ -26,6 +26,7 @@ module Api
         end
 
         if @invitation.save
+          track_first_family_invite
           render json: {
             message: "Invitation sent successfully.",
             invitation: invitation_response(@invitation)
@@ -157,6 +158,12 @@ module Api
 
       def user_params_for_invitation
         { email: @invitation.email }.merge(params[:user].permit(:password, :password_confirmation, :name).to_h)
+      end
+
+      def track_first_family_invite
+        return if current_user.first_family_invite_sent_at.present?
+
+        current_user.update(first_family_invite_sent_at: Time.current)
       end
 
       def invitation_response(invitation)
