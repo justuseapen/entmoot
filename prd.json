@@ -545,7 +545,7 @@
         "Responsive layout for mobile"
       ],
       "priority": 29,
-      "passes": false,
+      "passes": true,
       "notes": "Dashboard is the home base. Make it useful without being overwhelming."
     },
     {

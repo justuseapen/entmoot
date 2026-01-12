@@ -725,3 +725,26 @@ Started: January 2026
   - PointsDisplay compact mode shows only 3 recent activities, full mode shows View All link
   - Use `ReturnType<typeof setTimeout>` instead of NodeJS.Timeout for browser-compatible types
 ---
+
+## 2026-01-12 - US-029
+- Implemented Dashboard - Home Page with comprehensive feature set
+- Files created/changed:
+  - `/backend/app/services/activity_feed_service.rb` - ActivityFeedService aggregating family activities
+  - `/backend/app/controllers/api/v1/activity_feeds_controller.rb` - GET /api/v1/families/:id/activity_feed endpoint
+  - `/backend/app/policies/activity_feed_policy.rb` - Authorization policy for activity feed
+  - `/backend/config/routes.rb` - Added activity_feed resource route
+  - `/backend/spec/services/activity_feed_service_spec.rb` - 14 tests for service
+  - `/backend/spec/requests/api/v1/activity_feeds_spec.rb` - 7 tests for endpoint
+  - `/frontend/src/lib/activityFeed.ts` - API functions, types, helper utilities
+  - `/frontend/src/hooks/useActivityFeed.ts` - TanStack Query hook for activity feed
+  - `/frontend/src/pages/Dashboard.tsx` - Enhanced dashboard with all features
+- **Learnings for future iterations:**
+  - ActivityFeedService collects activities from multiple sources (goals, badges, streaks, reflections)
+  - Split complex service methods into smaller query/build helpers to satisfy Rubocop ABC metrics
+  - Use LOOKBACK_PERIOD constant for 7.days window to avoid repeated calculations
+  - NotificationsResponse is an object with notifications array - use data?.notifications not data?.filter
+  - Time-based greeting function: use new Date().getHours() to determine morning/afternoon/evening
+  - Responsive grid layout: lg:grid-cols-3 with lg:col-span-2 for left column creates 2/3 + 1/3 layout
+  - Filter goals by isDueSoon || isOverdue and exclude completed/abandoned for upcoming goals
+  - 896 total tests pass (21 new activity feed tests)
+---
