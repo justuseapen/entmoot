@@ -53,6 +53,10 @@ Rails.application.routes.draw do
         resources :streaks, only: [:index]
         resources :points, only: [:index]
         get "badges", to: "badges#user_badges"
+        patch "profile", to: "profile#update"
+        patch "password", to: "profile#update_password"
+        delete "/", to: "profile#destroy"
+        get "export", to: "profile#export"
       end
 
       # All badges (public-ish, requires auth)
