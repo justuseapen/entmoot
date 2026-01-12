@@ -18,6 +18,7 @@ import { Breadcrumbs } from "./Breadcrumbs";
 import { MobileNav } from "./MobileNav";
 import { FamilySwitcher } from "./FamilySwitcher";
 import { NotificationBell } from "./NotificationBell";
+import { GuidedTour } from "./GuidedTour";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -251,6 +252,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <MobileNav />
+
+      {/* Guided Tour */}
+      <GuidedTour />
     </div>
   );
 }

@@ -57,6 +57,12 @@ Rails.application.routes.draw do
         patch "password", to: "profile#update_password"
         delete "/", to: "profile#destroy"
         get "export", to: "profile#export"
+        # Tour preferences
+        resource :tour_preferences, only: [:show] do
+          post "complete", on: :member
+          post "dismiss", on: :member
+          post "restart", on: :member
+        end
       end
 
       # All badges (public-ish, requires auth)
