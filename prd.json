@@ -851,7 +851,7 @@
         "Request specs for admin feedback endpoints"
       ],
       "priority": 45,
-      "passes": false,
+      "passes": true,
       "notes": "Add status, assigned_to, internal_notes, duplicate_of fields to FeedbackReport model."
     },
     {
