@@ -41,6 +41,7 @@ import { PendingInvitations } from "@/components/PendingInvitations";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
 import { PetsList } from "@/components/PetsList";
 import { StandaloneTip } from "@/components/TipTooltip";
+import { EmptyState } from "@/components/EmptyState";
 import type { MemberRole } from "@/lib/families";
 
 const familySettingsSchema = z.object({
@@ -261,6 +262,14 @@ export function FamilySettings() {
           {/* Tip for when family has more than one member */}
           {family.members.length > 1 && (
             <StandaloneTip tipType="first_family_member" />
+          )}
+
+          {/* Encourage inviting members if family only has one member */}
+          {family.members.length === 1 && canInvite && (
+            <EmptyState
+              variant="family_members"
+              onAction={() => setShowInviteModal(true)}
+            />
           )}
 
           {/* Members List */}

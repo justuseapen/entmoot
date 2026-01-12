@@ -35,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
+import { InlineEmptyState } from "@/components/EmptyState";
 
 export function WeeklyReview() {
   const { id } = useParams<{ id: string }>();
@@ -227,12 +228,12 @@ export function WeeklyReview() {
 
     if (pastReviews.length === 0) {
       return (
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground">No past reviews yet.</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Complete your first weekly review to see it here.
-          </p>
-        </div>
+        <InlineEmptyState
+          variant="weekly_reviews"
+          title="No past reviews yet"
+          description="Complete your first weekly review to see it here."
+          showAction={false}
+        />
       );
     }
 

@@ -36,6 +36,7 @@ import {
 import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
 import { TreePine, Sparkles } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
+import { EmptyState } from "@/components/EmptyState";
 
 export function Goals() {
   const { id } = useParams<{ id: string }>();
@@ -374,26 +375,23 @@ export function Goals() {
               />
             ))}
           </div>
+        ) : hasActiveFilters ? (
+          <EmptyState
+            variant="custom"
+            emoji="🔍"
+            title="No goals match your filters"
+            description="Try adjusting your filters to see more goals."
+            actionLabel="Clear Filters"
+            onAction={clearFilters}
+          />
         ) : (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">
-                {hasActiveFilters
-                  ? "No goals match your filters"
-                  : "No goals yet"}
-              </p>
-              {canManageGoals && !hasActiveFilters && (
-                <Button onClick={() => setShowCreateModal(true)}>
-                  Create Your First Goal
-                </Button>
-              )}
-              {hasActiveFilters && (
-                <Button variant="outline" onClick={clearFilters}>
-                  Clear Filters
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <EmptyState
+            variant="goals"
+            onAction={
+              canManageGoals ? () => setShowCreateModal(true) : undefined
+            }
+            showAction={canManageGoals}
+          />
         )}
 
         {/* Goal count */}

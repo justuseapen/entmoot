@@ -37,6 +37,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
+import { InlineEmptyState } from "@/components/EmptyState";
 
 // Step interface
 interface Step {
@@ -295,12 +296,12 @@ export function EveningReflection() {
 
     if (pastReflections.length === 0) {
       return (
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground">No past reflections yet.</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Complete your first evening reflection to see it here.
-          </p>
-        </div>
+        <InlineEmptyState
+          variant="reflections"
+          title="No past reflections yet"
+          description="Complete your first evening reflection to see it here."
+          showAction={false}
+        />
       );
     }
 

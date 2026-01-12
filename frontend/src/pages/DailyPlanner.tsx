@@ -41,6 +41,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
+import { InlineEmptyState } from "@/components/EmptyState";
 
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
@@ -490,9 +491,13 @@ export function DailyPlanner() {
                 </SortableContext>
               </DndContext>
             ) : (
-              <div className="text-muted-foreground py-8 text-center">
-                <p>No tasks yet. Add your first task above!</p>
-              </div>
+              <InlineEmptyState
+                variant="daily_plans"
+                emoji="✅"
+                title="No tasks yet"
+                description="Add your first task above to start planning your day!"
+                showAction={false}
+              />
             )}
           </CardContent>
         </Card>
