@@ -46,6 +46,12 @@ export function Goals() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [viewingGoalId, setViewingGoalId] = useState<number | null>(null);
   const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
+  const [showAITab, setShowAITab] = useState(false);
+  const [pendingSubGoal, setPendingSubGoal] = useState<{
+    parentId: number;
+    title: string;
+    description: string | null;
+  } | null>(null);
 
   // Fetch data
   const {
@@ -115,6 +121,13 @@ export function Goals() {
 
   const handleEditGoal = (goal: Goal) => {
     setViewingGoalId(null);
+    setShowAITab(false);
+    setEditingGoal(goal);
+  };
+
+  const handleRefineWithAI = (goal: Goal) => {
+    setViewingGoalId(null);
+    setShowAITab(true);
     setEditingGoal(goal);
   };
 
@@ -131,6 +144,26 @@ export function Goals() {
     } catch (err) {
       console.error("Failed to delete goal:", err);
     }
+  };
+
+  const handleCreateSubGoal = (
+    parentGoalId: number,
+    milestone: {
+      title: string;
+      description: string | null;
+      suggestedProgress: number;
+    }
+  ) => {
+    // Store the sub-goal info and open a create modal for it
+    setPendingSubGoal({
+      parentId: parentGoalId,
+      title: milestone.title,
+      description: milestone.description,
+    });
+    // Close the current editing modal to open a new creation modal
+    setEditingGoal(null);
+    setShowAITab(false);
+    setShowCreateModal(true);
   };
 
   const hasActiveFilters =
@@ -326,8 +359,21 @@ export function Goals() {
           if (!open) {
             setShowCreateModal(false);
             setEditingGoal(null);
+            setShowAITab(false);
+            setPendingSubGoal(null);
           }
         }}
+        initialTab={showAITab ? "ai" : "basic"}
+        onCreateSubGoal={canManageGoals ? handleCreateSubGoal : undefined}
+        defaultValues={
+          pendingSubGoal
+            ? {
+                title: pendingSubGoal.title,
+                description: pendingSubGoal.description || undefined,
+                parent_id: pendingSubGoal.parentId,
+              }
+            : undefined
+        }
       />
 
       {/* Detail View Modal */}
@@ -341,6 +387,7 @@ export function Goals() {
             if (!open) setViewingGoalId(null);
           }}
           onEdit={canManageGoals ? handleEditGoal : undefined}
+          onRefineWithAI={canManageGoals ? handleRefineWithAI : undefined}
           onDelete={canManageGoals ? handleDeleteGoal : undefined}
           canManage={canManageGoals}
         />

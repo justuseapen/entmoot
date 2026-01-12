@@ -255,3 +255,67 @@ export function isOverdue(dueDate: string | null): boolean {
   const today = new Date();
   return date < today;
 }
+
+// AI Refinement Types
+export interface SmartSuggestions {
+  specific: string | null;
+  measurable: string | null;
+  achievable: string | null;
+  relevant: string | null;
+  time_bound: string | null;
+}
+
+export interface Obstacle {
+  obstacle: string;
+  mitigation: string;
+}
+
+export interface Milestone {
+  title: string;
+  description: string | null;
+  suggested_progress: number;
+}
+
+export interface GoalRefinementResponse {
+  smart_suggestions: SmartSuggestions;
+  alternative_titles: string[];
+  alternative_descriptions: string[];
+  potential_obstacles: Obstacle[];
+  milestones: Milestone[];
+  overall_feedback: string;
+}
+
+// AI Refinement API
+export async function refineGoal(
+  familyId: number,
+  goalId: number,
+  token: string
+): Promise<{ refinement: GoalRefinementResponse }> {
+  return apiFetch<{ refinement: GoalRefinementResponse }>(
+    `/families/${familyId}/goals/${goalId}/refine`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+}
+
+// SMART field labels for display
+export const smartFieldLabels: Record<keyof SmartSuggestions, string> = {
+  specific: "Specific",
+  measurable: "Measurable",
+  achievable: "Achievable",
+  relevant: "Relevant",
+  time_bound: "Time-Bound",
+};
+
+// SMART field descriptions for context
+export const smartFieldDescriptions: Record<keyof SmartSuggestions, string> = {
+  specific: "What exactly will you accomplish?",
+  measurable: "How will you track progress?",
+  achievable: "Is this goal realistic?",
+  relevant: "Why does this goal matter?",
+  time_bound: "When will you achieve this?",
+};

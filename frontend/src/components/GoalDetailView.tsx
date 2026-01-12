@@ -48,6 +48,7 @@ interface GoalDetailViewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit?: (goal: Goal) => void;
+  onRefineWithAI?: (goal: Goal) => void;
   onDelete?: (goal: Goal) => void;
   canManage: boolean;
 }
@@ -91,6 +92,7 @@ export function GoalDetailView({
   open,
   onOpenChange,
   onEdit,
+  onRefineWithAI,
   onDelete,
   canManage,
 }: GoalDetailViewProps) {
@@ -435,6 +437,16 @@ export function GoalDetailView({
             </div>
 
             <DialogFooter className="gap-2">
+              {canManage && onRefineWithAI && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => onRefineWithAI(goal)}
+                >
+                  <span>✨</span>
+                  Refine with AI
+                </Button>
+              )}
               {canManage && onEdit && (
                 <Button variant="outline" onClick={() => onEdit(goal)}>
                   Edit Goal

@@ -23,17 +23,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateGoal, useUpdateGoal, useGoals } from "@/hooks/useGoals";
+import {
+  useCreateGoal,
+  useUpdateGoal,
+  useGoals,
+  useRefineGoal,
+} from "@/hooks/useGoals";
 import {
   type Goal,
   type GoalUser,
   type TimeScale,
   type GoalStatus,
   type GoalVisibility,
+  type GoalRefinementResponse,
+  type SmartSuggestions,
   timeScaleOptions,
   statusOptions,
   visibilityOptions,
 } from "@/lib/goals";
+import { AIRefinementPanel } from "@/components/AIRefinementPanel";
 
 const goalSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
@@ -60,12 +68,25 @@ const goalSchema = z.object({
 
 type GoalFormData = z.infer<typeof goalSchema>;
 
+interface MilestoneSubGoal {
+  title: string;
+  description: string | null;
+  suggestedProgress: number;
+}
+
 interface GoalModalProps {
   familyId: number;
   goal?: Goal | null;
   familyMembers: GoalUser[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTab?: "basic" | "smart" | "ai";
+  onCreateSubGoal?: (parentGoalId: number, milestone: MilestoneSubGoal) => void;
+  defaultValues?: {
+    title?: string;
+    description?: string;
+    parent_id?: number;
+  };
 }
 
 const wizardSteps = [
@@ -112,14 +133,23 @@ export function GoalModal({
   familyMembers,
   open,
   onOpenChange,
+  initialTab = "basic",
+  onCreateSubGoal,
+  defaultValues,
 }: GoalModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"single" | "wizard">("single");
   const [wizardStep, setWizardStep] = useState(0);
+  const [refinement, setRefinement] = useState<GoalRefinementResponse | null>(
+    null
+  );
+  const [showRefinement, setShowRefinement] = useState(false);
+  const [activeTab, setActiveTab] = useState(initialTab);
   const isEditing = !!goal;
 
   const createGoal = useCreateGoal(familyId);
   const updateGoal = useUpdateGoal(familyId, goal?.id ?? 0);
+  const refineGoal = useRefineGoal(familyId, goal?.id ?? 0);
 
   // Fetch all goals for parent selection
   const { data: allGoals } = useGoals(familyId);
@@ -165,6 +195,9 @@ export function GoalModal({
     if (open) {
       setError(null);
       setWizardStep(0);
+      setRefinement(null);
+      setShowRefinement(false);
+      setActiveTab(initialTab);
       if (goal) {
         reset({
           title: goal.title,
@@ -184,8 +217,8 @@ export function GoalModal({
         });
       } else {
         reset({
-          title: "",
-          description: "",
+          title: defaultValues?.title || "",
+          description: defaultValues?.description || "",
           specific: "",
           measurable: "",
           achievable: "",
@@ -196,12 +229,52 @@ export function GoalModal({
           visibility: "family",
           progress: 0,
           due_date: "",
-          parent_id: null,
+          parent_id: defaultValues?.parent_id ?? null,
           assignee_ids: [],
         });
       }
     }
-  }, [open, goal, reset]);
+  }, [open, goal, reset, initialTab, defaultValues]);
+
+  // Handle AI refinement
+  const handleRefineWithAI = async () => {
+    if (!goal?.id) return;
+    setError(null);
+    try {
+      const result = await refineGoal.mutateAsync();
+      setRefinement(result.refinement);
+      setShowRefinement(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to get AI suggestions"
+      );
+    }
+  };
+
+  const handleAcceptSmartSuggestion = (
+    field: keyof SmartSuggestions,
+    value: string
+  ) => {
+    setValue(field, value);
+  };
+
+  const handleAcceptTitle = (title: string) => {
+    setValue("title", title);
+  };
+
+  const handleAcceptDescription = (description: string) => {
+    setValue("description", description);
+  };
+
+  const handleDismissRefinement = () => {
+    setShowRefinement(false);
+  };
+
+  const handleCreateSubGoalFromMilestone = (milestone: MilestoneSubGoal) => {
+    if (onCreateSubGoal && goal?.id) {
+      onCreateSubGoal(goal.id, milestone);
+    }
+  };
 
   const onSubmit = async (data: GoalFormData) => {
     setError(null);
@@ -775,10 +848,17 @@ export function GoalModal({
           )}
 
           {mode === "single" || isEditing ? (
-            <Tabs defaultValue="basic" className="py-4">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as "basic" | "smart" | "ai")}
+              className="py-4"
+            >
+              <TabsList
+                className={`grid w-full ${isEditing ? "grid-cols-3" : "grid-cols-2"}`}
+              >
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
                 <TabsTrigger value="smart">SMART Details</TabsTrigger>
+                {isEditing && <TabsTrigger value="ai">AI Coach</TabsTrigger>}
               </TabsList>
               <TabsContent value="basic" className="mt-4">
                 {renderFormFields()}
@@ -786,6 +866,67 @@ export function GoalModal({
               <TabsContent value="smart" className="mt-4">
                 {renderSmartFields()}
               </TabsContent>
+              {isEditing && (
+                <TabsContent value="ai" className="mt-4">
+                  {showRefinement && refinement ? (
+                    <AIRefinementPanel
+                      refinement={refinement}
+                      currentValues={{
+                        title: watch("title"),
+                        description: watch("description") || "",
+                        specific: watch("specific") || "",
+                        measurable: watch("measurable") || "",
+                        achievable: watch("achievable") || "",
+                        relevant: watch("relevant") || "",
+                        time_bound: watch("time_bound") || "",
+                      }}
+                      onAcceptSmartSuggestion={handleAcceptSmartSuggestion}
+                      onAcceptTitle={handleAcceptTitle}
+                      onAcceptDescription={handleAcceptDescription}
+                      onDismiss={handleDismissRefinement}
+                      onCreateSubGoal={
+                        onCreateSubGoal
+                          ? handleCreateSubGoalFromMilestone
+                          : undefined
+                      }
+                    />
+                  ) : (
+                    <div className="space-y-4 py-4 text-center">
+                      <div className="text-6xl">✨</div>
+                      <h3 className="text-lg font-semibold">
+                        Refine Your Goal with AI
+                      </h3>
+                      <p className="text-muted-foreground mx-auto max-w-md text-sm">
+                        Get personalized suggestions from our AI coach to make
+                        your goal more specific, measurable, achievable,
+                        relevant, and time-bound.
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={handleRefineWithAI}
+                        disabled={refineGoal.isPending}
+                        className="mt-4"
+                      >
+                        {refineGoal.isPending ? (
+                          <>
+                            <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            Analyzing goal...
+                          </>
+                        ) : (
+                          "Get AI Suggestions"
+                        )}
+                      </Button>
+                      {refineGoal.isError && (
+                        <p className="text-destructive text-sm">
+                          {refineGoal.error instanceof Error
+                            ? refineGoal.error.message
+                            : "Failed to get suggestions. Please try again."}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+              )}
             </Tabs>
           ) : (
             <>

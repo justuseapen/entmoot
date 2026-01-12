@@ -6,6 +6,7 @@ import {
   createGoal,
   updateGoal,
   deleteGoal,
+  refineGoal,
   type CreateGoalData,
   type UpdateGoalData,
   type GoalFilters,
@@ -81,5 +82,15 @@ export function useDeleteGoal(familyId: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
     },
+  });
+}
+
+// AI Refinement mutation
+export function useRefineGoal(familyId: number, goalId: number) {
+  const { token } = useAuthStore();
+
+  return useMutation({
+    mutationFn: () => refineGoal(familyId, goalId, token!),
+    // Don't invalidate queries - refinement doesn't change the goal until user accepts
   });
 }
