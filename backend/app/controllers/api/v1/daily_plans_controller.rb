@@ -23,9 +23,14 @@ module Api
       def update
         authorize @daily_plan
 
+        tasks_before = tasks_completion_state
+
         if @daily_plan.update(daily_plan_params)
           # Record daily planning streak if plan has meaningful content
           record_daily_planning_streak if plan_has_content?
+
+          # Award points for newly completed tasks
+          award_task_completion_points(tasks_before)
 
           render json: {
             message: "Daily plan updated successfully.",
@@ -115,6 +120,18 @@ module Api
 
       def record_daily_planning_streak
         StreakService.record_daily_planning(user: current_user, date: @daily_plan.date)
+      end
+
+      def tasks_completion_state
+        @daily_plan.daily_tasks.reload.to_h { |t| [t.id, t.completed] }
+      end
+
+      def award_task_completion_points(tasks_before)
+        @daily_plan.daily_tasks.reload.each do |task|
+          was_completed = tasks_before[task.id]
+          # Award points only if task changed from not completed to completed
+          PointsService.award_task_completion(user: current_user, task: task) if task.completed && !was_completed
+        end
       end
     end
   end

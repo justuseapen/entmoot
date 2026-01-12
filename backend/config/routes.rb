@@ -49,6 +49,7 @@ Rails.application.routes.draw do
       scope "users/me" do
         resource :notification_preferences, only: %i[show update]
         resources :streaks, only: [:index]
+        resources :points, only: [:index]
         get "badges", to: "badges#user_badges"
       end
 

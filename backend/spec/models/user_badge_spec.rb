@@ -11,7 +11,7 @@ RSpec.describe UserBadge do
   describe "validations" do
     subject { build(:user_badge) }
 
-    # Note: earned_at presence validation cannot be tested with shoulda-matchers
+    # NOTE: earned_at presence validation cannot be tested with shoulda-matchers
     # because before_validation callback sets it automatically. Tested in callbacks section.
     it { is_expected.to validate_uniqueness_of(:user_id).scoped_to(:badge_id).with_message(:already_earned) }
   end

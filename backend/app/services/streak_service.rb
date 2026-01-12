@@ -73,6 +73,11 @@ class StreakService
         streak_type: streak.streak_type,
         count: streak.current_count
       )
+      PointsService.award_streak_milestone(
+        user: user,
+        streak: streak,
+        milestone: streak.current_count
+      )
     end
   end
 end

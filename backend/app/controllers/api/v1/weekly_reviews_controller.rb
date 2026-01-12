@@ -36,8 +36,11 @@ module Api
         was_completed_before = @weekly_review.completed?
 
         if @weekly_review.update(weekly_review_params)
-          # Record weekly review streak if just completed
-          record_weekly_review_streak if !was_completed_before && @weekly_review.completed?
+          # Record weekly review streak and award points if just completed
+          if !was_completed_before && @weekly_review.completed?
+            record_weekly_review_streak
+            PointsService.award_weekly_review_completion(user: current_user, weekly_review: @weekly_review)
+          end
 
           render json: {
             message: "Weekly review updated successfully.",

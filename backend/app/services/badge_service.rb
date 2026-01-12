@@ -55,6 +55,7 @@ class BadgeService
 
       user_badge = UserBadge.create!(user: user, badge: badge)
       NotificationService.notify_badge_earned(user: user, badge_name: badge.name)
+      PointsService.award_badge_earned(user: user, badge: badge)
 
       user_badge
     end

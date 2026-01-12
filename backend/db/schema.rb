@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_150001) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_150002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -174,6 +174,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150001) do
     t.index ["family_id"], name: "index_pets_on_family_id"
   end
 
+  create_table "points_ledger_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "points", null: false
+    t.string "activity_type", null: false
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_type"], name: "index_points_ledger_entries_on_activity_type"
+    t.index ["created_at"], name: "index_points_ledger_entries_on_created_at"
+    t.index ["user_id", "activity_type", "created_at"], name: "idx_points_user_activity_date"
+    t.index ["user_id"], name: "index_points_ledger_entries_on_user_id"
+  end
+
   create_table "reflection_responses", force: :cascade do |t|
     t.bigint "reflection_id", null: false
     t.string "prompt", null: false
@@ -288,6 +301,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_150001) do
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "pets", "families"
+  add_foreign_key "points_ledger_entries", "users"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"
   add_foreign_key "refresh_tokens", "users"

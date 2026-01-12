@@ -26,8 +26,7 @@ module Api
         authorize @goal
 
         if @goal.save
-          assign_users if params.dig(:goal, :assignee_ids).present?
-          render_created_goal
+          handle_goal_creation
         else
           render_errors(@goal.errors.full_messages)
         end
@@ -36,8 +35,12 @@ module Api
       def update
         authorize @goal
 
+        was_completed_before = @goal.completed?
+
         if @goal.update(goal_params)
           update_assignments if params.dig(:goal, :assignee_ids).present?
+          # Award points if goal just became completed
+          award_goal_completion_points if !was_completed_before && @goal.completed?
           render_updated_goal
         else
           render_errors(@goal.errors.full_messages)
@@ -148,6 +151,16 @@ module Api
 
       def user_response(user)
         { id: user.id, name: user.name, email: user.email, avatar_url: user.avatar_url }
+      end
+
+      def award_goal_completion_points
+        PointsService.award_goal_completion(user: current_user, goal: @goal)
+      end
+
+      def handle_goal_creation
+        assign_users if params.dig(:goal, :assignee_ids).present?
+        PointsService.award_goal_creation(user: current_user, goal: @goal)
+        render_created_goal
       end
     end
   end

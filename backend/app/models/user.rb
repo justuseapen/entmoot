@@ -20,6 +20,7 @@ class User < ApplicationRecord
   has_many :streaks, dependent: :destroy
   has_many :user_badges, dependent: :destroy
   has_many :badges, through: :user_badges
+  has_many :points_ledger_entries, dependent: :destroy
 
   validates :name, presence: true
 
@@ -41,5 +42,13 @@ class User < ApplicationRecord
 
   def member_of?(family)
     families.include?(family)
+  end
+
+  def total_points
+    PointsService.total_points(self)
+  end
+
+  def weekly_points
+    PointsService.weekly_points(self)
   end
 end

@@ -34,7 +34,10 @@ module Api
 
         if @reflection.save
           # Record evening reflection streak if it's an evening reflection with content
-          record_evening_reflection_streak if @reflection.evening? && @reflection.completed?
+          if @reflection.evening? && @reflection.completed?
+            record_evening_reflection_streak
+            PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
+          end
 
           render json: {
             message: "Reflection created successfully.",
@@ -48,9 +51,14 @@ module Api
       def update
         authorize @reflection
 
+        was_completed_before = @reflection.completed?
+
         if @reflection.update(reflection_params)
-          # Record evening reflection streak if it's an evening reflection that's now completed
-          record_evening_reflection_streak if @reflection.evening? && @reflection.completed?
+          # Record evening reflection streak and award points if it just completed
+          if @reflection.evening? && @reflection.completed? && !was_completed_before
+            record_evening_reflection_streak
+            PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
+          end
 
           render json: {
             message: "Reflection updated successfully.",
