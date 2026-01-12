@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :pet do
     family
-    name { Faker::Creature::Dog.name }
+    sequence(:name) { |n| "#{Faker::Creature::Dog.name}#{n}" }
     pet_type { %w[dog cat bird fish hamster rabbit].sample }
     avatar_url { nil }
     birthday { Faker::Date.birthday(min_age: 1, max_age: 15) }

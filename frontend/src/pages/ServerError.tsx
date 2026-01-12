@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,16 +8,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function NotFound() {
-  const navigate = useNavigate();
+interface ServerErrorProps {
+  onRetry?: () => void;
+}
+
+export function ServerError({ onRetry }: ServerErrorProps) {
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 p-8">
       <Card className="w-full max-w-md text-center">
         <CardHeader>
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
             <svg
-              className="h-10 w-10 text-blue-600"
+              className="h-10 w-10 text-red-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -26,29 +32,29 @@ export function NotFound() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
           </div>
-          <CardTitle className="text-3xl">Page not found</CardTitle>
+          <CardTitle className="text-3xl">Something went wrong</CardTitle>
           <CardDescription className="text-base">
-            Sorry, we couldn&apos;t find the page you&apos;re looking for. It
-            might have been moved or doesn&apos;t exist.
+            We&apos;re experiencing some technical difficulties. Our team has
+            been notified and is working to fix the issue.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <Button onClick={() => navigate(-1)} variant="outline">
-              Go Back
+            <Button onClick={onRetry || handleRefresh} variant="default">
+              Try Again
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link to="/dashboard">Go to Dashboard</Link>
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">
-            Need help?{" "}
+            If the problem persists, please try again later or{" "}
             <Link to="/" className="text-blue-600 hover:underline">
-              Visit our homepage
+              contact support
             </Link>
           </p>
         </CardContent>

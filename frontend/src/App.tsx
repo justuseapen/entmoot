@@ -19,8 +19,12 @@ import { PointsHistory } from "./pages/PointsHistory";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { UserProfile } from "./pages/UserProfile";
 import { NotFound } from "./pages/NotFound";
+import { ServerError } from "./pages/ServerError";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { MainLayout } from "./components/MainLayout";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { GlobalLoadingIndicator } from "./components/LoadingIndicator";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import {
   CelebrationProvider,
   useCelebrationListener,
@@ -45,164 +49,172 @@ function NotificationWebSocketInitializer() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <CelebrationProvider>
-        <BrowserRouter>
-          <NotificationWebSocketInitializer />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/login"
-              element={
-                <AuthenticatedRedirect>
-                  <Login />
-                </AuthenticatedRedirect>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <AuthenticatedRedirect>
-                  <Register />
-                </AuthenticatedRedirect>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Families />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <FamilySettings />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/goals"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Goals />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/goals/tree"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <GoalTree />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/planner"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <DailyPlanner />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/reflection"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <EveningReflection />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/weekly-review"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <WeeklyReview />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/families/:id/leaderboard"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Leaderboard />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings/notifications"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <NotificationSettings />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <NotificationsPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/points"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <PointsHistory />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <UserProfile />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/invitations/:token" element={<AcceptInvitation />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CelebrationProvider>
-    </QueryClientProvider>
+    <ErrorBoundary fallback={<ServerError />}>
+      <QueryClientProvider client={queryClient}>
+        <CelebrationProvider>
+          <BrowserRouter>
+            <GlobalLoadingIndicator />
+            <OfflineIndicator />
+            <NotificationWebSocketInitializer />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route
+                path="/login"
+                element={
+                  <AuthenticatedRedirect>
+                    <Login />
+                  </AuthenticatedRedirect>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <AuthenticatedRedirect>
+                    <Register />
+                  </AuthenticatedRedirect>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Families />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <FamilySettings />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/goals"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Goals />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/goals/tree"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <GoalTree />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/planner"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <DailyPlanner />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/reflection"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <EveningReflection />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/weekly-review"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <WeeklyReview />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/leaderboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Leaderboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings/notifications"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <NotificationSettings />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <NotificationsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/points"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <PointsHistory />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/invitations/:token"
+                element={<AcceptInvitation />}
+              />
+              <Route path="/error" element={<ServerError />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CelebrationProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
