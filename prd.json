@@ -709,7 +709,7 @@
         "Request specs for quick reflection type"
       ],
       "priority": 38,
-      "passes": false,
+      "passes": true,
       "notes": "Use family timezone for time-of-day calculation. Keep it lightweight - single question only."
     },
     {

@@ -28,6 +28,8 @@ Started: January 2026
 - Role enum in models: use `enum :role, { key: value }, validate: true` syntax
 - For custom validation messages, use I18n keys (e.g., `:user_already_member`) and add to `config/locales/en.yml`
 - Factory Bot factories should set auto-generated attributes (like token, expires_at) to avoid nil issues in `build` calls
+- For conditional associations (e.g., optional daily_plan for quick reflections), use `belongs_to :x, optional: true` with validates :x, presence: true, unless: :some_condition?
+- Use `without_validating_presence` in shoulda-matchers when testing optional associations with conditional validation
 - ActionCable WebSocket auth: pass JWT token as query param `?token=...` and decode with `Warden::JWTAuth::TokenDecoder`
 - Use `ReturnType<typeof setTimeout>` instead of `NodeJS.Timeout` for browser-compatible timeout types
 - NotificationService.create_and_broadcast handles both DB persistence and WebSocket broadcast
@@ -961,4 +963,32 @@ Started: January 2026
   - Dismissed prompt won't show again for 24 hours
   - AI refinement dialog shown immediately after first goal creation (is_first_goal: true)
   - 965 total tests pass (12 new first goal prompt specs + 4 first goal tracking specs)
+---
+## 2026-01-12 - US-038
+- Implemented First Reflection Prompt with contextual time-based prompts for first-time users
+- Files created/changed:
+  - `/backend/db/migrate/20260112194705_add_first_reflection_fields_to_users.rb` - Migration adding first_reflection_created_at, first_reflection_prompt_dismissed_at
+  - `/backend/db/migrate/20260112194808_add_user_and_family_to_reflections.rb` - Migration adding user_id, family_id to reflections
+  - `/backend/db/migrate/20260112195105_allow_null_daily_plan_on_reflections.rb` - Migration allowing null daily_plan_id
+  - `/backend/app/controllers/api/v1/first_reflection_prompts_controller.rb` - GET /show, POST /dismiss, POST /create endpoints
+  - `/backend/app/models/reflection.rb` - Added 'quick' reflection type (value: 5), optional daily_plan, direct user/family associations
+  - `/backend/app/models/user.rb` - Added has_many :reflections association
+  - `/backend/app/models/family.rb` - Added has_many :reflections association
+  - `/backend/app/policies/reflection_policy.rb` - Updated to handle quick reflections with direct associations
+  - `/backend/spec/requests/api/v1/first_reflection_prompts_spec.rb` - 15 request specs for first reflection prompt
+  - `/backend/spec/factories/reflections.rb` - Added :quick trait with user/family associations
+  - `/backend/spec/models/reflection_spec.rb` - Updated tests for optional daily_plan and effective_user/effective_family methods
+  - `/frontend/src/lib/firstReflectionPrompt.ts` - API functions, types, and time period helpers
+  - `/frontend/src/hooks/useFirstReflectionPrompt.ts` - TanStack Query hooks for status, dismiss, submit
+  - `/frontend/src/components/FirstReflectionPrompt.tsx` - Modal with time-based greeting and prompt
+  - `/frontend/src/pages/Dashboard.tsx` - Integrated FirstReflectionPrompt component
+- **Learnings for future iterations:**
+  - Quick reflections bypass daily_plan requirement - use direct user/family associations
+  - Reflection model needs `optional: true` on belongs_to associations for conditional validation
+  - Use `effective_user` and `effective_family` methods to abstract over quick vs daily_plan-based reflections
+  - ReflectionPolicy.Scope needs left_joins to handle both quick and daily_plan reflections
+  - Time period calculation uses family timezone: Time.find_zone(family.timezone)&.now&.hour
+  - Session-based dismiss uses 1.hour.ago as session boundary
+  - Night time (22:00-05:00) returns nil prompt and should_show: false
+  - 987 backend tests + 69 frontend tests = 1056 total tests pass (22 new specs)
 ---
