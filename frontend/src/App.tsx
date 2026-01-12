@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/api";
-import { Home } from "./pages/Home";
+import { LandingPage } from "./pages/LandingPage";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
@@ -58,7 +58,7 @@ function App() {
             <OfflineIndicator />
             <NotificationWebSocketInitializer />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<LandingPage />} />
               <Route
                 path="/login"
                 element={
