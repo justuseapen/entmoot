@@ -616,7 +616,7 @@
         "CI pipeline runs tests on every push"
       ],
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "notes": "Tests are essential for Ralph iterations to validate changes."
     },
     {

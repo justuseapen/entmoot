@@ -822,3 +822,31 @@ Started: January 2026
   - Pet factory needed sequence to avoid duplicate name validation errors when creating multiple pets
   - 934 total tests pass (no new backend tests needed for frontend-only story)
 ---
+
+## 2026-01-12 - US-033
+- Implemented Testing Infrastructure for frontend with Vitest and React Testing Library
+- Files created/changed:
+  - `/frontend/vitest.config.ts` - Vitest configuration with jsdom environment, coverage thresholds (80%), path aliases
+  - `/frontend/src/test/setup.ts` - Test setup file with jest-dom matchers, window mocks (matchMedia, ResizeObserver, scrollTo)
+  - `/frontend/src/test/test-utils.tsx` - Custom render function with QueryClient and Router providers, re-exports from testing-library
+  - `/frontend/src/test/factories.ts` - Mock factory functions (createMockUser) for consistent test data
+  - `/frontend/src/lib/utils.test.ts` - Tests for cn utility function (7 tests)
+  - `/frontend/src/stores/auth.test.ts` - Tests for auth Zustand store (5 tests)
+  - `/frontend/src/hooks/useOnlineStatus.test.ts` - Tests for online status hook (5 tests)
+  - `/frontend/src/components/ui/button.test.tsx` - Tests for Button component variants and sizes (8 tests)
+  - `/frontend/src/components/ErrorMessage.test.tsx` - Tests for ErrorMessage, FormError, QueryError (22 tests)
+  - `/frontend/src/components/LoadingIndicator.test.tsx` - Tests for loading components (10 tests)
+  - `/frontend/src/components/Skeleton.test.tsx` - Tests for skeleton components (10 tests)
+  - `/frontend/src/components/ProtectedRoute.test.tsx` - Tests for auth route protection (2 tests)
+  - `/frontend/package.json` - Added test scripts (test, test:run, test:coverage) and dev dependencies
+- **Learnings for future iterations:**
+  - Use Vitest instead of Jest for Vite projects - shares config and is much faster
+  - Test setup file should mock window.matchMedia, ResizeObserver, and scrollTo for jsdom
+  - Custom render wrapper should include QueryClientProvider with retry:false for predictable tests
+  - Use createMockUser factory to generate complete User objects matching the type definition
+  - eslint-disable react-refresh/only-export-components needed for test utility files
+  - When testing Zustand stores, use useAuthStore.setState() to reset state before each test
+  - vi.mocked() helper from vitest enables proper typing of mocked functions
+  - Use MemoryRouter in tests instead of BrowserRouter for controlled routing
+  - 69 frontend tests + 934 backend tests = 1003 total tests pass
+---
