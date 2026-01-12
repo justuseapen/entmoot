@@ -1152,7 +1152,7 @@
         "Alt text on all images"
       ],
       "priority": 60,
-      "passes": false,
+      "passes": true,
       "notes": "Use React Helmet or update index.html directly. OG image can be a placeholder for now."
     },
     {

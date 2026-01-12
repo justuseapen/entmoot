@@ -384,3 +384,35 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Pass duration (0 or skip) to count-up hook for immediate display when motion reduced
   - FloatingIsland component accepts animate prop to conditionally apply CSS animation class
 ---
+
+## 2026-01-12 - US-060 Landing Page SEO and Meta Tags
+- What was implemented:
+  - Installed react-helmet-async package for dynamic meta tag management
+  - Created LandingPageSEO component at /frontend/src/components/landing/LandingPageSEO.tsx
+  - Page title: "Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together"
+  - Meta description about transforming family chaos into epic adventures
+  - Open Graph tags (og:title, og:description, og:image, og:type, og:url, og:site_name)
+  - Twitter card meta tags (summary_large_image)
+  - Canonical URL set to https://entmoot.app
+  - Updated index.html with default fallback meta tags for crawlers/pre-renderers
+  - Wrapped app with HelmetProvider in main.tsx
+  - Added aria-hidden="true" and role="presentation" to decorative SVGs in HeroSection and FinalCTASection
+  - Verified semantic HTML structure (header, nav, main, section, footer already in place)
+
+- Files changed:
+  - frontend/src/components/landing/LandingPageSEO.tsx (new)
+  - frontend/src/main.tsx (wrapped with HelmetProvider)
+  - frontend/src/pages/LandingPage.tsx (added LandingPageSEO import and usage)
+  - frontend/index.html (added default meta tags)
+  - frontend/src/components/landing/HeroSection.tsx (aria-hidden on decorative SVGs)
+  - frontend/src/components/landing/FinalCTASection.tsx (aria-hidden on decorative SVGs)
+  - frontend/package.json (added react-helmet-async dependency)
+
+- **Learnings for future iterations:**
+  - react-helmet-async is the modern fork of react-helmet for React 18 concurrent mode
+  - HelmetProvider must wrap the entire app at the root level in main.tsx
+  - index.html should have fallback meta tags for crawlers that don't execute JavaScript
+  - Decorative SVGs should have aria-hidden="true" and role="presentation" for accessibility
+  - AnimatedSection component already uses <section> by default - good semantic HTML
+  - The OG image path is placeholder (/og-image.png) - actual image needs to be created later
+---
