@@ -612,3 +612,34 @@ Started: January 2026
   - Controller integration: record streak when plan_has_content?, reflection.completed?, or weekly review just completed
   - 743 total tests pass (71 new streak-related tests)
 ---
+
+## 2026-01-12 - US-025
+- Implemented Gamification - Badges Backend for user achievement tracking
+- Files created/changed:
+  - `/backend/app/models/badge.rb` - Badge model with name, description, icon, category, criteria (jsonb), CATEGORIES constant
+  - `/backend/app/models/user_badge.rb` - UserBadge join model with earned_at timestamp, auto-set via before_validation
+  - `/backend/app/services/badge_service.rb` - BadgeService with check_all_badges, category-specific checks, award_badge methods
+  - `/backend/app/controllers/api/v1/badges_controller.rb` - GET /api/v1/badges and GET /api/v1/users/me/badges endpoints
+  - `/backend/config/routes.rb` - Added badges routes (index and user_badges under /users/me)
+  - `/backend/db/migrate/20260112150000_create_badges.rb` - Badges table with unique name index
+  - `/backend/db/migrate/20260112150001_create_user_badges.rb` - UserBadges join table with unique user_id+badge_id
+  - `/backend/db/seeds/badges.rb` - Seed data for 10 initial badges across 4 categories
+  - `/backend/db/seeds.rb` - Updated to load badge seeds
+  - `/backend/config/locales/en.yml` - Added validation message for already_earned
+  - `/backend/app/models/user.rb` - Added user_badges and badges associations
+  - `/backend/spec/factories/badges.rb` - Factory with category and specific badge traits
+  - `/backend/spec/factories/user_badges.rb` - Factory with recent/old traits
+  - `/backend/spec/models/badge_spec.rb` - Model specs (16 tests)
+  - `/backend/spec/models/user_badge_spec.rb` - Model specs (7 tests)
+  - `/backend/spec/services/badge_service_spec.rb` - Service specs (15 tests)
+  - `/backend/spec/requests/api/v1/badges_spec.rb` - Request specs (12 tests)
+- **Learnings for future iterations:**
+  - Badge categories: goals, planning, reflection, streaks, general
+  - BadgeService uses dynamic method dispatch: #{badge.name}_eligible? for specific badges, generic_eligible? for fallback
+  - Badge criteria stored as jsonb with "type" and threshold fields (count, days)
+  - UserBadge before_validation callback sets earned_at, so presence validation can't use shoulda-matchers
+  - User badges endpoint calls BadgeService.check_all_badges to auto-award newly eligible badges
+  - NotificationService.notify_badge_earned sends badge earned notifications
+  - Badge stats include total_badges, earned_badges, completion_percentage
+  - 793 total tests pass (50 new badge-related tests)
+---

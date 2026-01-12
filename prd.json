@@ -473,7 +473,7 @@
         "Request specs"
       ],
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "notes": "Start with ~10 badges. Easy to add more later."
     },
     {
