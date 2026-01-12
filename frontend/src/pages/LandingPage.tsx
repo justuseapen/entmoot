@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { SocialProofBar } from "@/components/landing/SocialProofBar";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -32,6 +33,9 @@ export function LandingPage() {
       <main className="flex flex-col">
         {/* Hero Section */}
         <HeroSection />
+
+        {/* Social Proof Bar - immediately below hero */}
+        <SocialProofBar />
 
         {/* Features section placeholder - for smooth scroll target */}
         <section
