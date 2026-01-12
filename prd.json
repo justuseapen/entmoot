@@ -634,7 +634,7 @@
         "Branch protection requiring CI pass"
       ],
       "priority": 34,
-      "passes": false,
+      "passes": true,
       "notes": "Essential for Ralph to have passing CI as a stop condition."
     },
     {

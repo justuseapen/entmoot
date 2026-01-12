@@ -850,3 +850,31 @@ Started: January 2026
   - Use MemoryRouter in tests instead of BrowserRouter for controlled routing
   - 69 frontend tests + 934 backend tests = 1003 total tests pass
 ---
+
+## 2026-01-12 - US-034
+- Implemented CI/CD Pipeline with GitHub Actions
+- Files created/changed:
+  - `/.github/workflows/ci.yml` - Complete CI workflow with backend and frontend jobs
+- **Backend job features:**
+  - PostgreSQL 16 and Redis 7 services via Docker containers
+  - Ruby 3.4.4 setup with bundler cache
+  - Database creation and schema load
+  - Rubocop linting
+  - RSpec tests
+  - Database migration rollback/migrate check
+- **Frontend job features:**
+  - Node.js 22 setup with npm cache
+  - ESLint linting
+  - TypeScript type checking (tsc --noEmit)
+  - Vitest tests
+  - Vite build verification
+- **Learnings for future iterations:**
+  - GitHub Actions services block creates Docker containers for PostgreSQL and Redis
+  - Use `ruby/setup-ruby@v1` with `bundler-cache: true` for fast gem installation
+  - Use `actions/setup-node@v4` with `cache: "npm"` for fast npm ci
+  - Separate jobs for backend/frontend run in parallel for faster CI
+  - Database migration check: rollback STEP=1 then migrate verifies reversibility
+  - TypeScript check: `npx tsc --noEmit` verifies types without producing output
+  - Branch protection requiring CI pass must be configured manually in GitHub repo settings
+  - All 1003 tests pass (934 backend + 69 frontend)
+---
