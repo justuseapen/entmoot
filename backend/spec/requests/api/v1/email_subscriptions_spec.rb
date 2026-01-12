@@ -112,6 +112,23 @@ RSpec.describe "Api::V1::EmailSubscriptions" do
         expect(user_without_prefs.reload.notification_preference.morning_planning).to be false
       end
     end
+
+    context "with valid token for onboarding" do
+      let(:token) do
+        payload = { user_id: user.id, type: :onboarding, exp: 1.year.from_now.to_i }
+        JWT.encode(payload, Rails.application.secret_key_base)
+      end
+
+      it "unsubscribes from onboarding emails" do
+        expect(user.onboarding_unsubscribed).to be false
+
+        get "/api/v1/unsubscribe", params: { token: token }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["message"]).to eq("Successfully unsubscribed from onboarding emails")
+        expect(user.reload.onboarding_unsubscribed).to be true
+      end
+    end
   end
 
   private
