@@ -34,6 +34,12 @@ RSpec.configure do |config|
   # Include time travel helpers
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # Use test adapter for ActiveJob
+  config.include ActiveJob::TestHelper, type: :job
+  config.before(:each, type: :job) do
+    ActiveJob::Base.queue_adapter = :test
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join("spec/fixtures")

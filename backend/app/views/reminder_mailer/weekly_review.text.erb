@@ -1,0 +1,19 @@
+Time for your weekly review, <%= @user.name %>!
+
+Congratulations on completing another week! Taking time to review your progress helps you celebrate wins and plan for even better weeks ahead.
+
+In your weekly review:
+- Review your metrics and accomplishments
+- Celebrate your wins - big and small!
+- Acknowledge challenges and lessons learned
+- Set priorities for the week ahead
+
+Start weekly review: <%= @app_url %>
+
+Here's to a great week ahead!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

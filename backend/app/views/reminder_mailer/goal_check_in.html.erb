@@ -1,0 +1,27 @@
+<h1>Goal Check-in: <%= @goal.title %></h1>
+
+<p>Hi <%= @user.name %>,</p>
+
+<p>It's time for a quick check-in on your goal. How's it going?</p>
+
+<% if @goal.progress.present? && @goal.progress > 0 %>
+<p><strong>Current Progress:</strong> <%= @goal.progress %>%</p>
+<% end %>
+
+<% if @goal.due_date.present? %>
+<p><strong>Due Date:</strong> <%= @goal.due_date.strftime("%B %d, %Y") %></p>
+<% end %>
+
+<p>Take a moment to:</p>
+<ul>
+  <li>Update your progress</li>
+  <li>Review what's working</li>
+  <li>Identify any blockers</li>
+  <li>Adjust your approach if needed</li>
+</ul>
+
+<p style="text-align: center;">
+  <a href="<%= @app_url %>" class="button">View Goal</a>
+</p>
+
+<p>Keep up the great work!</p>

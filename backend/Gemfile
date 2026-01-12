@@ -16,6 +16,7 @@ gem "redis", ">= 4.0.1"
 
 # Background job processing
 gem "sidekiq", "~> 7.0"
+gem "sidekiq-scheduler", "~> 5.0"
 
 # Authentication
 gem "devise", "~> 4.9"
@@ -59,6 +60,9 @@ group :development, :test do
   gem "faker", "~> 3.0"
   gem "rspec-rails", "~> 6.0"
   gem "shoulda-matchers", "~> 6.0"
+
+  # Email preview in development
+  gem "letter_opener", "~> 1.8"
 end
 
 group :test do

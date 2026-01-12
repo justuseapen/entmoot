@@ -59,6 +59,9 @@ Rails.application.routes.draw do
 
       # Accept invitation (public route with token)
       post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
+
+      # Email unsubscribe (public route with token)
+      get "unsubscribe", to: "email_subscriptions#unsubscribe", as: :unsubscribe
     end
   end
 end

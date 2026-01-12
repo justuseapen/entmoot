@@ -1,0 +1,29 @@
+Goal Check-in: <%= @goal.title %>
+
+Hi <%= @user.name %>,
+
+It's time for a quick check-in on your goal. How's it going?
+
+<% if @goal.progress.present? && @goal.progress > 0 %>
+Current Progress: <%= @goal.progress %>%
+<% end %>
+
+<% if @goal.due_date.present? %>
+Due Date: <%= @goal.due_date.strftime("%B %d, %Y") %>
+<% end %>
+
+Take a moment to:
+- Update your progress
+- Review what's working
+- Identify any blockers
+- Adjust your approach if needed
+
+View goal: <%= @app_url %>
+
+Keep up the great work!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

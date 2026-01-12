@@ -1,0 +1,19 @@
+Good evening, <%= @user.name %>!
+
+It's time for your evening reflection. Taking a few moments to reflect on your day helps you learn and grow.
+
+Reflect on:
+- What went well today?
+- What was challenging?
+- What are you grateful for?
+- What will you do differently tomorrow?
+
+Start reflection: <%= @app_url %>
+
+Rest well and recharge for tomorrow!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

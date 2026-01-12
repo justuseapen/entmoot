@@ -1,0 +1,18 @@
+Good morning, <%= @user.name %>!
+
+It's time for your morning planning. Starting your day with intention helps you focus on what truly matters.
+
+Take 5 minutes to:
+- Set your top 3 priorities for today
+- Write down your daily intention
+- Review your tasks and goals
+
+Start planning: <%= @app_url %>
+
+Have a wonderful and productive day!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

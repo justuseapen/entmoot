@@ -5,3 +5,29 @@
   - mailers
   - notifications
   - low
+
+:scheduler:
+  :schedule:
+    send_morning_planning_reminders:
+      cron: '*/5 * * * *'
+      class: SendMorningPlanningRemindersJob
+      queue: default
+      description: "Check and send morning planning reminder emails"
+
+    send_evening_reflection_reminders:
+      cron: '*/5 * * * *'
+      class: SendEveningReflectionRemindersJob
+      queue: default
+      description: "Check and send evening reflection reminder emails"
+
+    send_weekly_review_reminders:
+      cron: '*/5 * * * *'
+      class: SendWeeklyReviewRemindersJob
+      queue: default
+      description: "Check and send weekly review reminder emails"
+
+    send_goal_check_in_reminders:
+      cron: '0 10 * * *'
+      class: SendGoalCheckInRemindersJob
+      queue: default
+      description: "Send goal check-in reminders for goals with upcoming due dates"
