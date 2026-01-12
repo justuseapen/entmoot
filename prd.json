@@ -580,7 +580,7 @@
         "Connected calendar accounts (placeholder for Phase 2)"
       ],
       "priority": 31,
-      "passes": false,
+      "passes": true,
       "notes": "Avatar upload can use ActiveStorage with S3 in production."
     },
     {

@@ -773,3 +773,26 @@ Started: January 2026
   - Page content needs pb-20 (mobile) or md:pb-6 (desktop) to account for bottom nav
   - All 896 tests continue to pass (no new backend tests needed)
 ---
+
+## 2026-01-12 - US-031
+- Implemented User Profile and Settings page
+- Files created/changed:
+  - `/backend/app/controllers/api/v1/profile_controller.rb` - Profile CRUD: update, update_password, destroy, export endpoints
+  - `/backend/app/services/user_data_export_service.rb` - Aggregates all user data for GDPR export (families, goals, plans, reflections, reviews, streaks, badges, points, notifications, preferences)
+  - `/backend/config/routes.rb` - Added /users/me/profile, /users/me/password, /users/me (DELETE), /users/me/export routes
+  - `/backend/spec/requests/api/v1/profile_spec.rb` - 24 request specs covering all profile endpoints
+  - `/backend/spec/services/user_data_export_service_spec.rb` - 14 service specs for data export
+  - `/frontend/src/pages/UserProfile.tsx` - Complete profile page with profile card, edit form, password change, settings links, calendar placeholder, data export, account deletion with confirmation dialog
+  - `/frontend/src/hooks/useProfile.ts` - TanStack Query hooks for profile mutations (update, change password, delete account, export data)
+  - `/frontend/src/lib/profile.ts` - API functions, types, and downloadJson utility
+- **Learnings for future iterations:**
+  - Use `user_response` helper method to format user data consistently in profile controller
+  - Password change requires current_password, password, and password_confirmation all validated
+  - Account deletion should revoke all refresh tokens before destroying user record
+  - UserDataExportService splits large methods into smaller helpers (goal_to_hash, daily_plan_to_hash, etc.) to satisfy ABC complexity metrics
+  - Export limits notifications and points entries to 100 most recent to avoid excessive data
+  - Delete confirmation dialog requires both password AND typing "DELETE" for safety
+  - Use downloadJson utility to create blob and trigger download in browser
+  - Profile form uses react-hook-form reset() with user data when cancel is clicked
+  - 934 total tests pass (38 new profile-related tests)
+---
