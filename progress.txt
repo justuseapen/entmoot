@@ -141,3 +141,28 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Quote component uses rotated Quote icon (rotate-180) for opening quote style
   - StarRating component fills stars based on rating value (fullStars + hasHalfStar logic)
 ---
+
+## 2026-01-12 - US-051 Landing Page Problem/Solution Section
+- What was implemented:
+  - Created ProblemSolutionSection component at /frontend/src/components/landing/ProblemSolutionSection.tsx
+  - Section headline: "Sound Familiar?"
+  - Two-column grid layout: "Without Entmoot" (red-tinted) vs "With Entmoot" (green-tinted)
+  - Pain points with emoji icons: dog feeding, soccer, grandma pickup, no fun activities
+  - Solutions with checkmark icons: quests tracked, everyone sees map, goals connected, celebrations built in
+  - Transition quote: "Every family deserves to feel like a team on an epic quest..."
+  - BlockyCard component with pixelated border effect using box-shadows and corner accents
+  - Responsive: stacks on mobile, side-by-side on tablet/desktop
+
+- Files changed:
+  - frontend/src/components/landing/ProblemSolutionSection.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (added import and usage after SocialProofBar)
+
+- **Learnings for future iterations:**
+  - BlockyCard uses inset and outset box-shadows to create pixelated border effect
+  - Small corner accent divs (2x2px) add to the blocky/Minecraft visual style
+  - Red colors for problem: #FEE2E2 background, #FECACA/#FCA5A5 inset shadows, #F87171 outset
+  - Green colors for solution: #DCFCE7 background, #BBF7D0/#86EFAC inset shadows, leafGreen outset
+  - PainPointItem combines emoji in rounded-lg box with X icon and text
+  - SolutionItem uses Check icon in leafGreen-tinted circle
+  - Section placed after SocialProofBar and before Features placeholder
+---

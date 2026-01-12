@@ -982,7 +982,7 @@
         "Cards have subtle blocky/pixelated border style"
       ],
       "priority": 51,
-      "passes": false,
+      "passes": true,
       "notes": "Use grid layout. Consider adding simple illustrations later."
     },
     {
