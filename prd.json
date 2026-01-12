@@ -455,7 +455,7 @@
         "Request specs"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": "Consider 'freeze' feature to pause streaks during vacation. Phase 2."
     },
     {
