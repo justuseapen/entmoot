@@ -15,6 +15,9 @@ import { logout as logoutApi } from "@/lib/auth";
 import { FamilySwitcher } from "@/components/FamilySwitcher";
 import { FamilyCreationWizard } from "@/components/FamilyCreationWizard";
 import { NotificationBell } from "@/components/NotificationBell";
+import { StreaksSummary } from "@/components/StreaksSummary";
+import { BadgeShowcase } from "@/components/BadgeShowcase";
+import { PointsDisplay } from "@/components/PointsDisplay";
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -196,6 +199,13 @@ export function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Gamification Section */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <StreaksSummary />
+              <PointsDisplay compact />
+              <BadgeShowcase compact />
+            </div>
           </div>
         )}
       </div>

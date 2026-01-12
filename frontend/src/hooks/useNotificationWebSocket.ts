@@ -9,8 +9,12 @@ interface WebSocketMessage {
   notification: Notification;
 }
 
+export type NotificationCallback = (notification: Notification) => void;
+
 // ActionCable WebSocket hook for real-time notifications
-export function useNotificationWebSocket() {
+export function useNotificationWebSocket(
+  onNotification?: NotificationCallback
+) {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
@@ -18,11 +22,16 @@ export function useNotificationWebSocket() {
     null
   );
   const tokenRef = useRef(token);
+  const onNotificationRef = useRef(onNotification);
 
-  // Keep token ref updated
+  // Keep refs updated
   useEffect(() => {
     tokenRef.current = token;
   }, [token]);
+
+  useEffect(() => {
+    onNotificationRef.current = onNotification;
+  }, [onNotification]);
 
   useEffect(() => {
     if (!token) {
@@ -100,6 +109,11 @@ export function useNotificationWebSocket() {
                   };
                 }
               );
+
+              // Call the notification callback if provided
+              if (onNotificationRef.current) {
+                onNotificationRef.current(message.notification);
+              }
             }
           }
         } catch {
