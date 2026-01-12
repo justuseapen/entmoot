@@ -10,6 +10,7 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { FinalCTASection } from "@/components/landing/FinalCTASection";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -65,6 +66,9 @@ export function LandingPage() {
         {/* Final CTA Section */}
         <FinalCTASection />
       </main>
+
+      {/* Footer */}
+      <LandingFooter />
     </div>
   );
 }
