@@ -33,6 +33,9 @@ module Api
         @reflection = @daily_plan.reflections.build(reflection_params)
 
         if @reflection.save
+          # Record evening reflection streak if it's an evening reflection with content
+          record_evening_reflection_streak if @reflection.evening? && @reflection.completed?
+
           render json: {
             message: "Reflection created successfully.",
             reflection: reflection_response(@reflection)
@@ -46,6 +49,9 @@ module Api
         authorize @reflection
 
         if @reflection.update(reflection_params)
+          # Record evening reflection streak if it's an evening reflection that's now completed
+          record_evening_reflection_streak if @reflection.evening? && @reflection.completed?
+
           render json: {
             message: "Reflection updated successfully.",
             reflection: reflection_response(@reflection)
@@ -138,6 +144,10 @@ module Api
 
       def response_summary(response)
         { id: response.id, prompt: response.prompt, response: response.response }
+      end
+
+      def record_evening_reflection_streak
+        StreakService.record_evening_reflection(user: current_user, date: @reflection.daily_plan.date)
       end
     end
   end

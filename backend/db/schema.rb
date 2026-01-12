@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_203405) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_061006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -195,6 +195,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_203405) do
     t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
   end
 
+  create_table "streaks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "streak_type", null: false
+    t.integer "current_count", default: 0, null: false
+    t.integer "longest_count", default: 0, null: false
+    t.date "last_activity_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "streak_type"], name: "index_streaks_unique_user_type", unique: true
+    t.index ["user_id"], name: "index_streaks_on_user_id"
+  end
+
   create_table "top_priorities", force: :cascade do |t|
     t.string "title", null: false
     t.integer "priority_order", null: false
@@ -256,6 +268,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_203405) do
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"
   add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "streaks", "users"
   add_foreign_key "top_priorities", "daily_plans"
   add_foreign_key "top_priorities", "goals"
   add_foreign_key "weekly_reviews", "families"

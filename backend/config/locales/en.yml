@@ -80,3 +80,7 @@ en:
               invalid_time_format: "must be in HH:MM format (00:00-23:59)"
             quiet_hours_end:
               invalid_time_format: "must be in HH:MM format (00:00-23:59)"
+        streak:
+          attributes:
+            streak_type:
+              already_exists: "already has a streak of this type"

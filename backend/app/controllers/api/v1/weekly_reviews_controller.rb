@@ -33,7 +33,12 @@ module Api
       def update
         authorize @weekly_review
 
+        was_completed_before = @weekly_review.completed?
+
         if @weekly_review.update(weekly_review_params)
+          # Record weekly review streak if just completed
+          record_weekly_review_streak if !was_completed_before && @weekly_review.completed?
+
           render json: {
             message: "Weekly review updated successfully.",
             weekly_review: weekly_review_response(@weekly_review, include_metrics: true)
@@ -101,6 +106,10 @@ module Api
           created_at: review.created_at,
           updated_at: review.updated_at
         }
+      end
+
+      def record_weekly_review_streak
+        StreakService.record_weekly_review(user: current_user, date: @weekly_review.week_start_date)
       end
     end
   end

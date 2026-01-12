@@ -48,6 +48,7 @@ Rails.application.routes.draw do
       # User preferences (scoped to current user via /users/me)
       scope "users/me" do
         resource :notification_preferences, only: %i[show update]
+        resources :streaks, only: [:index]
       end
 
       # Notifications

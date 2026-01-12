@@ -24,6 +24,9 @@ module Api
         authorize @daily_plan
 
         if @daily_plan.update(daily_plan_params)
+          # Record daily planning streak if plan has meaningful content
+          record_daily_planning_streak if plan_has_content?
+
           render json: {
             message: "Daily plan updated successfully.",
             daily_plan: daily_plan_response(@daily_plan)
@@ -104,6 +107,14 @@ module Api
           time_scale: goal.time_scale,
           status: goal.status
         }
+      end
+
+      def plan_has_content?
+        @daily_plan.daily_tasks.any? || @daily_plan.top_priorities.any? || @daily_plan.intention.present?
+      end
+
+      def record_daily_planning_streak
+        StreakService.record_daily_planning(user: current_user, date: @daily_plan.date)
       end
     end
   end
