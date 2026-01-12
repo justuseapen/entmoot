@@ -9,6 +9,9 @@ Started: Mon Jan 12 17:13:26 EST 2026
 - Hooks in `/hooks/useProactiveFeedback.ts` provide convenient triggers for feedback components
 - Landing page design system colors: forestGreen #2D5A27, leafGreen #7CB342, skyBlue #64B5F6, warmGold #FFD54F, earthBrown #795548, creamWhite #FFF8E7, sunsetOrange #FF7043, darkForest #1B3A1A
 - Landing page components go in `/frontend/src/components/landing/`
+- useScrollAnimation hook pattern: use Intersection Observer with initial state from prefersReducedMotion
+- To avoid setState-in-effect lint error: initialize useState with the condition value, not set it in useEffect
+- AnimatedSection wrapper provides consistent fade-in animation for landing sections
 ---
 
 ## 2026-01-12 17:30 - US-046 Proactive Feedback Collection
@@ -348,4 +351,36 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - FooterColumn reusable component for consistent link list styling
   - Prettier requires `tracking-wider uppercase` order (not `uppercase tracking-wider`)
   - Footer is placed outside main element, after </main> closing tag
+---
+
+## 2026-01-12 - US-059 Landing Page Animations and Polish
+- What was implemented:
+  - Created useScrollAnimation hook at /frontend/src/hooks/useScrollAnimation.ts
+  - Created usePrefersReducedMotion hook for detecting reduced motion preference
+  - Created AnimatedSection wrapper component at /frontend/src/components/landing/AnimatedSection.tsx
+  - Wrapped all landing page sections in AnimatedSection for fade-in-on-scroll animation
+  - Added prefers-reduced-motion support to HeroSection (floating islands animation)
+  - Added prefers-reduced-motion support to SocialProofBar (count-up animation)
+  - All existing animations verified: button hover effects, feature card hover, smooth scroll, carousel, accordion
+
+- Files changed:
+  - frontend/src/hooks/useScrollAnimation.ts (new)
+  - frontend/src/components/landing/AnimatedSection.tsx (new)
+  - frontend/src/components/landing/HeroSection.tsx (added reduced motion support)
+  - frontend/src/components/landing/SocialProofBar.tsx (added reduced motion support)
+  - frontend/src/components/landing/ProblemSolutionSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/FeaturesSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/HowItWorksSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/TestimonialsSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/PricingSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/FAQSection.tsx (wrapped in AnimatedSection)
+  - frontend/src/components/landing/FinalCTASection.tsx (wrapped in AnimatedSection)
+
+- **Learnings for future iterations:**
+  - To avoid setState-in-effect lint error: set initial useState value from condition, don't set in useEffect
+  - usePrefersReducedMotion hook listens to media query changes for dynamic preference updates
+  - AnimatedSection uses opacity + translate-y transition for smooth fade-in effect
+  - Intersection Observer threshold of 0.2 works well for section-level animations
+  - Pass duration (0 or skip) to count-up hook for immediate display when motion reduced
+  - FloatingIsland component accepts animate prop to conditionally apply CSS animation class
 ---

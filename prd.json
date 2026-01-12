@@ -1134,7 +1134,7 @@
         "No animation if user prefers-reduced-motion"
       ],
       "priority": 59,
-      "passes": false,
+      "passes": true,
       "notes": "Use CSS transitions where possible. Framer Motion optional but not required."
     },
     {
