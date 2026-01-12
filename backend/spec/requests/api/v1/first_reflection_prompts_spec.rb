@@ -124,7 +124,9 @@ RSpec.describe "Api::V1::FirstReflectionPrompts" do
       context "with valid params" do
         it "creates a quick reflection" do
           travel_to Time.zone.parse("2026-01-12 09:00:00 EST") do
-            expect { post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user) }
+            expect do
+              post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user)
+            end
               .to change(Reflection, :count).by(1)
 
             expect(response).to have_http_status(:created)
@@ -136,7 +138,9 @@ RSpec.describe "Api::V1::FirstReflectionPrompts" do
 
         it "tracks first reflection created at" do
           travel_to Time.zone.parse("2026-01-12 09:00:00 EST") do
-            expect { post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user) }
+            expect do
+              post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user)
+            end
               .to change { user.reload.first_reflection_created_at }.from(nil)
           end
         end
@@ -201,7 +205,9 @@ RSpec.describe "Api::V1::FirstReflectionPrompts" do
           travel_to Time.zone.parse("2026-01-12 09:00:00 EST") do
             original_time = user.first_reflection_created_at
 
-            expect { post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user) }
+            expect do
+              post "/api/v1/users/me/first_reflection_prompt", params: valid_params, headers: auth_headers(user)
+            end
               .to change(Reflection, :count).by(1)
 
             expect(user.reload.first_reflection_created_at).to eq(original_time)

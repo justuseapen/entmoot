@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe Reflection do
   describe "associations" do
-    # Note: daily_plan is optional at the model level but required for non-quick reflections via validation
+    # NOTE: daily_plan is optional at the model level but required for non-quick reflections via validation
     it { is_expected.to belong_to(:daily_plan).without_validating_presence }
     it { is_expected.to belong_to(:user).without_validating_presence }
     it { is_expected.to belong_to(:family).without_validating_presence }

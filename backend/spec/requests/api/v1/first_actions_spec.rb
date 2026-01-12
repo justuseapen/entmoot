@@ -17,9 +17,9 @@ RSpec.describe "Api::V1::FirstActions" do
 
       it "returns completed first_actions" do
         user.update!(first_actions: {
-          "goal_created" => "2026-01-01T12:00:00Z",
-          "reflection_completed" => "2026-01-01T13:00:00Z"
-        })
+                       "goal_created" => "2026-01-01T12:00:00Z",
+                       "reflection_completed" => "2026-01-01T13:00:00Z"
+                     })
 
         get "/api/v1/users/me/first_actions", headers: auth_headers(user)
 
@@ -31,11 +31,11 @@ RSpec.describe "Api::V1::FirstActions" do
 
       it "returns all_completed true when all actions are completed" do
         user.update!(first_actions: {
-          "goal_created" => "2026-01-01T12:00:00Z",
-          "reflection_completed" => "2026-01-01T13:00:00Z",
-          "daily_plan_completed" => "2026-01-01T14:00:00Z",
-          "invitation_accepted" => "2026-01-01T15:00:00Z"
-        })
+                       "goal_created" => "2026-01-01T12:00:00Z",
+                       "reflection_completed" => "2026-01-01T13:00:00Z",
+                       "daily_plan_completed" => "2026-01-01T14:00:00Z",
+                       "invitation_accepted" => "2026-01-01T15:00:00Z"
+                     })
 
         get "/api/v1/users/me/first_actions", headers: auth_headers(user)
 
