@@ -673,3 +673,27 @@ Started: January 2026
   - Use activity_label helper to convert activity_type to human-readable strings
   - 854 total tests pass (61 new points-related tests)
 ---
+
+## 2026-01-12 - US-027
+- Implemented Gamification - Family Leaderboard with backend and frontend
+- Files created/changed:
+  - `/backend/app/services/leaderboard_service.rb` - LeaderboardService with weekly/all-time scopes, ranking logic, streak/badge aggregation
+  - `/backend/app/controllers/api/v1/leaderboards_controller.rb` - GET /api/v1/families/:id/leaderboard endpoint
+  - `/backend/config/routes.rb` - Added leaderboard resource under families
+  - `/backend/spec/services/leaderboard_service_spec.rb` - Service specs (10 tests)
+  - `/backend/spec/requests/api/v1/leaderboards_spec.rb` - Request specs (9 tests)
+  - `/frontend/src/lib/leaderboard.ts` - API functions, types, and helper utilities
+  - `/frontend/src/hooks/useLeaderboard.ts` - TanStack Query hook for leaderboard data
+  - `/frontend/src/pages/Leaderboard.tsx` - Family leaderboard page with member cards, top performer spotlight, scope tabs
+  - `/frontend/src/App.tsx` - Added /families/:id/leaderboard route
+  - `/frontend/src/pages/FamilySettings.tsx` - Added Leaderboard button link
+- **Learnings for future iterations:**
+  - LeaderboardService uses PointsService.total_points and PointsService.weekly_points for scope-based points calculation
+  - Ranking handles ties by giving same rank and sorting alphabetically within ties
+  - Top performer is first entry in sorted leaderboard (highest points)
+  - Encouragement messages vary by rank position (1st="Leading", 2nd="So close", etc.)
+  - MemberCard displays avatar with initial fallback, rank badge, points, streak breakdown, badge count
+  - Use index_by(&:streak_type) to convert streak array to hash for easy lookup
+  - Reuse existing FamilyPolicy :show? for leaderboard authorization (members can view)
+  - 875 total tests pass (21 new leaderboard tests)
+---

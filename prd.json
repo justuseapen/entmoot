@@ -508,7 +508,7 @@
         "Encouraging messages for all positions"
       ],
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "notes": "Make it fun and supportive, not cutthroat competitive."
     },
     {
