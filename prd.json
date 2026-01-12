@@ -398,7 +398,7 @@
         "Mailer specs"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": "Use SendGrid or Postmark in production. Letter Opener in development."
     },
     {

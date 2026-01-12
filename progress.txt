@@ -497,3 +497,41 @@ Started: January 2026
   - Refetch interval (30s) provides polling fallback when WebSocket disconnects
   - 584 total tests pass (31 new notification tests)
 ---
+
+## 2026-01-11 - US-021
+- Implemented Email Notifications with scheduled Sidekiq jobs and ReminderMailer
+- Files created/changed:
+  - `/backend/app/mailers/reminder_mailer.rb` - ReminderMailer with 4 email types (morning_planning, evening_reflection, weekly_review, goal_check_in)
+  - `/backend/app/mailers/application_mailer.rb` - Updated default from address
+  - `/backend/app/views/layouts/mailer.html.erb` - Mobile-friendly HTML email layout with unsubscribe link
+  - `/backend/app/views/reminder_mailer/*.html.erb` - HTML templates for all 4 email types
+  - `/backend/app/views/reminder_mailer/*.text.erb` - Plain text templates for all 4 email types
+  - `/backend/app/jobs/send_morning_planning_reminders_job.rb` - Scheduled job for morning reminders
+  - `/backend/app/jobs/send_evening_reflection_reminders_job.rb` - Scheduled job for evening reminders
+  - `/backend/app/jobs/send_weekly_review_reminders_job.rb` - Scheduled job for weekly review reminders
+  - `/backend/app/jobs/send_goal_check_in_reminders_job.rb` - Scheduled job for goal check-in reminders
+  - `/backend/app/controllers/api/v1/email_subscriptions_controller.rb` - One-click unsubscribe endpoint
+  - `/backend/config/sidekiq.yml` - Sidekiq scheduler configuration for reminder jobs
+  - `/backend/config/initializers/sidekiq.rb` - Sidekiq-scheduler plugin configuration
+  - `/backend/config/environments/development.rb` - Letter Opener configuration for development
+  - `/backend/config/routes.rb` - Added unsubscribe route
+  - `/backend/Gemfile` - Added letter_opener and sidekiq-scheduler gems
+  - `/backend/spec/mailers/reminder_mailer_spec.rb` - Mailer specs (22 tests)
+  - `/backend/spec/jobs/send_morning_planning_reminders_job_spec.rb` - Job specs (6 tests)
+  - `/backend/spec/jobs/send_evening_reflection_reminders_job_spec.rb` - Job specs (4 tests)
+  - `/backend/spec/jobs/send_weekly_review_reminders_job_spec.rb` - Job specs (5 tests)
+  - `/backend/spec/jobs/send_goal_check_in_reminders_job_spec.rb` - Job specs (8 tests)
+  - `/backend/spec/requests/api/v1/email_subscriptions_spec.rb` - Unsubscribe endpoint specs (8 tests)
+- **Learnings for future iterations:**
+  - Use sidekiq-scheduler gem for cron-based job scheduling in sidekiq.yml
+  - Reminder jobs run every 5 minutes and check if current time is within 5-minute window of user's scheduled time
+  - JWT tokens with 1-year expiry work well for unsubscribe links - encode user_id and reminder_type
+  - Letter Opener in development mode opens emails in browser automatically
+  - Email templates use table-based layout for better email client compatibility
+  - Reminder jobs filter by both email channel (enabled) AND specific reminder type (enabled)
+  - Goal check-in job filters for goals with status in (not_started, in_progress, at_risk) and due_date within 7 days
+  - Prevent duplicate goal emails by checking Notification table for same goal_id same day
+  - Use `find_each` for batch processing users to avoid loading all into memory
+  - Split complex job methods into smaller private helpers (build_context, should_skip?, send_email) to satisfy ABC complexity
+  - 638 total tests pass (53 new email notification tests)
+---
