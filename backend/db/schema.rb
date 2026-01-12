@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_061006) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_150001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "badges", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description", null: false
+    t.string "icon", null: false
+    t.string "category", null: false
+    t.jsonb "criteria", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_badges_on_category"
+    t.index ["name"], name: "index_badges_on_name", unique: true
+  end
 
   create_table "daily_plans", force: :cascade do |t|
     t.date "date", null: false
@@ -219,6 +231,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_061006) do
     t.index ["goal_id"], name: "index_top_priorities_on_goal_id"
   end
 
+  create_table "user_badges", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "badge_id", null: false
+    t.datetime "earned_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["badge_id"], name: "index_user_badges_on_badge_id"
+    t.index ["user_id", "badge_id"], name: "index_user_badges_unique_user_badge", unique: true
+    t.index ["user_id"], name: "index_user_badges_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -271,6 +294,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_061006) do
   add_foreign_key "streaks", "users"
   add_foreign_key "top_priorities", "daily_plans"
   add_foreign_key "top_priorities", "goals"
+  add_foreign_key "user_badges", "badges"
+  add_foreign_key "user_badges", "users"
   add_foreign_key "weekly_reviews", "families"
   add_foreign_key "weekly_reviews", "users"
 end

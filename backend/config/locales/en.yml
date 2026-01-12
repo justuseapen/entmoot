@@ -84,3 +84,7 @@ en:
           attributes:
             streak_type:
               already_exists: "already has a streak of this type"
+        user_badge:
+          attributes:
+            user_id:
+              already_earned: "has already earned this badge"

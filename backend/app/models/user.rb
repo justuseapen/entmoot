@@ -18,6 +18,8 @@ class User < ApplicationRecord
   has_one :notification_preference, dependent: :destroy
   has_many :notifications, dependent: :destroy
   has_many :streaks, dependent: :destroy
+  has_many :user_badges, dependent: :destroy
+  has_many :badges, through: :user_badges
 
   validates :name, presence: true
 

@@ -14,7 +14,9 @@ export function useNotificationWebSocket() {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const tokenRef = useRef(token);
 
   // Keep token ref updated
