@@ -67,3 +67,27 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Responsive breakpoints: sm: 640px, lg: 1024px (Tailwind defaults)
   - Home.tsx is no longer used but wasn't deleted - can be removed later if needed
 ---
+
+## 2026-01-12 17:30 - US-048 Landing Page Navigation Bar
+- What was implemented:
+  - Created LandingNav component at /frontend/src/components/landing/LandingNav.tsx
+  - TreePine logo icon with "Entmoot" text as navigation brand
+  - Desktop navigation links: Features, How It Works, Pricing (smooth scroll to sections)
+  - Sign In link (text link to /login) and Get Started CTA button (forest green, links to /register)
+  - Sticky header with transparent background over hero, solid cream white (#FFF8E7) on scroll
+  - Mobile hamburger menu with slide-out drawer using shadcn/ui Sheet component
+  - Smooth scroll functionality via scrollIntoView({ behavior: "smooth" })
+  - Added placeholder sections with IDs (#features, #how-it-works, #pricing) for scroll targets
+  - Added pt-24 padding to hero section to account for fixed navbar height
+
+- Files changed:
+  - frontend/src/components/landing/LandingNav.tsx (new)
+  - frontend/src/pages/LandingPage.tsx (updated to include LandingNav and placeholder sections)
+
+- **Learnings for future iterations:**
+  - Use useState for scroll position tracking with window.scrollY > 50 threshold
+  - Sheet component from shadcn/ui works well for mobile drawer navigation
+  - Placeholder sections with IDs allow smooth scroll to work before full section implementations
+  - Fixed navbar requires padding-top on first content section to prevent overlap
+  - Landing page colors are duplicated between LandingNav and LandingPage - consider extracting to shared constants
+---

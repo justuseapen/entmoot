@@ -929,7 +929,7 @@
         "Smooth scroll to sections when nav links clicked"
       ],
       "priority": 48,
-      "passes": false,
+      "passes": true,
       "notes": "Use Lucide icons. Logo can be TreePine or TreeDeciduous icon for now."
     },
     {
