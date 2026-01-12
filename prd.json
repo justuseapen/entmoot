@@ -437,7 +437,7 @@
         "Graceful error handling if AI unavailable"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": "Make AI feel like a helpful coach, not a critic."
     },
     {

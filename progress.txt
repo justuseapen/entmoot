@@ -565,3 +565,22 @@ Started: January 2026
   - Break large heredocs into constants (SYSTEM_PROMPT, RESPONSE_FORMAT) to satisfy method length cops
   - 672 total tests pass (34 new AI refinement tests)
 ---
+
+## 2026-01-12 - US-023
+- Implemented AI SMART Goal Refinement Frontend with coaching interface
+- Files created/changed:
+  - `/frontend/src/components/AIRefinementPanel.tsx` - AI suggestions panel with organized sections for SMART criteria, titles, descriptions, obstacles, milestones
+  - `/frontend/src/components/GoalModal.tsx` - Added AI Coach tab, defaultValues support, onCreateSubGoal callback
+  - `/frontend/src/components/GoalDetailView.tsx` - Added onRefineWithAI callback
+  - `/frontend/src/hooks/useGoals.ts` - Added useRefineGoal mutation hook
+  - `/frontend/src/lib/goals.ts` - Added AI refinement types (GoalRefinementResponse, SmartSuggestions, Obstacle, Milestone) and refineGoal API
+  - `/frontend/src/pages/Goals.tsx` - Added handleCreateSubGoal handler and pendingSubGoal state for milestone-to-subgoal flow
+- **Learnings for future iterations:**
+  - AI refinement panel uses purple theme (bg-purple-50, border-purple-200) for suggestion sections
+  - Use dismissedSuggestions Set to track dismissed individual suggestions
+  - Use createdMilestones Set to track which milestones have been converted to sub-goals
+  - defaultValues prop on GoalModal enables pre-populating form when creating sub-goals from milestones
+  - onCreateSubGoal callback flows: AIRefinementPanel -> GoalModal -> Goals.tsx (opens new modal with parent_id set)
+  - MilestoneSubGoal interface has: title, description, suggestedProgress fields
+  - Separate state (pendingSubGoal) needed to pass info from edit modal to create modal
+---
