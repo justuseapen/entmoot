@@ -4,7 +4,7 @@ module Api
   module V1
     class GoalsController < BaseController
       before_action :set_family
-      before_action :set_goal, only: %i[show update destroy]
+      before_action :set_goal, only: %i[show update destroy refine]
 
       def index
         authorize @family, policy_class: GoalPolicy
@@ -49,6 +49,17 @@ module Api
 
         @goal.destroy
         render json: { message: "Goal deleted successfully." }
+      end
+
+      def refine
+        authorize @goal
+
+        service = GoalRefinementService.new(@goal)
+        suggestions = service.refine
+
+        render json: { suggestions: suggestions }
+      rescue GoalRefinementService::RefinementError => e
+        render json: { error: "AI refinement failed: #{e.message}" }, status: :service_unavailable
       end
 
       private

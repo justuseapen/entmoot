@@ -669,4 +669,179 @@ RSpec.describe "Api::V1::Goals" do
       end
     end
   end
+
+  describe "POST /api/v1/families/:family_id/goals/:id/refine" do
+    let!(:goal) do
+      create(:goal, :with_smart, :family_visible, family: family, creator: user, title: "Learn Spanish")
+    end
+
+    let(:mock_ai_response) do
+      {
+        smart_suggestions: {
+          specific: "Define which aspect of Spanish you want to focus on (conversational, business, academic)",
+          measurable: "Set a target level (e.g., B2 CEFR level) or vocabulary count (2000 words)",
+          achievable: "Start with 15-30 minutes daily practice and gradually increase",
+          relevant: "Consider how Spanish will benefit your career or personal life",
+          time_bound: "Set a 6-month checkpoint to assess progress toward fluency"
+        },
+        alternative_titles: [
+          "Achieve B2 Spanish Fluency for Travel",
+          "Master Conversational Spanish in 6 Months",
+          "Learn 2000 Spanish Words for Daily Use"
+        ],
+        alternative_descriptions: [
+          "Develop Spanish speaking and comprehension skills to confidently navigate everyday situations",
+          "Build a strong Spanish vocabulary foundation and practice conversational skills through daily exercises"
+        ],
+        potential_obstacles: [
+          { obstacle: "Lack of daily practice consistency",
+            mitigation: "Set specific practice times and use habit-stacking techniques" },
+          { obstacle: "Limited speaking practice opportunities",
+            mitigation: "Join language exchange platforms or local Spanish meetups" }
+        ],
+        milestones: [
+          { title: "Complete beginner course", description: "Finish A1 level materials", suggested_progress: 25 },
+          { title: "Hold basic conversations", description: "Can discuss simple topics for 5+ minutes",
+            suggested_progress: 50 },
+          { title: "Understand native content", description: "Follow Spanish podcasts/shows with minimal subtitles",
+            suggested_progress: 75 },
+          { title: "Achieve target fluency", description: "Pass B2 assessment or equivalent", suggested_progress: 100 }
+        ],
+        overall_feedback: "Great goal! Adding specific metrics and checkpoints will make your progress more measurable."
+      }
+    end
+
+    let(:mock_service) { instance_double(GoalRefinementService, refine: mock_ai_response) }
+
+    before do
+      allow(GoalRefinementService).to receive(:new).and_return(mock_service)
+    end
+
+    context "when user is a family member" do
+      before { create(:family_membership, :adult, family: family, user: user) }
+
+      it "returns AI refinement suggestions" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["suggestions"]).to be_present
+        expect(json_response["suggestions"]["smart_suggestions"]).to be_present
+        expect(json_response["suggestions"]["alternative_titles"]).to be_an(Array)
+        expect(json_response["suggestions"]["potential_obstacles"]).to be_an(Array)
+        expect(json_response["suggestions"]["milestones"]).to be_an(Array)
+      end
+
+      it "includes SMART criterion suggestions" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        smart = json_response["suggestions"]["smart_suggestions"]
+        expect(smart).to include("specific", "measurable", "achievable", "relevant", "time_bound")
+      end
+
+      it "includes alternative titles and descriptions" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        expect(json_response["suggestions"]["alternative_titles"].length).to be >= 1
+        expect(json_response["suggestions"]["alternative_descriptions"].length).to be >= 1
+      end
+
+      it "includes potential obstacles with mitigations" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        obstacles = json_response["suggestions"]["potential_obstacles"]
+        expect(obstacles.first).to include("obstacle", "mitigation")
+      end
+
+      it "includes milestones with progress percentages" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        milestones = json_response["suggestions"]["milestones"]
+        expect(milestones.first).to include("title", "suggested_progress")
+      end
+
+      it "includes overall feedback" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        expect(json_response["suggestions"]["overall_feedback"]).to be_present
+      end
+    end
+
+    context "when AI service fails" do
+      let(:failing_service) do
+        instance_double(GoalRefinementService).tap do |svc|
+          allow(svc).to receive(:refine)
+            .and_raise(GoalRefinementService::RefinementError, "API connection failed")
+        end
+      end
+
+      before do
+        create(:family_membership, :adult, family: family, user: user)
+        allow(GoalRefinementService).to receive(:new).and_return(failing_service)
+      end
+
+      it "returns 503 service unavailable" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:service_unavailable)
+        expect(json_response["error"]).to include("AI refinement failed")
+      end
+    end
+
+    context "with visibility restrictions" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:family_membership, :adult, family: family, user: other_user)
+      end
+
+      it "returns 403 for personal goals of other users" do
+        personal_goal = create(:goal, :personal, family: family, creator: user)
+
+        post "/api/v1/families/#{family.id}/goals/#{personal_goal.id}/refine", headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "allows refinement of family-visible goals" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "allows refinement of shared goals when assigned" do
+        shared_goal = create(:goal, :shared, family: family, creator: user)
+        shared_goal.assign_user(other_user)
+
+        post "/api/v1/families/#{family.id}/goals/#{shared_goal.id}/refine", headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when user is not a family member" do
+      it "returns 403" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when goal does not exist" do
+      before { create(:family_membership, :adult, family: family, user: user) }
+
+      it "returns 404" do
+        post "/api/v1/families/#{family.id}/goals/999999/refine", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when not authenticated" do
+      it "returns 401" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine"
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end

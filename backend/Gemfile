@@ -25,6 +25,12 @@ gem "devise-jwt", "~> 0.11"
 # Authorization
 gem "pundit", "~> 2.3"
 
+# AI/LLM
+gem "anthropic", "~> 0.3"
+
+# Rate limiting
+gem "rack-attack", "~> 6.7"
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
