@@ -43,6 +43,7 @@ Rails.application.routes.draw do
           get "current", on: :collection
           get "metrics", on: :member
         end
+        resource :leaderboard, only: [:show]
       end
 
       # User preferences (scoped to current user via /users/me)

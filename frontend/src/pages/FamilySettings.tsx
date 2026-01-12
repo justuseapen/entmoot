@@ -175,6 +175,9 @@ export function FamilySettings() {
               <Link to={`/families/${familyId}/goals`}>View Goals</Link>
             </Button>
             <Button variant="outline" asChild>
+              <Link to={`/families/${familyId}/leaderboard`}>Leaderboard</Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link to="/dashboard">Back to Dashboard</Link>
             </Button>
           </div>
