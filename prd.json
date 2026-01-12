@@ -526,7 +526,7 @@
         "Streak milestone celebration"
       ],
       "priority": 28,
-      "passes": false,
+      "passes": true,
       "notes": "Keep celebrations brief and delightful, not disruptive."
     },
     {

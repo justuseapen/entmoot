@@ -697,3 +697,31 @@ Started: January 2026
   - Reuse existing FamilyPolicy :show? for leaderboard authorization (members can view)
   - 875 total tests pass (21 new leaderboard tests)
 ---
+
+## 2026-01-12 - US-028
+- Implemented Gamification - Frontend UI with streaks, badges, points components and celebration system
+- Files created/changed:
+  - `/frontend/src/components/StreaksSummary.tsx` - Streak display with flame icons, at-risk warnings, total count
+  - `/frontend/src/components/BadgeShowcase.tsx` - Badge grid with earned/unearned states, detail modal, completion stats
+  - `/frontend/src/components/PointsDisplay.tsx` - Points summary card with total, weekly points, recent activity
+  - `/frontend/src/components/CelebrationToast.tsx` - CelebrationProvider context, animated toast for badges/milestones, useCelebrationListener hook
+  - `/frontend/src/pages/PointsHistory.tsx` - Full points history page with breakdown by activity type, activity list
+  - `/frontend/src/hooks/useStreaks.ts` - TanStack Query hook for user streaks
+  - `/frontend/src/hooks/useBadges.ts` - TanStack Query hooks for all badges and user badges
+  - `/frontend/src/hooks/usePoints.ts` - TanStack Query hooks for points summary and history
+  - `/frontend/src/lib/streaks.ts` - Streak API functions, types, helper utilities (labels, emojis, milestones)
+  - `/frontend/src/lib/badges.ts` - Badge API functions, types, category helpers, grouping utilities
+  - `/frontend/src/lib/points.ts` - Points API functions, types, activity helpers, formatting utilities
+  - `/frontend/src/hooks/useNotificationWebSocket.ts` - Added NotificationCallback for celebration triggers
+  - `/frontend/src/pages/Dashboard.tsx` - Added gamification section with StreaksSummary, PointsDisplay, BadgeShowcase
+  - `/frontend/src/App.tsx` - Added CelebrationProvider, PointsHistory route, celebration listener integration
+- **Learnings for future iterations:**
+  - CelebrationProvider uses React Context to provide celebrate() function throughout the app
+  - CelebrationToast uses CSS @keyframes animation (bounce-in) for delightful entrance effect
+  - useCelebrationListener hook watches for badge_earned and streak_milestone notification types
+  - NotificationWebSocket callback allows external components to react to real-time notifications
+  - Streak at-risk state uses animate-pulse CSS class and orange border for visual urgency
+  - BadgeDetailModal shows earned_at date for earned badges, encouragement for unearned
+  - PointsDisplay compact mode shows only 3 recent activities, full mode shows View All link
+  - Use `ReturnType<typeof setTimeout>` instead of NodeJS.Timeout for browser-compatible types
+---
