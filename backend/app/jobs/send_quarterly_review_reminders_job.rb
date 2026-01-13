@@ -21,6 +21,9 @@ class SendQuarterlyReviewRemindersJob < ApplicationJob
     family = user.families.first
     return unless family
 
+    # Skip if check-in frequency doesn't include quarterly reminders
+    return unless preference.quarterly_reminders_enabled?
+
     timezone = family.timezone || "UTC"
     current_time = Time.current.in_time_zone(timezone)
 

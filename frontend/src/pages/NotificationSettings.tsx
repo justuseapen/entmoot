@@ -23,10 +23,14 @@ import {
 } from "@/hooks/useNotificationPreferences";
 import { useFamilyStore } from "@/stores/family";
 import {
+  CHECK_IN_FREQUENCIES,
   DAYS_OF_WEEK,
   generateTimeOptions,
   getSchedulePreview,
   INACTIVITY_THRESHOLD_OPTIONS,
+  isDailyFrequency,
+  isWeeklyOrMoreFrequent,
+  type CheckInFrequency,
   type UpdateNotificationPreferencesData,
 } from "@/lib/notificationPreferences";
 
@@ -182,22 +186,81 @@ export function NotificationSettings() {
             </CardContent>
           </Card>
 
+          {/* Check-in Frequency */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Check-in Frequency</CardTitle>
+              <CardDescription>
+                Choose how often you want to engage with Entmoot
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <Label htmlFor="check-in-frequency">
+                  How often do you want to check in?
+                </Label>
+                <Select
+                  value={prefs.check_in_frequency}
+                  onValueChange={(value) =>
+                    handleUpdate({
+                      check_in_frequency: value as CheckInFrequency,
+                    })
+                  }
+                  disabled={updatePreferences.isPending}
+                >
+                  <SelectTrigger id="check-in-frequency" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CHECK_IN_FREQUENCIES.map((freq) => (
+                      <SelectItem key={freq.value} value={freq.value}>
+                        <div className="flex flex-col">
+                          <span>{freq.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-sm">
+                  {
+                    CHECK_IN_FREQUENCIES.find(
+                      (f) => f.value === prefs.check_in_frequency
+                    )?.description
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Reminder Preferences */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Reminders</CardTitle>
               <CardDescription>
                 Set up reminders to help you stay on track
+                {!isDailyFrequency(prefs.check_in_frequency) && (
+                  <span className="text-muted-foreground mt-1 block text-xs">
+                    Note: Some reminders are disabled based on your check-in
+                    frequency
+                  </span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Morning Planning */}
-              <div className="space-y-3">
+              <div
+                className={`space-y-3 ${!isDailyFrequency(prefs.check_in_frequency) ? "opacity-50" : ""}`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="morning-planning">Morning Planning</Label>
                     <p className="text-muted-foreground text-sm">
                       Daily reminder to plan your day
+                      {!isDailyFrequency(prefs.check_in_frequency) && (
+                        <span className="block text-xs italic">
+                          (Requires daily check-in frequency)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <Switch
@@ -206,44 +269,50 @@ export function NotificationSettings() {
                     onCheckedChange={(checked) =>
                       handleUpdate({ morning_planning: checked })
                     }
-                    disabled={updatePreferences.isPending}
+                    disabled={
+                      updatePreferences.isPending ||
+                      !isDailyFrequency(prefs.check_in_frequency)
+                    }
                   />
                 </div>
-                {prefs.reminders.morning_planning.enabled && (
-                  <div className="flex items-center gap-2 pl-4">
-                    <Label
-                      htmlFor="morning-planning-time"
-                      className="text-muted-foreground text-sm"
-                    >
-                      Time:
-                    </Label>
-                    <Select
-                      value={prefs.reminders.morning_planning.time}
-                      onValueChange={(value) =>
-                        handleUpdate({ morning_planning_time: value })
-                      }
-                      disabled={updatePreferences.isPending}
-                    >
-                      <SelectTrigger
-                        id="morning-planning-time"
-                        className="w-32"
+                {isDailyFrequency(prefs.check_in_frequency) &&
+                  prefs.reminders.morning_planning.enabled && (
+                    <div className="flex items-center gap-2 pl-4">
+                      <Label
+                        htmlFor="morning-planning-time"
+                        className="text-muted-foreground text-sm"
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                        Time:
+                      </Label>
+                      <Select
+                        value={prefs.reminders.morning_planning.time}
+                        onValueChange={(value) =>
+                          handleUpdate({ morning_planning_time: value })
+                        }
+                        disabled={updatePreferences.isPending}
+                      >
+                        <SelectTrigger
+                          id="morning-planning-time"
+                          className="w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
               </div>
 
               {/* Evening Reflection */}
-              <div className="space-y-3">
+              <div
+                className={`space-y-3 ${!isDailyFrequency(prefs.check_in_frequency) ? "opacity-50" : ""}`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="evening-reflection">
@@ -251,6 +320,11 @@ export function NotificationSettings() {
                     </Label>
                     <p className="text-muted-foreground text-sm">
                       Daily reminder to reflect on your day
+                      {!isDailyFrequency(prefs.check_in_frequency) && (
+                        <span className="block text-xs italic">
+                          (Requires daily check-in frequency)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <Switch
@@ -259,49 +333,60 @@ export function NotificationSettings() {
                     onCheckedChange={(checked) =>
                       handleUpdate({ evening_reflection: checked })
                     }
-                    disabled={updatePreferences.isPending}
+                    disabled={
+                      updatePreferences.isPending ||
+                      !isDailyFrequency(prefs.check_in_frequency)
+                    }
                   />
                 </div>
-                {prefs.reminders.evening_reflection.enabled && (
-                  <div className="flex items-center gap-2 pl-4">
-                    <Label
-                      htmlFor="evening-reflection-time"
-                      className="text-muted-foreground text-sm"
-                    >
-                      Time:
-                    </Label>
-                    <Select
-                      value={prefs.reminders.evening_reflection.time}
-                      onValueChange={(value) =>
-                        handleUpdate({ evening_reflection_time: value })
-                      }
-                      disabled={updatePreferences.isPending}
-                    >
-                      <SelectTrigger
-                        id="evening-reflection-time"
-                        className="w-32"
+                {isDailyFrequency(prefs.check_in_frequency) &&
+                  prefs.reminders.evening_reflection.enabled && (
+                    <div className="flex items-center gap-2 pl-4">
+                      <Label
+                        htmlFor="evening-reflection-time"
+                        className="text-muted-foreground text-sm"
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                        Time:
+                      </Label>
+                      <Select
+                        value={prefs.reminders.evening_reflection.time}
+                        onValueChange={(value) =>
+                          handleUpdate({ evening_reflection_time: value })
+                        }
+                        disabled={updatePreferences.isPending}
+                      >
+                        <SelectTrigger
+                          id="evening-reflection-time"
+                          className="w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
               </div>
 
               {/* Weekly Review */}
-              <div className="space-y-3">
+              <div
+                className={`space-y-3 ${!isWeeklyOrMoreFrequent(prefs.check_in_frequency) ? "opacity-50" : ""}`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="weekly-review">Weekly Review</Label>
                     <p className="text-muted-foreground text-sm">
                       Weekly reminder to review your progress
+                      {!isWeeklyOrMoreFrequent(prefs.check_in_frequency) && (
+                        <span className="block text-xs italic">
+                          (Requires weekly or more frequent check-ins)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <Switch
@@ -310,64 +395,70 @@ export function NotificationSettings() {
                     onCheckedChange={(checked) =>
                       handleUpdate({ weekly_review: checked })
                     }
-                    disabled={updatePreferences.isPending}
+                    disabled={
+                      updatePreferences.isPending ||
+                      !isWeeklyOrMoreFrequent(prefs.check_in_frequency)
+                    }
                   />
                 </div>
-                {prefs.reminders.weekly_review.enabled && (
-                  <div className="flex flex-wrap items-center gap-2 pl-4">
-                    <Label
-                      htmlFor="weekly-review-day"
-                      className="text-muted-foreground text-sm"
-                    >
-                      Day:
-                    </Label>
-                    <Select
-                      value={prefs.reminders.weekly_review.day.toString()}
-                      onValueChange={(value) =>
-                        handleUpdate({ weekly_review_day: parseInt(value, 10) })
-                      }
-                      disabled={updatePreferences.isPending}
-                    >
-                      <SelectTrigger id="weekly-review-day" className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DAYS_OF_WEEK.map((day) => (
-                          <SelectItem
-                            key={day.value}
-                            value={day.value.toString()}
-                          >
-                            {day.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Label
-                      htmlFor="weekly-review-time"
-                      className="text-muted-foreground text-sm"
-                    >
-                      at
-                    </Label>
-                    <Select
-                      value={prefs.reminders.weekly_review.time}
-                      onValueChange={(value) =>
-                        handleUpdate({ weekly_review_time: value })
-                      }
-                      disabled={updatePreferences.isPending}
-                    >
-                      <SelectTrigger id="weekly-review-time" className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {isWeeklyOrMoreFrequent(prefs.check_in_frequency) &&
+                  prefs.reminders.weekly_review.enabled && (
+                    <div className="flex flex-wrap items-center gap-2 pl-4">
+                      <Label
+                        htmlFor="weekly-review-day"
+                        className="text-muted-foreground text-sm"
+                      >
+                        Day:
+                      </Label>
+                      <Select
+                        value={prefs.reminders.weekly_review.day.toString()}
+                        onValueChange={(value) =>
+                          handleUpdate({
+                            weekly_review_day: parseInt(value, 10),
+                          })
+                        }
+                        disabled={updatePreferences.isPending}
+                      >
+                        <SelectTrigger id="weekly-review-day" className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DAYS_OF_WEEK.map((day) => (
+                            <SelectItem
+                              key={day.value}
+                              value={day.value.toString()}
+                            >
+                              {day.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Label
+                        htmlFor="weekly-review-time"
+                        className="text-muted-foreground text-sm"
+                      >
+                        at
+                      </Label>
+                      <Select
+                        value={prefs.reminders.weekly_review.time}
+                        onValueChange={(value) =>
+                          handleUpdate({ weekly_review_time: value })
+                        }
+                        disabled={updatePreferences.isPending}
+                      >
+                        <SelectTrigger id="weekly-review-time" className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>

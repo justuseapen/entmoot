@@ -11,6 +11,33 @@ export const DAYS_OF_WEEK = [
   { value: 6, label: "Saturday" },
 ];
 
+// Check-in frequency options
+export type CheckInFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "annual"
+  | "as_needed";
+
+export const CHECK_IN_FREQUENCIES: { value: CheckInFrequency; label: string; description: string }[] = [
+  { value: "daily", label: "Daily", description: "Morning planning and evening reflection every day" },
+  { value: "weekly", label: "Weekly", description: "Weekly review reminders only" },
+  { value: "monthly", label: "Monthly", description: "Monthly review reminders only" },
+  { value: "quarterly", label: "Quarterly", description: "Quarterly review reminders only" },
+  { value: "annual", label: "Annual", description: "Annual review reminders only" },
+  { value: "as_needed", label: "As Needed", description: "No automatic reminders" },
+];
+
+// Helper functions for check-in frequency
+export function isDailyFrequency(frequency: CheckInFrequency): boolean {
+  return frequency === "daily";
+}
+
+export function isWeeklyOrMoreFrequent(frequency: CheckInFrequency): boolean {
+  return ["daily", "weekly"].includes(frequency);
+}
+
 // Channel preferences
 export interface ChannelPreferences {
   in_app: boolean;
@@ -63,6 +90,7 @@ export interface NotificationPreferences {
   quiet_hours: QuietHoursPreferences;
   tips?: TipsPreferences;
   reengagement?: ReengagementPreferences;
+  check_in_frequency: CheckInFrequency;
   created_at: string;
   updated_at: string;
 }
@@ -92,6 +120,8 @@ export interface UpdateNotificationPreferencesData {
   missed_checkin_reminder?: boolean;
   inactivity_reminder?: boolean;
   inactivity_threshold_days?: number;
+  // Check-in frequency
+  check_in_frequency?: CheckInFrequency;
 }
 
 // Inactivity threshold options for selector

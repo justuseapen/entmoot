@@ -4,12 +4,14 @@ module Api
   module V1
     class NotificationPreferencesController < Api::V1::BaseController
       PERMITTED_PARAMS = %i[
-        in_app email push
+        in_app email push sms
         morning_planning evening_reflection weekly_review
         morning_planning_time evening_reflection_time weekly_review_time weekly_review_day
+        monthly_review monthly_review_day quarterly_review annual_review
         quiet_hours_start quiet_hours_end
         tips_enabled
         reengagement_enabled missed_checkin_reminder inactivity_reminder inactivity_threshold_days
+        check_in_frequency
       ].freeze
 
       def show
@@ -41,6 +43,7 @@ module Api
           quiet_hours: quiet_hours_preferences(prefs),
           tips: tips_preferences(prefs),
           reengagement: reengagement_preferences(prefs),
+          check_in_frequency: prefs.check_in_frequency,
           created_at: prefs.created_at,
           updated_at: prefs.updated_at
         }
@@ -50,7 +53,8 @@ module Api
         {
           in_app: prefs.in_app,
           email: prefs.email,
-          push: prefs.push
+          push: prefs.push,
+          sms: prefs.sms
         }
       end
 

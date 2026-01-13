@@ -11,6 +11,52 @@ export const DAYS_OF_WEEK = [
   { value: 6, label: "Saturday" },
 ];
 
+// Check-in frequency options
+export type CheckInFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "annual"
+  | "as_needed";
+
+export const CHECK_IN_FREQUENCIES: {
+  value: CheckInFrequency;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "daily",
+    label: "Daily",
+    description: "Morning planning and evening reflection every day",
+  },
+  {
+    value: "weekly",
+    label: "Weekly",
+    description: "Weekly review reminders only",
+  },
+  {
+    value: "monthly",
+    label: "Monthly",
+    description: "Monthly review reminders only",
+  },
+  {
+    value: "quarterly",
+    label: "Quarterly",
+    description: "Quarterly review reminders only",
+  },
+  {
+    value: "annual",
+    label: "Annual",
+    description: "Annual review reminders only",
+  },
+  {
+    value: "as_needed",
+    label: "As Needed",
+    description: "No automatic reminders - check in when you want",
+  },
+];
+
 // Channel preferences
 export interface ChannelPreferences {
   in_app: boolean;
@@ -63,6 +109,7 @@ export interface NotificationPreferences {
   quiet_hours: QuietHoursPreferences;
   tips?: TipsPreferences;
   reengagement?: ReengagementPreferences;
+  check_in_frequency: CheckInFrequency;
   created_at: string;
   updated_at: string;
 }
@@ -92,6 +139,8 @@ export interface UpdateNotificationPreferencesData {
   missed_checkin_reminder?: boolean;
   inactivity_reminder?: boolean;
   inactivity_threshold_days?: number;
+  // Check-in frequency
+  check_in_frequency?: CheckInFrequency;
 }
 
 // Inactivity threshold options for the selector
@@ -148,6 +197,31 @@ export function generateTimeOptions(): { value: string; label: string }[] {
   return options;
 }
 
+// Helper functions for check-in frequency
+export function isDailyFrequency(frequency: CheckInFrequency): boolean {
+  return frequency === "daily";
+}
+
+export function isWeeklyOrMoreFrequent(frequency: CheckInFrequency): boolean {
+  return ["daily", "weekly"].includes(frequency);
+}
+
+export function isMonthlyOrMoreFrequent(frequency: CheckInFrequency): boolean {
+  return ["daily", "weekly", "monthly"].includes(frequency);
+}
+
+export function isQuarterlyOrMoreFrequent(
+  frequency: CheckInFrequency
+): boolean {
+  return ["daily", "weekly", "monthly", "quarterly"].includes(frequency);
+}
+
+export function isAnnualOrMoreFrequent(frequency: CheckInFrequency): boolean {
+  return ["daily", "weekly", "monthly", "quarterly", "annual"].includes(
+    frequency
+  );
+}
+
 // Get the schedule preview message
 export function getSchedulePreview(
   prefs: NotificationPreferences,
@@ -155,18 +229,36 @@ export function getSchedulePreview(
 ): string[] {
   const schedule: string[] = [];
   const tz = familyTimezone || "your timezone";
+  const frequency = prefs.check_in_frequency;
 
-  if (prefs.reminders.morning_planning.enabled) {
+  // Add frequency info at the top
+  const freqLabel = CHECK_IN_FREQUENCIES.find(
+    (f) => f.value === frequency
+  )?.label;
+  schedule.push(`Check-in frequency: ${freqLabel}`);
+
+  if (frequency === "as_needed") {
+    schedule.push("No automatic reminders - check in when you want");
+    return schedule;
+  }
+
+  if (isDailyFrequency(frequency) && prefs.reminders.morning_planning.enabled) {
     const time = formatTimeDisplay(prefs.reminders.morning_planning.time);
     schedule.push(`Morning planning reminder at ${time}`);
   }
 
-  if (prefs.reminders.evening_reflection.enabled) {
+  if (
+    isDailyFrequency(frequency) &&
+    prefs.reminders.evening_reflection.enabled
+  ) {
     const time = formatTimeDisplay(prefs.reminders.evening_reflection.time);
     schedule.push(`Evening reflection reminder at ${time}`);
   }
 
-  if (prefs.reminders.weekly_review.enabled) {
+  if (
+    isWeeklyOrMoreFrequent(frequency) &&
+    prefs.reminders.weekly_review.enabled
+  ) {
     const time = formatTimeDisplay(prefs.reminders.weekly_review.time);
     const day = DAYS_OF_WEEK.find(
       (d) => d.value === prefs.reminders.weekly_review.day
@@ -174,8 +266,8 @@ export function getSchedulePreview(
     schedule.push(`Weekly review reminder on ${day}s at ${time}`);
   }
 
-  if (schedule.length === 0) {
-    schedule.push("No reminders scheduled");
+  if (schedule.length === 1) {
+    schedule.push("No reminders scheduled for your frequency level");
   } else {
     schedule.push(`All times are in ${tz}`);
   }

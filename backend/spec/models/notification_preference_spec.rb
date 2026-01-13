@@ -32,6 +32,16 @@ RSpec.describe NotificationPreference do
       it { is_expected.not_to allow_value(-1).for(:weekly_review_day) }
       it { is_expected.not_to allow_value(7).for(:weekly_review_day) }
     end
+
+    describe "check_in_frequency validation" do
+      it { is_expected.to allow_value("daily").for(:check_in_frequency) }
+      it { is_expected.to allow_value("weekly").for(:check_in_frequency) }
+      it { is_expected.to allow_value("monthly").for(:check_in_frequency) }
+      it { is_expected.to allow_value("quarterly").for(:check_in_frequency) }
+      it { is_expected.to allow_value("annual").for(:check_in_frequency) }
+      it { is_expected.to allow_value("as_needed").for(:check_in_frequency) }
+      it { is_expected.not_to allow_value("invalid").for(:check_in_frequency) }
+    end
   end
 
   describe ".find_or_create_for" do
@@ -271,6 +281,130 @@ RSpec.describe NotificationPreference do
     it "returns false when tips are disabled" do
       prefs.update(tips_enabled: false)
       expect(prefs.should_show_tip?("first_reflection")).to be false
+    end
+  end
+
+  describe "check_in_frequency helper methods" do
+    describe "#daily_reminders_enabled?" do
+      it "returns true for daily frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "daily")
+        expect(prefs.daily_reminders_enabled?).to be true
+      end
+
+      it "returns false for weekly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "weekly")
+        expect(prefs.daily_reminders_enabled?).to be false
+      end
+
+      it "returns false for monthly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "monthly")
+        expect(prefs.daily_reminders_enabled?).to be false
+      end
+
+      it "returns false for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.daily_reminders_enabled?).to be false
+      end
+    end
+
+    describe "#weekly_reminders_enabled?" do
+      it "returns true for daily frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "daily")
+        expect(prefs.weekly_reminders_enabled?).to be true
+      end
+
+      it "returns true for weekly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "weekly")
+        expect(prefs.weekly_reminders_enabled?).to be true
+      end
+
+      it "returns false for monthly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "monthly")
+        expect(prefs.weekly_reminders_enabled?).to be false
+      end
+
+      it "returns false for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.weekly_reminders_enabled?).to be false
+      end
+    end
+
+    describe "#monthly_reminders_enabled?" do
+      it "returns true for daily frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "daily")
+        expect(prefs.monthly_reminders_enabled?).to be true
+      end
+
+      it "returns true for weekly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "weekly")
+        expect(prefs.monthly_reminders_enabled?).to be true
+      end
+
+      it "returns true for monthly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "monthly")
+        expect(prefs.monthly_reminders_enabled?).to be true
+      end
+
+      it "returns false for quarterly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "quarterly")
+        expect(prefs.monthly_reminders_enabled?).to be false
+      end
+
+      it "returns false for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.monthly_reminders_enabled?).to be false
+      end
+    end
+
+    describe "#quarterly_reminders_enabled?" do
+      it "returns true for monthly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "monthly")
+        expect(prefs.quarterly_reminders_enabled?).to be true
+      end
+
+      it "returns true for quarterly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "quarterly")
+        expect(prefs.quarterly_reminders_enabled?).to be true
+      end
+
+      it "returns false for annual frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "annual")
+        expect(prefs.quarterly_reminders_enabled?).to be false
+      end
+
+      it "returns false for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.quarterly_reminders_enabled?).to be false
+      end
+    end
+
+    describe "#annual_reminders_enabled?" do
+      it "returns true for quarterly frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "quarterly")
+        expect(prefs.annual_reminders_enabled?).to be true
+      end
+
+      it "returns true for annual frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "annual")
+        expect(prefs.annual_reminders_enabled?).to be true
+      end
+
+      it "returns false for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.annual_reminders_enabled?).to be false
+      end
+    end
+
+    describe "#as_needed_frequency?" do
+      it "returns true for as_needed frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "as_needed")
+        expect(prefs.as_needed_frequency?).to be true
+      end
+
+      it "returns false for daily frequency" do
+        prefs = build(:notification_preference, check_in_frequency: "daily")
+        expect(prefs.as_needed_frequency?).to be false
+      end
     end
   end
 end

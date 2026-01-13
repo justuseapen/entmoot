@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_200001) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -254,6 +254,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_200001) do
     t.integer "monthly_review_day", default: 1, null: false
     t.boolean "quarterly_review", default: true, null: false
     t.boolean "annual_review", default: true, null: false
+    t.string "check_in_frequency", default: "daily", null: false
+    t.index ["check_in_frequency"], name: "index_notification_preferences_on_check_in_frequency"
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 

@@ -35,6 +35,9 @@ FactoryBot.define do
     inactivity_reminder { true }
     inactivity_threshold_days { 7 }
 
+    # Check-in frequency (default to daily)
+    check_in_frequency { "daily" }
+
     trait :all_channels_disabled do
       in_app { false }
       email { false }
@@ -64,6 +67,27 @@ FactoryBot.define do
       evening_reflection_time { "21:30" }
       weekly_review_time { "17:00" }
       weekly_review_day { 1 } # Monday
+    end
+
+    # Check-in frequency traits
+    trait :weekly_frequency do
+      check_in_frequency { "weekly" }
+    end
+
+    trait :monthly_frequency do
+      check_in_frequency { "monthly" }
+    end
+
+    trait :quarterly_frequency do
+      check_in_frequency { "quarterly" }
+    end
+
+    trait :annual_frequency do
+      check_in_frequency { "annual" }
+    end
+
+    trait :as_needed_frequency do
+      check_in_frequency { "as_needed" }
     end
   end
 end

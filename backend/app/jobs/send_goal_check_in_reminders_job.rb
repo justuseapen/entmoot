@@ -38,6 +38,9 @@ class SendGoalCheckInRemindersJob < ApplicationJob
   end
 
   def should_skip?(context)
+    # Skip if check-in frequency doesn't include daily reminders
+    return true unless context[:preference].daily_reminders_enabled?
+
     timezone = context[:family].timezone || "UTC"
     current_time = Time.current.in_time_zone(timezone)
 

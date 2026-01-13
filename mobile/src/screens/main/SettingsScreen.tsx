@@ -26,8 +26,12 @@ import {
   formatDateToTime,
   DAYS_OF_WEEK,
   INACTIVITY_THRESHOLD_OPTIONS,
+  CHECK_IN_FREQUENCIES,
+  isDailyFrequency,
+  isWeeklyOrMoreFrequent,
   type NotificationPreferences,
   type UpdateNotificationPreferencesData,
+  type CheckInFrequency,
 } from "../../lib/notificationPreferences";
 import type { Family } from "@shared/types";
 
@@ -44,14 +48,6 @@ const COLORS = {
 };
 
 type Props = MainTabScreenProps<"Settings">;
-
-// Check-in frequency options
-const CHECK_IN_FREQUENCIES = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "as_needed", label: "As Needed" },
-];
 
 // Helper function for user initials - defined outside component
 function getInitials(name: string | undefined): string {
@@ -85,8 +81,7 @@ export function SettingsScreen(_props: Props) {
   // Day picker state
   const [showDayPicker, setShowDayPicker] = useState(false);
 
-  // Check-in frequency state
-  const [checkInFrequency, setCheckInFrequency] = useState("daily");
+  // Check-in frequency picker state
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
 
   // Inactivity threshold picker state
@@ -518,26 +513,30 @@ export function SettingsScreen(_props: Props) {
       )}
 
       {/* Check-in Frequency Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Check-in Frequency</Text>
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => setShowFrequencyPicker(true)}
-        >
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>
-                {CHECK_IN_FREQUENCIES.find((f) => f.value === checkInFrequency)
-                  ?.label || "Daily"}
-              </Text>
-              <Text style={styles.settingDescription}>
-                How often would you like reminders?
-              </Text>
+      {prefs && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Check-in Frequency</Text>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => setShowFrequencyPicker(true)}
+            disabled={isSaving}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>
+                  {CHECK_IN_FREQUENCIES.find((f) => f.value === prefs.check_in_frequency)
+                    ?.label || "Daily"}
+                </Text>
+                <Text style={styles.settingDescription}>
+                  {CHECK_IN_FREQUENCIES.find((f) => f.value === prefs.check_in_frequency)
+                    ?.description || "Choose how often you want reminders"}
+                </Text>
+              </View>
+              <Text style={styles.chevron}>▶</Text>
             </View>
-            <Text style={styles.chevron}>▶</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Re-engagement Reminders Section */}
       {prefs && (
@@ -770,23 +769,26 @@ export function SettingsScreen(_props: Props) {
                 key={freq.value}
                 style={[
                   styles.dayOption,
-                  checkInFrequency === freq.value && styles.dayOptionSelected,
+                  prefs?.check_in_frequency === freq.value && styles.dayOptionSelected,
                 ]}
                 onPress={() => {
-                  setCheckInFrequency(freq.value);
+                  handleUpdate({ check_in_frequency: freq.value as CheckInFrequency });
                   setShowFrequencyPicker(false);
                 }}
               >
-                <Text
-                  style={[
-                    styles.dayOptionText,
-                    checkInFrequency === freq.value &&
-                      styles.dayOptionTextSelected,
-                  ]}
-                >
-                  {freq.label}
-                </Text>
-                {checkInFrequency === freq.value && (
+                <View style={styles.frequencyOption}>
+                  <Text
+                    style={[
+                      styles.dayOptionText,
+                      prefs?.check_in_frequency === freq.value &&
+                        styles.dayOptionTextSelected,
+                    ]}
+                  >
+                    {freq.label}
+                  </Text>
+                  <Text style={styles.frequencyDescription}>{freq.description}</Text>
+                </View>
+                {prefs?.check_in_frequency === freq.value && (
                   <Text style={styles.checkmark}>✓</Text>
                 )}
               </TouchableOpacity>
@@ -1164,6 +1166,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.forestGreen,
     fontWeight: "bold",
+  },
+  frequencyOption: {
+    flex: 1,
+  },
+  frequencyDescription: {
+    fontSize: 12,
+    color: COLORS.earthBrown,
+    marginTop: 2,
   },
   modalCloseButton: {
     marginTop: 8,

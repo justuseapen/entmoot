@@ -3,6 +3,9 @@
 class NotificationPreference < ApplicationRecord
   belongs_to :user
 
+  # Check-in frequency options
+  CHECK_IN_FREQUENCIES = %w[daily weekly monthly quarterly annual as_needed].freeze
+
   # Validations for time format (HH:MM)
   TIME_FORMAT = /\A([01]\d|2[0-3]):([0-5]\d)\z/
 
@@ -13,6 +16,7 @@ class NotificationPreference < ApplicationRecord
   validates :quiet_hours_end, format: { with: TIME_FORMAT, message: :invalid_time_format }
 
   validates :weekly_review_day, numericality: { in: 0..6 }
+  validates :check_in_frequency, inclusion: { in: CHECK_IN_FREQUENCIES }
 
   # Find or create for a user - ensures each user has notification preferences
   def self.find_or_create_for(user)
@@ -27,6 +31,36 @@ class NotificationPreference < ApplicationRecord
     first_daily_plan
     first_weekly_review
   ].freeze
+
+  # Check if daily reminders should be sent based on frequency
+  def daily_reminders_enabled?
+    check_in_frequency == "daily"
+  end
+
+  # Check if weekly reminders should be sent based on frequency
+  def weekly_reminders_enabled?
+    %w[daily weekly].include?(check_in_frequency)
+  end
+
+  # Check if monthly reminders should be sent based on frequency
+  def monthly_reminders_enabled?
+    %w[daily weekly monthly].include?(check_in_frequency)
+  end
+
+  # Check if quarterly reminders should be sent based on frequency
+  def quarterly_reminders_enabled?
+    %w[daily weekly monthly quarterly].include?(check_in_frequency)
+  end
+
+  # Check if annual reminders should be sent based on frequency
+  def annual_reminders_enabled?
+    %w[daily weekly monthly quarterly annual].include?(check_in_frequency)
+  end
+
+  # Check if as_needed mode (no automatic reminders)
+  def as_needed_frequency?
+    check_in_frequency == "as_needed"
+  end
 
   # Check if a specific tip has been shown
   def tip_shown?(tip_type)

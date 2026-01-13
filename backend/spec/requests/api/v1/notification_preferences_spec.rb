@@ -68,6 +68,12 @@ RSpec.describe "Api::V1::NotificationPreferences" do
           expect(reengagement["inactivity_reminder"]).to be true
           expect(reengagement["inactivity_threshold_days"]).to eq(7)
         end
+
+        it "returns default check_in_frequency as daily" do
+          get "/api/v1/users/me/notification_preferences", headers: auth_headers(user)
+
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("daily")
+        end
       end
 
       context "when preferences already exist" do
@@ -146,7 +152,7 @@ RSpec.describe "Api::V1::NotificationPreferences" do
 
           expect(response).to have_http_status(:ok)
           channels = json_response["notification_preferences"]["channels"]
-          expect(channels).to eq("in_app" => false, "email" => false, "push" => true)
+          expect(channels).to eq("in_app" => false, "email" => false, "push" => true, "sms" => false)
         end
       end
 
@@ -286,6 +292,61 @@ RSpec.describe "Api::V1::NotificationPreferences" do
           expect(reengagement["missed_checkin_reminder"]).to be false
           expect(reengagement["inactivity_reminder"]).to be false
           expect(reengagement["inactivity_threshold_days"]).to eq(30)
+        end
+      end
+
+      context "when updating check_in_frequency" do
+        it "updates check_in_frequency to weekly" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "weekly" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("weekly")
+        end
+
+        it "updates check_in_frequency to monthly" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "monthly" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("monthly")
+        end
+
+        it "updates check_in_frequency to quarterly" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "quarterly" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("quarterly")
+        end
+
+        it "updates check_in_frequency to annual" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "annual" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("annual")
+        end
+
+        it "updates check_in_frequency to as_needed" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "as_needed" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["notification_preferences"]["check_in_frequency"]).to eq("as_needed")
+        end
+
+        it "returns error for invalid check_in_frequency" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { check_in_frequency: "invalid" } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
 

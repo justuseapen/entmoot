@@ -18,6 +18,9 @@ class SendEveningReflectionRemindersJob < ApplicationJob
     family = user.families.first
     return unless family
 
+    # Skip if check-in frequency doesn't include daily reminders
+    return unless preference.daily_reminders_enabled?
+
     timezone = family.timezone || "UTC"
     current_time = Time.current.in_time_zone(timezone)
 
