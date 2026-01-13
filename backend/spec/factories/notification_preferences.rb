@@ -14,6 +14,10 @@ FactoryBot.define do
     morning_planning { true }
     evening_reflection { true }
     weekly_review { true }
+    monthly_review { true }
+    monthly_review_day { 1 }
+    quarterly_review { true }
+    annual_review { true }
 
     # Preferred times (defaults from PRD)
     morning_planning_time { "07:00" }
@@ -46,6 +50,9 @@ FactoryBot.define do
       morning_planning { false }
       evening_reflection { false }
       weekly_review { false }
+      monthly_review { false }
+      quarterly_review { false }
+      annual_review { false }
     end
 
     trait :push_enabled do

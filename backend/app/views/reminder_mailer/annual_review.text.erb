@@ -1,0 +1,21 @@
+Time for your annual review, <%= @user.name %>!
+
+As the year draws to a close, it's a wonderful opportunity to reflect on all that you and your family have accomplished together!
+
+In your annual review:
+- Review your year's metrics and achievements
+- Celebrate your highlights and proud moments
+- Reflect on challenges and growth
+- Capture lessons learned
+- Express gratitude for the year
+- Set a theme and goals for the new year
+
+Start annual review: <%= @app_url %>
+
+Here's to celebrating this year and embracing the next!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

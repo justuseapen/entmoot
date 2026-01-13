@@ -1,0 +1,19 @@
+Time for your monthly review, <%= @user.name %>!
+
+Another month has passed - what an opportunity to reflect on your journey and set the stage for an even better month ahead!
+
+In your monthly review:
+- Review your monthly metrics and progress
+- Celebrate your highlights and achievements
+- Acknowledge challenges and what you learned from them
+- Set your focus areas for next month
+
+Start monthly review: <%= @app_url %>
+
+Here's to a meaningful month ahead!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>

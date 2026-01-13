@@ -67,3 +67,21 @@
       class: DetectInactiveUsersJob
       queue: default
       description: "Detect and reach out to inactive users daily"
+
+    send_monthly_review_reminders:
+      cron: '0 9 * * *'
+      class: SendMonthlyReviewRemindersJob
+      queue: default
+      description: "Send monthly review reminders on configured day of month"
+
+    send_quarterly_review_reminders:
+      cron: '0 9 * * *'
+      class: SendQuarterlyReviewRemindersJob
+      queue: default
+      description: "Send quarterly review reminders during last week of quarter"
+
+    send_annual_review_reminders:
+      cron: '0 9 * * *'
+      class: SendAnnualReviewRemindersJob
+      queue: default
+      description: "Send annual review reminders December 20-31"

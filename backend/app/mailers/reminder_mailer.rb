@@ -53,6 +53,42 @@ class ReminderMailer < ApplicationMailer
     )
   end
 
+  def monthly_review(user, family)
+    @user = user
+    @family = family
+    @unsubscribe_token = generate_unsubscribe_token(user, :monthly_review)
+    @app_url = app_url(family, "/monthly-review")
+
+    mail(
+      to: user.email,
+      subject: "Monthly Review Time - Reflect on your month and plan ahead!"
+    )
+  end
+
+  def quarterly_review(user, family)
+    @user = user
+    @family = family
+    @unsubscribe_token = generate_unsubscribe_token(user, :quarterly_review)
+    @app_url = app_url(family, "/quarterly-review")
+
+    mail(
+      to: user.email,
+      subject: "Quarterly Review Time - Assess your progress and set new objectives!"
+    )
+  end
+
+  def annual_review(user, family)
+    @user = user
+    @family = family
+    @unsubscribe_token = generate_unsubscribe_token(user, :annual_review)
+    @app_url = app_url(family, "/annual-review")
+
+    mail(
+      to: user.email,
+      subject: "Annual Review Time - Reflect on your year and set intentions!"
+    )
+  end
+
   private
 
   def generate_unsubscribe_token(user, reminder_type)

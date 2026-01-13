@@ -1,0 +1,20 @@
+Time for your quarterly review, <%= @user.name %>!
+
+The quarter is coming to an end - a perfect moment to step back and look at the bigger picture of your family's progress!
+
+In your quarterly review:
+- Review goal completion and quarterly metrics
+- Celebrate your achievements and wins
+- Reflect on obstacles and how you overcame them
+- Capture key insights from the quarter
+- Set objectives for the next quarter
+
+Start quarterly review: <%= @app_url %>
+
+Here's to continued growth and success!
+
+---
+You're receiving this because you have email notifications enabled.
+<% if @unsubscribe_token.present? %>
+Unsubscribe: <%= api_v1_unsubscribe_url(token: @unsubscribe_token) %>
+<% end %>
