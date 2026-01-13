@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_221500) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_001413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -77,6 +77,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_221500) do
     t.index ["daily_plan_id", "position"], name: "index_daily_tasks_on_daily_plan_id_and_position"
     t.index ["daily_plan_id"], name: "index_daily_tasks_on_daily_plan_id"
     t.index ["goal_id"], name: "index_daily_tasks_on_goal_id"
+  end
+
+  create_table "device_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.string "platform", null: false
+    t.string "device_name"
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_device_tokens_on_token", unique: true
+    t.index ["user_id", "token"], name: "index_device_tokens_on_user_id_and_token", unique: true
+    t.index ["user_id"], name: "index_device_tokens_on_user_id"
   end
 
   create_table "families", force: :cascade do |t|
@@ -362,6 +375,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_221500) do
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
   add_foreign_key "daily_tasks", "goals"
+  add_foreign_key "device_tokens", "users"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
   add_foreign_key "feedback_reports", "feedback_reports", column: "duplicate_of_id"

@@ -23,6 +23,7 @@ class User < ApplicationRecord
   has_many :points_ledger_entries, dependent: :destroy
   has_many :reflections, dependent: :destroy
   has_many :feedback_reports, dependent: :nullify
+  has_many :device_tokens, dependent: :destroy
 
   validates :name, presence: true
 

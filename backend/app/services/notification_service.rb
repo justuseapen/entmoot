@@ -9,9 +9,35 @@ class NotificationService
       notification_type: notification_type
     )
 
+    # Broadcast via WebSocket
     NotificationsChannel.broadcast_to_user(user, notification)
 
+    # Send push notification if user has push enabled
+    send_push_notification(user: user, title: title, body: body, link: link)
+
     notification
+  end
+
+  def self.send_push_notification(user:, title:, body:, link: nil)
+    preferences = user.notification_preference
+
+    # Only send push if user has push enabled and has device tokens
+    return unless preferences&.push && user.device_tokens.active.any?
+
+    # Don't send during quiet hours
+    timezone = user.families.first&.timezone || "UTC"
+    current_time = Time.current.in_time_zone(timezone)
+    return if preferences.within_quiet_hours?(current_time)
+
+    PushNotificationService.new.send_to_user(
+      user: user,
+      title: title,
+      body: body,
+      link: link
+    )
+  rescue StandardError => e
+    # Log but don't fail the notification creation
+    Rails.logger.error("Failed to send push notification: #{e.message}")
   end
 
   def self.notify_reminder(user:, reminder_type:)

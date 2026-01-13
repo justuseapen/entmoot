@@ -90,6 +90,11 @@ Rails.application.routes.draw do
         post "mark_all_as_read", on: :collection
       end
 
+      # Device tokens (for push notifications)
+      resources :device_tokens, only: %i[create destroy] do
+        delete "unregister", on: :collection
+      end
+
       # Reflection prompts (public endpoint)
       resources :reflection_prompts, only: [:index]
 
