@@ -676,3 +676,35 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Goal hierarchy navigation uses navigation.push instead of navigate to allow back stack
   - AI refinement creates temporary goal then refines - consider backend endpoint for draft goals
 ---
+
+## 2026-01-13 - US-068 Mobile Settings Screen
+- What was implemented:
+  - Created notificationPreferences.ts lib with API functions matching web frontend patterns
+  - SettingsScreen component with user profile display (name, email, avatar with initials fallback)
+  - Family management section showing current family name and timezone
+  - Notification channel toggles: in-app, email, push with Switch components
+  - Reminder preferences with native time pickers (morning planning, evening reflection, weekly review)
+  - Weekly review has both day picker (modal) and time picker
+  - Quiet hours configuration with start/end time pickers
+  - Check-in frequency selector with modal picker (daily, weekly, monthly, as-needed)
+  - Logout functionality with confirmation modal
+  - App version display using Constants.expoConfig.version
+  - Updated MainTabNavigator to use real SettingsScreen component
+
+- Files changed:
+  - mobile/src/lib/notificationPreferences.ts (new)
+  - mobile/src/lib/index.ts (added notificationPreferences export)
+  - mobile/src/screens/main/SettingsScreen.tsx (new)
+  - mobile/src/screens/main/index.ts (added SettingsScreen export)
+  - mobile/src/navigation/MainTabNavigator.tsx (imports real SettingsScreen, removed placeholder)
+
+- **Learnings for future iterations:**
+  - Mobile notification preferences mirror web frontend lib structure for consistency
+  - DateTimePicker behavior differs by platform: iOS shows spinner in modal, Android shows native dialog
+  - For iOS DateTimePicker, use Modal wrapper with Done/Cancel buttons for better UX
+  - parseTimeToDate and formatDateToTime helpers convert between HH:MM strings and Date objects
+  - Use Constants.expoConfig?.version for displaying app version (from app.json)
+  - Check-in frequency is local state for now - backend doesn't have this field yet (future story US-082)
+  - getInitials helper defined outside component to avoid "accessed before declaration" lint error
+  - void _props pattern suppresses unused parameter warning while keeping type annotation
+---

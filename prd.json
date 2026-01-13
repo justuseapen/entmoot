@@ -1301,7 +1301,7 @@
         "App version display"
       ],
       "priority": 68,
-      "passes": false,
+      "passes": true,
       "notes": "API: GET/PUT /api/v1/users/me/notification_preferences. Use native time pickers for iOS/Android."
     },
     {
