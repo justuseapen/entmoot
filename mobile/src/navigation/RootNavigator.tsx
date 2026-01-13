@@ -2,6 +2,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "./types";
 import { AuthNavigator } from "./AuthNavigator";
 import { MainTabNavigator } from "./MainTabNavigator";
+import {
+  GoalDetailScreen,
+  CreateGoalScreen,
+  EditGoalScreen,
+} from "../screens/goals";
 import { View, Text, StyleSheet } from "react-native";
 
 // Design system colors
@@ -11,25 +16,7 @@ const COLORS = {
   earthBrown: "#795548",
 };
 
-// Placeholder screens for stack screens
-const GoalDetailScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Goal Detail Screen</Text>
-  </View>
-);
-
-const CreateGoalScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Create Goal Screen</Text>
-  </View>
-);
-
-const EditGoalScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Edit Goal Screen</Text>
-  </View>
-);
-
+// Placeholder screens for stack screens (to be implemented in future stories)
 const FamilyMemberDetailScreen = () => (
   <View style={styles.container}>
     <Text style={styles.text}>Family Member Detail Screen</Text>

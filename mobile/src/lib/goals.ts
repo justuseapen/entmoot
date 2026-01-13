@@ -1,5 +1,12 @@
 import { authFetch } from "./api";
-import type { Goal, GoalFilters } from "@shared/types";
+import type {
+  Goal,
+  GoalFilters,
+  CreateGoalData,
+  UpdateGoalData,
+  GoalRefinementResponse,
+  FamilyMember,
+} from "@shared/types";
 
 // Goals list response
 export interface GoalsResponse {
@@ -92,4 +99,115 @@ export function formatStatus(status: string): string {
     abandoned: "Abandoned",
   };
   return labels[status] || status;
+}
+
+// Create a new goal
+export async function createGoal(
+  familyId: number,
+  data: CreateGoalData
+): Promise<Goal> {
+  return authFetch<Goal>(`/families/${familyId}/goals`, {
+    method: "POST",
+    body: JSON.stringify({ goal: data }),
+  });
+}
+
+// Update an existing goal
+export async function updateGoal(
+  familyId: number,
+  goalId: number,
+  data: UpdateGoalData
+): Promise<Goal> {
+  return authFetch<Goal>(`/families/${familyId}/goals/${goalId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ goal: data }),
+  });
+}
+
+// Delete a goal
+export async function deleteGoal(
+  familyId: number,
+  goalId: number
+): Promise<void> {
+  await authFetch<void>(`/families/${familyId}/goals/${goalId}`, {
+    method: "DELETE",
+  });
+}
+
+// Get AI goal refinement suggestions
+export async function refineGoal(
+  goalId: number
+): Promise<GoalRefinementResponse> {
+  return authFetch<GoalRefinementResponse>(`/goals/${goalId}/refine`, {
+    method: "POST",
+  });
+}
+
+// Family members response for assignee selection
+export interface FamilyMembersResponse {
+  members: FamilyMember[];
+}
+
+// Get family members for assignee selection
+export async function getFamilyMembers(
+  familyId: number
+): Promise<FamilyMembersResponse> {
+  return authFetch<FamilyMembersResponse>(`/families/${familyId}/members`);
+}
+
+// Helper to format visibility for display
+export function formatVisibility(visibility: string): string {
+  const labels: Record<string, string> = {
+    personal: "Personal",
+    shared: "Shared",
+    family: "Family",
+  };
+  return labels[visibility] || visibility;
+}
+
+// Helper to get visibility icon
+export function getVisibilityEmoji(visibility: string): string {
+  const emojis: Record<string, string> = {
+    personal: "🔒",
+    shared: "👥",
+    family: "👨‍👩‍👧‍👦",
+  };
+  return emojis[visibility] || "📋";
+}
+
+// Helper to get time scale emoji
+export function getTimeScaleEmoji(timeScale: string): string {
+  const emojis: Record<string, string> = {
+    daily: "📅",
+    weekly: "📆",
+    monthly: "🗓️",
+    quarterly: "📊",
+    annual: "🎯",
+  };
+  return emojis[timeScale] || "📋";
+}
+
+// Helper to format due date for display
+export function formatDueDate(dueDate: string | null): string {
+  if (!dueDate) return "No due date";
+  const date = new Date(dueDate);
+  const now = new Date();
+  const diffTime = date.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? "" : "s"} overdue`;
+  } else if (diffDays === 0) {
+    return "Due today";
+  } else if (diffDays === 1) {
+    return "Due tomorrow";
+  } else if (diffDays <= 7) {
+    return `Due in ${diffDays} days`;
+  } else {
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    });
+  }
 }

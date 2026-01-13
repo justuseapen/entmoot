@@ -1,22 +1,18 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { MainTabParamList } from "./types";
 import { View, Text, StyleSheet } from "react-native";
-import { DashboardScreen, DailyPlannerScreen } from "../screens/main";
+import {
+  DashboardScreen,
+  DailyPlannerScreen,
+  GoalsScreen,
+} from "../screens/main";
 
 // Design system colors
 const COLORS = {
   forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
   creamWhite: "#FFF8E7",
   earthBrown: "#795548",
 };
-
-const GoalsScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Goals</Text>
-    <Text style={styles.text}>Your goals will appear here</Text>
-  </View>
-);
 
 const FamilyScreen = () => (
   <View style={styles.container}>
