@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { MainTabParamList } from "./types";
 import { View, Text, StyleSheet } from "react-native";
-import { DashboardScreen } from "../screens/main";
+import { DashboardScreen, DailyPlannerScreen } from "../screens/main";
 
 // Design system colors
 const COLORS = {
@@ -15,13 +15,6 @@ const GoalsScreen = () => (
   <View style={styles.container}>
     <Text style={styles.title}>Goals</Text>
     <Text style={styles.text}>Your goals will appear here</Text>
-  </View>
-);
-
-const DailyPlannerScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Daily Planner</Text>
-    <Text style={styles.text}>Plan your day</Text>
   </View>
 );
 

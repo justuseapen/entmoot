@@ -4,6 +4,7 @@ export * from "./config";
 export * from "./dailyPlans";
 export * from "./deviceTokens";
 export * from "./families";
+export * from "./goals";
 export * from "./notifications";
 export * from "./pushNotifications";
 export * from "./streaks";
