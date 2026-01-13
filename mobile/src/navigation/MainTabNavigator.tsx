@@ -5,6 +5,7 @@ import {
   DashboardScreen,
   DailyPlannerScreen,
   GoalsScreen,
+  SettingsScreen,
 } from "../screens/main";
 
 // Design system colors
@@ -18,13 +19,6 @@ const FamilyScreen = () => (
   <View style={styles.container}>
     <Text style={styles.title}>Family</Text>
     <Text style={styles.text}>Manage your family</Text>
-  </View>
-);
-
-const SettingsScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Settings</Text>
-    <Text style={styles.text}>App settings</Text>
   </View>
 );
 

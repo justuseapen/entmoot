@@ -6,5 +6,6 @@ export * from "./deviceTokens";
 export * from "./families";
 export * from "./goals";
 export * from "./notifications";
+export * from "./notificationPreferences";
 export * from "./pushNotifications";
 export * from "./streaks";
