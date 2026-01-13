@@ -23,7 +23,7 @@ class ApplicationController < ActionController::API
     end
 
     # Re-raise in development/test for debugging
-    raise exception if Rails.env.development? || Rails.env.test?
+    raise exception if Rails.env.local?
 
     render json: { error: "An unexpected error occurred" }, status: :internal_server_error
   end
