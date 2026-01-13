@@ -598,3 +598,40 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - RefreshControl props: refreshing, onRefresh, tintColor (iOS), colors (Android)
   - Navigation.navigate to sibling tabs works from MainTabScreenProps
 ---
+
+## 2026-01-13 - US-066 Mobile Daily Planner Screen
+- What was implemented:
+  - Created DailyPlannerScreen component with all daily planning features
+  - Date display with formatTodayDate helper, subtitle "Start your day with intention"
+  - Top 3 priorities section with numbered inputs and auto-save on blur
+  - Task list with up/down reorder buttons (mobile-friendly alternative to drag-and-drop)
+  - Task completion toggle with checkbox styling (leafGreen when checked)
+  - Goal picker modal with FlatList showing linkable goals and "Remove link" option
+  - Daily intention multiline text input with auto-save
+  - Auto-save with 2-second debounce using useRef timers
+  - Save status indicator showing saving/saved/idle states
+  - Yesterday's incomplete tasks section with carry-over button
+  - Family switcher modal for multi-family users
+  - Progress bar with completion percentage
+  - Created goals.ts lib with getLinkableGoals, formatTimeScale, getStatusColor helpers
+  - Updated dailyPlans.ts lib with updateDailyPlan API and proper TypeScript types
+
+- Files created/changed:
+  - mobile/src/screens/main/DailyPlannerScreen.tsx (new)
+  - mobile/src/lib/goals.ts (new)
+  - mobile/src/lib/dailyPlans.ts (updated with update API and types)
+  - mobile/src/lib/index.ts (added goals export)
+  - mobile/src/screens/main/index.ts (added DailyPlannerScreen export)
+  - mobile/src/navigation/MainTabNavigator.tsx (imports real DailyPlannerScreen)
+
+- **Learnings for future iterations:**
+  - Move helper functions outside component to avoid "accessed before declaration" lint error
+  - Use `void _props` to suppress unused parameter warning when keeping type annotation
+  - Mobile task reordering: use up/down buttons instead of drag-and-drop for simplicity
+  - Debounce pattern: useRef for timer, clear on new change, setTimeout with 2000ms delay
+  - Save status uses 3 states: idle, saving, saved - reset to idle after 2s timeout
+  - DailyPlanWithStats extends Omit<DailyPlan, "tasks" | "top_priorities"> to override field types
+  - GoalSummary type for embedded goal info in tasks (id, title, time_scale, status)
+  - TopPriorityWithGoal adds goal_id and goal fields to base TopPriority type
+  - _destroy flag marks items for deletion on server via nested attributes pattern
+---

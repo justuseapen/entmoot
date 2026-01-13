@@ -1263,7 +1263,7 @@
         "Yesterday's incomplete tasks with carry-over option"
       ],
       "priority": 66,
-      "passes": false,
+      "passes": true,
       "notes": "API: GET /api/v1/families/:id/daily_plans/today, PUT /api/v1/families/:id/daily_plans/:id"
     },
     {
