@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_145647) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_150743) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -230,6 +230,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_145647) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
+  create_table "outreach_histories", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "outreach_type", null: false
+    t.string "channel", null: false
+    t.datetime "sent_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "channel"], name: "index_outreach_histories_on_user_id_and_channel"
+    t.index ["user_id", "outreach_type", "sent_at"], name: "idx_on_user_id_outreach_type_sent_at_245204cf96"
+    t.index ["user_id"], name: "index_outreach_histories_on_user_id"
+  end
+
   create_table "pets", force: :cascade do |t|
     t.string "name", null: false
     t.string "pet_type"
@@ -403,6 +415,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_145647) do
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "notifications", "users"
+  add_foreign_key "outreach_histories", "users"
   add_foreign_key "pets", "families"
   add_foreign_key "points_ledger_entries", "users"
   add_foreign_key "reflection_responses", "reflections"
