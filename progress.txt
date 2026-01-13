@@ -456,3 +456,38 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Shared types allow code reuse between web and mobile but need tsconfig paths configured
   - Design system colors should be consistent: creamWhite #FFF8E7 for background, forestGreen #2D5A27 for primary
 ---
+
+## 2026-01-12 - US-062 Mobile Authentication Flow
+- What was implemented:
+  - Created API client lib (mobile/src/lib/api.ts) with auto token refresh and error handling
+  - Created auth service (mobile/src/lib/auth.ts) mirroring web frontend patterns
+  - Created Zustand auth store (mobile/src/stores/auth.ts) with expo-secure-store for secure token storage
+  - Login screen with email/password fields, validation, error handling, and loading states
+  - Registration screen with name/email/password/confirmation, validation, and loading states
+  - Forgot Password screen with email input and success confirmation view
+  - Updated App.tsx to initialize auth store and display loading screen while initializing
+  - Added zustand and expo-secure-store dependencies
+
+- Files created/changed:
+  - mobile/src/lib/api.ts (ApiClient class with auto token refresh)
+  - mobile/src/lib/auth.ts (login, register, logout, refreshTokens, requestPasswordReset)
+  - mobile/src/stores/auth.ts (Zustand store with SecureStore persistence)
+  - mobile/src/stores/index.ts (exports)
+  - mobile/src/screens/auth/LoginScreen.tsx
+  - mobile/src/screens/auth/RegisterScreen.tsx
+  - mobile/src/screens/auth/ForgotPasswordScreen.tsx
+  - mobile/src/screens/auth/index.ts
+  - mobile/src/screens/index.ts
+  - mobile/src/navigation/AuthNavigator.tsx (updated to use actual screen components)
+  - mobile/App.tsx (uses auth store, shows loading while initializing)
+  - mobile/package.json (added zustand, expo-secure-store)
+
+- **Learnings for future iterations:**
+  - React Native doesn't have DOM types like RequestInit - define custom FetchOptions interface
+  - Use &apos; instead of apostrophes in JSX text content to satisfy react/no-unescaped-entities
+  - Zustand store initialization with SecureStore is async - need isInitialized flag
+  - Auto token refresh: intercept 401 responses, call refresh endpoint, retry original request
+  - apiClient.setOnTokenRefresh callback updates store and SecureStore when tokens are refreshed
+  - Mobile screens follow same design system colors as landing page (creamWhite, forestGreen, earthBrown, darkForest)
+  - Form validation patterns: validateForm() returns boolean, setErrors updates state, clearFieldError on change
+---

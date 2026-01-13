@@ -1188,7 +1188,7 @@
         "Loading states during auth operations"
       ],
       "priority": 62,
-      "passes": false,
+      "passes": true,
       "notes": "Mirror web auth patterns from frontend/src/stores/auth.ts. Use expo-secure-store for secure storage."
     },
     {
