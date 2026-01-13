@@ -1359,7 +1359,7 @@
         "Service specs with comprehensive test coverage"
       ],
       "priority": 71,
-      "passes": false,
+      "passes": true,
       "notes": "Consider user timezone for all time-based checks. Add reengagement_enabled boolean to notification_preferences."
     },
     {
@@ -1378,7 +1378,7 @@
         "Service specs with mocked notification services"
       ],
       "priority": 72,
-      "passes": false,
+      "passes": true,
       "notes": "SMS should be reserved for high-priority re-engagement (7+ days inactive). Push and email for daily check-ins."
     },
     {

@@ -772,3 +772,68 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Twilio opt-in commands: START, YES, UNSTOP
   - Use Messaging Service SID if available, otherwise use From number for SMS delivery
 ---
+
+## 2026-01-13 11:00 - US-071 Re-engagement Detection Service
+- What was implemented:
+  - Backend: Created ReengagementDetectionService class for detecting users needing re-engagement
+  - Backend: Detect missed check-ins (no daily plan by noon in user's timezone)
+  - Backend: Detect missed reflections (daily plan exists but no evening reflection by 10pm)
+  - Backend: Detect inactivity with configurable thresholds (3, 7, 14, 30 days)
+  - Backend: OutreachCandidate Struct for prioritized user targeting with reason
+  - Backend: Respects quiet hours settings when detecting candidates
+  - Backend: Excludes users with reengagement_enabled set to false
+  - Database: Added reengagement_enabled boolean to notification_preferences (default true)
+  - Tests: 29 comprehensive specs covering all detection scenarios
+
+- Files changed:
+  - backend/db/migrate/20260113145647_add_reengagement_enabled_to_notification_preferences.rb (new)
+  - backend/db/schema.rb (updated)
+  - backend/app/services/reengagement_detection_service.rb (new)
+  - backend/spec/services/reengagement_detection_service_spec.rb (new)
+  - backend/spec/factories/notification_preferences.rb (added reengagement_enabled attribute)
+
+- **Learnings for future iterations:**
+  - Inactivity detection should check highest threshold first (sort descending) to categorize users correctly
+  - Default quiet hours (22:00-07:00) can overlap with test times (22:30) - explicitly set quiet hours in tests
+  - Use travel_to with specific dates to ensure consistent test behavior across time zones
+  - within_quiet_hours? check must be called after timezone conversion for accurate detection
+  - OutreachCandidate Struct uses keyword_init: true for cleaner instantiation
+  - Priority ordering: missed_checkin (1), missed_reflection (2), inactive_30_days (3), inactive_14_days (4), inactive_7_days (5), inactive_3_days (6)
+  - Refactor service methods to extract helpers (morning_planning_users, collect_candidates_for_users) for Rubocop compliance
+  - Daily plan considered "missed" if it has no tasks AND no intention (empty plan)
+---
+
+## 2026-01-13 15:10 - US-072 Multi-Channel Outreach Service
+- What was implemented:
+  - OutreachHistory model to track sent outreach and prevent spam (user_id, outreach_type, channel, sent_at)
+  - OutreachService with channel cascade: push -> email -> SMS (based on user preferences)
+  - Message templates for all outreach types (missed_checkin, missed_reflection, inactive_3/7/14/30_days)
+  - Personalized messages with user name and context-specific deep links
+  - Spam prevention: max 1 outreach per type per day per user
+  - SMS reserved for high-priority inactivity (7+ days only)
+  - OutreachMailer with HTML and text templates for email delivery
+  - send_to_candidates method to process multiple candidates from ReengagementDetectionService
+  - 43 comprehensive service specs covering all scenarios with mocked notification services
+
+- Files changed:
+  - backend/db/migrate/20260113150743_create_outreach_histories.rb (new)
+  - backend/db/schema.rb (updated)
+  - backend/app/models/outreach_history.rb (new)
+  - backend/app/models/user.rb (added outreach_histories association)
+  - backend/app/services/outreach_service.rb (new)
+  - backend/app/mailers/outreach_mailer.rb (new)
+  - backend/app/views/outreach_mailer/re_engagement.html.erb (new)
+  - backend/app/views/outreach_mailer/re_engagement.text.erb (new)
+  - backend/spec/models/outreach_history_spec.rb (new)
+  - backend/spec/services/outreach_service_spec.rb (new)
+  - backend/spec/factories/outreach_histories.rb (new)
+
+- **Learnings for future iterations:**
+  - Channel cascade uses nil returns from try_push/try_email/try_sms for fallback to next channel
+  - SMS_ELIGIBLE_TYPES constant restricts SMS to high-priority re-engagement only
+  - OutreachHistory.already_sent_today? scopes by user, type, and date range for spam prevention
+  - MESSAGE_TEMPLATES hash uses symbols as keys for cleaner lookup
+  - RSpec/ContextWording cop requires "with", "when", or "without" prefix - use "with duplicate outreach prevention"
+  - ActiveJob::Base.queue_adapter = :test must be set in before block for have_enqueued_mail matcher
+  - Extract mailer_base_url helper to reduce ABC complexity in url building methods
+---
