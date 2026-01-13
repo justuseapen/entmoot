@@ -149,6 +149,7 @@ module Api
         return unless reflection_completed?
 
         record_evening_reflection_streak
+        track_reflection_activity
         PointsService.award_reflection_completion(user: current_user, reflection: @reflection)
         current_user.record_first_action?(:reflection_completed)
       end

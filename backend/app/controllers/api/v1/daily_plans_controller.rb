@@ -130,6 +130,7 @@ module Api
         return false unless plan_has_content?
 
         record_daily_planning_streak
+        track_daily_plan_activity
         current_user.record_first_action?(:daily_plan_completed)
       end
 

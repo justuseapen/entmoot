@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_001413) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_144309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -349,7 +349,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_001413) do
     t.integer "onboarding_wizard_last_step"
     t.datetime "first_family_invite_sent_at"
     t.datetime "last_nps_prompt_date"
+    t.datetime "last_active_at"
+    t.datetime "last_daily_plan_at"
+    t.datetime "last_reflection_at"
+    t.datetime "last_weekly_review_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["last_active_at"], name: "index_users_on_last_active_at"
+    t.index ["last_daily_plan_at"], name: "index_users_on_last_daily_plan_at"
+    t.index ["last_reflection_at"], name: "index_users_on_last_reflection_at"
+    t.index ["last_weekly_review_at"], name: "index_users_on_last_weekly_review_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

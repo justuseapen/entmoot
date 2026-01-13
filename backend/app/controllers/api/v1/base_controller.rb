@@ -4,6 +4,7 @@ module Api
   module V1
     class BaseController < ApplicationController
       include Pundit::Authorization
+      include UserActivity
 
       before_action :authenticate_user!
 
