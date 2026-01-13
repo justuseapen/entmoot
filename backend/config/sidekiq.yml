@@ -37,3 +37,33 @@
       class: SendOnboardingEmailsJob
       queue: default
       description: "Send onboarding email sequence to new users"
+
+    detect_missed_check_ins_noon:
+      cron: '0 12 * * *'
+      class: DetectMissedCheckInsJob
+      queue: default
+      description: "Detect users who missed morning check-in by noon"
+
+    detect_missed_check_ins_afternoon:
+      cron: '0 14 * * *'
+      class: DetectMissedCheckInsJob
+      queue: default
+      description: "Detect users who missed morning check-in by early afternoon"
+
+    detect_missed_reflections_evening:
+      cron: '0 21 * * *'
+      class: DetectMissedReflectionsJob
+      queue: default
+      description: "Detect users who missed evening reflection by 9pm"
+
+    detect_missed_reflections_night:
+      cron: '0 22 * * *'
+      class: DetectMissedReflectionsJob
+      queue: default
+      description: "Detect users who missed evening reflection by 10pm"
+
+    detect_inactive_users:
+      cron: '0 10 * * *'
+      class: DetectInactiveUsersJob
+      queue: default
+      description: "Detect and reach out to inactive users daily"
