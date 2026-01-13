@@ -12,6 +12,7 @@ import { GoalTree } from "./pages/GoalTree";
 import { DailyPlanner } from "./pages/DailyPlanner";
 import { EveningReflection } from "./pages/EveningReflection";
 import { WeeklyReview } from "./pages/WeeklyReview";
+import { MonthlyReview } from "./pages/MonthlyReview";
 import { Leaderboard } from "./pages/Leaderboard";
 import { NotificationSettings } from "./pages/NotificationSettings";
 import { NotificationsPage } from "./pages/Notifications";
@@ -151,6 +152,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <WeeklyReview />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/monthly-review"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <MonthlyReview />
                     </MainLayout>
                   </ProtectedRoute>
                 }

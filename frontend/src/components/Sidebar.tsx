@@ -1,4 +1,5 @@
-import { NavLink, useParams } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useParams, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useFamilyStore } from "@/stores/family";
 
@@ -7,6 +8,11 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   tourId?: string;
+}
+
+interface ReviewSubItem {
+  label: string;
+  href: string;
 }
 
 // Icon components for navigation items
@@ -127,6 +133,23 @@ function SettingsIcon({ className }: { className?: string }) {
   );
 }
 
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 interface SidebarProps {
   collapsed?: boolean;
   onItemClick?: () => void;
@@ -135,9 +158,17 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
   const { currentFamily } = useFamilyStore();
   const params = useParams();
+  const location = useLocation();
+  const [reviewsExpanded, setReviewsExpanded] = useState(() => {
+    // Auto-expand if on a review page
+    return location.pathname.includes("-review");
+  });
 
   // Get family ID from either params or current family
   const familyId = params.id || currentFamily?.id?.toString();
+
+  // Check if on any review page
+  const isOnReviewPage = location.pathname.includes("-review");
 
   // Build navigation items based on whether family is selected
   const navItems: NavItem[] = [
@@ -149,9 +180,12 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
     },
   ];
 
-  // Family-dependent navigation items
+  // Family-dependent navigation items (before Reviews)
+  const familyNavItems: NavItem[] = [];
+  let reviewSubItems: ReviewSubItem[] = [];
+
   if (familyId) {
-    navItems.push(
+    familyNavItems.push(
       {
         label: "Goals",
         href: `/families/${familyId}/goals`,
@@ -163,51 +197,119 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
         href: `/families/${familyId}/planner`,
         icon: <CalendarIcon className="h-5 w-5" />,
         tourId: "daily-planner",
-      },
-      {
-        label: "Reviews",
-        href: `/families/${familyId}/weekly-review`,
-        icon: <ClipboardIcon className="h-5 w-5" />,
-      },
-      {
+      }
+    );
+
+    reviewSubItems = [
+      { label: "Weekly", href: `/families/${familyId}/weekly-review` },
+      { label: "Monthly", href: `/families/${familyId}/monthly-review` },
+    ];
+  }
+
+  // Family item (after Reviews)
+  const familyItem: NavItem | null = familyId
+    ? {
         label: "Family",
         href: `/families/${familyId}`,
         icon: <UsersIcon className="h-5 w-5" />,
         tourId: "family",
       }
-    );
-  }
+    : null;
 
-  // Always available settings
-  navItems.push({
+  // Settings item
+  const settingsItem: NavItem = {
     label: "Settings",
     href: "/settings/notifications",
     icon: <SettingsIcon className="h-5 w-5" />,
-  });
+  };
+
+  const renderNavItem = (item: NavItem) => (
+    <NavLink
+      key={item.href}
+      to={item.href}
+      onClick={onItemClick}
+      data-tour={item.tourId}
+      className={({ isActive }) =>
+        cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          "hover:bg-gray-100",
+          isActive
+            ? "bg-blue-50 text-blue-600"
+            : "text-gray-700 hover:text-gray-900",
+          collapsed && "justify-center px-2"
+        )
+      }
+    >
+      {item.icon}
+      {!collapsed && <span>{item.label}</span>}
+    </NavLink>
+  );
 
   return (
     <nav className="flex flex-col gap-1 p-2">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.href}
-          to={item.href}
-          onClick={onItemClick}
-          data-tour={item.tourId}
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+      {/* Dashboard */}
+      {navItems.map(renderNavItem)}
+
+      {/* Family-dependent items (Goals, Daily Planner) */}
+      {familyNavItems.map(renderNavItem)}
+
+      {/* Reviews section with sub-items */}
+      {familyId && (
+        <div>
+          <button
+            onClick={() => setReviewsExpanded(!reviewsExpanded)}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               "hover:bg-gray-100",
-              isActive
+              isOnReviewPage
                 ? "bg-blue-50 text-blue-600"
                 : "text-gray-700 hover:text-gray-900",
               collapsed && "justify-center px-2"
-            )
-          }
-        >
-          {item.icon}
-          {!collapsed && <span>{item.label}</span>}
-        </NavLink>
-      ))}
+            )}
+          >
+            <ClipboardIcon className="h-5 w-5" />
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left">Reviews</span>
+                <ChevronDownIcon
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    reviewsExpanded && "rotate-180"
+                  )}
+                />
+              </>
+            )}
+          </button>
+          {!collapsed && reviewsExpanded && (
+            <div className="mt-1 ml-8 flex flex-col gap-1">
+              {reviewSubItems.map((subItem) => (
+                <NavLink
+                  key={subItem.href}
+                  to={subItem.href}
+                  onClick={onItemClick}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                      "hover:bg-gray-100",
+                      isActive
+                        ? "bg-blue-50 font-medium text-blue-600"
+                        : "text-gray-600 hover:text-gray-900"
+                    )
+                  }
+                >
+                  {subItem.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Family */}
+      {familyItem && renderNavItem(familyItem)}
+
+      {/* Settings */}
+      {renderNavItem(settingsItem)}
     </nav>
   );
 }

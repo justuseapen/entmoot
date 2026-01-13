@@ -17,6 +17,7 @@ export type EmptyStateVariant =
   | "family_members"
   | "daily_plans"
   | "weekly_reviews"
+  | "monthly_reviews"
   | "custom";
 
 interface EmptyStateConfig {
@@ -80,6 +81,16 @@ const EMPTY_STATE_CONFIG: Record<
     actionLabel: "Start Review",
     iconColor: "text-orange-600",
     iconBgColor: "bg-orange-100",
+  },
+  monthly_reviews: {
+    icon: ClipboardList,
+    emoji: "📅",
+    title: "No monthly reviews yet",
+    description:
+      "Monthly reviews help you reflect on and plan at a broader time scale.",
+    actionLabel: "Start Review",
+    iconColor: "text-purple-600",
+    iconBgColor: "bg-purple-100",
   },
 };
 
