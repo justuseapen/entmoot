@@ -411,3 +411,29 @@ export interface UpdatePetData {
   birthday?: string;
   notes?: string;
 }
+
+// =============================================================================
+// Device Token Types (Push Notifications)
+// =============================================================================
+
+export type DevicePlatform = "ios" | "android" | "web";
+
+export interface DeviceToken {
+  id: number;
+  token: string;
+  platform: DevicePlatform;
+  device_name: string | null;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDeviceTokenData {
+  token: string;
+  platform: DevicePlatform;
+  device_name?: string;
+}
+
+export interface DeleteDeviceTokenData {
+  token: string;
+}

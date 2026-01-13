@@ -8,6 +8,10 @@ import type {
 } from "@shared/types";
 import * as authApi from "../lib/auth";
 import { apiClient } from "../lib/api";
+import {
+  registerForPushNotifications,
+  unregisterFromPushNotifications,
+} from "../lib/pushNotifications";
 
 // Storage keys
 const TOKEN_KEY = "entmoot_access_token";
@@ -204,6 +208,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
           isAuthenticated: true,
           isLoading: false,
         });
+
+        // Register for push notifications after successful login
+        // This is done asynchronously and does not block login
+        registerForPushNotifications().catch((error) => {
+          console.error("Failed to register for push notifications:", error);
+        });
       } catch (error) {
         set({ isLoading: false });
         throw error;
@@ -232,6 +242,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
           isAuthenticated: true,
           isLoading: false,
         });
+
+        // Register for push notifications after successful registration
+        // This is done asynchronously and does not block registration
+        registerForPushNotifications().catch((error) => {
+          console.error("Failed to register for push notifications:", error);
+        });
       } catch (error) {
         set({ isLoading: false });
         throw error;
@@ -241,6 +257,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     logout: async () => {
       const { token } = get();
       set({ isLoading: true });
+
+      // Unregister from push notifications before logging out
+      // This is done first while we still have valid tokens
+      await unregisterFromPushNotifications();
 
       try {
         if (token) {

@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.entmoot.mobile"
+      "bundleIdentifier": "app.entmoot.mobile",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,16 +26,29 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "app.entmoot.mobile"
+      "package": "app.entmoot.mobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "releaseChannel": "development"
+      "releaseChannel": "development",
+      "eas": {
+        "projectId": "your-project-id"
+      }
     },
     "plugins": [
-      "expo-constants"
+      "expo-constants",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2D5A27",
+          "sounds": [],
+          "defaultChannel": "default"
+        }
+      ]
     ]
   }
 }
