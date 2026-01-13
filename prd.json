@@ -1244,7 +1244,7 @@
         "Loading skeleton while data loads"
       ],
       "priority": 65,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse dashboard data fetching patterns from web. API: GET /api/v1/families, GET /api/v1/auth/me, GET /api/v1/users/me/streaks"
     },
     {

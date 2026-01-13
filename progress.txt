@@ -563,3 +563,38 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Unregister from push before logout to ensure token is removed with valid auth
   - Navigation typing is strict - handle each route explicitly instead of dynamic navigation
 ---
+
+## 2026-01-13 - US-065 Mobile Dashboard Screen
+- What was implemented:
+  - Created DashboardScreen component with time-based greeting (Good morning/afternoon/evening)
+  - Added family switcher modal for users with multiple families
+  - Displayed quick stats: tasks completed today and total streak days
+  - Showed individual streaks with emoji icons and day/week counts
+  - Added quick action buttons for Morning Planning, Evening Reflection, Weekly Review
+  - Implemented recent notifications section with unread indicators
+  - Added pull-to-refresh functionality with RefreshControl
+  - Created loading state with ActivityIndicator while data loads
+  - Created mobile API lib files: families.ts, streaks.ts, notifications.ts, dailyPlans.ts
+  - Updated MainTabNavigator to use actual DashboardScreen component
+
+- Files created/changed:
+  - mobile/src/lib/dailyPlans.ts (new)
+  - mobile/src/lib/families.ts (new)
+  - mobile/src/lib/notifications.ts (new)
+  - mobile/src/lib/streaks.ts (new)
+  - mobile/src/lib/index.ts (new - exports all lib modules)
+  - mobile/src/screens/main/DashboardScreen.tsx (new)
+  - mobile/src/screens/main/index.ts (new)
+  - mobile/src/screens/index.ts (added main screens export)
+  - mobile/src/navigation/MainTabNavigator.tsx (imports DashboardScreen)
+
+- **Learnings for future iterations:**
+  - Mobile API lib files use authFetch from api.ts (no token param needed - tokens handled by apiClient)
+  - getTimeBasedGreeting helper: before 12pm = morning, 12-5pm = afternoon, after 5pm = evening
+  - Family switcher only shown when user has > 1 family, otherwise shows simple badge
+  - Quick stats show tasks_completed/total from daily plan completion_stats
+  - Total streak count aggregated from all streak types in array
+  - Use FlatList inside Modal for family selection list
+  - RefreshControl props: refreshing, onRefresh, tintColor (iOS), colors (Android)
+  - Navigation.navigate to sibling tabs works from MainTabScreenProps
+---
