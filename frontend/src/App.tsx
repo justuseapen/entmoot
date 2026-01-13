@@ -14,6 +14,7 @@ import { EveningReflection } from "./pages/EveningReflection";
 import { WeeklyReview } from "./pages/WeeklyReview";
 import { MonthlyReview } from "./pages/MonthlyReview";
 import { QuarterlyReview } from "./pages/QuarterlyReview";
+import { AnnualReview } from "./pages/AnnualReview";
 import { Leaderboard } from "./pages/Leaderboard";
 import { NotificationSettings } from "./pages/NotificationSettings";
 import { NotificationsPage } from "./pages/Notifications";
@@ -173,6 +174,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <QuarterlyReview />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/families/:id/annual-review"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AnnualReview />
                     </MainLayout>
                   </ProtectedRoute>
                 }

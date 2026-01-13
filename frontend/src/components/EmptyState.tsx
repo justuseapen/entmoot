@@ -19,6 +19,7 @@ export type EmptyStateVariant =
   | "weekly_reviews"
   | "monthly_reviews"
   | "quarterly_reviews"
+  | "annual_reviews"
   | "custom";
 
 interface EmptyStateConfig {
@@ -102,6 +103,16 @@ const EMPTY_STATE_CONFIG: Record<
     actionLabel: "Start Review",
     iconColor: "text-teal-600",
     iconBgColor: "bg-teal-100",
+  },
+  annual_reviews: {
+    icon: ClipboardList,
+    emoji: "🎆",
+    title: "No annual reviews yet",
+    description:
+      "Annual reviews help you reflect on the year and set intentions for the next.",
+    actionLabel: "Start Review",
+    iconColor: "text-indigo-600",
+    iconBgColor: "bg-indigo-100",
   },
 };
 
