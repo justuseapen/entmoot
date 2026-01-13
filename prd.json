@@ -1435,7 +1435,7 @@
         "Request specs for all endpoints"
       ],
       "priority": 75,
-      "passes": false,
+      "passes": true,
       "notes": "Month identified by first day of month. Similar structure to WeeklyReview model."
     },
     {

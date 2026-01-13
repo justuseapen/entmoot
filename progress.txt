@@ -895,3 +895,35 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Re-engagement preferences use conditional rendering: sub-controls only show when master toggle is enabled
   - Mobile uses picker modals for threshold selection (same pattern as weekly review day picker)
 ---
+
+## 2026-01-13 - US-075 Monthly Review Model and API
+- What was implemented:
+  - MonthlyReview model with month (date), user_id, family_id, highlights (jsonb), challenges (jsonb), lessons_learned (text), next_month_focus (jsonb), completed (boolean) fields
+  - Migration with unique index on [user_id, family_id, month]
+  - MonthlyReviewPolicy with same pattern as WeeklyReviewPolicy
+  - MonthlyReviewsController with index, current, show, update, destroy, metrics actions
+  - Routes added under /api/v1/families/:family_id/monthly_reviews
+  - Factory for monthly_reviews with traits: with_content, completed, last_month, two_months_ago
+  - Metrics calculation: task_completion, goal_progress, reflection_consistency
+  - 32 comprehensive request specs
+
+- Files changed:
+  - backend/db/migrate/20260113152937_create_monthly_reviews.rb (new)
+  - backend/db/schema.rb
+  - backend/app/models/monthly_review.rb (new)
+  - backend/app/models/user.rb (added has_many :monthly_reviews)
+  - backend/app/models/family.rb (added has_many :monthly_reviews)
+  - backend/app/policies/monthly_review_policy.rb (new)
+  - backend/app/controllers/api/v1/monthly_reviews_controller.rb (new)
+  - backend/config/routes.rb (added monthly_reviews routes)
+  - backend/spec/factories/monthly_reviews.rb (new)
+  - backend/spec/requests/api/v1/monthly_reviews_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - MonthlyReview uses same patterns as WeeklyReview for consistency
+  - Month is stored as first day of month (Date type) for easy querying
+  - Reflection consistency metric calculates reflections vs total days in month
+  - Use Time.days_in_month(month, year) to get accurate day count
+  - find_or_create_for_current_month pattern mirrors weekly review pattern
+  - Reflections query uses created_at date range since reflection may not have daily_plan
+---
