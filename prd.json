@@ -1208,7 +1208,7 @@
         "Service specs for PushNotificationService"
       ],
       "priority": 63,
-      "passes": false,
+      "passes": true,
       "notes": "FCM HTTP v1 API supports both iOS (APNs) and Android. Device tokens should be unique per user+token."
     },
     {

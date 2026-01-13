@@ -455,6 +455,9 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Mobile structure: /mobile/src/{screens,components,hooks,lib,stores,navigation}
   - Shared types allow code reuse between web and mobile but need tsconfig paths configured
   - Design system colors should be consistent: creamWhite #FFF8E7 for background, forestGreen #2D5A27 for primary
+- PushNotificationService uses googleauth gem for FCM HTTP v1 API authentication (not firebase-admin)
+- DeviceToken platforms: 'ios', 'android', 'web' - validated via inclusion
+- Device token cleanup: on 400/404 FCM response with error codes UNREGISTERED, INVALID_ARGUMENT, NOT_FOUND
 ---
 
 ## 2026-01-12 - US-062 Mobile Authentication Flow
@@ -490,4 +493,40 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - apiClient.setOnTokenRefresh callback updates store and SecureStore when tokens are refreshed
   - Mobile screens follow same design system colors as landing page (creamWhite, forestGreen, earthBrown, darkForest)
   - Form validation patterns: validateForm() returns boolean, setErrors updates state, clearFieldError on change
+---
+
+## 2026-01-13 - US-063 Push Notification Infrastructure - Backend
+- What was implemented:
+  - Added googleauth gem (~> 1.8) to Gemfile for FCM HTTP v1 API authentication
+  - Created DeviceToken model with user_id, token, platform, device_name, last_used_at fields
+  - Added device_tokens migration with unique index on token and composite index on user_id+token
+  - Created DeviceTokensController with create, destroy, and unregister actions
+  - Created PushNotificationService for FCM HTTP v1 API with iOS (APNs), Android, and web support
+  - Updated NotificationService.send_push_notification to dispatch push when user has push:true preference
+  - Implemented automatic cleanup of invalid device tokens on FCM error responses
+  - Added request specs for all device token endpoints (24 examples)
+  - Added service specs for PushNotificationService (13 examples)
+
+- Files created/changed:
+  - backend/Gemfile (added googleauth gem)
+  - backend/db/migrate/20260113001413_create_device_tokens.rb (new)
+  - backend/app/models/device_token.rb (new)
+  - backend/app/models/user.rb (added has_many :device_tokens)
+  - backend/app/controllers/api/v1/device_tokens_controller.rb (new)
+  - backend/config/routes.rb (added device_tokens routes)
+  - backend/app/services/push_notification_service.rb (new)
+  - backend/app/services/notification_service.rb (added push notification dispatch)
+  - backend/spec/factories/device_tokens.rb (new)
+  - backend/spec/requests/api/v1/device_tokens_spec.rb (new)
+  - backend/spec/services/push_notification_service_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - Use googleauth gem instead of firebase-admin for FCM HTTP v1 API - lighter weight
+  - FCM HTTP v1 endpoint format: https://fcm.googleapis.com/v1/projects/{project_id}/messages:send
+  - DeviceToken.active scope: last_used_at > 30.days.ago OR last_used_at is nil
+  - Platform-specific config: iOS uses apns.payload.aps.sound, Android uses android.priority + notification.channel_id
+  - FCM requires all data values to be strings - use transform_values(&:to_s)
+  - Invalid token error codes: UNREGISTERED, INVALID_ARGUMENT, NOT_FOUND
+  - In development, PushNotificationService logs messages instead of calling FCM
+  - NotificationService.send_push_notification respects user's push preference and quiet hours
 ---
