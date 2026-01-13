@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { MainTabParamList } from "./types";
 import { View, Text, StyleSheet } from "react-native";
+import { DashboardScreen } from "../screens/main";
 
 // Design system colors
 const COLORS = {
@@ -9,14 +10,6 @@ const COLORS = {
   creamWhite: "#FFF8E7",
   earthBrown: "#795548",
 };
-
-// Placeholder screens - will be implemented in subsequent stories
-const DashboardScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Dashboard</Text>
-    <Text style={styles.text}>Welcome to Entmoot!</Text>
-  </View>
-);
 
 const GoalsScreen = () => (
   <View style={styles.container}>
