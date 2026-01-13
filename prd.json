@@ -1456,7 +1456,7 @@
         "Request specs for all endpoints"
       ],
       "priority": 76,
-      "passes": false,
+      "passes": true,
       "notes": "Quarter start dates: Q1=Jan 1, Q2=Apr 1, Q3=Jul 1, Q4=Oct 1."
     },
     {

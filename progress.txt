@@ -927,3 +927,36 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - find_or_create_for_current_month pattern mirrors weekly review pattern
   - Reflections query uses created_at date range since reflection may not have daily_plan
 ---
+
+## 2026-01-13 - US-076 Quarterly Review Model and API
+- What was implemented:
+  - QuarterlyReview model with quarter_start_date, achievements, obstacles, insights, next_quarter_objectives, completed fields
+  - Migration with unique index on [user_id, family_id, quarter_start_date]
+  - QuarterlyReviewPolicy with same pattern as MonthlyReviewPolicy
+  - QuarterlyReviewsController with index, current, show, update, destroy, metrics actions
+  - Routes added under /api/v1/families/:family_id/quarterly_reviews
+  - Factory for quarterly_reviews with traits: with_content, completed, last_quarter, two_quarters_ago
+  - Metrics calculation: goal_completion, monthly_review_completion, habit_consistency
+  - 32 comprehensive request specs
+
+- Files changed:
+  - backend/db/migrate/20260113153418_create_quarterly_reviews.rb (new)
+  - backend/db/schema.rb
+  - backend/app/models/quarterly_review.rb (new)
+  - backend/app/models/user.rb (added has_many :quarterly_reviews)
+  - backend/app/models/family.rb (added has_many :quarterly_reviews)
+  - backend/app/policies/quarterly_review_policy.rb (new)
+  - backend/app/controllers/api/v1/quarterly_reviews_controller.rb (new)
+  - backend/config/routes.rb (added quarterly_reviews routes)
+  - backend/spec/factories/quarterly_reviews.rb (new)
+  - backend/spec/requests/api/v1/quarterly_reviews_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - QuarterlyReview follows same patterns as MonthlyReview for consistency
+  - Quarter start dates: Q1=Jan 1, Q2=Apr 1, Q3=Jul 1, Q4=Oct 1 (QUARTER_START_MONTHS constant)
+  - quarter_start_date_for uses reverse find to get the most recent quarter start month <= today.month
+  - Metrics helper: metrics_url local method avoids long URL lines in specs
+  - habit_consistency tracks weekly review completion (13 weeks per quarter)
+  - monthly_review_completion assumes 3 months per quarter
+  - quarterly_goals scoped to time_scale: :quarterly and user/family visibility
+---
