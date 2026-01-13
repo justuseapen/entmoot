@@ -993,3 +993,37 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - calculate_completion_rate helper avoids division-by-zero issues
   - Factory traits: :last_year and :two_years_ago use simple year arithmetic
 ---
+## 2026-01-13 - US-078 Monthly Review UI - Web
+- What was implemented:
+  - Created monthlyReviews.ts lib with API functions, types, and helpers (formatMonthYear, getMonthName, formatMonthShort)
+  - Created useMonthlyReviews.ts hook with TanStack Query integration (current, list, detail, metrics, update)
+  - Created MonthlyReview.tsx page component with 5-step wizard workflow
+  - Step 1: Month Metrics (task completion, goal progress, reflection consistency)
+  - Step 2: Highlights - add multiple highlights for the month
+  - Step 3: Challenges - add multiple challenges faced
+  - Step 4: Lessons Learned - text input
+  - Step 5: Next Month Focus - add focus areas (3-5 items)
+  - Added route /families/:id/monthly-review in App.tsx
+  - Updated Sidebar.tsx with expandable Reviews section containing Weekly and Monthly sub-links
+  - Added monthly_reviews variant to EmptyState component (purple color scheme)
+  - Past monthly reviews list with quick view functionality
+  - Save progress and resume later functionality
+  - Mark complete with navigation to planner
+
+- Files changed:
+  - frontend/src/lib/monthlyReviews.ts (new)
+  - frontend/src/hooks/useMonthlyReviews.ts (new)
+  - frontend/src/pages/MonthlyReview.tsx (new)
+  - frontend/src/App.tsx (added route and import)
+  - frontend/src/components/Sidebar.tsx (expandable Reviews section with Weekly/Monthly)
+  - frontend/src/components/EmptyState.tsx (added monthly_reviews variant)
+
+- **Learnings for future iterations:**
+  - Monthly review follows exact same patterns as WeeklyReview.tsx for consistency
+  - Sidebar Reviews section uses useState for expand/collapse with ChevronDownIcon rotation
+  - Reviews section auto-expands when on any review page (location.pathname.includes("-review"))
+  - Monthly review uses purple color scheme to differentiate from weekly (orange) 
+  - MonthlyReview metrics includes reflection_consistency (reflections/days_in_month)
+  - Empty state variant follows same pattern as weekly_reviews with different emoji (📅 vs 📋)
+  - Wizard steps use same pattern: metrics -> content collection -> lessons -> future focus
+---
