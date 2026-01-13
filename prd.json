@@ -1584,7 +1584,7 @@
         "Request specs verifying reminder filtering by frequency"
       ],
       "priority": 82,
-      "passes": false,
+      "passes": true,
       "notes": "Consider family-level defaults with user override capability."
     }
   ]

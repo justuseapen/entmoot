@@ -1143,3 +1143,47 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Jobs send both email and push notifications based on user preferences
   - Each job respects quiet hours setting from notification_preferences
 ---
+
+## 2026-01-13 - US-082 Flexible Check-in Frequency
+- What was implemented:
+  - Migration adding check_in_frequency string column to notification_preferences (default "daily")
+  - NotificationPreference model updated with CHECK_IN_FREQUENCIES constant and validation
+  - Helper methods: daily_reminders_enabled?, weekly_reminders_enabled?, monthly_reminders_enabled?, quarterly_reminders_enabled?, annual_reminders_enabled?, as_needed_frequency?
+  - NotificationPreferencesController updated with check_in_frequency in PERMITTED_PARAMS and API responses
+  - All 7 reminder jobs updated to respect check_in_frequency (morning, evening, weekly, monthly, quarterly, annual, goal check-in)
+  - Frontend NotificationSettings.tsx: Added Check-in Frequency card with Select dropdown, frequency-aware reminder disabling
+  - Frontend notificationPreferences.ts: Added CheckInFrequency type, CHECK_IN_FREQUENCIES constant, helper functions
+  - Mobile notificationPreferences.ts: Added same types and helpers as web frontend
+  - Mobile SettingsScreen.tsx: Added frequency picker modal with descriptions
+  - Factory updated with check_in_frequency attribute and frequency traits
+  - Model specs for all helper methods
+  - Request specs for check_in_frequency CRUD operations
+
+- Files changed:
+  - backend/db/migrate/20260113210000_add_check_in_frequency_to_notification_preferences.rb (new)
+  - backend/db/schema.rb (updated)
+  - backend/app/models/notification_preference.rb (added CHECK_IN_FREQUENCIES, validation, helper methods)
+  - backend/app/controllers/api/v1/notification_preferences_controller.rb (added check_in_frequency to PERMITTED_PARAMS and responses)
+  - backend/app/jobs/send_morning_planning_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_evening_reflection_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_weekly_review_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_monthly_review_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_quarterly_review_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_annual_review_reminders_job.rb (added frequency check)
+  - backend/app/jobs/send_goal_check_in_reminders_job.rb (added frequency check)
+  - backend/spec/factories/notification_preferences.rb (added check_in_frequency and traits)
+  - backend/spec/models/notification_preference_spec.rb (added helper method specs)
+  - backend/spec/requests/api/v1/notification_preferences_spec.rb (added frequency specs)
+  - frontend/src/lib/notificationPreferences.ts (added types, constants, helpers)
+  - frontend/src/pages/NotificationSettings.tsx (added Check-in Frequency card)
+  - mobile/src/lib/notificationPreferences.ts (added types, constants, helpers)
+  - mobile/src/screens/main/SettingsScreen.tsx (added frequency picker)
+
+- **Learnings for future iterations:**
+  - Frequency hierarchy: daily includes all reminders, weekly excludes daily-only, monthly excludes weekly/daily, etc.
+  - Helper methods return boolean based on whether frequency level includes that reminder type
+  - as_needed frequency disables all automatic reminders
+  - UI disables specific reminder toggles when frequency doesn't support them (e.g., daily reminders disabled for weekly+ frequencies)
+  - Mobile uses picker modal with descriptions for each frequency option
+  - All reminder jobs check frequency at start of send_reminder_if_due method before processing
+---
