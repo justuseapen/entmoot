@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_144926) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_145647) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -212,6 +212,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_144926) do
     t.boolean "tips_enabled", default: true, null: false
     t.jsonb "shown_tips", default: [], null: false
     t.boolean "sms", default: false, null: false
+    t.boolean "reengagement_enabled", default: true, null: false
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 

@@ -25,6 +25,9 @@ FactoryBot.define do
     quiet_hours_start { "22:00" }
     quiet_hours_end { "07:00" }
 
+    # Re-engagement settings (default to enabled)
+    reengagement_enabled { true }
+
     trait :all_channels_disabled do
       in_app { false }
       email { false }
