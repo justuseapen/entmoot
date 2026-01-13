@@ -1022,8 +1022,43 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Monthly review follows exact same patterns as WeeklyReview.tsx for consistency
   - Sidebar Reviews section uses useState for expand/collapse with ChevronDownIcon rotation
   - Reviews section auto-expands when on any review page (location.pathname.includes("-review"))
-  - Monthly review uses purple color scheme to differentiate from weekly (orange) 
+  - Monthly review uses purple color scheme to differentiate from weekly (orange)
   - MonthlyReview metrics includes reflection_consistency (reflections/days_in_month)
   - Empty state variant follows same pattern as weekly_reviews with different emoji (📅 vs 📋)
   - Wizard steps use same pattern: metrics -> content collection -> lessons -> future focus
+---
+
+## 2026-01-13 - US-079 Quarterly Review UI - Web
+- What was implemented:
+  - Created quarterlyReviews.ts lib with API functions, types, and helpers (formatQuarterYear, getQuarterDateRange, etc.)
+  - Created useQuarterlyReviews.ts hook with TanStack Query integration (current, list, detail, metrics, update)
+  - Created QuarterlyReview.tsx page component with 5-step wizard workflow
+  - Step 1: Quarter Metrics (goal completion, monthly review completion, habit consistency)
+  - Step 2: Achievements - add multiple achievements for the quarter
+  - Step 3: Obstacles - add multiple obstacles faced
+  - Step 4: Insights - text input for key learnings
+  - Step 5: Next Quarter Objectives - add 3-5 focus objectives
+  - Added route /families/:id/quarterly-review in App.tsx
+  - Updated Sidebar.tsx with Quarterly sub-link in expandable Reviews section
+  - Added quarterly_reviews variant to EmptyState component (teal color scheme)
+  - Past quarterly reviews list with quick view functionality
+  - Save progress and resume later functionality
+  - Mark complete with navigation to planner
+
+- Files changed:
+  - frontend/src/lib/quarterlyReviews.ts (new)
+  - frontend/src/hooks/useQuarterlyReviews.ts (new)
+  - frontend/src/pages/QuarterlyReview.tsx (new)
+  - frontend/src/App.tsx (added route and import)
+  - frontend/src/components/Sidebar.tsx (added Quarterly to Reviews section)
+  - frontend/src/components/EmptyState.tsx (added quarterly_reviews variant)
+
+- **Learnings for future iterations:**
+  - Quarterly review follows same patterns as MonthlyReview.tsx for consistency
+  - Quarter date helpers: formatQuarterYear returns "Q1 2026", getQuarterDateRange returns "January - March 2026"
+  - Quarter determination: month 0-2=Q1, 3-5=Q2, 6-8=Q3, 9-11=Q4
+  - Quarterly uses teal color scheme (teal-50 to emerald-50 gradient) to differentiate from monthly (purple) and weekly (orange)
+  - Quarterly metrics: goal_completion, monthly_review_completion, habit_consistency (weekly reviews)
+  - Icons for quarterly steps: BarChart3, Trophy (achievements), Mountain (obstacles), Lightbulb (insights), Target (objectives)
+  - EmptyState variant uses emoji 📊 for quarterly vs 📅 for monthly
 ---

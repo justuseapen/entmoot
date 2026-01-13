@@ -1520,7 +1520,7 @@
         "Add Quarterly Review to Reviews section in sidebar"
       ],
       "priority": 79,
-      "passes": false,
+      "passes": true,
       "notes": "Create useQuarterlyReviews.ts hook and quarterlyReviews.ts lib."
     },
     {
