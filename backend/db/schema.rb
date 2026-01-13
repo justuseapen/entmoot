@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_150743) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_152212) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -213,6 +213,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_150743) do
     t.jsonb "shown_tips", default: [], null: false
     t.boolean "sms", default: false, null: false
     t.boolean "reengagement_enabled", default: true, null: false
+    t.boolean "missed_checkin_reminder", default: true, null: false
+    t.boolean "inactivity_reminder", default: true, null: false
+    t.integer "inactivity_threshold_days", default: 7, null: false
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 

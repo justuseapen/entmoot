@@ -3,6 +3,15 @@
 module Api
   module V1
     class NotificationPreferencesController < Api::V1::BaseController
+      PERMITTED_PARAMS = %i[
+        in_app email push
+        morning_planning evening_reflection weekly_review
+        morning_planning_time evening_reflection_time weekly_review_time weekly_review_day
+        quiet_hours_start quiet_hours_end
+        tips_enabled
+        reengagement_enabled missed_checkin_reminder inactivity_reminder inactivity_threshold_days
+      ].freeze
+
       def show
         @preferences = NotificationPreference.find_or_create_for(current_user)
         render json: { notification_preferences: preference_response(@preferences) }, status: :ok
@@ -21,26 +30,7 @@ module Api
       private
 
       def notification_preference_params
-        params.require(:notification_preferences).permit(
-          # Channel preferences
-          :in_app,
-          :email,
-          :push,
-          # Reminder preferences
-          :morning_planning,
-          :evening_reflection,
-          :weekly_review,
-          # Preferred times
-          :morning_planning_time,
-          :evening_reflection_time,
-          :weekly_review_time,
-          :weekly_review_day,
-          # Quiet hours
-          :quiet_hours_start,
-          :quiet_hours_end,
-          # Tips
-          :tips_enabled
-        )
+        params.require(:notification_preferences).permit(PERMITTED_PARAMS)
       end
 
       def preference_response(prefs)
@@ -50,6 +40,7 @@ module Api
           reminders: reminder_preferences(prefs),
           quiet_hours: quiet_hours_preferences(prefs),
           tips: tips_preferences(prefs),
+          reengagement: reengagement_preferences(prefs),
           created_at: prefs.created_at,
           updated_at: prefs.updated_at
         }
@@ -91,6 +82,15 @@ module Api
       def tips_preferences(prefs)
         {
           enabled: prefs.tips_enabled
+        }
+      end
+
+      def reengagement_preferences(prefs)
+        {
+          enabled: prefs.reengagement_enabled,
+          missed_checkin_reminder: prefs.missed_checkin_reminder,
+          inactivity_reminder: prefs.inactivity_reminder,
+          inactivity_threshold_days: prefs.inactivity_threshold_days
         }
       end
     end

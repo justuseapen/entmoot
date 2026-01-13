@@ -26,6 +26,7 @@ import {
   DAYS_OF_WEEK,
   generateTimeOptions,
   getSchedulePreview,
+  INACTIVITY_THRESHOLD_OPTIONS,
   type UpdateNotificationPreferencesData,
 } from "@/lib/notificationPreferences";
 
@@ -461,6 +462,121 @@ export function NotificationSettings() {
                   disabled={updatePreferences.isPending}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Re-engagement Reminders */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Re-engagement Reminders</CardTitle>
+              <CardDescription>
+                Get helpful nudges when you miss a check-in or become inactive
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="reengagement">
+                    Enable Re-engagement Reminders
+                  </Label>
+                  <p className="text-muted-foreground text-sm">
+                    Master toggle for all re-engagement notifications
+                  </p>
+                </div>
+                <Switch
+                  id="reengagement"
+                  checked={prefs.reengagement?.enabled ?? true}
+                  onCheckedChange={(checked) =>
+                    handleUpdate({ reengagement_enabled: checked })
+                  }
+                  disabled={updatePreferences.isPending}
+                />
+              </div>
+
+              {prefs.reengagement?.enabled !== false && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="missed-checkin">
+                        Missed Check-in Reminders
+                      </Label>
+                      <p className="text-muted-foreground text-sm">
+                        Get reminded if you miss morning planning or evening
+                        reflection
+                      </p>
+                    </div>
+                    <Switch
+                      id="missed-checkin"
+                      checked={
+                        prefs.reengagement?.missed_checkin_reminder ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        handleUpdate({ missed_checkin_reminder: checked })
+                      }
+                      disabled={updatePreferences.isPending}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="inactivity">Inactivity Reminders</Label>
+                      <p className="text-muted-foreground text-sm">
+                        Get reminded if you haven&apos;t used Entmoot in a while
+                      </p>
+                    </div>
+                    <Switch
+                      id="inactivity"
+                      checked={prefs.reengagement?.inactivity_reminder ?? true}
+                      onCheckedChange={(checked) =>
+                        handleUpdate({ inactivity_reminder: checked })
+                      }
+                      disabled={updatePreferences.isPending}
+                    />
+                  </div>
+
+                  {prefs.reengagement?.inactivity_reminder !== false && (
+                    <div className="flex items-center gap-2 pl-4">
+                      <Label
+                        htmlFor="inactivity-threshold"
+                        className="text-muted-foreground text-sm"
+                      >
+                        Remind me after:
+                      </Label>
+                      <Select
+                        value={(
+                          prefs.reengagement?.inactivity_threshold_days ?? 7
+                        ).toString()}
+                        onValueChange={(value) =>
+                          handleUpdate({
+                            inactivity_threshold_days: parseInt(value, 10),
+                          })
+                        }
+                        disabled={updatePreferences.isPending}
+                      >
+                        <SelectTrigger
+                          id="inactivity-threshold"
+                          className="w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INACTIVITY_THRESHOLD_OPTIONS.map((opt) => (
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value.toString()}
+                            >
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="text-muted-foreground text-sm">
+                        of inactivity
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 

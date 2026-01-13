@@ -47,6 +47,14 @@ export interface TipsPreferences {
   enabled: boolean;
 }
 
+// Re-engagement preferences
+export interface ReengagementPreferences {
+  enabled: boolean;
+  missed_checkin_reminder: boolean;
+  inactivity_reminder: boolean;
+  inactivity_threshold_days: number;
+}
+
 // Full notification preferences from API
 export interface NotificationPreferences {
   id: number;
@@ -54,6 +62,7 @@ export interface NotificationPreferences {
   reminders: ReminderPreferences;
   quiet_hours: QuietHoursPreferences;
   tips?: TipsPreferences;
+  reengagement?: ReengagementPreferences;
   created_at: string;
   updated_at: string;
 }
@@ -78,7 +87,20 @@ export interface UpdateNotificationPreferencesData {
   quiet_hours_end?: string;
   // Tips
   tips_enabled?: boolean;
+  // Re-engagement preferences
+  reengagement_enabled?: boolean;
+  missed_checkin_reminder?: boolean;
+  inactivity_reminder?: boolean;
+  inactivity_threshold_days?: number;
 }
+
+// Inactivity threshold options for the selector
+export const INACTIVITY_THRESHOLD_OPTIONS = [
+  { value: 3, label: "3 days" },
+  { value: 7, label: "7 days" },
+  { value: 14, label: "14 days" },
+  { value: 30, label: "30 days" },
+];
 
 // Get notification preferences
 export async function getNotificationPreferences(

@@ -58,6 +58,16 @@ RSpec.describe "Api::V1::NotificationPreferences" do
           expect(quiet_hours["start"]).to eq("22:00")
           expect(quiet_hours["end"]).to eq("07:00")
         end
+
+        it "returns default re-engagement preferences" do
+          get "/api/v1/users/me/notification_preferences", headers: auth_headers(user)
+
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["enabled"]).to be true
+          expect(reengagement["missed_checkin_reminder"]).to be true
+          expect(reengagement["inactivity_reminder"]).to be true
+          expect(reengagement["inactivity_threshold_days"]).to eq(7)
+        end
       end
 
       context "when preferences already exist" do
@@ -215,6 +225,67 @@ RSpec.describe "Api::V1::NotificationPreferences" do
           expect(response).to have_http_status(:ok)
           quiet_hours = json_response["notification_preferences"]["quiet_hours"]
           expect(quiet_hours).to eq("start" => "21:00", "end" => "06:00")
+        end
+      end
+
+      context "when updating re-engagement preferences" do
+        it "updates reengagement_enabled" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { reengagement_enabled: false } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["enabled"]).to be false
+        end
+
+        it "updates missed_checkin_reminder" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { missed_checkin_reminder: false } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["missed_checkin_reminder"]).to be false
+        end
+
+        it "updates inactivity_reminder" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { inactivity_reminder: false } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["inactivity_reminder"]).to be false
+        end
+
+        it "updates inactivity_threshold_days" do
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: { inactivity_threshold_days: 14 } },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["inactivity_threshold_days"]).to eq(14)
+        end
+
+        it "updates all re-engagement preferences at once" do
+          params = {
+            reengagement_enabled: false,
+            missed_checkin_reminder: false,
+            inactivity_reminder: false,
+            inactivity_threshold_days: 30
+          }
+          patch "/api/v1/users/me/notification_preferences",
+                params: { notification_preferences: params },
+                headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          reengagement = json_response["notification_preferences"]["reengagement"]
+          expect(reengagement["enabled"]).to be false
+          expect(reengagement["missed_checkin_reminder"]).to be false
+          expect(reengagement["inactivity_reminder"]).to be false
+          expect(reengagement["inactivity_threshold_days"]).to eq(30)
         end
       end
 

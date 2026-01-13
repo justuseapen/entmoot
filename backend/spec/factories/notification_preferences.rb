@@ -27,6 +27,9 @@ FactoryBot.define do
 
     # Re-engagement settings (default to enabled)
     reengagement_enabled { true }
+    missed_checkin_reminder { true }
+    inactivity_reminder { true }
+    inactivity_threshold_days { 7 }
 
     trait :all_channels_disabled do
       in_app { false }

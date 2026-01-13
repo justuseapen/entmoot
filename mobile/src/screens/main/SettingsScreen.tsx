@@ -25,6 +25,7 @@ import {
   parseTimeToDate,
   formatDateToTime,
   DAYS_OF_WEEK,
+  INACTIVITY_THRESHOLD_OPTIONS,
   type NotificationPreferences,
   type UpdateNotificationPreferencesData,
 } from "../../lib/notificationPreferences";
@@ -87,6 +88,10 @@ export function SettingsScreen(_props: Props) {
   // Check-in frequency state
   const [checkInFrequency, setCheckInFrequency] = useState("daily");
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
+
+  // Inactivity threshold picker state
+  const [showInactivityThresholdPicker, setShowInactivityThresholdPicker] =
+    useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -534,6 +539,118 @@ export function SettingsScreen(_props: Props) {
         </TouchableOpacity>
       </View>
 
+      {/* Re-engagement Reminders Section */}
+      {prefs && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Re-engagement Reminders</Text>
+          <View style={styles.card}>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>Enable Re-engagement</Text>
+                <Text style={styles.settingDescription}>
+                  Get reminders when you miss check-ins
+                </Text>
+              </View>
+              <Switch
+                value={prefs.reengagement?.enabled ?? true}
+                onValueChange={(value) =>
+                  handleUpdate({ reengagement_enabled: value })
+                }
+                trackColor={{ false: "#D1D5DB", true: COLORS.leafGreen }}
+                thumbColor={
+                  prefs.reengagement?.enabled !== false
+                    ? COLORS.forestGreen
+                    : "#F3F4F6"
+                }
+                disabled={isSaving}
+              />
+            </View>
+
+            {prefs.reengagement?.enabled !== false && (
+              <>
+                <View style={styles.settingDivider} />
+
+                <View style={styles.settingRow}>
+                  <View style={styles.settingInfo}>
+                    <Text style={styles.settingLabel}>
+                      Missed Check-in Reminders
+                    </Text>
+                    <Text style={styles.settingDescription}>
+                      Remind me if I miss planning or reflection
+                    </Text>
+                  </View>
+                  <Switch
+                    value={prefs.reengagement?.missed_checkin_reminder ?? true}
+                    onValueChange={(value) =>
+                      handleUpdate({ missed_checkin_reminder: value })
+                    }
+                    trackColor={{ false: "#D1D5DB", true: COLORS.leafGreen }}
+                    thumbColor={
+                      prefs.reengagement?.missed_checkin_reminder !== false
+                        ? COLORS.forestGreen
+                        : "#F3F4F6"
+                    }
+                    disabled={isSaving}
+                  />
+                </View>
+
+                <View style={styles.settingDivider} />
+
+                <View style={styles.settingRow}>
+                  <View style={styles.settingInfo}>
+                    <Text style={styles.settingLabel}>Inactivity Reminders</Text>
+                    <Text style={styles.settingDescription}>
+                      Remind me after a period of inactivity
+                    </Text>
+                  </View>
+                  <Switch
+                    value={prefs.reengagement?.inactivity_reminder ?? true}
+                    onValueChange={(value) =>
+                      handleUpdate({ inactivity_reminder: value })
+                    }
+                    trackColor={{ false: "#D1D5DB", true: COLORS.leafGreen }}
+                    thumbColor={
+                      prefs.reengagement?.inactivity_reminder !== false
+                        ? COLORS.forestGreen
+                        : "#F3F4F6"
+                    }
+                    disabled={isSaving}
+                  />
+                </View>
+
+                {prefs.reengagement?.inactivity_reminder !== false && (
+                  <>
+                    <View style={styles.settingDivider} />
+
+                    <TouchableOpacity
+                      style={styles.settingRow}
+                      onPress={() => setShowInactivityThresholdPicker(true)}
+                    >
+                      <View style={styles.settingInfo}>
+                        <Text style={styles.settingLabel}>Remind After</Text>
+                        <Text style={styles.settingDescription}>
+                          How long before you receive an inactivity reminder
+                        </Text>
+                      </View>
+                      <View style={styles.thresholdValue}>
+                        <Text style={styles.thresholdText}>
+                          {INACTIVITY_THRESHOLD_OPTIONS.find(
+                            (opt) =>
+                              opt.value ===
+                              (prefs.reengagement?.inactivity_threshold_days ?? 7)
+                          )?.label ?? "7 days"}
+                        </Text>
+                        <Text style={styles.chevron}>▶</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* Logout Section */}
       <View style={styles.section}>
         <TouchableOpacity
@@ -677,6 +794,52 @@ export function SettingsScreen(_props: Props) {
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setShowFrequencyPicker(false)}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Inactivity Threshold Picker Modal */}
+      <Modal
+        visible={showInactivityThresholdPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowInactivityThresholdPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Inactivity Reminder Threshold</Text>
+            {INACTIVITY_THRESHOLD_OPTIONS.map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  styles.dayOption,
+                  (prefs?.reengagement?.inactivity_threshold_days ?? 7) ===
+                    opt.value && styles.dayOptionSelected,
+                ]}
+                onPress={() => {
+                  handleUpdate({ inactivity_threshold_days: opt.value });
+                  setShowInactivityThresholdPicker(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.dayOptionText,
+                    (prefs?.reengagement?.inactivity_threshold_days ?? 7) ===
+                      opt.value && styles.dayOptionTextSelected,
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+                {(prefs?.reengagement?.inactivity_threshold_days ?? 7) ===
+                  opt.value && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowInactivityThresholdPicker(false)}
             >
               <Text style={styles.modalCloseText}>Cancel</Text>
             </TouchableOpacity>
@@ -925,6 +1088,16 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 12,
     color: COLORS.earthBrown,
+  },
+  thresholdValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  thresholdText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.forestGreen,
   },
   logoutButton: {
     backgroundColor: "#FEE2E2",
