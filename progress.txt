@@ -1100,3 +1100,46 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Icons for annual steps: BarChart3, Star (highlights), Mountain (challenges), Lightbulb (lessons), Heart (gratitude), Compass (theme), Target (goals)
   - EmptyState variant uses emoji 🎆 (fireworks) for annual celebratory feel
 ---
+
+## 2026-01-13 - US-081 Review Cadence Reminders
+- What was implemented:
+  - Migration adding monthly_review, monthly_review_day (1-28), quarterly_review, annual_review to notification_preferences
+  - SendMonthlyReviewRemindersJob: runs on configured day of month (default 1st)
+  - SendQuarterlyReviewRemindersJob: runs during last week of quarter (last 7 days of March, June, September, December)
+  - SendAnnualReviewRemindersJob: runs December 20-31
+  - Email templates for monthly, quarterly, annual review reminders (HTML and text)
+  - Push notification support via NotificationService integration
+  - Jobs added to sidekiq.yml scheduler (run daily at 9am)
+  - Refactored NotificationService with REMINDER_CONTENT hash to fix Rubocop offenses
+  - 26 comprehensive job specs covering all scenarios
+
+- Files changed:
+  - backend/db/migrate/20260113200001_add_review_reminders_to_notification_preferences.rb (new)
+  - backend/db/schema.rb (updated)
+  - backend/app/jobs/send_monthly_review_reminders_job.rb (new)
+  - backend/app/jobs/send_quarterly_review_reminders_job.rb (new)
+  - backend/app/jobs/send_annual_review_reminders_job.rb (new)
+  - backend/app/mailers/reminder_mailer.rb (added monthly/quarterly/annual review methods)
+  - backend/app/views/reminder_mailer/monthly_review.html.erb (new)
+  - backend/app/views/reminder_mailer/monthly_review.text.erb (new)
+  - backend/app/views/reminder_mailer/quarterly_review.html.erb (new)
+  - backend/app/views/reminder_mailer/quarterly_review.text.erb (new)
+  - backend/app/views/reminder_mailer/annual_review.html.erb (new)
+  - backend/app/views/reminder_mailer/annual_review.text.erb (new)
+  - backend/app/services/notification_service.rb (refactored, added review reminder content)
+  - backend/config/sidekiq.yml (added 3 scheduler entries)
+  - backend/spec/factories/notification_preferences.rb (added new attributes)
+  - backend/spec/jobs/send_monthly_review_reminders_job_spec.rb (new)
+  - backend/spec/jobs/send_quarterly_review_reminders_job_spec.rb (new)
+  - backend/spec/jobs/send_annual_review_reminders_job_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - Review reminder jobs follow same pattern as existing reminder jobs (SendWeeklyReviewRemindersJob)
+  - Monthly review uses configurable day (1-28) via monthly_review_day preference
+  - Quarterly review uses QUARTER_END_MONTHS constant [3, 6, 9, 12] and in_last_week_of_quarter? helper
+  - Annual review uses December 20-31 period constants
+  - Refactor case statements with many branches to use hash constants (REMINDER_CONTENT)
+  - Extract helper methods (can_send_push?) to satisfy Rubocop ABC/complexity metrics
+  - Jobs send both email and push notifications based on user preferences
+  - Each job respects quiet hours setting from notification_preferences
+---

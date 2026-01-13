@@ -1563,7 +1563,7 @@
         "Job specs for all reminder jobs"
       ],
       "priority": 81,
-      "passes": false,
+      "passes": true,
       "notes": "Update ReminderMailer with new templates. Respect user notification preferences."
     },
     {
