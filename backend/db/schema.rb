@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_152212) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_152937) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -191,6 +191,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_152212) do
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
+  end
+
+  create_table "monthly_reviews", force: :cascade do |t|
+    t.date "month", null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.jsonb "highlights", default: []
+    t.jsonb "challenges", default: []
+    t.text "lessons_learned"
+    t.jsonb "next_month_focus", default: []
+    t.boolean "completed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_monthly_reviews_on_family_id"
+    t.index ["user_id", "family_id", "month"], name: "index_monthly_reviews_unique_month", unique: true
+    t.index ["user_id"], name: "index_monthly_reviews_on_user_id"
   end
 
   create_table "notification_preferences", force: :cascade do |t|
@@ -416,6 +432,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_152212) do
   add_foreign_key "goals", "users", column: "creator_id"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "monthly_reviews", "families"
+  add_foreign_key "monthly_reviews", "users"
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "outreach_histories", "users"

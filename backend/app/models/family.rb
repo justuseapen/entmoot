@@ -8,6 +8,7 @@ class Family < ApplicationRecord
   has_many :goals, dependent: :destroy
   has_many :daily_plans, dependent: :destroy
   has_many :weekly_reviews, dependent: :destroy
+  has_many :monthly_reviews, dependent: :destroy
   has_many :reflections, dependent: :destroy
 
   validates :name, presence: true

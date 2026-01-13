@@ -43,6 +43,10 @@ Rails.application.routes.draw do
           get "current", on: :collection
           get "metrics", on: :member
         end
+        resources :monthly_reviews, only: %i[index show update destroy] do
+          get "current", on: :collection
+          get "metrics", on: :member
+        end
         resource :leaderboard, only: [:show]
         resource :activity_feed, only: [:show]
       end
