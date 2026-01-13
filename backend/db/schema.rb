@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_153418) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_153418) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "annual_reviews", force: :cascade do |t|
+    t.integer "year", null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.jsonb "year_highlights", default: []
+    t.jsonb "year_challenges", default: []
+    t.text "lessons_learned"
+    t.jsonb "gratitude", default: []
+    t.string "next_year_theme"
+    t.jsonb "next_year_goals", default: []
+    t.boolean "completed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_annual_reviews_on_family_id"
+    t.index ["user_id", "family_id", "year"], name: "index_annual_reviews_unique", unique: true
+    t.index ["user_id"], name: "index_annual_reviews_on_user_id"
   end
 
   create_table "badges", force: :cascade do |t|
@@ -431,6 +449,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_153418) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "annual_reviews", "families"
+  add_foreign_key "annual_reviews", "users"
   add_foreign_key "daily_plans", "families"
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
