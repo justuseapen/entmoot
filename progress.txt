@@ -1062,3 +1062,41 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Icons for quarterly steps: BarChart3, Trophy (achievements), Mountain (obstacles), Lightbulb (insights), Target (objectives)
   - EmptyState variant uses emoji 📊 for quarterly vs 📅 for monthly
 ---
+
+## 2026-01-13 - US-080 Annual Review UI - Web
+- What was implemented:
+  - Created annualReviews.ts lib with API functions, types, and helpers (formatYear, getYearDateRange, etc.)
+  - Created useAnnualReviews.ts hook with TanStack Query integration (current, list, detail, metrics, update)
+  - Created AnnualReview.tsx page component with 7-step wizard workflow
+  - Step 1: Year Metrics (goals achieved, longest streaks, review consistency)
+  - Step 2: Year Highlights - add multiple highlights
+  - Step 3: Year Challenges - add multiple challenges
+  - Step 4: Lessons Learned - text input
+  - Step 5: Gratitude - add gratitude items
+  - Step 6: Next Year Theme - single guiding theme/word
+  - Step 7: Next Year Goals - add 3-5 goals for next year
+  - Added route /families/:id/annual-review in App.tsx
+  - Updated Sidebar.tsx with Annual sub-link in expandable Reviews section
+  - Added annual_reviews variant to EmptyState component (indigo color scheme)
+  - Past annual reviews list with quick view functionality
+  - Save progress and resume later functionality
+  - Mark complete with navigation to planner
+
+- Files changed:
+  - frontend/src/lib/annualReviews.ts (new)
+  - frontend/src/hooks/useAnnualReviews.ts (new)
+  - frontend/src/pages/AnnualReview.tsx (new)
+  - frontend/src/App.tsx (added route and import)
+  - frontend/src/components/Sidebar.tsx (added Annual to Reviews section)
+  - frontend/src/components/EmptyState.tsx (added annual_reviews variant)
+
+- **Learnings for future iterations:**
+  - Annual review follows same patterns as QuarterlyReview.tsx for consistency
+  - Annual review has 7 steps (more than other reviews) to cover the full year comprehensively
+  - Year helpers simpler than quarter helpers since year is just an integer
+  - Annual uses indigo-to-purple gradient background to differentiate from other reviews
+  - Metrics include: goals_achieved, streaks_maintained (3 types), review_consistency (quarterly/monthly/weekly)
+  - Theme step uses simple centered input with helpful tip for guiding users
+  - Icons for annual steps: BarChart3, Star (highlights), Mountain (challenges), Lightbulb (lessons), Heart (gratitude), Compass (theme), Target (goals)
+  - EmptyState variant uses emoji 🎆 (fireworks) for annual celebratory feel
+---

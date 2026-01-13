@@ -1542,7 +1542,7 @@
         "Add Annual Review to Reviews section in sidebar"
       ],
       "priority": 80,
-      "passes": false,
+      "passes": true,
       "notes": "Create useAnnualReviews.ts hook and annualReviews.ts lib. Consider shareable year summary feature for Phase 2."
     },
     {
