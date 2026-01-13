@@ -1319,7 +1319,7 @@
         "Request specs verifying activity tracking"
       ],
       "priority": 69,
-      "passes": false,
+      "passes": true,
       "notes": "Use before_action callback in BaseController. Only update if last update was > 1 hour ago."
     },
     {

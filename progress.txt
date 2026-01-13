@@ -708,3 +708,33 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - getInitials helper defined outside component to avoid "accessed before declaration" lint error
   - void _props pattern suppresses unused parameter warning while keeping type annotation
 ---
+
+## 2026-01-13 - US-069 User Activity Tracking
+- What was implemented:
+  - Migration adding last_active_at, last_daily_plan_at, last_reflection_at, last_weekly_review_at to users table
+  - Database indexes on all activity timestamp columns for efficient querying
+  - UserActivity concern with debounced tracking (1 hour interval)
+  - Integrated concern into BaseController via include UserActivity
+  - track_daily_plan_activity called when daily plan has content
+  - track_reflection_activity called when evening reflection is completed
+  - track_weekly_review_activity called when weekly review is marked completed
+  - 17 request specs verifying all tracking behavior
+
+- Files changed:
+  - backend/db/migrate/20260113144309_add_activity_tracking_to_users.rb (new)
+  - backend/db/schema.rb (updated)
+  - backend/app/controllers/concerns/user_activity.rb (new)
+  - backend/app/controllers/api/v1/base_controller.rb (added include UserActivity)
+  - backend/app/controllers/api/v1/daily_plans_controller.rb (added track_daily_plan_activity)
+  - backend/app/controllers/api/v1/reflections_controller.rb (added track_reflection_activity)
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (added track_weekly_review_activity)
+  - backend/spec/requests/api/v1/user_activity_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - UserActivity concern uses update_column for timestamps to avoid callbacks/validations
+  - Debounce interval of 1 hour prevents excessive DB writes on frequent API calls
+  - Activity-specific timestamps (last_daily_plan_at, etc.) only updated on meaningful actions
+  - track_user_activity runs via before_action automatically for all authenticated requests
+  - Activity methods (track_daily_plan_activity, etc.) called explicitly in controllers when needed
+  - Indexes on timestamp columns enable efficient queries for re-engagement detection
+---
