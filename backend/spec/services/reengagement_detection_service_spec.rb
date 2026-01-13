@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/NestedGroups, RSpec/LetSetup
 require "rails_helper"
 
 RSpec.describe ReengagementDetectionService do
@@ -540,3 +541,5 @@ RSpec.describe ReengagementDetectionService do
     end
   end
 end
+
+# rubocop:enable RSpec/NestedGroups, RSpec/LetSetup

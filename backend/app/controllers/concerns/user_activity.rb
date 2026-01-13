@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Rails/SkipsModelValidations -- Using update_column intentionally for performance
 module UserActivity
   extend ActiveSupport::Concern
 
@@ -45,3 +46,4 @@ module UserActivity
     current_user.update_column(:last_weekly_review_at, Time.current)
   end
 end
+# rubocop:enable Rails/SkipsModelValidations

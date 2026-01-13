@@ -31,10 +31,9 @@ export function reportError(
 }
 
 // Helper to wrap async functions with error reporting
-export function withErrorReporting<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
-  context?: Record<string, string | number | boolean>
-): T {
+export function withErrorReporting<
+  T extends (...args: unknown[]) => Promise<unknown>,
+>(fn: T, context?: Record<string, string | number | boolean>): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await fn(...args);

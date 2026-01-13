@@ -36,3 +36,7 @@ logs/
 /frontend/coverage/
 /frontend/.cache/
 .env.coolify
+.claude/
+frontend/.vite/
+backend/package.json
+backend/package-lock.json

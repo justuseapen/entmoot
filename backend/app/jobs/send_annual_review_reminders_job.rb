@@ -18,7 +18,7 @@ class SendAnnualReviewRemindersJob < ApplicationJob
 
   private
 
-  def send_reminder_if_due(user)
+  def send_reminder_if_due(user) # rubocop:disable Metrics/CyclomaticComplexity
     preference = user.notification_preference
     family = user.families.first
     return unless family

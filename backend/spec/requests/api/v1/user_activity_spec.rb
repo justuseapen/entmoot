@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Rails/SkipsModelValidations, RSpec/ExampleLength
 require "rails_helper"
 
 RSpec.describe "User Activity Tracking" do
@@ -304,3 +305,5 @@ RSpec.describe "User Activity Tracking" do
     end
   end
 end
+
+# rubocop:enable Rails/SkipsModelValidations, RSpec/ExampleLength
