@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_152937) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_153418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -287,6 +287,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_152937) do
     t.index ["user_id"], name: "index_points_ledger_entries_on_user_id"
   end
 
+  create_table "quarterly_reviews", force: :cascade do |t|
+    t.date "quarter_start_date", null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.jsonb "achievements", default: []
+    t.jsonb "obstacles", default: []
+    t.text "insights"
+    t.jsonb "next_quarter_objectives", default: []
+    t.boolean "completed", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_quarterly_reviews_on_family_id"
+    t.index ["user_id", "family_id", "quarter_start_date"], name: "index_quarterly_reviews_unique", unique: true
+    t.index ["user_id"], name: "index_quarterly_reviews_on_user_id"
+  end
+
   create_table "reflection_responses", force: :cascade do |t|
     t.bigint "reflection_id", null: false
     t.string "prompt", null: false
@@ -439,6 +455,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_152937) do
   add_foreign_key "outreach_histories", "users"
   add_foreign_key "pets", "families"
   add_foreign_key "points_ledger_entries", "users"
+  add_foreign_key "quarterly_reviews", "families"
+  add_foreign_key "quarterly_reviews", "users"
   add_foreign_key "reflection_responses", "reflections"
   add_foreign_key "reflections", "daily_plans"
   add_foreign_key "reflections", "families"
