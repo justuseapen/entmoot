@@ -635,3 +635,44 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - TopPriorityWithGoal adds goal_id and goal fields to base TopPriority type
   - _destroy flag marks items for deletion on server via nested attributes pattern
 ---
+
+## 2026-01-13 - US-067 Mobile Goals Screen
+- What was implemented:
+  - Created GoalsScreen component with goals list, filtering by time scale and status
+  - Created GoalDetailScreen with full goal view including SMART criteria display
+  - Created CreateGoalScreen with complete goal creation form and AI refinement
+  - Created EditGoalScreen with progress slider, status updates, all fields editable
+  - Extended goals.ts lib with createGoal, updateGoal, deleteGoal, refineGoal APIs
+  - Added helper functions: formatVisibility, getVisibilityEmoji, getTimeScaleEmoji, formatDueDate
+  - Added getFamilyMembers API for assignee selection in goal forms
+  - Goal card component shows title, progress bar, due date, status badge, assignees
+  - Filter chips for time scale and status with clear filters button
+  - Family switcher modal for multi-family users on all goal screens
+  - Integrated @react-native-community/slider for progress input
+  - Integrated @react-native-community/datetimepicker for due date selection
+  - Updated MainTabNavigator to use real GoalsScreen component
+  - Updated RootNavigator to use real GoalDetailScreen, CreateGoalScreen, EditGoalScreen
+
+- Files created/changed:
+  - mobile/src/screens/main/GoalsScreen.tsx (new)
+  - mobile/src/screens/goals/GoalDetailScreen.tsx (new)
+  - mobile/src/screens/goals/CreateGoalScreen.tsx (new)
+  - mobile/src/screens/goals/EditGoalScreen.tsx (new)
+  - mobile/src/screens/goals/index.ts (new)
+  - mobile/src/screens/index.ts (added goals export)
+  - mobile/src/screens/main/index.ts (added GoalsScreen export)
+  - mobile/src/lib/goals.ts (extended with CRUD APIs and helpers)
+  - mobile/src/navigation/MainTabNavigator.tsx (imports GoalsScreen)
+  - mobile/src/navigation/RootNavigator.tsx (imports goal screens from screens/goals)
+  - mobile/package.json (added slider and datetimepicker dependencies)
+
+- **Learnings for future iterations:**
+  - @react-native-community/slider uses onValueChange for immediate updates and onSlidingComplete for final commit
+  - DateTimePicker on iOS uses "spinner" display mode, on Android uses "default"
+  - For iOS DateTimePicker, add a separate "Done" button to dismiss the picker
+  - getFamilyMembers returns members with user_id, name, email, role for assignee selection
+  - Goal filtering can be done on the client by passing filters to getGoals API
+  - Modal with FlatList works well for multi-select picker (assignees) and single-select (parent goal)
+  - Goal hierarchy navigation uses navigation.push instead of navigate to allow back stack
+  - AI refinement creates temporary goal then refines - consider backend endpoint for draft goals
+---

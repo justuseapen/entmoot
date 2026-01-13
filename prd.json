@@ -1282,7 +1282,7 @@
         "Goal hierarchy visualization showing parent/child relationships"
       ],
       "priority": 67,
-      "passes": false,
+      "passes": true,
       "notes": "API: GET/POST /api/v1/families/:id/goals, PUT /api/v1/families/:id/goals/:id, POST /api/v1/goals/:id/refine"
     },
     {
