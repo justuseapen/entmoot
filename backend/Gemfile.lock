@@ -80,6 +80,9 @@ GEM
       event_stream_parser (>= 0.3.0, < 2.0.0)
       faraday (>= 1)
       faraday-multipart (>= 1)
+    appsignal (4.8.1)
+      logger
+      rack (>= 2.0.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.21)
@@ -416,6 +419,7 @@ PLATFORMS
 
 DEPENDENCIES
   anthropic (~> 0.3)
+  appsignal (~> 4.0)
   bootsnap
   brakeman
   database_cleaner-active_record

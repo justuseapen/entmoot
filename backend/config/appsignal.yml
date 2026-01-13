@@ -1,0 +1,59 @@
+# AppSignal configuration
+# Docs: https://docs.appsignal.com/ruby/configuration.html
+
+default: &defaults
+  # Push API key - set via environment variable for security
+  push_api_key: <%= ENV["APPSIGNAL_PUSH_API_KEY"] %>
+
+  # Application name shown in AppSignal dashboard
+  name: "Entmoot"
+
+  # Enable AppSignal
+  active: <%= ENV.fetch("APPSIGNAL_ACTIVE", false) %>
+
+  # Enable error tracking
+  enable_error_tracking: true
+
+  # Enable performance tracking
+  enable_performance_tracking: true
+
+  # Enable host metrics (CPU, memory, disk)
+  enable_host_metrics: true
+
+  # Ignore certain actions from performance tracking
+  ignore_actions: []
+
+  # Ignore certain errors
+  ignore_errors: []
+
+  # Filter sensitive parameters from error reports
+  filter_parameters:
+    - password
+    - password_confirmation
+    - token
+    - api_key
+    - secret
+    - credit_card
+    - ssn
+
+development:
+  <<: *defaults
+  active: false
+
+test:
+  <<: *defaults
+  active: false
+
+staging:
+  <<: *defaults
+  active: true
+
+production:
+  <<: *defaults
+  active: true
+
+  # Send detailed backtraces
+  send_session_data: true
+
+  # Track slow requests (threshold in ms)
+  slow_request_threshold: 2000

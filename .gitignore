@@ -35,3 +35,4 @@ logs/
 /frontend/dist/
 /frontend/coverage/
 /frontend/.cache/
+.env.coolify

@@ -37,6 +37,9 @@ gem "twilio-ruby", "~> 7.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
+# Error tracking and APM
+gem "appsignal", "~> 4.0"
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
