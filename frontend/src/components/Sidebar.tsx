@@ -203,6 +203,7 @@ export function Sidebar({ collapsed = false, onItemClick }: SidebarProps) {
     reviewSubItems = [
       { label: "Weekly", href: `/families/${familyId}/weekly-review` },
       { label: "Monthly", href: `/families/${familyId}/monthly-review` },
+      { label: "Quarterly", href: `/families/${familyId}/quarterly-review` },
     ];
   }
 
