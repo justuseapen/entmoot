@@ -1478,7 +1478,7 @@
         "Request specs for all endpoints"
       ],
       "priority": 77,
-      "passes": false,
+      "passes": true,
       "notes": "Year identified by integer (e.g., 2026). Aggregate from quarterly reviews and annual goals."
     },
     {

@@ -960,3 +960,36 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - monthly_review_completion assumes 3 months per quarter
   - quarterly_goals scoped to time_scale: :quarterly and user/family visibility
 ---
+
+## 2026-01-13 - US-077 Annual Review Model and API
+- What was implemented:
+  - AnnualReview model with year (integer), user_id, family_id, year_highlights, year_challenges, lessons_learned, gratitude, next_year_theme, next_year_goals, completed fields
+  - Migration with unique index on [user_id, family_id, year]
+  - AnnualReviewPolicy following same pattern as QuarterlyReviewPolicy
+  - AnnualReviewsController with index, current, show, update, destroy, metrics actions
+  - Routes added under /api/v1/families/:family_id/annual_reviews
+  - Metrics calculation: goals_achieved (annual goals), streaks_maintained (longest streak counts), review_consistency (quarterly/monthly/weekly review completion)
+  - 36 comprehensive request specs
+
+- Files changed:
+  - backend/db/migrate/20260113200000_create_annual_reviews.rb (new)
+  - backend/db/schema.rb
+  - backend/app/models/annual_review.rb (new)
+  - backend/app/models/user.rb (added has_many :annual_reviews)
+  - backend/app/models/family.rb (added has_many :annual_reviews)
+  - backend/app/policies/annual_review_policy.rb (new)
+  - backend/app/controllers/api/v1/annual_reviews_controller.rb (new)
+  - backend/config/routes.rb (added annual_reviews routes)
+  - backend/spec/factories/annual_reviews.rb (new)
+  - backend/spec/requests/api/v1/annual_reviews_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - AnnualReview follows same patterns as QuarterlyReview/MonthlyReview for consistency
+  - Year is stored as integer (e.g., 2026) rather than date for simpler querying
+  - year_for(family) uses family timezone to determine current year
+  - streaks_maintained metrics fetches longest_count from each streak type
+  - review_consistency aggregates quarterly, monthly, and weekly review completion rates
+  - Refactor long methods by extracting build_* helper methods to satisfy Rubocop metrics
+  - calculate_completion_rate helper avoids division-by-zero issues
+  - Factory traits: :last_year and :two_years_ago use simple year arithmetic
+---
