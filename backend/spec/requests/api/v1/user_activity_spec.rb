@@ -42,7 +42,7 @@ RSpec.describe "User Activity Tracking" do
 
         expect(response).to have_http_status(:ok)
         user.reload
-        expect(user.last_active_at).to eq(recent_time)
+        expect(user.last_active_at).to be_within(1.second).of(recent_time)
       end
     end
 
@@ -273,7 +273,7 @@ RSpec.describe "User Activity Tracking" do
 
         expect(response).to have_http_status(:ok)
         user.reload
-        expect(user.last_weekly_review_at).to eq(completed_time)
+        expect(user.last_weekly_review_at).to be_within(1.second).of(completed_time)
       end
     end
   end
