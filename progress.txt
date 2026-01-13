@@ -867,3 +867,31 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - TIMEZONES constant included in jobs for documentation but actual scheduling uses fixed UTC times
   - Jobs follow same pattern as existing reminder jobs (SendMorningPlanningRemindersJob, etc.)
 ---
+
+## 2026-01-13 - US-074 Re-engagement Preferences UI
+- What was implemented:
+  - Backend: Migration adding missed_checkin_reminder, inactivity_reminder, inactivity_threshold_days fields to notification_preferences table
+  - Backend: Updated NotificationPreferencesController with PERMITTED_PARAMS constant and reengagement_preferences helper method
+  - Backend: API now returns reengagement preferences (enabled, missed_checkin_reminder, inactivity_reminder, inactivity_threshold_days)
+  - Frontend: Re-engagement Reminders card in NotificationSettings page with master toggle, missed check-in toggle, inactivity toggle, and threshold selector
+  - Mobile: Re-engagement Reminders section in Settings screen with same controls and picker modal for threshold
+  - Tests: Added 6 new request specs for re-engagement preference CRUD operations
+
+- Files changed:
+  - backend/db/migrate/20260113152212_add_reengagement_preferences_to_notification_preferences.rb (new)
+  - backend/db/schema.rb
+  - backend/app/controllers/api/v1/notification_preferences_controller.rb
+  - backend/spec/factories/notification_preferences.rb
+  - backend/spec/requests/api/v1/notification_preferences_spec.rb
+  - frontend/src/lib/notificationPreferences.ts
+  - frontend/src/pages/NotificationSettings.tsx
+  - mobile/src/lib/notificationPreferences.ts
+  - mobile/src/screens/main/SettingsScreen.tsx
+
+- **Learnings for future iterations:**
+  - Use change_table with bulk: true for multiple column additions in migrations (Rails/BulkChangeTable cop)
+  - Move constants above private keyword in controllers (Lint/UselessConstantScoping cop)
+  - INACTIVITY_THRESHOLD_OPTIONS constant in lib files provides consistent options for web and mobile
+  - Re-engagement preferences use conditional rendering: sub-controls only show when master toggle is enabled
+  - Mobile uses picker modals for threshold selection (same pattern as weekly review day picker)
+---

@@ -1414,7 +1414,7 @@
         "Request specs for updated preferences endpoint"
       ],
       "priority": 74,
-      "passes": false,
+      "passes": true,
       "notes": "Update both web and mobile notification settings UI."
     },
     {
