@@ -50,6 +50,9 @@ Rails.application.routes.draw do
       # User preferences (scoped to current user via /users/me)
       scope "users/me" do
         resource :notification_preferences, only: %i[show update]
+        resource :phone_number, only: %i[show create destroy] do
+          post "verify", on: :member
+        end
         resources :streaks, only: [:index]
         resources :points, only: [:index]
         get "badges", to: "badges#user_badges"
@@ -112,6 +115,9 @@ Rails.application.routes.draw do
 
       # Email unsubscribe (public route with token)
       get "unsubscribe", to: "email_subscriptions#unsubscribe", as: :unsubscribe
+
+      # Webhooks (public routes)
+      post "webhooks/twilio", to: "webhooks#twilio"
 
       # Admin routes
       namespace :admin do

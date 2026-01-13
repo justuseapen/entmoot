@@ -31,6 +31,9 @@ gem "anthropic", "~> 0.3"
 # Push notifications (FCM HTTP v1 API)
 gem "googleauth", "~> 1.8"
 
+# SMS notifications
+gem "twilio-ruby", "~> 7.0"
+
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_144309) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_144926) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -211,6 +211,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_144309) do
     t.datetime "updated_at", null: false
     t.boolean "tips_enabled", default: true, null: false
     t.jsonb "shown_tips", default: [], null: false
+    t.boolean "sms", default: false, null: false
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 
@@ -353,11 +354,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_144309) do
     t.datetime "last_daily_plan_at"
     t.datetime "last_reflection_at"
     t.datetime "last_weekly_review_at"
+    t.string "phone_number"
+    t.boolean "phone_verified", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_active_at"], name: "index_users_on_last_active_at"
     t.index ["last_daily_plan_at"], name: "index_users_on_last_daily_plan_at"
     t.index ["last_reflection_at"], name: "index_users_on_last_reflection_at"
     t.index ["last_weekly_review_at"], name: "index_users_on_last_weekly_review_at"
+    t.index ["phone_number"], name: "index_users_on_phone_number", unique: true, where: "(phone_number IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

@@ -8,6 +8,7 @@ FactoryBot.define do
     in_app { true }
     email { true }
     push { false }
+    sms { false }
 
     # Reminder preferences (defaults)
     morning_planning { true }
@@ -28,6 +29,11 @@ FactoryBot.define do
       in_app { false }
       email { false }
       push { false }
+      sms { false }
+    end
+
+    trait :sms_enabled do
+      sms { true }
     end
 
     trait :all_reminders_disabled do
