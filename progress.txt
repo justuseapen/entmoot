@@ -530,3 +530,36 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - In development, PushNotificationService logs messages instead of calling FCM
   - NotificationService.send_push_notification respects user's push preference and quiet hours
 ---
+
+## 2026-01-13 - US-064 Push Notification Infrastructure - Mobile
+- What was implemented:
+  - Added expo-notifications and expo-device dependencies to package.json
+  - Configured app.json with FCM sender ID, APNs UIBackgroundModes, and notification icon
+  - Created pushNotifications.ts with setNotificationHandler, permission requests, token management
+  - Created deviceTokens.ts for backend API integration (register/unregister tokens)
+  - Created usePushNotifications hook for notification listeners and deep link navigation
+  - Updated auth store to register for push on login/register and unregister on logout
+  - Added DeviceToken types to shared/types/index.ts
+  - Integrated PushNotificationHandler component in App.tsx for authenticated users
+
+- Files created/changed:
+  - mobile/package.json (added expo-device, expo-notifications)
+  - mobile/app.json (FCM, APNs, notification plugin config)
+  - mobile/src/lib/pushNotifications.ts (new)
+  - mobile/src/lib/deviceTokens.ts (new)
+  - mobile/src/hooks/usePushNotifications.ts (new)
+  - mobile/src/hooks/index.ts (new)
+  - mobile/src/stores/auth.ts (push registration on login/logout)
+  - mobile/App.tsx (PushNotificationHandler component)
+  - shared/types/index.ts (DeviceToken, DevicePlatform types)
+
+- **Learnings for future iterations:**
+  - expo-notifications setNotificationHandler configures foreground notification behavior (shouldShowAlert, etc.)
+  - expo-device provides Device.isDevice check - push only works on physical devices
+  - Expo push token requires projectId from Constants.expoConfig.extra.eas.projectId
+  - parseNotificationLink maps backend link field to React Navigation routes for deep linking
+  - PushNotificationHandler must be inside NavigationContainer for useNavigation to work
+  - Register for push asynchronously after login to avoid blocking auth flow
+  - Unregister from push before logout to ensure token is removed with valid auth
+  - Navigation typing is strict - handle each route explicitly instead of dynamic navigation
+---

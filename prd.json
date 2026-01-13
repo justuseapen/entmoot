@@ -1226,7 +1226,7 @@
         "Test push notifications work on both iOS and Android"
       ],
       "priority": 64,
-      "passes": false,
+      "passes": true,
       "notes": "Use expo-notifications package. Map notification link field to React Navigation routes for deep linking."
     },
     {
