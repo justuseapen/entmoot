@@ -738,3 +738,37 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - Activity methods (track_daily_plan_activity, etc.) called explicitly in controllers when needed
   - Indexes on timestamp columns enable efficient queries for re-engagement detection
 ---
+
+## 2026-01-13 10:00 - US-070 Twilio SMS Integration
+- What was implemented:
+  - Backend: Added twilio-ruby gem (~> 7.0)
+  - Backend: SmsService class with send_message capability
+  - Backend: Phone number management endpoints (show, create, destroy, verify)
+  - Backend: Twilio webhook for SMS opt-out/opt-in handling
+  - Backend: Rate limiting (5 SMS per day per user using Rails.cache)
+  - Backend: E.164 phone number validation
+  - Database: Added phone_number and phone_verified columns to users
+  - Database: Added sms column to notification_preferences
+  - Tests: 45 new specs for full coverage
+
+- Files changed:
+  - backend/Gemfile (added twilio-ruby)
+  - backend/app/services/sms_service.rb (new)
+  - backend/app/controllers/api/v1/phone_numbers_controller.rb (new)
+  - backend/app/controllers/api/v1/webhooks_controller.rb (new)
+  - backend/config/routes.rb (added phone_number and webhook routes)
+  - backend/db/migrate/20260113144912_add_phone_columns_to_users.rb (new)
+  - backend/db/migrate/20260113144926_add_sms_to_notification_preferences.rb (new)
+  - backend/spec/services/sms_service_spec.rb (new)
+  - backend/spec/requests/api/v1/phone_numbers_spec.rb (new)
+  - backend/spec/requests/api/v1/webhooks_spec.rb (new)
+  - backend/spec/factories/notification_preferences.rb (added sms attribute)
+
+- **Learnings for future iterations:**
+  - Rails.cache in test environment uses :null_store by default - use MemoryStore in around block for rate limiting tests
+  - E.164 phone format regex: /\A\+[1-9]\d{1,14}\z/ (must start with +, digit 1-9, then 1-14 more digits)
+  - Twilio webhook responds with empty TwiML: <?xml version="1.0" encoding="UTF-8"?><Response></Response>
+  - Twilio opt-out commands: STOP, UNSUBSCRIBE, CANCEL, END, QUIT
+  - Twilio opt-in commands: START, YES, UNSTOP
+  - Use Messaging Service SID if available, otherwise use From number for SMS delivery
+---

@@ -1341,7 +1341,7 @@
         "Service specs for SmsService"
       ],
       "priority": 70,
-      "passes": false,
+      "passes": true,
       "notes": "Use Twilio Messaging Service for better deliverability. Handle webhook at POST /api/v1/webhooks/twilio."
     },
     {
