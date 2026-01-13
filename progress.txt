@@ -837,3 +837,33 @@ Started: Mon Jan 12 17:13:26 EST 2026
   - ActiveJob::Base.queue_adapter = :test must be set in before block for have_enqueued_mail matcher
   - Extract mailer_base_url helper to reduce ABC complexity in url building methods
 ---
+
+## 2026-01-13 - US-073 Re-engagement Scheduled Jobs
+- What was implemented:
+  - DetectMissedCheckInsJob: Runs at 12:00 and 14:00 to detect users who missed morning planning
+  - DetectMissedReflectionsJob: Runs at 21:00 and 22:00 to detect users who missed evening reflection
+  - DetectInactiveUsersJob: Runs daily at 10:00 UTC to detect users inactive for 3/7/14/30 days
+  - All jobs dispatch to OutreachService for notification delivery
+  - Jobs configurable via REENGAGEMENT_JOBS_ENABLED environment variable
+  - Inactivity thresholds configurable via INACTIVITY_THRESHOLDS environment variable
+  - Added all 5 job entries to sidekiq.yml scheduler
+  - 32 comprehensive job specs with time travel testing
+
+- Files changed:
+  - backend/app/jobs/detect_missed_check_ins_job.rb (new)
+  - backend/app/jobs/detect_missed_reflections_job.rb (new)
+  - backend/app/jobs/detect_inactive_users_job.rb (new)
+  - backend/config/sidekiq.yml (added 5 new scheduler entries)
+  - backend/spec/jobs/detect_missed_check_ins_job_spec.rb (new)
+  - backend/spec/jobs/detect_missed_reflections_job_spec.rb (new)
+  - backend/spec/jobs/detect_inactive_users_job_spec.rb (new)
+
+- **Learnings for future iterations:**
+  - RSpec prefers allow/have_received pattern over expect/receive for mocking services
+  - Reflection.completed? is a method, not a column - use :completed trait in factory that creates reflection_responses
+  - Jobs return early if candidates.empty? to avoid unnecessary OutreachService calls
+  - Use string concatenation with backslash for long log messages to stay under 120 chars
+  - Travel_to with explicit timezone ensures consistent test behavior
+  - TIMEZONES constant included in jobs for documentation but actual scheduling uses fixed UTC times
+  - Jobs follow same pattern as existing reminder jobs (SendMorningPlanningRemindersJob, etc.)
+---

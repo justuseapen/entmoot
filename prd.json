@@ -1395,7 +1395,7 @@
         "Job specs with time travel testing"
       ],
       "priority": 73,
-      "passes": false,
+      "passes": true,
       "notes": "Similar pattern to existing reminder jobs. Group users by timezone for efficient processing."
     },
     {
