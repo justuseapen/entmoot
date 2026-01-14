@@ -35,6 +35,9 @@ Rails.application.routes.draw do
         resources :goals, only: %i[index show create update destroy] do
           post "refine", on: :member
         end
+        resource :goal_import, only: [:create] do
+          get :status, on: :member
+        end
         resources :daily_plans, only: %i[show update] do
           get "today", on: :collection
         end

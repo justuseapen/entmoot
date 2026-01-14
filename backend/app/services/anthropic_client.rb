@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require "anthropic"
+
 class AnthropicClient
   class ApiError < StandardError; end
   class RateLimitError < ApiError; end
   class ContentFilterError < ApiError; end
 
-  DEFAULT_MODEL = "claude-3-5-sonnet-20241022"
+  DEFAULT_MODEL = "claude-sonnet-4-20250514"
   DEFAULT_MAX_TOKENS = 4096
 
   def initialize
@@ -23,19 +25,19 @@ class AnthropicClient
     )
 
     extract_text_content(response)
-  rescue Faraday::TooManyRequestsError => e
+  rescue Anthropic::Errors::RateLimitError => e
     raise RateLimitError, "Rate limit exceeded: #{e.message}"
-  rescue Faraday::BadRequestError => e
+  rescue Anthropic::Errors::BadRequestError => e
     raise ContentFilterError, "Content filtered: #{e.message}"
-  rescue Faraday::Error, Anthropic::Error => e
+  rescue Anthropic::Errors::APIError => e
     raise ApiError, "API error: #{e.message}"
   end
 
   private
 
   def extract_text_content(response)
-    content_blocks = response["content"] || []
-    text_blocks = content_blocks.select { |block| block["type"] == "text" }
-    text_blocks.pluck("text").join("\n")
+    content_blocks = response.content || []
+    text_blocks = content_blocks.select { |block| block.type.to_s == "text" }
+    text_blocks.map(&:text).join("\n")
   end
 end

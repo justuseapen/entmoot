@@ -20,6 +20,7 @@ import {
 import { GoalCard } from "@/components/GoalCard";
 import { GoalModal } from "@/components/GoalModal";
 import { GoalDetailView } from "@/components/GoalDetailView";
+import { GoalImportModal } from "@/components/GoalImportModal";
 import { FirstGoalPrompt } from "@/components/FirstGoalPrompt";
 import { useGoals, useDeleteGoal } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
@@ -34,7 +35,7 @@ import {
   statusOptions,
 } from "@/lib/goals";
 import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
-import { TreePine, Sparkles } from "lucide-react";
+import { TreePine, Sparkles, Upload } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { EmptyState } from "@/components/EmptyState";
 
@@ -64,6 +65,9 @@ export function Goals() {
     useState<GoalSuggestion | null>(null);
   const [showFirstGoalAIPrompt, setShowFirstGoalAIPrompt] = useState(false);
   const [firstGoalId, setFirstGoalId] = useState<number | null>(null);
+
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Fetch data
   const {
@@ -273,9 +277,18 @@ export function Goals() {
               <Link to={`/families/${familyId}`}>Family Settings</Link>
             </Button>
             {canManageGoals && (
-              <Button onClick={() => setShowCreateModal(true)}>
-                Create Goal
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowImportModal(true)}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import CSV
+                </Button>
+                <Button onClick={() => setShowCreateModal(true)}>
+                  Create Goal
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -518,6 +531,13 @@ export function Goals() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Goal Import Modal */}
+      <GoalImportModal
+        familyId={familyId}
+        open={showImportModal}
+        onOpenChange={setShowImportModal}
+      />
     </div>
   );
 }

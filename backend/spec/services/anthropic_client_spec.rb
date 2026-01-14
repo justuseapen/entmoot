@@ -7,8 +7,8 @@ RSpec.describe AnthropicClient do
   let(:messages) { [{ role: "user", content: "Hello" }] }
   let(:system_prompt) { "You are a helpful assistant." }
 
-  # Create a mock Messages resource for testing
-  let(:mock_messages_resource) { double("Anthropic::Messages::Resource") } # rubocop:disable RSpec/VerifiedDoubles
+  # Create mock objects that match the SDK's response structure
+  let(:mock_messages_resource) { instance_double(Anthropic::Resources::Messages) }
   let(:mock_anthropic) { instance_double(Anthropic::Client, messages: mock_messages_resource) }
 
   before do
@@ -17,12 +17,11 @@ RSpec.describe AnthropicClient do
 
   describe "#chat" do
     context "with successful API response" do
+      let(:mock_text_block) do
+        instance_double(Anthropic::Models::TextBlock, type: :text, text: "Hello! How can I help you today?")
+      end
       let(:mock_response) do
-        {
-          "content" => [
-            { "type" => "text", "text" => "Hello! How can I help you today?" }
-          ]
-        }
+        instance_double(Anthropic::Models::Message, content: [mock_text_block])
       end
 
       before do
@@ -36,12 +35,10 @@ RSpec.describe AnthropicClient do
       end
 
       it "concatenates multiple text blocks" do
-        allow(mock_messages_resource).to receive(:create).and_return({
-                                                                       "content" => [
-                                                                         { "type" => "text", "text" => "First part. " },
-                                                                         { "type" => "text", "text" => "Second part." }
-                                                                       ]
-                                                                     })
+        block1 = instance_double(Anthropic::Models::TextBlock, type: :text, text: "First part. ")
+        block2 = instance_double(Anthropic::Models::TextBlock, type: :text, text: "Second part.")
+        response = instance_double(Anthropic::Models::Message, content: [block1, block2])
+        allow(mock_messages_resource).to receive(:create).and_return(response)
 
         result = client.chat(messages: messages)
 
@@ -49,12 +46,10 @@ RSpec.describe AnthropicClient do
       end
 
       it "filters out non-text content blocks" do
-        allow(mock_messages_resource).to receive(:create).and_return({
-                                                                       "content" => [
-                                                                         { "type" => "text", "text" => "Text content" },
-                                                                         { "type" => "tool_use", "name" => "some_tool" }
-                                                                       ]
-                                                                     })
+        text_block = instance_double(Anthropic::Models::TextBlock, type: :text, text: "Text content")
+        tool_block = instance_double(Anthropic::Models::ToolUseBlock, type: :tool_use, name: "some_tool")
+        response = instance_double(Anthropic::Models::Message, content: [text_block, tool_block])
+        allow(mock_messages_resource).to receive(:create).and_return(response)
 
         result = client.chat(messages: messages)
 
@@ -64,7 +59,8 @@ RSpec.describe AnthropicClient do
 
     context "with empty response" do
       before do
-        allow(mock_messages_resource).to receive(:create).and_return({ "content" => [] })
+        response = instance_double(Anthropic::Models::Message, content: [])
+        allow(mock_messages_resource).to receive(:create).and_return(response)
       end
 
       it "returns empty string" do
@@ -76,8 +72,9 @@ RSpec.describe AnthropicClient do
 
     context "with rate limit error" do
       before do
-        allow(mock_messages_resource).to receive(:create)
-          .and_raise(Faraday::TooManyRequestsError.new("rate limited"))
+        error = Anthropic::Errors::RateLimitError.allocate
+        allow(error).to receive(:message).and_return("rate limited")
+        allow(mock_messages_resource).to receive(:create).and_raise(error)
       end
 
       it "raises RateLimitError" do
@@ -89,8 +86,9 @@ RSpec.describe AnthropicClient do
 
     context "with bad request error" do
       before do
-        allow(mock_messages_resource).to receive(:create)
-          .and_raise(Faraday::BadRequestError.new("content filtered"))
+        error = Anthropic::Errors::BadRequestError.allocate
+        allow(error).to receive(:message).and_return("content filtered")
+        allow(mock_messages_resource).to receive(:create).and_raise(error)
       end
 
       it "raises ContentFilterError" do
@@ -102,7 +100,9 @@ RSpec.describe AnthropicClient do
 
     context "with generic API error" do
       before do
-        allow(mock_messages_resource).to receive(:create).and_raise(Faraday::Error.new("server error"))
+        error = Anthropic::Errors::APIError.allocate
+        allow(error).to receive(:message).and_return("server error")
+        allow(mock_messages_resource).to receive(:create).and_raise(error)
       end
 
       it "raises ApiError" do
