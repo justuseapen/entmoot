@@ -64,25 +64,39 @@ fi
 log_step "Pushing latest changes to GitHub..."
 git push origin master 2>/dev/null || log_warn "Already up to date or push failed"
 
-# Step 2: Trigger Coolify deployment
-log_step "Triggering Coolify deployment..."
-RESPONSE=$(curl -s -X GET \
-    "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID$FORCE" \
-    -H "Authorization: Bearer $COOLIFY_TOKEN" \
-    -H "Content-Type: application/json")
+# Step 2: Trigger Coolify deployment for each app
+log_step "Triggering Coolify deployments..."
 
-# Check response
-if echo "$RESPONSE" | grep -q "deployment_uuid"; then
-    DEPLOYMENT_UUID=$(echo "$RESPONSE" | grep -o '"deployment_uuid":"[^"]*"' | cut -d'"' -f4)
-    log_info "Deployment triggered successfully!"
-    echo ""
-    echo -e "  Deployment UUID: ${BLUE}$DEPLOYMENT_UUID${NC}"
+# Split comma-separated UUIDs and deploy each
+IFS=',' read -ra UUIDS <<< "$COOLIFY_APP_UUID"
+DEPLOY_COUNT=0
+
+for UUID in "${UUIDS[@]}"; do
+    UUID=$(echo "$UUID" | xargs)  # Trim whitespace
+    log_info "Deploying app: $UUID"
+
+    RESPONSE=$(curl -s -X GET \
+        "$COOLIFY_URL/api/v1/deploy?uuid=$UUID$FORCE" \
+        -H "Authorization: Bearer $COOLIFY_TOKEN" \
+        -H "Content-Type: application/json")
+
+    if echo "$RESPONSE" | grep -q "deployment_uuid"; then
+        DEPLOYMENT_UUID=$(echo "$RESPONSE" | grep -o '"deployment_uuid":"[^"]*"' | cut -d'"' -f4)
+        log_info "Deployment triggered for $UUID"
+        echo -e "  Deployment UUID: ${BLUE}$DEPLOYMENT_UUID${NC}"
+        ((DEPLOY_COUNT++))
+    else
+        log_error "Deployment failed for $UUID!"
+        echo "$RESPONSE"
+    fi
+done
+
+echo ""
+if [ $DEPLOY_COUNT -gt 0 ]; then
+    log_info "$DEPLOY_COUNT deployment(s) triggered successfully!"
     echo -e "  Monitor at: ${BLUE}$COOLIFY_URL${NC}"
-    echo ""
-    log_info "Deployment is running in the background."
     log_info "Check Coolify dashboard for build progress and logs."
 else
-    log_error "Deployment failed!"
-    echo "$RESPONSE"
+    log_error "No deployments were triggered!"
     exit 1
 fi

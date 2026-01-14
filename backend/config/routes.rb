@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   # Health check endpoint
   get "health", to: "health#show"
 
+  # Sentry test endpoint (remove after verifying)
+  get "sentry-test", to: "health#sentry_test"
+
   # Rails default health check
   get "up" => "rails/health#show", as: :rails_health_check
 
