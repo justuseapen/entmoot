@@ -46,18 +46,18 @@ RSpec.describe "Api::V1::Auth::Registrations" do
     end
 
     context "with invalid parameters" do
-      it "returns 422 when email is missing" do
+      it "returns 422 with friendly message when email is missing" do
         invalid_params = valid_params.deep_dup
         invalid_params[:user].delete(:email)
 
         post "/api/v1/auth/register", params: invalid_params
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(json_response["error"]).to eq("Sign up failed.")
+        expect(json_response["error"]).to eq("Email is required.")
         expect(json_response["errors"]).to include("Email can't be blank")
       end
 
-      it "returns 422 when password is too short" do
+      it "returns 422 with friendly message when password is too short" do
         invalid_params = valid_params.deep_dup
         invalid_params[:user][:password] = "short"
         invalid_params[:user][:password_confirmation] = "short"
@@ -65,6 +65,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
         post "/api/v1/auth/register", params: invalid_params
 
         expect(response).to have_http_status(:unprocessable_entity)
+        expect(json_response["error"]).to eq("Password must be at least 6 characters.")
         expect(json_response["errors"]).to include("Password is too short (minimum is 6 characters)")
       end
 
@@ -78,22 +79,25 @@ RSpec.describe "Api::V1::Auth::Registrations" do
         expect(json_response["errors"]).to include("Password confirmation doesn't match Password")
       end
 
-      it "returns 422 when email is already taken" do
+      it "returns 422 with friendly message and suggestion when email is already taken" do
         create(:user, email: "test@example.com")
 
         post "/api/v1/auth/register", params: valid_params
 
         expect(response).to have_http_status(:unprocessable_entity)
+        expect(json_response["error"]).to eq("This email is already registered.")
+        expect(json_response["suggestion"]).to eq("Try signing in instead.")
         expect(json_response["errors"]).to include("Email has already been taken")
       end
 
-      it "returns 422 when name is missing" do
+      it "returns 422 with friendly message when name is missing" do
         invalid_params = valid_params.deep_dup
         invalid_params[:user].delete(:name)
 
         post "/api/v1/auth/register", params: invalid_params
 
         expect(response).to have_http_status(:unprocessable_entity)
+        expect(json_response["error"]).to eq("Name is required.")
         expect(json_response["errors"]).to include("Name can't be blank")
       end
     end
