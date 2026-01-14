@@ -13,6 +13,7 @@ Entmoot is a full-stack family multi-scale planning platform (SaaS) that helps f
 - **Auth:** Devise + devise-jwt (24h access tokens, 30-day refresh tokens)
 - **Authorization:** Pundit policies
 - **AI:** Anthropic Claude API (via anthropic gem)
+- **Error Tracking:** Glitchtip (Sentry-compatible)
 - **State:** TanStack Query (server), Zustand (client)
 
 ## Commands

@@ -11,15 +11,13 @@ class ApplicationController < ActionController::API
   end
 
   def handle_unexpected_error(exception)
-    # Report to AppSignal with additional context
-    if defined?(Appsignal) && Appsignal.respond_to?(:send_error)
-      Appsignal.send_error(exception) do |transaction|
-        transaction.set_tags(
-          user_id: current_user&.id,
-          path: request.path,
-          method: request.method
-        )
-      end
+    # Report to Sentry/Glitchtip with additional context
+    Sentry.capture_exception(exception) do |scope|
+      scope.set_user(id: current_user&.id) if current_user
+      scope.set_tags(
+        path: request.path,
+        method: request.method
+      )
     end
 
     # Re-raise in development/test for debugging

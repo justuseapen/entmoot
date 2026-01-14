@@ -40,8 +40,10 @@ gem "twilio-ruby", "~> 7.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
-# Error tracking and APM
-gem "appsignal", "~> 4.0"
+# Error tracking (Sentry SDK - works with Glitchtip)
+gem "sentry-ruby", "~> 5.22"
+gem "sentry-rails", "~> 5.22"
+gem "sentry-sidekiq", "~> 5.22"
 
 # Environment variables from .env file
 gem "dotenv-rails", groups: [:development, :test]

@@ -16,8 +16,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@appsignal/javascript": "^1.6.1",
-    "@appsignal/react": "^1.0.31",
+    "@sentry/react": "^8.47.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

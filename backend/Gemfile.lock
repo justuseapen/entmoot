@@ -78,9 +78,6 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     anthropic-sdk-beta (0.1.0.pre.beta.8)
       connection_pool
-    appsignal (4.8.1)
-      logger
-      rack (>= 2.0.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.21)
@@ -358,6 +355,15 @@ GEM
     rufus-scheduler (3.9.2)
       fugit (~> 1.1, >= 1.11.1)
     securerandom (0.4.1)
+    sentry-rails (5.28.1)
+      railties (>= 5.0)
+      sentry-ruby (~> 5.28.1)
+    sentry-ruby (5.28.1)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+    sentry-sidekiq (5.28.1)
+      sentry-ruby (~> 5.28.1)
+      sidekiq (>= 3.0)
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
     sidekiq (7.3.9)
@@ -418,7 +424,6 @@ PLATFORMS
 
 DEPENDENCIES
   anthropic-sdk-beta (~> 0.1.0.pre.beta.8)
-  appsignal (~> 4.0)
   bootsnap
   brakeman
   csv (~> 3.0)
@@ -442,6 +447,9 @@ DEPENDENCIES
   rubocop
   rubocop-rails
   rubocop-rspec
+  sentry-rails (~> 5.22)
+  sentry-ruby (~> 5.22)
+  sentry-sidekiq (~> 5.22)
   shoulda-matchers (~> 6.0)
   sidekiq (~> 7.0)
   sidekiq-scheduler (~> 5.0)
