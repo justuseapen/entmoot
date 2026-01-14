@@ -24,11 +24,11 @@ RSpec.describe "Api::V1::Auth::Passwords" do
     end
 
     context "with non-existent email" do
-      it "returns 422 with error message" do
+      it "returns 422 with friendly error message" do
         post "/api/v1/auth/password", params: { user: { email: "nonexistent@example.com" } }
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(json_response["error"]).to eq("Unable to send password reset instructions.")
+        expect(json_response["error"]).to eq("We couldn't find an account with this email.")
         expect(json_response["errors"]).to include("Email not found")
       end
     end
@@ -78,7 +78,7 @@ RSpec.describe "Api::V1::Auth::Passwords" do
     end
 
     context "with invalid token" do
-      it "returns 422 with error message" do
+      it "returns 422 with friendly error message about expired link" do
         put "/api/v1/auth/password", params: {
           user: {
             reset_password_token: "invalid_token",
@@ -88,7 +88,7 @@ RSpec.describe "Api::V1::Auth::Passwords" do
         }
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(json_response["error"]).to eq("Unable to reset password.")
+        expect(json_response["error"]).to eq("This password reset link has expired. Please request a new one.")
         expect(json_response["errors"]).to include("Reset password token is invalid")
       end
     end
