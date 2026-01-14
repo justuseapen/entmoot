@@ -61,6 +61,7 @@ services:
       SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
       MAILER_FROM: ${MAILER_FROM:-noreply@entmoot.app}
       DOMAIN: ${DOMAIN:-localhost}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:
       - rails_storage:/rails/storage
     networks:
@@ -99,6 +100,7 @@ services:
       MAILER_FROM: ${MAILER_FROM:-noreply@entmoot.app}
       DOMAIN: ${DOMAIN:-localhost}
       SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:
       - rails_storage:/rails/storage
     networks:
