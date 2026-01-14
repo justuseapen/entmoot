@@ -9,10 +9,19 @@ module Api
         def create
           user = User.find_for_database_authentication(email: params.dig(:user, :email))
 
-          if user&.valid_password?(params.dig(:user, :password))
+          if user.nil?
+            render_error(
+              "No account found with this email.",
+              status: :unauthorized,
+              suggestion: "Would you like to create one?"
+            )
+          elsif user.valid_password?(params.dig(:user, :password))
             render_login_success(user)
           else
-            render json: { error: "Invalid email or password." }, status: :unauthorized
+            render_error(
+              "Incorrect email or password. Please try again.",
+              status: :unauthorized
+            )
           end
         end
 

@@ -49,20 +49,24 @@ RSpec.describe "Api::V1::Auth::Sessions" do
     end
 
     context "with invalid credentials" do
-      it "returns 401 with wrong password" do
+      it "returns 401 with friendly message for wrong password" do
         post "/api/v1/auth/login", params: {
           user: { email: "test@example.com", password: "wrongpassword" }
         }
 
         expect(response).to have_http_status(:unauthorized)
+        expect(json_response["error"]).to eq("Incorrect email or password. Please try again.")
+        expect(json_response["suggestion"]).to be_nil
       end
 
-      it "returns 401 with non-existent email" do
+      it "returns 401 with friendly message and suggestion for non-existent email" do
         post "/api/v1/auth/login", params: {
           user: { email: "nonexistent@example.com", password: "password123" }
         }
 
         expect(response).to have_http_status(:unauthorized)
+        expect(json_response["error"]).to eq("No account found with this email.")
+        expect(json_response["suggestion"]).to eq("Would you like to create one?")
       end
     end
   end
