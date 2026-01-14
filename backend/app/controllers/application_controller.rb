@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  include ErrorResponse
+
   rescue_from StandardError, with: :handle_unexpected_error
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   private
 
-  def handle_not_found
-    render json: { error: "Record not found" }, status: :not_found
+  def handle_not_found(exception = nil)
+    resource_name = exception&.model || "Record"
+    render_not_found(resource_name, suggestion: "Please check the URL or go back to the previous page.")
   end
 
   def handle_unexpected_error(exception)
@@ -23,6 +26,10 @@ class ApplicationController < ActionController::API
     # Re-raise in development/test for debugging
     raise exception if Rails.env.local?
 
-    render json: { error: "An unexpected error occurred" }, status: :internal_server_error
+    render_error(
+      "Something went wrong. Please try again.",
+      status: :internal_server_error,
+      suggestion: "If this problem persists, please contact support."
+    )
   end
 end
