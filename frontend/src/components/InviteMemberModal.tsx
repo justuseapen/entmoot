@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { CheckCircle2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSendInvitation } from "@/hooks/useFamilies";
-import { roleLabels, roleDescriptions, type MemberRole } from "@/lib/families";
+import {
+  roleLabels,
+  roleDescriptions,
+  type MemberRole,
+  type Invitation,
+} from "@/lib/families";
 
 const inviteSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -52,6 +59,7 @@ export function InviteMemberModal({
   onSuccess,
 }: InviteMemberModalProps) {
   const [error, setError] = useState<string | null>(null);
+  const [sentInvitation, setSentInvitation] = useState<Invitation | null>(null);
   const sendInvitation = useSendInvitation(familyId);
 
   const {
@@ -74,9 +82,8 @@ export function InviteMemberModal({
   const onSubmit = async (data: InviteFormData) => {
     setError(null);
     try {
-      await sendInvitation.mutateAsync(data);
-      reset();
-      onOpenChange(false);
+      const result = await sendInvitation.mutateAsync(data);
+      setSentInvitation(result.invitation);
       onSuccess?.();
     } catch (err) {
       setError(
@@ -89,9 +96,72 @@ export function InviteMemberModal({
     if (!newOpen) {
       reset();
       setError(null);
+      setSentInvitation(null);
     }
     onOpenChange(newOpen);
   };
+
+  const handleSendAnother = () => {
+    reset();
+    setSentInvitation(null);
+  };
+
+  const formatExpirationDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  if (sentInvitation) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              Invitation Sent
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="flex items-start gap-3">
+                <Mail className="text-muted-foreground mt-0.5 h-5 w-5" />
+                <div className="space-y-1">
+                  <p className="font-medium">{sentInvitation.email}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                      {roleLabels[sentInvitation.role]}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="border-green-200 bg-green-50 text-green-700"
+                    >
+                      Pending
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Expires {formatExpirationDate(sentInvitation.expires_at)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              An email has been sent with instructions to join your family. You
+              can track this invitation in the Pending Invitations section.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleSendAnother}>
+              Send Another
+            </Button>
+            <Button onClick={() => handleOpenChange(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
