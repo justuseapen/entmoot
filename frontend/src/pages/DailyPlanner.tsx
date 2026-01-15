@@ -24,6 +24,7 @@ import { SortableTaskItem } from "@/components/SortableTaskItem";
 import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
+import { useHabits } from "@/hooks/useHabits";
 import { useCelebration } from "@/components/CelebrationToast";
 import {
   formatTodayDate,
@@ -31,6 +32,8 @@ import {
   type TopPriority,
   type DailyTaskAttributes,
   type TopPriorityAttributes,
+  type HabitCompletion,
+  type HabitCompletionAttributes,
 } from "@/lib/dailyPlans";
 import {
   Plus,
@@ -44,10 +47,12 @@ import {
   Check,
   Link2,
   X,
+  ListChecks,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -69,6 +74,7 @@ export function DailyPlanner() {
   } = useTodaysPlan(familyId);
   const { data: family, isLoading: loadingFamily } = useFamily(familyId);
   const { data: goals } = useGoals(familyId);
+  const { data: habits } = useHabits(familyId);
   const updatePlan = useUpdateDailyPlan(familyId);
 
   // Local state for new task input
@@ -86,6 +92,10 @@ export function DailyPlanner() {
   const initialIntention = plan?.intention || "";
   const initialTasks = useMemo(() => plan?.daily_tasks || [], [plan]);
   const initialPriorities = useMemo(() => plan?.top_priorities || [], [plan]);
+  const initialHabitCompletions = useMemo(
+    () => plan?.habit_completions || [],
+    [plan]
+  );
 
   // Local edits state (tracks modifications on top of server data)
   const [localIntention, setLocalIntention] = useState<string | null>(null);
@@ -93,11 +103,15 @@ export function DailyPlanner() {
   const [localPriorities, setLocalPriorities] = useState<TopPriority[] | null>(
     null
   );
+  const [localHabitCompletions, setLocalHabitCompletions] = useState<
+    HabitCompletion[] | null
+  >(null);
 
   // Use local edits if they exist, otherwise use server data
   const intention = localIntention ?? initialIntention;
   const tasks = localTasks ?? initialTasks;
   const priorities = localPriorities ?? initialPriorities;
+  const habitCompletions = localHabitCompletions ?? initialHabitCompletions;
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -121,7 +135,8 @@ export function DailyPlanner() {
     async (
       newTasks?: DailyTask[],
       newPriorities?: TopPriority[],
-      newIntention?: string
+      newIntention?: string,
+      newHabitCompletions?: HabitCompletion[]
     ) => {
       if (!plan) return;
 
@@ -135,6 +150,7 @@ export function DailyPlanner() {
       const tasksToSave = newTasks ?? tasks;
       const prioritiesToSave = newPriorities ?? priorities;
       const intentionToSave = newIntention ?? intention;
+      const habitCompletionsToSave = newHabitCompletions ?? habitCompletions;
 
       const taskAttributes: DailyTaskAttributes[] = tasksToSave.map(
         (task, index) => ({
@@ -157,6 +173,14 @@ export function DailyPlanner() {
         })
       );
 
+      const habitCompletionAttributes: HabitCompletionAttributes[] =
+        habitCompletionsToSave.map((hc) => ({
+          // Only include id if it's an existing record (id > 0)
+          ...(hc.id > 0 ? { id: hc.id } : {}),
+          habit_id: hc.habit_id,
+          completed: hc.completed,
+        }));
+
       try {
         const result = await updatePlan.mutateAsync({
           planId: plan.id,
@@ -164,12 +188,14 @@ export function DailyPlanner() {
             intention: intentionToSave,
             daily_tasks_attributes: taskAttributes,
             top_priorities_attributes: priorityAttributes,
+            habit_completions_attributes: habitCompletionAttributes,
           },
         });
         // Clear local edits after successful save (server data will be updated via query invalidation)
         setLocalIntention(null);
         setLocalTasks(null);
         setLocalPriorities(null);
+        setLocalHabitCompletions(null);
 
         // Show saved status
         setSaveStatus("saved");
@@ -186,7 +212,15 @@ export function DailyPlanner() {
         setSaveStatus("idle");
       }
     },
-    [plan, tasks, priorities, intention, updatePlan, celebrateFirstAction]
+    [
+      plan,
+      tasks,
+      priorities,
+      intention,
+      habitCompletions,
+      updatePlan,
+      celebrateFirstAction,
+    ]
   );
 
   // Handle drag end for task reordering
@@ -336,16 +370,50 @@ export function DailyPlanner() {
     }
   };
 
+  // Habit completion handler
+  const handleToggleHabitCompletion = (habitId: number, completed: boolean) => {
+    // Find existing completion or create a new one
+    const existingCompletion = habitCompletions.find(
+      (hc) => hc.habit_id === habitId
+    );
+    const habit = habits?.find((h) => h.id === habitId);
+
+    if (existingCompletion) {
+      // Update existing completion
+      const newHabitCompletions = habitCompletions.map((hc) =>
+        hc.habit_id === habitId ? { ...hc, completed } : hc
+      );
+      setLocalHabitCompletions(newHabitCompletions);
+      saveChanges(undefined, undefined, undefined, newHabitCompletions);
+    } else if (habit) {
+      // Create new completion
+      const newCompletion: HabitCompletion = {
+        id: 0, // Will be assigned by server
+        habit_id: habitId,
+        daily_plan_id: plan?.id || 0,
+        completed,
+        habit,
+      };
+      const newHabitCompletions = [...habitCompletions, newCompletion];
+      setLocalHabitCompletions(newHabitCompletions);
+      saveChanges(undefined, undefined, undefined, newHabitCompletions);
+    }
+  };
+
   // Check if there are unsaved changes
   const hasUnsavedChanges =
-    localIntention !== null || localTasks !== null || localPriorities !== null;
+    localIntention !== null ||
+    localTasks !== null ||
+    localPriorities !== null ||
+    localHabitCompletions !== null;
 
   // Manual save handler
   const handleManualSave = () => {
     saveChanges(
       localTasks ?? undefined,
       localPriorities ?? undefined,
-      localIntention ?? undefined
+      localIntention ?? undefined,
+      localHabitCompletions ?? undefined
     );
   };
 
@@ -568,6 +636,52 @@ export function DailyPlanner() {
             })}
           </CardContent>
         </Card>
+
+        {/* Non-Negotiables Habit Tracker */}
+        {habits && habits.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="text-primary h-5 w-5" />
+                  Non-Negotiables
+                </div>
+                <span className="text-muted-foreground text-sm font-normal">
+                  {habitCompletions.filter((hc) => hc.completed).length}/
+                  {habits.length} complete
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {habits.map((habit) => {
+                  const completion = habitCompletions.find(
+                    (hc) => hc.habit_id === habit.id
+                  );
+                  const isCompleted = completion?.completed ?? false;
+                  return (
+                    <label
+                      key={habit.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-md border p-3 transition-colors hover:bg-gray-50"
+                    >
+                      <Checkbox
+                        checked={isCompleted}
+                        onCheckedChange={(checked) =>
+                          handleToggleHabitCompletion(habit.id, checked === true)
+                        }
+                      />
+                      <span
+                        className={`text-sm ${isCompleted ? "text-muted-foreground line-through" : ""}`}
+                      >
+                        {habit.name}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Daily Intention */}
         <Card className="mb-6">

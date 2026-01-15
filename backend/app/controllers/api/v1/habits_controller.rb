@@ -10,7 +10,7 @@ module Api
 
         habits = current_user.habits.where(family: @family).active.ordered
 
-        render json: habits.map { |habit| habit_response(habit) }
+        render json: { habits: habits.map { |habit| habit_response(habit) } }
       end
 
       private

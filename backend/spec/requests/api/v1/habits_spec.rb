@@ -14,7 +14,7 @@ RSpec.describe "Api::V1::Habits" do
         get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
-        expect(json_response).to eq([])
+        expect(json_response["habits"]).to eq([])
       end
 
       it "returns user's active habits ordered by position" do
@@ -25,9 +25,10 @@ RSpec.describe "Api::V1::Habits" do
         get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(3)
-        expect(json_response.pluck("name")).to eq(%w[First Second Third])
-        expect(json_response.first).to include(
+        habits = json_response["habits"]
+        expect(habits.length).to eq(3)
+        expect(habits.pluck("name")).to eq(%w[First Second Third])
+        expect(habits.first).to include(
           "id" => habit1.id,
           "name" => "First",
           "position" => 1,
@@ -42,8 +43,9 @@ RSpec.describe "Api::V1::Habits" do
         get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(1)
-        expect(json_response.first["id"]).to eq(active_habit.id)
+        habits = json_response["habits"]
+        expect(habits.length).to eq(1)
+        expect(habits.first["id"]).to eq(active_habit.id)
       end
 
       it "excludes habits from other families" do
@@ -55,8 +57,9 @@ RSpec.describe "Api::V1::Habits" do
         get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(1)
-        expect(json_response.first["id"]).to eq(this_family_habit.id)
+        habits = json_response["habits"]
+        expect(habits.length).to eq(1)
+        expect(habits.first["id"]).to eq(this_family_habit.id)
       end
 
       it "excludes habits from other users" do
@@ -68,8 +71,9 @@ RSpec.describe "Api::V1::Habits" do
         get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(1)
-        expect(json_response.first["id"]).to eq(my_habit.id)
+        habits = json_response["habits"]
+        expect(habits.length).to eq(1)
+        expect(habits.first["id"]).to eq(my_habit.id)
       end
     end
 
