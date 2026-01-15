@@ -1,26 +1,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { SortableTaskItem } from "@/components/SortableTaskItem";
 import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
@@ -28,19 +11,13 @@ import { useHabits } from "@/hooks/useHabits";
 import { useCelebration } from "@/components/CelebrationToast";
 import {
   formatTodayDate,
-  type DailyTask,
   type TopPriority,
-  type DailyTaskAttributes,
   type TopPriorityAttributes,
   type HabitCompletion,
   type HabitCompletionAttributes,
 } from "@/lib/dailyPlans";
 import {
-  Plus,
   Target,
-  CheckCircle2,
-  AlertCircle,
-  ArrowRight,
   Save,
   Loader2,
   Check,
@@ -50,7 +27,6 @@ import {
   Sunset,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
-import { InlineEmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -77,9 +53,6 @@ export function DailyPlanner() {
   const { data: habits } = useHabits(familyId);
   const updatePlan = useUpdateDailyPlan(familyId);
 
-  // Local state for new task input
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-
   // Save status state
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
@@ -90,7 +63,6 @@ export function DailyPlanner() {
 
   // Derive initial values from plan data
   const initialIntention = plan?.intention || "";
-  const initialTasks = useMemo(() => plan?.daily_tasks || [], [plan]);
   const initialPriorities = useMemo(() => plan?.top_priorities || [], [plan]);
   const initialHabitCompletions = useMemo(
     () => plan?.habit_completions || [],
@@ -101,7 +73,6 @@ export function DailyPlanner() {
 
   // Local edits state (tracks modifications on top of server data)
   const [localIntention, setLocalIntention] = useState<string | null>(null);
-  const [localTasks, setLocalTasks] = useState<DailyTask[] | null>(null);
   const [localPriorities, setLocalPriorities] = useState<TopPriority[] | null>(
     null
   );
@@ -117,19 +88,10 @@ export function DailyPlanner() {
 
   // Use local edits if they exist, otherwise use server data
   const intention = localIntention ?? initialIntention;
-  const tasks = localTasks ?? initialTasks;
   const priorities = localPriorities ?? initialPriorities;
   const habitCompletions = localHabitCompletions ?? initialHabitCompletions;
   const shutdownShipped = localShutdownShipped ?? initialShutdownShipped;
   const shutdownBlocked = localShutdownBlocked ?? initialShutdownBlocked;
-
-  // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   // Clear save status timeout on unmount
   useEffect(() => {
@@ -143,7 +105,6 @@ export function DailyPlanner() {
   // Save changes to the server
   const saveChanges = useCallback(
     async (
-      newTasks?: DailyTask[],
       newPriorities?: TopPriority[],
       newIntention?: string,
       newHabitCompletions?: HabitCompletion[],
@@ -159,23 +120,11 @@ export function DailyPlanner() {
 
       setSaveStatus("saving");
 
-      const tasksToSave = newTasks ?? tasks;
       const prioritiesToSave = newPriorities ?? priorities;
       const intentionToSave = newIntention ?? intention;
       const habitCompletionsToSave = newHabitCompletions ?? habitCompletions;
       const shutdownShippedToSave = newShutdownShipped ?? shutdownShipped;
       const shutdownBlockedToSave = newShutdownBlocked ?? shutdownBlocked;
-
-      const taskAttributes: DailyTaskAttributes[] = tasksToSave.map(
-        (task, index) => ({
-          id: task.id,
-          title: task.title,
-          completed: task.completed,
-          position: index,
-          goal_id: task.goal_id,
-          _destroy: task._destroy,
-        })
-      );
 
       const priorityAttributes: TopPriorityAttributes[] = prioritiesToSave.map(
         (priority) => ({
@@ -200,7 +149,6 @@ export function DailyPlanner() {
           planId: plan.id,
           data: {
             intention: intentionToSave,
-            daily_tasks_attributes: taskAttributes,
             top_priorities_attributes: priorityAttributes,
             habit_completions_attributes: habitCompletionAttributes,
             shutdown_shipped: shutdownShippedToSave,
@@ -209,7 +157,6 @@ export function DailyPlanner() {
         });
         // Clear local edits after successful save (server data will be updated via query invalidation)
         setLocalIntention(null);
-        setLocalTasks(null);
         setLocalPriorities(null);
         setLocalHabitCompletions(null);
         setLocalShutdownShipped(null);
@@ -232,7 +179,6 @@ export function DailyPlanner() {
     },
     [
       plan,
-      tasks,
       priorities,
       intention,
       habitCompletions,
@@ -242,91 +188,6 @@ export function DailyPlanner() {
       celebrateFirstAction,
     ]
   );
-
-  // Handle drag end for task reordering
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = tasks.findIndex((t) => `task-${t.id}` === active.id);
-      const newIndex = tasks.findIndex((t) => `task-${t.id}` === over.id);
-
-      const reorderedTasks = arrayMove(tasks, oldIndex, newIndex).map(
-        (task, index) => ({
-          ...task,
-          position: index,
-        })
-      );
-
-      setLocalTasks(reorderedTasks);
-      saveChanges(reorderedTasks);
-    }
-  };
-
-  // Task handlers
-  const handleAddTask = () => {
-    if (!newTaskTitle.trim()) return;
-
-    const newTask: DailyTask = {
-      title: newTaskTitle.trim(),
-      completed: false,
-      position: tasks.length,
-      goal_id: null,
-      goal: null,
-    };
-
-    const newTasks = [...tasks, newTask];
-    setLocalTasks(newTasks);
-    setNewTaskTitle("");
-    saveChanges(newTasks);
-  };
-
-  const handleToggleTask = (index: number) => {
-    const newTasks = tasks.map((task, i) =>
-      i === index ? { ...task, completed: !task.completed } : task
-    );
-    setLocalTasks(newTasks);
-    saveChanges(newTasks);
-  };
-
-  const handleRemoveTask = (index: number) => {
-    const taskToRemove = tasks[index];
-    if (taskToRemove.id) {
-      // Mark for deletion on server
-      const newTasks = tasks.map((task, i) =>
-        i === index ? { ...task, _destroy: true } : task
-      );
-      setLocalTasks(newTasks);
-      saveChanges(newTasks);
-    } else {
-      // Just remove from local state (not yet saved)
-      const newTasks = tasks.filter((_, i) => i !== index);
-      setLocalTasks(newTasks);
-      saveChanges(newTasks);
-    }
-  };
-
-  const handleLinkTaskToGoal = (index: number, goalId: number | null) => {
-    const selectedGoal = goals?.find((g) => g.id === goalId);
-    const newTasks = tasks.map((task, i) =>
-      i === index
-        ? {
-            ...task,
-            goal_id: goalId,
-            goal: selectedGoal
-              ? {
-                  id: selectedGoal.id,
-                  title: selectedGoal.title,
-                  time_scale: selectedGoal.time_scale,
-                  status: selectedGoal.status,
-                }
-              : null,
-          }
-        : task
-    );
-    setLocalTasks(newTasks);
-    saveChanges(newTasks);
-  };
 
   // Priority handlers
   const handlePriorityChange = (index: number, title: string) => {
@@ -339,7 +200,7 @@ export function DailyPlanner() {
 
   const handlePriorityBlur = () => {
     if (localPriorities) {
-      saveChanges(undefined, localPriorities);
+      saveChanges(localPriorities);
     }
   };
 
@@ -363,7 +224,7 @@ export function DailyPlanner() {
         : p
     );
     setLocalPriorities(newPriorities);
-    saveChanges(undefined, newPriorities);
+    saveChanges(newPriorities);
   };
 
   const ensureThreePriorities = useCallback((): TopPriority[] => {
@@ -393,7 +254,7 @@ export function DailyPlanner() {
         hc.habit_id === habitId ? { ...hc, completed } : hc
       );
       setLocalHabitCompletions(newHabitCompletions);
-      saveChanges(undefined, undefined, undefined, newHabitCompletions);
+      saveChanges(undefined, undefined, newHabitCompletions);
     } else if (habit) {
       // Create new completion
       const newCompletion: HabitCompletion = {
@@ -405,7 +266,7 @@ export function DailyPlanner() {
       };
       const newHabitCompletions = [...habitCompletions, newCompletion];
       setLocalHabitCompletions(newHabitCompletions);
-      saveChanges(undefined, undefined, undefined, newHabitCompletions);
+      saveChanges(undefined, undefined, newHabitCompletions);
     }
   };
 
@@ -416,13 +277,7 @@ export function DailyPlanner() {
 
   const handleShutdownShippedBlur = () => {
     if (localShutdownShipped !== null) {
-      saveChanges(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        localShutdownShipped
-      );
+      saveChanges(undefined, undefined, undefined, localShutdownShipped);
     }
   };
 
@@ -437,7 +292,6 @@ export function DailyPlanner() {
         undefined,
         undefined,
         undefined,
-        undefined,
         localShutdownBlocked
       );
     }
@@ -446,7 +300,6 @@ export function DailyPlanner() {
   // Check if there are unsaved changes
   const hasUnsavedChanges =
     localIntention !== null ||
-    localTasks !== null ||
     localPriorities !== null ||
     localHabitCompletions !== null ||
     localShutdownShipped !== null ||
@@ -455,27 +308,12 @@ export function DailyPlanner() {
   // Manual save handler
   const handleManualSave = () => {
     saveChanges(
-      localTasks ?? undefined,
       localPriorities ?? undefined,
       localIntention ?? undefined,
       localHabitCompletions ?? undefined,
       localShutdownShipped ?? undefined,
       localShutdownBlocked ?? undefined
     );
-  };
-
-  // Carry over incomplete tasks from yesterday
-  const handleCarryOverTask = (task: DailyTask) => {
-    const newTask: DailyTask = {
-      title: task.title,
-      completed: false,
-      position: tasks.length,
-      goal_id: task.goal_id,
-      goal: task.goal,
-    };
-    const newTasks = [...tasks, newTask];
-    setLocalTasks(newTasks);
-    saveChanges(newTasks);
   };
 
   // Loading and error states
@@ -498,17 +336,7 @@ export function DailyPlanner() {
     );
   }
 
-  const visibleTasks = tasks.filter((t) => !t._destroy);
-  const completionPercentage =
-    visibleTasks.length > 0
-      ? Math.round(
-          (visibleTasks.filter((t) => t.completed).length /
-            visibleTasks.length) *
-            100
-        )
-      : 0;
   const displayPriorities = ensureThreePriorities();
-  const yesterdayIncompleteTasks = plan.yesterday_incomplete_tasks || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
@@ -569,28 +397,6 @@ export function DailyPlanner() {
 
         {/* Tip for first daily plan */}
         <StandaloneTip tipType="first_daily_plan" className="mb-4" />
-
-        {/* Progress Indicator */}
-        {visibleTasks.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  <span className="font-medium">Today&apos;s Progress</span>
-                </div>
-                <span className="text-muted-foreground text-sm">
-                  {visibleTasks.filter((t) => t.completed).length} of{" "}
-                  {visibleTasks.length} tasks
-                </span>
-              </div>
-              <Progress value={completionPercentage} className="mt-3 h-2" />
-              <p className="text-muted-foreground mt-2 text-center text-sm">
-                {completionPercentage}% complete
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Top 3 Outcomes Today */}
         <Card className="mb-6">
@@ -729,108 +535,6 @@ export function DailyPlanner() {
             </CardContent>
           </Card>
         )}
-
-        {/* Previous Day Incomplete Tasks */}
-        {yesterdayIncompleteTasks.length > 0 && (
-          <Card className="mb-6 border-amber-200 bg-amber-50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg text-amber-800">
-                <AlertCircle className="h-5 w-5" />
-                Yesterday&apos;s Unfinished Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {yesterdayIncompleteTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between rounded-lg bg-white p-3"
-                  >
-                    <span className="text-sm">{task.title}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCarryOverTask(task)}
-                      className="text-primary hover:text-primary"
-                    >
-                      <ArrowRight className="mr-1 h-4 w-4" />
-                      Carry over
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Task Checklist */}
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CheckCircle2 className="text-primary h-5 w-5" />
-              Today&apos;s Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Quick add task input */}
-            <div className="mb-4 flex gap-2">
-              <Input
-                placeholder="Add a new task..."
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddTask();
-                  }
-                }}
-                className="flex-1"
-              />
-              <Button onClick={handleAddTask} size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Task list with drag and drop */}
-            {visibleTasks.length > 0 ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={visibleTasks.map((t) => `task-${t.id}`)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2">
-                    {visibleTasks.map((task, index) => (
-                      <SortableTaskItem
-                        key={task.id || `new-${index}`}
-                        id={`task-${task.id}`}
-                        task={task}
-                        index={index}
-                        goals={goals || []}
-                        onToggle={() => handleToggleTask(index)}
-                        onRemove={() => handleRemoveTask(index)}
-                        onLinkToGoal={(goalId) =>
-                          handleLinkTaskToGoal(index, goalId)
-                        }
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            ) : (
-              <InlineEmptyState
-                variant="daily_plans"
-                emoji="✅"
-                title="No tasks yet"
-                description="Add your first task above to start planning your day!"
-                showAction={false}
-              />
-            )}
-          </CardContent>
-        </Card>
 
         {/* Shutdown Notes */}
         <Card className="mb-6">
