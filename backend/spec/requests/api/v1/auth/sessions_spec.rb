@@ -106,7 +106,7 @@ RSpec.describe "Api::V1::Auth::Sessions" do
   end
 
   describe "Session-based authentication" do
-    let!(:user) { create(:user, email: "session@example.com", password: "password123") }
+    let(:session_user) { create(:user, email: "session@example.com", password: "password123") }
     let(:valid_params) do
       {
         user: {
@@ -115,6 +115,8 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         }
       }
     end
+
+    before { session_user }
 
     describe "session cookie on login" do
       it "sets a session cookie on successful login" do
