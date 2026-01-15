@@ -1,92 +1,177 @@
 {
   "project": "Entmoot",
-  "branchName": "ralph/production-auth-fixes",
-  "description": "Fix production authentication failures after JWT-to-session migration",
+  "branchName": "ralph/daily-focus-card-redesign",
+  "description": "Redesign Daily Planner to match Daily Focus Card Template with Top 3 Outcomes, Non-Negotiables habit tracker, and Shutdown Notes",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Fix session cookie domain configuration",
-      "description": "As a user, I need my login session to work across subdomains so API requests are authenticated.",
+      "title": "Create Habit model and migration",
+      "description": "As a developer, I need to store habit definitions and daily completion status.",
       "acceptanceCriteria": [
-        "Add domain: :all to session cookie configuration in backend/config/application.rb",
-        "Change same_site: :lax to same_site: :none for cross-origin cookie sending",
-        "Keep secure: Rails.env.production? setting",
+        "Create habits table with: name (string), position (integer), user_id (references), family_id (references), is_active (boolean default true)",
+        "Create habit_completions table with: habit_id (references), daily_plan_id (references), completed (boolean default false)",
+        "Create Habit model with: belongs_to :user, belongs_to :family, has_many :habit_completions",
+        "Create HabitCompletion model with: belongs_to :habit, belongs_to :daily_plan",
+        "Add has_many :habit_completions to DailyPlan model",
+        "Run migration successfully",
         "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Added session middleware to config/application.rb"
+      "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Update ActionCable connection for session auth",
-      "description": "As a developer, I need ActionCable to authenticate via session cookies instead of JWT tokens.",
+      "title": "Seed default habits for users",
+      "description": "As a user, I want preset habits available when I first use the daily planner.",
       "acceptanceCriteria": [
-        "Remove JWT token decoding from backend/app/channels/application_cable/connection.rb",
-        "Use request.session and env['warden'] to get authenticated user",
-        "Handle case where no session exists by rejecting connection",
+        "Create HabitInitializerService in backend/app/services/",
+        "Service creates 9 habits: Prayer AM, Bible Study, Planning, Workout, Walk, Writing, Reading, House Reset, Prayer PM",
+        "Habits have sequential position values (1-9)",
+        "Service is idempotent - does not create duplicates if called again",
+        "Call service in DailyPlan.find_or_create_for_today when user has no habits",
         "Typecheck passes"
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Simplified to use env['warden'] directly - cleaner than request.session approach"
+      "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Add CORS expose headers for cookies",
-      "description": "As a developer, I need CORS to properly expose Set-Cookie headers for session management.",
+      "title": "Add habits API endpoints",
+      "description": "As a developer, I need API endpoints to manage habits and completions.",
       "acceptanceCriteria": [
-        "Add expose: ['Set-Cookie'] to CORS configuration in backend/config/initializers/cors.rb",
+        "Create HabitsController at backend/app/controllers/api/v1/habits_controller.rb",
+        "GET /api/v1/families/:family_id/habits returns user's active habits ordered by position",
+        "Add routes in config/routes.rb under families namespace",
+        "Create HabitPolicy with index action allowing authenticated family members",
+        "Update daily_plans_controller to permit habit_completions_attributes",
+        "Add accepts_nested_attributes_for :habit_completions to DailyPlan model",
+        "Write request specs for habits endpoint",
         "Typecheck passes"
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Added expose: %w[Set-Cookie] to CORS config"
+      "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Add request spec for cross-origin session auth",
-      "description": "As a developer, I need regression tests to verify session auth works correctly.",
+      "title": "Add shutdown_notes to daily_plans",
+      "description": "As a user, I need to record structured shutdown notes at end of day.",
       "acceptanceCriteria": [
-        "Add spec testing that session cookie is set on login in backend/spec/requests/api/v1/auth/sessions_spec.rb",
-        "Add spec testing that session cookie authenticates subsequent requests",
-        "Add spec testing logout clears session",
-        "All tests pass",
+        "Add shutdown_shipped (text) column to daily_plans table",
+        "Add shutdown_blocked (text) column to daily_plans table",
+        "Update daily_plans_controller to permit :shutdown_shipped and :shutdown_blocked params",
+        "Run migration successfully",
         "Typecheck passes"
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Added 5 specs: session cookie on login, session auth with JWT, session persistence, logout clears session. Also added warden.set_user on login and warden.logout on logout."
+      "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Add ActionCable connection spec for session auth",
-      "description": "As a developer, I need tests verifying ActionCable authenticates via sessions.",
+      "title": "Update frontend types for habits and shutdown notes",
+      "description": "As a developer, I need TypeScript types for the new data structures.",
       "acceptanceCriteria": [
-        "Create backend/spec/channels/connection_spec.rb",
-        "Add spec testing connection with valid session succeeds",
-        "Add spec testing connection without session is rejected",
-        "All tests pass",
+        "Add Habit type to frontend/src/lib/dailyPlans.ts: id, name, position, is_active",
+        "Add HabitCompletion type: id, habit_id, daily_plan_id, completed, habit (nested Habit)",
+        "Add shutdown_shipped and shutdown_blocked (string | null) to DailyPlan type",
+        "Add habit_completions array to DailyPlan type",
+        "Create frontend/src/hooks/useHabits.ts with useHabits(familyId) hook using TanStack Query",
         "Typecheck passes"
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Created spec/channels/application_cable/connection_spec.rb with 3 tests: valid session connects, no session rejected, nil warden user rejected. All 1626 tests pass."
+      "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Update frontend WebSocket to handle reconnection",
-      "description": "As a user, I need WebSocket to gracefully handle authentication state changes.",
+      "title": "Redesign Top 3 Outcomes section",
+      "description": "As a user, I want my Top 3 outcomes to be explicitly linked to weekly goals.",
       "acceptanceCriteria": [
-        "WebSocket reconnects when auth state changes in frontend/src/hooks/useNotificationWebSocket.ts",
-        "WebSocket disconnects cleanly on logout",
-        "No stale connection attempts after logout",
+        "Rename CardTitle from 'Top 3 Priorities' to 'Top 3 Outcomes Today'",
+        "Add subtitle text below title: 'What tasks drive your weekly plan forward?'",
+        "Add goal selector dropdown to each outcome input row",
+        "Filter goals dropdown to only show weekly, monthly, quarterly, annual goals (not daily)",
+        "Display linked goal as small badge/tag when selected",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
       "passes": true,
-      "notes": "Changed from token-based to session-based auth. Added connection ID tracking to prevent stale reconnections. Verified login/logout/re-login flow in browser."
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Build Non-Negotiables habit tracker UI",
+      "description": "As a user, I want a checklist of my daily habits to track completion.",
+      "acceptanceCriteria": [
+        "Add new Card section titled 'Non-Negotiables' after Top 3 Outcomes card",
+        "Fetch habits using useHabits hook",
+        "Display habits as labeled checkboxes in a responsive grid (3 columns on desktop, 2 on mobile)",
+        "Toggle checkbox calls saveChanges with updated habit_completions_attributes",
+        "Show completion count in card header (e.g., '7/9 complete')",
+        "Use Checkbox component from shadcn/ui",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Build Shutdown Notes UI section",
+      "description": "As a user, I want structured prompts for end-of-day reflection.",
+      "acceptanceCriteria": [
+        "Remove the 'Daily Intention' card",
+        "Add new 'Shutdown Notes' card at bottom of page (before navigation buttons)",
+        "First textarea with label 'What shipped today?' bound to shutdown_shipped",
+        "Second textarea with label 'What blocked me?' bound to shutdown_blocked",
+        "Both textareas auto-save on blur using existing pattern",
+        "Use Sunset icon from lucide-react for card header",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Remove Daily Tasks section from UI",
+      "description": "As a user, I want a cleaner daily focus card without the general tasks list.",
+      "acceptanceCriteria": [
+        "Remove the 'Today's Tasks' Card component from DailyPlanner.tsx",
+        "Remove the 'Yesterday's Unfinished Tasks' Card component",
+        "Remove the Progress Card component showing completion percentage",
+        "Remove newTaskTitle state and related handlers (handleAddTask, handleToggleTask, etc.)",
+        "Remove DndContext and SortableContext imports (no longer needed)",
+        "Keep DailyTask model and API unchanged for backwards compatibility",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Update daily planner header and styling",
+      "description": "As a user, I want the daily focus card to look clean and focused.",
+      "acceptanceCriteria": [
+        "Change header subtitle from 'Start your day with intention' to 'Daily Focus Card'",
+        "Adjust vertical spacing between cards (mb-6 is good)",
+        "Ensure 3-card layout works on mobile (stack vertically)",
+        "Keep Save status bar functionality",
+        "Keep navigation buttons at bottom",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
