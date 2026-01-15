@@ -76,7 +76,9 @@ export function Login() {
                 {serverError.suggestion && (
                   <p className="mt-1">
                     {serverError.suggestion}{" "}
-                    {serverError.suggestion.toLowerCase().includes("create") && (
+                    {serverError.suggestion
+                      .toLowerCase()
+                      .includes("create") && (
                       <Link
                         to="/register"
                         className="font-medium underline underline-offset-4 hover:opacity-80"

@@ -197,3 +197,21 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - Both destructive/10 background and text-destructive classes are needed for error styling
   - The session auth migration commit (629a2ff) included the Register.tsx changes
 ---
+
+## 2026-01-14 - US-012
+- Updated login form (Login.tsx) to display friendly error messages
+- Added ServerError interface with message and suggestion properties
+- Imported getErrorMessage from @/lib/errors
+- Updated onSubmit to use getErrorMessage helper for consistent error extraction
+- Added error alert above form showing main message with conditional links:
+  - "No account found" error shows "Create an account" link to /register
+  - "Incorrect email/password" error shows "Forgot password?" link to /forgot-password
+- Verified in browser: Both error scenarios display correctly with appropriate links
+- Files changed:
+  - `frontend/src/pages/Login.tsx`
+- **Learnings for future iterations:**
+  - Backend sessions controller returns suggestion only for "user not found" scenario
+  - When no suggestion is present (wrong password), show "Forgot password?" as contextual help
+  - Check suggestion.toLowerCase().includes("create") to conditionally render "Create an account" link
+  - Use conditional rendering (!serverError.suggestion) for the forgot password case
+---
