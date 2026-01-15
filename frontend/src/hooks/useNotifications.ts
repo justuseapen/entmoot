@@ -16,11 +16,11 @@ export const notificationsKeys = {
 
 // Get notifications
 export function useNotifications(limit?: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: notificationsKeys.list(limit),
-    queryFn: () => getNotifications(token!, limit),
-    enabled: !!token,
+    queryFn: () => getNotifications(limit),
+    enabled: isAuthenticated,
     // Refetch every 30 seconds to get new notifications
     refetchInterval: 30000,
     // Keep showing stale data while refetching
@@ -30,12 +30,11 @@ export function useNotifications(limit?: number) {
 
 // Mark notification as read
 export function useMarkNotificationAsRead() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (notificationId: number) =>
-      markNotificationAsRead(notificationId, token!),
+      markNotificationAsRead(notificationId),
     onSuccess: (response, notificationId) => {
       // Update the notification in the cache
       queryClient.setQueriesData(
@@ -57,11 +56,10 @@ export function useMarkNotificationAsRead() {
 
 // Mark all notifications as read
 export function useMarkAllNotificationsAsRead() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => markAllNotificationsAsRead(token!),
+    mutationFn: () => markAllNotificationsAsRead(),
     onSuccess: () => {
       // Update all notifications in cache to read
       queryClient.setQueriesData(

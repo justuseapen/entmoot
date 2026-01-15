@@ -8,6 +8,8 @@ Started: Wed Jan 14 17:28:39 EST 2026
 - When adding methods to concerns, ensure child controllers don't have conflicting method definitions
 - Error detection: Use `errors.where(:field, :error_type).any?` to check for specific validation errors (not `errors.added?`)
 - Auth controllers are at `app/controllers/api/v1/auth/` (registrations, sessions, passwords)
+- Frontend error handling: Use `ApiError` class from `@/lib/errors` and `getErrorMessage()` helper for user-friendly messages
+- Frontend API client: `apiFetch` in `@/lib/api.ts` throws `ApiError` with structured data (status, message, errors[], suggestion)
 ---
 
 ## 2026-01-14 - US-001
@@ -66,4 +68,113 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - `User.find_for_database_authentication(email:)` returns nil if user not found (does not raise)
   - For auth flows, distinguish between "not found" and "wrong credentials" to provide actionable suggestions
   - All 1618 tests pass after changes
+---
+
+## 2026-01-14 - US-005
+- Updated passwords controller to use ErrorResponse concern with friendly messages
+- Added FRIENDLY_ERROR_MESSAGES constant for password reset errors:
+  - Email not found: "We couldn't find an account with this email."
+  - Invalid/expired token: "This password reset link has expired. Please request a new one."
+  - Password too short: "Password must be at least 6 characters."
+  - Password mismatch: "Password confirmation doesn't match."
+- Implemented detect_reset_error_message method using errors.where() pattern
+- Files changed:
+  - `backend/app/controllers/api/v1/auth/passwords_controller.rb`
+  - `backend/spec/requests/api/v1/auth/passwords_spec.rb`
+- **Learnings for future iterations:**
+  - Devise's reset_password_by_token returns user with errors (even if user not found, returns new User with errors)
+  - Invalid token error type is `errors.where(:reset_password_token, :invalid)`
+  - All 1618 tests pass after changes
+---
+
+## 2026-01-14 - US-006
+- Updated families controller to use ErrorResponse concern with friendly messages
+- Changed set_family rescue handler to use `render_error` with friendly message:
+  - "This family doesn't exist or you don't have access to it."
+- Changed validation error handling to use `render_validation_errors` instead of `render_errors`:
+  - In create action (for RecordInvalid exceptions)
+  - In update action (for validation failures)
+- Updated specs to verify new error message format
+- Files changed:
+  - `backend/app/controllers/api/v1/families_controller.rb`
+  - `backend/spec/requests/api/v1/families_spec.rb`
+- **Learnings for future iterations:**
+  - `render_validation_errors(record)` takes the ActiveRecord object directly, not errors.full_messages
+  - ErrorResponse concern provides consistent JSON response format: { error: string, errors?: string[], suggestion?: string }
+  - All 1618 tests pass after changes
+---
+
+## 2026-01-14 - US-007
+- Updated goals controller to use ErrorResponse concern with friendly messages
+- Changed set_goal rescue handler to use `render_error`:
+  - "This goal doesn't exist or has been deleted."
+- Changed set_family rescue handler (duplicated in goals controller) to use `render_error`:
+  - "This family doesn't exist or you don't have access to it."
+- Changed AI refinement error handling to use friendly message:
+  - "Our AI assistant is temporarily unavailable. Please try again in a few minutes."
+- Changed validation error handling to use `render_validation_errors` in create/update actions
+- Updated specs to verify new error message formats
+- Files changed:
+  - `backend/app/controllers/api/v1/goals_controller.rb`
+  - `backend/spec/requests/api/v1/goals_spec.rb`
+- **Learnings for future iterations:**
+  - GoalRefinementService::RefinementError is the exception type for AI service failures
+  - Controllers that have their own set_family method (like GoalsController) need individual updates
+  - All 1618 tests pass after changes
+---
+
+## 2026-01-14 - US-008
+- Updated invitations controller to use ErrorResponse concern with friendly messages
+- Updated accept action to use helper methods for clear error messages:
+  - Invalid/missing token: "This invitation link is invalid. Please check the link or request a new invitation."
+  - Expired invitation: "This invitation has expired. Please ask for a new one."
+  - Already used: "This invitation has already been used."
+- Changed set_family rescue handler to use `render_error` with friendly message
+- Changed set_invitation rescue handler to use render_invalid_invitation helper
+- Changed validation error handling to use `render_validation_errors` instead of `render_errors`
+- Removed unused render_not_found and render_gone private methods (now using concern's render_error)
+- Added three private helper methods: render_invalid_invitation, render_expired_invitation, render_used_invitation
+- Files changed:
+  - `backend/app/controllers/api/v1/invitations_controller.rb`
+  - `backend/spec/requests/api/v1/invitations_spec.rb`
+- **Learnings for future iterations:**
+  - InvitationsController has both token-based lookups (accept via token) and ID-based lookups (set_invitation for destroy/resend)
+  - Use helper methods to keep accept method concise and pass Rubocop's MethodLength check (15 lines max)
+  - ClassLength limit is 150 lines - refactoring to one-liner methods using Ruby 3's `def method_name = expression` can help
+  - All 1618 tests pass after changes
+---
+
+## 2026-01-14 - US-009
+- Created frontend ApiError class and getErrorMessage helper
+- Created `frontend/src/lib/errors.ts` with:
+  - `ApiError` class extending Error with properties: message, errors (string[]), suggestion (string | undefined), status (number)
+  - `getErrorMessage(error: unknown)` helper returning `{ message: string, suggestion?: string }`
+- Network error handling: "Unable to connect. Please check your internet connection."
+- Unknown error fallback: "Something went wrong. Please try again."
+- Files changed:
+  - `frontend/src/lib/errors.ts` (new)
+- **Learnings for future iterations:**
+  - Frontend lib files are in `frontend/src/lib/`
+  - Use `Error.captureStackTrace` for proper stack traces in custom error classes
+  - Check for `TypeError` with message "Failed to fetch" for network errors
+  - Pre-existing TypeScript errors in codebase (AuthState.token removed) don't affect new code
+  - Typecheck passes for the new file (verified independently)
+---
+
+## 2026-01-14 - US-010
+- Updated apiFetch in `frontend/src/lib/api.ts` to throw ApiError with structured data
+- Imports ApiError class from `./errors`
+- When response.ok is false:
+  - Parses error JSON from response
+  - Extracts message from `error` or `message` field (backward compatible)
+  - Extracts `errors` array if present (defaults to empty array)
+  - Extracts `suggestion` if present
+  - Throws ApiError with status, message, errors, and suggestion
+- Files changed:
+  - `frontend/src/lib/api.ts`
+- **Learnings for future iterations:**
+  - Pre-existing TypeScript errors in codebase don't block frontend work (verified with ESLint)
+  - Use `Array.isArray()` for safe array detection
+  - Backend error format: `{ error: string, errors?: string[], suggestion?: string }`
+  - apiFetch is the central API client used by all lib files (auth.ts, goals.ts, families.ts, etc.)
 ---

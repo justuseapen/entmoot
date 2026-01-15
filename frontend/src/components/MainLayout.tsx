@@ -103,7 +103,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
-  const { user, token, logout, setLoading, isLoading } = useAuthStore();
+  const { user, logout, setLoading, isLoading } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -114,9 +114,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      if (token) {
-        await logoutApi(token);
-      }
+      await logoutApi();
     } catch {
       // Even if logout fails on server, clear local state
     } finally {

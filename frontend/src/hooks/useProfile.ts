@@ -11,42 +11,40 @@ import {
 } from "@/lib/profile";
 
 export function useUpdateProfile() {
-  const { token, setAuth, user, refreshToken } = useAuthStore();
+  const { setUser, isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      if (!token) throw new Error("Not authenticated");
-      return updateProfile(token, data);
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      return updateProfile(data);
     },
     onSuccess: (response) => {
       // Update the auth store with the new user data
-      if (user && token && refreshToken) {
-        setAuth(response.user, token, refreshToken);
-      }
+      setUser(response.user);
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 }
 
 export function useChangePassword() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useMutation({
     mutationFn: async (data: ChangePasswordData) => {
-      if (!token) throw new Error("Not authenticated");
-      return changePassword(token, data);
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      return changePassword(data);
     },
   });
 }
 
 export function useDeleteAccount() {
-  const { token, logout } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
 
   return useMutation({
     mutationFn: async (data: DeleteAccountData) => {
-      if (!token) throw new Error("Not authenticated");
-      return deleteAccount(token, data);
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      return deleteAccount(data);
     },
     onSuccess: () => {
       // Clear auth state after account deletion
@@ -56,25 +54,25 @@ export function useDeleteAccount() {
 }
 
 export function useExportUserData() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery({
     queryKey: ["user", "export"],
     queryFn: async () => {
-      if (!token) throw new Error("Not authenticated");
-      return exportUserData(token);
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      return exportUserData();
     },
     enabled: false, // Only fetch when manually triggered
   });
 }
 
 export function useExportUserDataMutation() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useMutation({
     mutationFn: async () => {
-      if (!token) throw new Error("Not authenticated");
-      return exportUserData(token);
+      if (!isAuthenticated) throw new Error("Not authenticated");
+      return exportUserData();
     },
   });
 }

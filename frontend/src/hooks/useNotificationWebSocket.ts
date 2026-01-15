@@ -12,30 +12,31 @@ interface WebSocketMessage {
 export type NotificationCallback = (notification: Notification) => void;
 
 // ActionCable WebSocket hook for real-time notifications
+// Note: With session-based auth, WebSocket authentication is handled via cookies
 export function useNotificationWebSocket(
   onNotification?: NotificationCallback
 ) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const tokenRef = useRef(token);
+  const isAuthenticatedRef = useRef(isAuthenticated);
   const onNotificationRef = useRef(onNotification);
 
   // Keep refs updated
   useEffect(() => {
-    tokenRef.current = token;
-  }, [token]);
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     onNotificationRef.current = onNotification;
   }, [onNotification]);
 
   useEffect(() => {
-    if (!token) {
-      // Clean up if no token
+    if (!isAuthenticated) {
+      // Clean up if not authenticated
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -48,17 +49,20 @@ export function useNotificationWebSocket(
     }
 
     function connect() {
-      const currentToken = tokenRef.current;
-      if (!currentToken || wsRef.current?.readyState === WebSocket.OPEN) {
+      if (
+        !isAuthenticatedRef.current ||
+        wsRef.current?.readyState === WebSocket.OPEN
+      ) {
         return;
       }
 
       // Determine WebSocket URL based on environment
+      // With session-based auth, the cookie will be sent automatically
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = import.meta.env.DEV
         ? "localhost:3000"
         : window.location.host;
-      const wsUrl = `${wsProtocol}//${wsHost}/cable?token=${encodeURIComponent(currentToken)}`;
+      const wsUrl = `${wsProtocol}//${wsHost}/cable`;
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -128,7 +132,7 @@ export function useNotificationWebSocket(
       ws.onclose = () => {
         wsRef.current = null;
         // Attempt to reconnect after 5 seconds if still authenticated
-        if (tokenRef.current) {
+        if (isAuthenticatedRef.current) {
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, 5000);
@@ -148,5 +152,5 @@ export function useNotificationWebSocket(
         wsRef.current = null;
       }
     };
-  }, [token, queryClient]);
+  }, [isAuthenticated, queryClient]);
 }

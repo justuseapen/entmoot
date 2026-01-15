@@ -68,14 +68,8 @@ export interface GetFeedbackResponse {
 
 // API functions
 export async function createFeedback(
-  data: CreateFeedbackData,
-  token?: string
+  data: CreateFeedbackData
 ): Promise<CreateFeedbackResponse> {
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
   // For screenshot uploads, we'd use FormData
   // For now, we'll just send JSON without screenshots
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -83,20 +77,12 @@ export async function createFeedback(
 
   return apiFetch<CreateFeedbackResponse>("/feedback", {
     method: "POST",
-    headers,
     body: JSON.stringify(jsonData),
   });
 }
 
-export async function getFeedback(
-  id: number,
-  token: string
-): Promise<GetFeedbackResponse> {
-  return apiFetch<GetFeedbackResponse>(`/feedback/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getFeedback(id: number): Promise<GetFeedbackResponse> {
+  return apiFetch<GetFeedbackResponse>(`/feedback/${id}`);
 }
 
 // Helper functions
@@ -177,80 +163,57 @@ export interface DismissNPSResponse {
 }
 
 // Proactive feedback API functions
-export async function getFeedbackEligibility(
-  token: string
-): Promise<FeedbackEligibility> {
-  return apiFetch<FeedbackEligibility>("/feedback/eligibility", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getFeedbackEligibility(): Promise<FeedbackEligibility> {
+  return apiFetch<FeedbackEligibility>("/feedback/eligibility");
 }
 
-export async function dismissNPS(token: string): Promise<DismissNPSResponse> {
+export async function dismissNPS(): Promise<DismissNPSResponse> {
   return apiFetch<DismissNPSResponse>("/feedback/dismiss_nps", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 export async function getNPSFollowUp(
-  score: number,
-  token: string
+  score: number
 ): Promise<NPSFollowUpResponse> {
   return apiFetch<NPSFollowUpResponse>(
-    `/feedback/nps_follow_up?score=${score}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/feedback/nps_follow_up?score=${score}`
   );
 }
 
 // Helper to submit NPS feedback
 export async function submitNPSFeedback(
   score: number,
-  followUp: string,
-  token: string
+  followUp: string
 ): Promise<CreateFeedbackResponse> {
-  return createFeedback(
-    {
-      report_type: "nps",
-      title: "NPS Survey Response",
-      description: followUp || undefined,
-      context_data: {
-        ...captureContext(),
-        score,
-        follow_up: followUp,
-      },
+  return createFeedback({
+    report_type: "nps",
+    title: "NPS Survey Response",
+    description: followUp || undefined,
+    context_data: {
+      ...captureContext(),
+      score,
+      follow_up: followUp,
     },
-    token
-  );
+  });
 }
 
 // Helper to submit feature feedback
 export async function submitFeatureFeedback(
   feature: string,
   rating: "positive" | "negative",
-  additionalFeedback: string | undefined,
-  token: string
+  additionalFeedback: string | undefined
 ): Promise<CreateFeedbackResponse> {
-  return createFeedback(
-    {
-      report_type: "quick_feedback",
-      title: `Feature Feedback: ${feature}`,
-      description: additionalFeedback,
-      context_data: {
-        ...captureContext(),
-        feature,
-        rating,
-      },
+  return createFeedback({
+    report_type: "quick_feedback",
+    title: `Feature Feedback: ${feature}`,
+    description: additionalFeedback,
+    context_data: {
+      ...captureContext(),
+      feature,
+      rating,
     },
-    token
-  );
+  });
 }
 
 // Helper to submit session feedback
@@ -259,22 +222,18 @@ export type SessionRating = 1 | 2 | 3 | 4 | 5;
 export async function submitSessionFeedback(
   flowType: string,
   rating: SessionRating,
-  additionalFeedback: string | undefined,
-  token: string
+  additionalFeedback: string | undefined
 ): Promise<CreateFeedbackResponse> {
-  return createFeedback(
-    {
-      report_type: "quick_feedback",
-      title: `Session Feedback: ${flowType}`,
-      description: additionalFeedback,
-      context_data: {
-        ...captureContext(),
-        feature: flowType,
-        rating: rating >= 4 ? "positive" : "negative",
-      },
+  return createFeedback({
+    report_type: "quick_feedback",
+    title: `Session Feedback: ${flowType}`,
+    description: additionalFeedback,
+    context_data: {
+      ...captureContext(),
+      feature: flowType,
+      rating: rating >= 4 ? "positive" : "negative",
     },
-    token
-  );
+  });
 }
 
 // Session feedback emoji options

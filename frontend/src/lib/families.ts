@@ -54,136 +54,92 @@ export interface InvitationData {
 }
 
 // Family endpoints
-export async function getFamilies(
-  token: string
-): Promise<{ families: Family[] }> {
-  return apiFetch<{ families: Family[] }>("/families", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getFamilies(): Promise<{ families: Family[] }> {
+  return apiFetch<{ families: Family[] }>("/families");
 }
 
 export async function getFamily(
-  id: number,
-  token: string
+  id: number
 ): Promise<{ family: FamilyWithMembers }> {
-  return apiFetch<{ family: FamilyWithMembers }>(`/families/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<{ family: FamilyWithMembers }>(`/families/${id}`);
 }
 
 export async function createFamily(
-  data: CreateFamilyData,
-  token: string
+  data: CreateFamilyData
 ): Promise<{ message: string; family: FamilyWithMembers }> {
   return apiFetch<{ message: string; family: FamilyWithMembers }>("/families", {
     method: "POST",
     body: JSON.stringify({ family: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 export async function updateFamily(
   id: number,
-  data: UpdateFamilyData,
-  token: string
+  data: UpdateFamilyData
 ): Promise<{ message: string; family: FamilyWithMembers }> {
   return apiFetch<{ message: string; family: FamilyWithMembers }>(
     `/families/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify({ family: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
-export async function deleteFamily(
-  id: number,
-  token: string
-): Promise<{ message: string }> {
+export async function deleteFamily(id: number): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/families/${id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 // Invitation endpoints
 export async function getInvitations(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<{ invitations: Invitation[] }> {
   return apiFetch<{ invitations: Invitation[] }>(
-    `/families/${familyId}/invitations`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/invitations`
   );
 }
 
 export async function sendInvitation(
   familyId: number,
-  data: InvitationData,
-  token: string
+  data: InvitationData
 ): Promise<{ message: string; invitation: Invitation }> {
   return apiFetch<{ message: string; invitation: Invitation }>(
     `/families/${familyId}/invitations`,
     {
       method: "POST",
       body: JSON.stringify({ invitation: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function resendInvitation(
   familyId: number,
-  invitationId: number,
-  token: string
+  invitationId: number
 ): Promise<{ message: string; invitation: Invitation }> {
   return apiFetch<{ message: string; invitation: Invitation }>(
     `/families/${familyId}/invitations/${invitationId}/resend`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function cancelInvitation(
   familyId: number,
-  invitationId: number,
-  token: string
+  invitationId: number
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(
     `/families/${familyId}/invitations/${invitationId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export interface AcceptInvitationParams {
   inviteToken: string;
-  authToken?: string;
   user?: {
     password: string;
     password_confirmation?: string;
@@ -210,37 +166,25 @@ export interface InvitationRequiresAuthResponse {
 export async function acceptInvitation(
   params: AcceptInvitationParams
 ): Promise<AcceptInvitationResponse> {
-  const headers: Record<string, string> = {};
-  if (params.authToken) {
-    headers.Authorization = `Bearer ${params.authToken}`;
-  }
-
   return apiFetch<AcceptInvitationResponse>(
     `/invitations/${params.inviteToken}/accept`,
     {
       method: "POST",
-      headers,
       body: params.user ? JSON.stringify({ user: params.user }) : undefined,
     }
   );
 }
 
 export async function getInvitationDetails(
-  inviteToken: string,
-  authToken?: string
+  inviteToken: string
 ): Promise<AcceptInvitationResponse | InvitationRequiresAuthResponse> {
-  const headers: Record<string, string> = {};
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
-  }
-
   // Try to accept - if user is logged in, it will succeed
   // If not, we'll get requires_auth: true with invitation details
   const response = await fetch(`/api/v1/invitations/${inviteToken}/accept`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...headers,
     },
   });
 
@@ -249,49 +193,35 @@ export async function getInvitationDetails(
 
 // Membership endpoints
 export async function getMembers(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<{ members: FamilyMember[] }> {
   return apiFetch<{ members: FamilyMember[] }>(
-    `/families/${familyId}/memberships`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/memberships`
   );
 }
 
 export async function updateMemberRole(
   familyId: number,
   membershipId: number,
-  role: MemberRole,
-  token: string
+  role: MemberRole
 ): Promise<{ message: string; member: FamilyMember }> {
   return apiFetch<{ message: string; member: FamilyMember }>(
     `/families/${familyId}/memberships/${membershipId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ membership: { role } }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function removeMember(
   familyId: number,
-  membershipId: number,
-  token: string
+  membershipId: number
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(
     `/families/${familyId}/memberships/${membershipId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }

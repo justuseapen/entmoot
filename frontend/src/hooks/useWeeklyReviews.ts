@@ -25,47 +25,46 @@ export const weeklyReviewKeys = {
 
 // Get current week's review (creates if not exists)
 export function useCurrentWeeklyReview(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: weeklyReviewKeys.current(familyId),
-    queryFn: () => getCurrentWeeklyReview(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getCurrentWeeklyReview(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get all weekly reviews for the user
 export function useWeeklyReviews(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: weeklyReviewKeys.list(familyId),
-    queryFn: () => getWeeklyReviews(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getWeeklyReviews(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get a single weekly review
 export function useWeeklyReview(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: weeklyReviewKeys.detail(familyId, reviewId),
-    queryFn: () => getWeeklyReview(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getWeeklyReview(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Get metrics for a weekly review
 export function useWeeklyReviewMetrics(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: weeklyReviewKeys.metrics(familyId, reviewId),
-    queryFn: () => getWeeklyReviewMetrics(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getWeeklyReviewMetrics(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Update a weekly review
 export function useUpdateWeeklyReview(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,7 +74,7 @@ export function useUpdateWeeklyReview(familyId: number) {
     }: {
       reviewId: number;
       data: UpdateWeeklyReviewData;
-    }) => updateWeeklyReview(familyId, reviewId, data, token!),
+    }) => updateWeeklyReview(familyId, reviewId, data),
     onSuccess: (response, { reviewId }) => {
       // Update the current review cache
       if (response.weekly_review) {

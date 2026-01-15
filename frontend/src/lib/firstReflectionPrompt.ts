@@ -23,35 +23,24 @@ export interface QuickReflectionResponse {
   prompt: string;
 }
 
-export async function getFirstReflectionPromptStatus(
-  token: string
-): Promise<FirstReflectionPromptStatus> {
+export async function getFirstReflectionPromptStatus(): Promise<FirstReflectionPromptStatus> {
   return apiFetch<FirstReflectionPromptStatus>(
-    "/users/me/first_reflection_prompt",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    "/users/me/first_reflection_prompt"
   );
 }
 
-export async function dismissFirstReflectionPrompt(
-  token: string
-): Promise<{ dismissed: boolean }> {
+export async function dismissFirstReflectionPrompt(): Promise<{
+  dismissed: boolean;
+}> {
   return apiFetch<{ dismissed: boolean }>(
     "/users/me/first_reflection_prompt/dismiss",
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function submitQuickReflection(
-  token: string,
   response: string,
   familyId?: number
 ): Promise<QuickReflectionResponse> {
@@ -64,10 +53,6 @@ export async function submitQuickReflection(
     "/users/me/first_reflection_prompt",
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(params),
     }
   );

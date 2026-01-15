@@ -37,24 +37,6 @@ RSpec.describe "Api::V1::Auth::Users" do
 
         expect(response).to have_http_status(:unauthorized)
       end
-
-      it "returns 401 with invalid token" do
-        get "/api/v1/auth/me", headers: { "Authorization" => "Bearer invalid_token" }
-
-        expect(response).to have_http_status(:unauthorized)
-      end
-
-      it "returns 401 with expired token" do
-        user = create(:user)
-        # Generate a token, then add it to denylist
-        token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
-        payload = JWT.decode(token, nil, false).first
-        JwtDenylist.create!(jti: payload["jti"], exp: Time.zone.at(payload["exp"]))
-
-        get "/api/v1/auth/me", headers: { "Authorization" => "Bearer #{token}" }
-
-        expect(response).to have_http_status(:unauthorized)
-      end
     end
   end
 end

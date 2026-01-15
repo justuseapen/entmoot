@@ -6,13 +6,12 @@ export interface User {
   name: string;
   avatar_url: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface AuthResponse {
+  message: string;
   user: User;
-  token: string;
-  refresh_token: string;
 }
 
 export interface RegisterData {
@@ -25,11 +24,6 @@ export interface RegisterData {
 export interface LoginData {
   email: string;
   password: string;
-}
-
-export interface RefreshResponse {
-  token: string;
-  refresh_token: string;
 }
 
 export interface ApiError {
@@ -51,28 +45,12 @@ export async function login(data: LoginData): Promise<AuthResponse> {
   });
 }
 
-export async function logout(token: string): Promise<void> {
+export async function logout(): Promise<void> {
   await apiFetch<{ message: string }>("/auth/logout", {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
-export async function getCurrentUser(token: string): Promise<User> {
-  return apiFetch<User>("/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
-
-export async function refreshToken(
-  refreshToken: string
-): Promise<RefreshResponse> {
-  return apiFetch<RefreshResponse>("/auth/refresh", {
-    method: "POST",
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
+export async function getCurrentUser(): Promise<{ user: User }> {
+  return apiFetch<{ user: User }>("/auth/me");
 }

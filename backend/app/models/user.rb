@@ -2,8 +2,7 @@
 
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
+         :recoverable, :rememberable, :validatable
 
   has_many :refresh_tokens, dependent: :destroy
   has_many :family_memberships, dependent: :destroy
@@ -30,10 +29,6 @@ class User < ApplicationRecord
   has_many :outreach_histories, dependent: :destroy
 
   validates :name, presence: true
-
-  def jwt_payload
-    { user_id: id }
-  end
 
   def membership_for(family)
     family_memberships.find_by(family: family)

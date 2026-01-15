@@ -25,32 +25,31 @@ export const goalKeys = {
 
 // Goal queries
 export function useGoals(familyId: number, filters?: GoalFilters) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: goalKeys.list(familyId, filters),
-    queryFn: () => getGoals(familyId, token!, filters),
-    enabled: !!token && !!familyId,
+    queryFn: () => getGoals(familyId, filters),
+    enabled: isAuthenticated && !!familyId,
     select: (data) => data.goals,
   });
 }
 
 export function useGoal(familyId: number, goalId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: goalKeys.detail(familyId, goalId),
-    queryFn: () => getGoal(familyId, goalId, token!),
-    enabled: !!token && !!familyId && !!goalId,
+    queryFn: () => getGoal(familyId, goalId),
+    enabled: isAuthenticated && !!familyId && !!goalId,
     select: (data) => data.goal,
   });
 }
 
 // Goal mutations
 export function useCreateGoal(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateGoalData) => createGoal(familyId, data, token!),
+    mutationFn: (data: CreateGoalData) => createGoal(familyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
       // Also invalidate first goal prompt status since user may have created their first goal
@@ -60,12 +59,10 @@ export function useCreateGoal(familyId: number) {
 }
 
 export function useUpdateGoal(familyId: number, goalId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateGoalData) =>
-      updateGoal(familyId, goalId, data, token!),
+    mutationFn: (data: UpdateGoalData) => updateGoal(familyId, goalId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
       queryClient.invalidateQueries({
@@ -76,11 +73,10 @@ export function useUpdateGoal(familyId: number, goalId: number) {
 }
 
 export function useDeleteGoal(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (goalId: number) => deleteGoal(familyId, goalId, token!),
+    mutationFn: (goalId: number) => deleteGoal(familyId, goalId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
     },
@@ -89,10 +85,8 @@ export function useDeleteGoal(familyId: number) {
 
 // AI Refinement mutation
 export function useRefineGoal(familyId: number, goalId: number) {
-  const { token } = useAuthStore();
-
   return useMutation({
-    mutationFn: () => refineGoal(familyId, goalId, token!),
+    mutationFn: () => refineGoal(familyId, goalId),
     // Don't invalidate queries - refinement doesn't change the goal until user accepts
   });
 }

@@ -55,62 +55,37 @@ export interface UpdateWeeklyReviewData {
 
 // API functions
 export async function getCurrentWeeklyReview(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<WeeklyReview> {
-  return apiFetch<WeeklyReview>(
-    `/api/v1/families/${familyId}/weekly_reviews/current`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  return apiFetch<WeeklyReview>(`/families/${familyId}/weekly_reviews/current`);
 }
 
 export async function getWeeklyReviews(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<WeeklyReviewsResponse> {
   return apiFetch<WeeklyReviewsResponse>(
-    `/api/v1/families/${familyId}/weekly_reviews`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/weekly_reviews`
   );
 }
 
 export async function getWeeklyReview(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<WeeklyReview> {
   return apiFetch<WeeklyReview>(
-    `/api/v1/families/${familyId}/weekly_reviews/${reviewId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/weekly_reviews/${reviewId}`
   );
 }
 
 export async function updateWeeklyReview(
   familyId: number,
   reviewId: number,
-  data: UpdateWeeklyReviewData,
-  token: string
+  data: UpdateWeeklyReviewData
 ): Promise<WeeklyReviewResponse> {
   return apiFetch<WeeklyReviewResponse>(
-    `/api/v1/families/${familyId}/weekly_reviews/${reviewId}`,
+    `/families/${familyId}/weekly_reviews/${reviewId}`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ weekly_review: data }),
     }
   );
@@ -118,16 +93,10 @@ export async function updateWeeklyReview(
 
 export async function getWeeklyReviewMetrics(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<{ metrics: WeeklyReviewMetrics }> {
   return apiFetch<{ metrics: WeeklyReviewMetrics }>(
-    `/api/v1/families/${familyId}/weekly_reviews/${reviewId}/metrics`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/weekly_reviews/${reviewId}/metrics`
   );
 }
 

@@ -46,12 +46,9 @@ export type LeaderboardScope = "all_time" | "weekly";
 // Get family leaderboard
 export async function getLeaderboard(
   familyId: number,
-  token: string,
   scope: LeaderboardScope = "all_time"
 ): Promise<LeaderboardResponse> {
-  return apiFetch(`/api/v1/families/${familyId}/leaderboard?scope=${scope}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  return apiFetch(`/families/${familyId}/leaderboard?scope=${scope}`);
 }
 
 // Helper to format rank with suffix

@@ -46,7 +46,7 @@ export function Login() {
     setLoading(true);
     try {
       const response = await login(data);
-      setAuth(response.user, response.token, response.refresh_token);
+      setAuth(response.user);
       navigate(from, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";

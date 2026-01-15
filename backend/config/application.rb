@@ -43,6 +43,13 @@ module Backend
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # Add session and cookie middleware for session-based authentication
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore,
+                          key: "_entmoot_session",
+                          same_site: :lax,
+                          secure: Rails.env.production?
+
     # Use Sidekiq for background job processing
     config.active_job.queue_adapter = :sidekiq
 

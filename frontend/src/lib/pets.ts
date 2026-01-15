@@ -29,71 +29,47 @@ export interface UpdatePetData {
 }
 
 // Pet endpoints
-export async function getPets(
-  familyId: number,
-  token: string
-): Promise<{ pets: Pet[] }> {
-  return apiFetch<{ pets: Pet[] }>(`/families/${familyId}/pets`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getPets(familyId: number): Promise<{ pets: Pet[] }> {
+  return apiFetch<{ pets: Pet[] }>(`/families/${familyId}/pets`);
 }
 
 export async function getPet(
   familyId: number,
-  petId: number,
-  token: string
+  petId: number
 ): Promise<{ pet: Pet }> {
-  return apiFetch<{ pet: Pet }>(`/families/${familyId}/pets/${petId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<{ pet: Pet }>(`/families/${familyId}/pets/${petId}`);
 }
 
 export async function createPet(
   familyId: number,
-  data: CreatePetData,
-  token: string
+  data: CreatePetData
 ): Promise<{ message: string; pet: Pet }> {
   return apiFetch<{ message: string; pet: Pet }>(`/families/${familyId}/pets`, {
     method: "POST",
     body: JSON.stringify({ pet: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 export async function updatePet(
   familyId: number,
   petId: number,
-  data: UpdatePetData,
-  token: string
+  data: UpdatePetData
 ): Promise<{ message: string; pet: Pet }> {
   return apiFetch<{ message: string; pet: Pet }>(
     `/families/${familyId}/pets/${petId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ pet: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function deletePet(
   familyId: number,
-  petId: number,
-  token: string
+  petId: number
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/families/${familyId}/pets/${petId}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 

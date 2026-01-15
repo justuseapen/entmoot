@@ -30,15 +30,11 @@ module Api
         end
 
         def render_success_response(user)
-          token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
-          refresh = RefreshToken.create!(user: user, expires_at: 30.days.from_now)
-          response.headers["Authorization"] = "Bearer #{token}"
+          sign_in(:user, user)
 
           render json: {
             message: "Signed up successfully.",
-            user: user_response(user),
-            token: token,
-            refresh_token: refresh.token
+            user: user_response(user)
           }, status: :created
         end
 

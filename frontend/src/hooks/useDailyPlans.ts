@@ -20,27 +20,26 @@ export const dailyPlanKeys = {
 
 // Today's plan query
 export function useTodaysPlan(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: dailyPlanKeys.today(familyId),
-    queryFn: () => getTodaysPlan(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getTodaysPlan(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Specific daily plan query
 export function useDailyPlan(familyId: number, planId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: dailyPlanKeys.detail(familyId, planId),
-    queryFn: () => getDailyPlan(familyId, planId, token!),
-    enabled: !!token && !!familyId && !!planId,
+    queryFn: () => getDailyPlan(familyId, planId),
+    enabled: isAuthenticated && !!familyId && !!planId,
   });
 }
 
 // Update daily plan mutation
 export function useUpdateDailyPlan(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -50,7 +49,7 @@ export function useUpdateDailyPlan(familyId: number) {
     }: {
       planId: number;
       data: UpdateDailyPlanData;
-    }) => updateDailyPlan(familyId, planId, data, token!),
+    }) => updateDailyPlan(familyId, planId, data),
     onSuccess: (response) => {
       // Update the today's plan cache
       queryClient.setQueryData(

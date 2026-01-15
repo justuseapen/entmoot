@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  include ActionController::Cookies
   include ErrorResponse
 
   rescue_from StandardError, with: :handle_unexpected_error

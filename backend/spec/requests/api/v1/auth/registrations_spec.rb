@@ -27,11 +27,13 @@ RSpec.describe "Api::V1::Auth::Registrations" do
         expect(json_response["user"]["name"]).to eq("Test User")
       end
 
-      it "returns a JWT token in the Authorization header" do
+      it "signs in the user after registration (session auth)" do
         post "/api/v1/auth/register", params: valid_params
 
-        expect(response.headers["Authorization"]).to be_present
-        expect(response.headers["Authorization"]).to start_with("Bearer ")
+        # After registration, subsequent requests should be authenticated via session
+        get "/api/v1/auth/me"
+        expect(response).to have_http_status(:ok)
+        expect(json_response["user"]["email"]).to eq("test@example.com")
       end
 
       it "creates a user with an avatar_url when provided" do
@@ -52,7 +54,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
 
         post "/api/v1/auth/register", params: invalid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["error"]).to eq("Email is required.")
         expect(json_response["errors"]).to include("Email can't be blank")
       end
@@ -64,7 +66,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
 
         post "/api/v1/auth/register", params: invalid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["error"]).to eq("Password must be at least 6 characters.")
         expect(json_response["errors"]).to include("Password is too short (minimum is 6 characters)")
       end
@@ -75,7 +77,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
 
         post "/api/v1/auth/register", params: invalid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["errors"]).to include("Password confirmation doesn't match Password")
       end
 
@@ -84,7 +86,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
 
         post "/api/v1/auth/register", params: valid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["error"]).to eq("This email is already registered.")
         expect(json_response["suggestion"]).to eq("Try signing in instead.")
         expect(json_response["errors"]).to include("Email has already been taken")
@@ -96,7 +98,7 @@ RSpec.describe "Api::V1::Auth::Registrations" do
 
         post "/api/v1/auth/register", params: invalid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response["error"]).to eq("Name is required.")
         expect(json_response["errors"]).to include("Name can't be blank")
       end

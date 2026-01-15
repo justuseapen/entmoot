@@ -25,47 +25,46 @@ export const annualReviewKeys = {
 
 // Get current year's review (creates if not exists)
 export function useCurrentAnnualReview(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: annualReviewKeys.current(familyId),
-    queryFn: () => getCurrentAnnualReview(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getCurrentAnnualReview(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get all annual reviews for the user
 export function useAnnualReviews(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: annualReviewKeys.list(familyId),
-    queryFn: () => getAnnualReviews(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getAnnualReviews(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get a single annual review
 export function useAnnualReview(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: annualReviewKeys.detail(familyId, reviewId),
-    queryFn: () => getAnnualReview(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getAnnualReview(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Get metrics for an annual review
 export function useAnnualReviewMetrics(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: annualReviewKeys.metrics(familyId, reviewId),
-    queryFn: () => getAnnualReviewMetrics(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getAnnualReviewMetrics(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Update an annual review
 export function useUpdateAnnualReview(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,7 +74,7 @@ export function useUpdateAnnualReview(familyId: number) {
     }: {
       reviewId: number;
       data: UpdateAnnualReviewData;
-    }) => updateAnnualReview(familyId, reviewId, data, token!),
+    }) => updateAnnualReview(familyId, reviewId, data),
     onSuccess: (response, { reviewId }) => {
       // Update the current review cache
       if (response.annual_review) {

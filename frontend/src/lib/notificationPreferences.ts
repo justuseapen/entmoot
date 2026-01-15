@@ -152,27 +152,19 @@ export const INACTIVITY_THRESHOLD_OPTIONS = [
 ];
 
 // Get notification preferences
-export async function getNotificationPreferences(
-  token: string
-): Promise<{ notification_preferences: NotificationPreferences }> {
-  return apiFetch("/users/me/notification_preferences", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getNotificationPreferences(): Promise<{
+  notification_preferences: NotificationPreferences;
+}> {
+  return apiFetch("/users/me/notification_preferences");
 }
 
 // Update notification preferences
 export async function updateNotificationPreferences(
-  data: UpdateNotificationPreferencesData,
-  token: string
+  data: UpdateNotificationPreferencesData
 ): Promise<{ notification_preferences: NotificationPreferences }> {
   return apiFetch("/users/me/notification_preferences", {
     method: "PATCH",
     body: JSON.stringify({ notification_preferences: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
