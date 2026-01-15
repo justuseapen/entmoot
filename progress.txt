@@ -178,3 +178,22 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - Backend error format: `{ error: string, errors?: string[], suggestion?: string }`
   - apiFetch is the central API client used by all lib files (auth.ts, goals.ts, families.ts, etc.)
 ---
+
+## 2026-01-14 - US-011
+- Updated registration form (Register.tsx) to display friendly error messages
+- Added ServerError interface with message, suggestion, and fieldErrors properties
+- Imported ApiError and getErrorMessage from @/lib/errors
+- Updated onSubmit to extract field-specific errors from ApiError.errors array
+- Added error alert above form showing main message and suggestion with Sign In link
+- Each field now displays both client-side validation errors and server-side errors
+- Verified in browser: "This email is already registered." with "Try signing in instead. Sign in" link shows correctly
+- Field-specific error "Email has already been taken" displays below the email field
+- Files changed:
+  - `frontend/src/pages/Register.tsx`
+- **Learnings for future iterations:**
+  - Backend errors array contains full validation messages like "Email has already been taken"
+  - Map errors to fields by checking if message contains field name (toLowerCase().includes())
+  - Use serverError?.fieldErrors[field] pattern to show server-side field errors alongside client validation
+  - Both destructive/10 background and text-destructive classes are needed for error styling
+  - The session auth migration commit (629a2ff) included the Register.tsx changes
+---
