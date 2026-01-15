@@ -114,3 +114,61 @@ Started: Thu Jan 15 09:15:55 EST 2026
   - The saveChanges function signature extended to accept 4th parameter for habitCompletions
   - All 1621 backend tests pass
 ---
+
+## 2026-01-15 12:15 - US-008
+- **What was implemented:** Built Shutdown Notes UI section with structured end-of-day reflection prompts
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Removed Daily Intention card, added Shutdown Notes card with Sunset icon, two textareas with auto-save on blur
+- **Learnings for future iterations:**
+  - Use Sunset icon from lucide-react for end-of-day/shutdown themed sections
+  - The saveChanges function can be extended with additional optional parameters for new fields
+  - For text areas with auto-save on blur: create a local state setter, onChange handler to update local state, and onBlur handler to call saveChanges
+  - When removing a card, also remove its related handlers (e.g., handleIntentionChange, handleIntentionBlur were removed with the Daily Intention card)
+  - State variables can be kept even if UI is removed (intention still persists in saveChanges for backwards compatibility)
+  - Typecheck passes
+  - Browser verification confirmed auto-save works with the "Saved" status indicator
+---
+
+## 2026-01-15 13:00 - US-009
+- **What was implemented:** Removed Daily Tasks section from UI for a cleaner daily focus card
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Major cleanup removing task-related UI and state
+- **What was removed:**
+  - Today's Tasks Card component with task checklist
+  - Yesterday's Unfinished Tasks Card component
+  - Progress Card showing completion percentage
+  - `newTaskTitle` state and `setNewTaskTitle` setter
+  - Task handlers: `handleAddTask`, `handleToggleTask`, `handleRemoveTask`, `handleLinkTaskToGoal`, `handleCarryOverTask`, `handleDragEnd`
+  - `localTasks`, `initialTasks`, `tasks`, `visibleTasks`, `completionPercentage`, `yesterdayIncompleteTasks` variables
+  - DndContext and SortableContext imports from @dnd-kit
+  - `DailyTask`, `DailyTaskAttributes` type imports
+  - `Progress`, `SortableTaskItem`, `InlineEmptyState` component imports
+  - `Plus`, `CheckCircle2`, `AlertCircle`, `ArrowRight` icon imports
+- **Learnings for future iterations:**
+  - When removing major UI sections, also clean up: state variables, handlers, imports, and computed values
+  - The saveChanges function signature was simplified to remove the tasks parameter
+  - Keep the DailyTask model and API unchanged for backwards compatibility
+  - The Daily Focus Card now shows only: Top 3 Outcomes, Non-Negotiables, and Shutdown Notes
+  - Removed 301 lines of code, significantly simplifying the component
+  - Typecheck passes
+  - Browser verification confirmed the cleaner UI works correctly
+---
+
+## 2026-01-15 13:45 - US-010
+- **What was implemented:** Updated daily planner header and styling
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Changed header subtitle from 'Start your day with intention' to 'Daily Focus Card'
+- **Verified:**
+  - Desktop view: Cards use mb-6 spacing, header displays correctly
+  - Mobile view: Cards stack vertically, Non-Negotiables grid switches from 3 columns to 2 columns
+  - Save status bar functionality preserved
+  - Navigation buttons remain at bottom and wrap nicely on mobile
+  - Typecheck passes
+  - Browser verification confirmed on both desktop and mobile viewports
+- **Learnings for future iterations:**
+  - The Daily Planner page is now fully redesigned as a "Daily Focus Card" with 3 main sections:
+    1. Top 3 Outcomes Today (with goal linking)
+    2. Non-Negotiables (habit tracker with responsive grid)
+    3. Shutdown Notes (structured end-of-day reflection)
+  - Responsive grid classes: `grid grid-cols-2 gap-3 md:grid-cols-3` for 2-col mobile, 3-col desktop
+---
