@@ -14,6 +14,7 @@ class DailyPlan < ApplicationRecord
 
   accepts_nested_attributes_for :daily_tasks, allow_destroy: true
   accepts_nested_attributes_for :top_priorities, allow_destroy: true
+  accepts_nested_attributes_for :habit_completions
 
   scope :for_date, ->(date) { where(date: date) }
 
