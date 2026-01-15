@@ -7,15 +7,12 @@ import {
 import type { FirstGoalPromptStatus } from "@/lib/firstGoalPrompt";
 
 export function useFirstGoalPromptStatus() {
-  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return useQuery<FirstGoalPromptStatus>({
     queryKey: ["firstGoalPrompt"],
-    queryFn: () => {
-      if (!token) throw new Error("No token");
-      return getFirstGoalPromptStatus(token);
-    },
-    enabled: !!token,
+    queryFn: () => getFirstGoalPromptStatus(),
+    enabled: isAuthenticated,
     // Check every 30 seconds while viewing
     refetchInterval: 30000,
     // Stale time of 10 seconds - don't refetch immediately
@@ -24,14 +21,10 @@ export function useFirstGoalPromptStatus() {
 }
 
 export function useDismissFirstGoalPrompt() {
-  const token = useAuthStore((state) => state.token);
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => {
-      if (!token) throw new Error("No token");
-      return dismissFirstGoalPrompt(token);
-    },
+    mutationFn: () => dismissFirstGoalPrompt(),
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ["firstGoalPrompt"] });

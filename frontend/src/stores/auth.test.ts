@@ -7,8 +7,6 @@ describe("useAuthStore", () => {
     // Reset store to initial state before each test
     useAuthStore.setState({
       user: null,
-      token: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
     });
@@ -18,46 +16,38 @@ describe("useAuthStore", () => {
     it("starts with no user and not authenticated", () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
-      expect(state.token).toBeNull();
-      expect(state.refreshToken).toBeNull();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
 
   describe("setAuth", () => {
-    it("sets user and tokens correctly", () => {
+    it("sets user and marks as authenticated", () => {
       const mockUser = createMockUser();
-      const token = "jwt-token";
-      const refreshToken = "refresh-token";
 
-      useAuthStore.getState().setAuth(mockUser, token, refreshToken);
+      useAuthStore.getState().setAuth(mockUser);
 
       const state = useAuthStore.getState();
       expect(state.user).toEqual(mockUser);
-      expect(state.token).toBe(token);
-      expect(state.refreshToken).toBe(refreshToken);
       expect(state.isAuthenticated).toBe(true);
       expect(state.isLoading).toBe(false);
     });
   });
 
-  describe("setTokens", () => {
-    it("updates tokens without affecting user", () => {
+  describe("setUser", () => {
+    it("updates user without affecting auth state", () => {
       const mockUser = createMockUser();
+      const updatedUser = { ...mockUser, name: "Updated Name" };
 
       // First set auth
-      useAuthStore
-        .getState()
-        .setAuth(mockUser, "old-token", "old-refresh-token");
+      useAuthStore.getState().setAuth(mockUser);
 
-      // Then update tokens
-      useAuthStore.getState().setTokens("new-token", "new-refresh-token");
+      // Then update user
+      useAuthStore.getState().setUser(updatedUser);
 
       const state = useAuthStore.getState();
-      expect(state.user).toEqual(mockUser);
-      expect(state.token).toBe("new-token");
-      expect(state.refreshToken).toBe("new-refresh-token");
+      expect(state.user).toEqual(updatedUser);
+      expect(state.isAuthenticated).toBe(true);
     });
   });
 
@@ -76,15 +66,13 @@ describe("useAuthStore", () => {
       const mockUser = createMockUser();
 
       // First set auth
-      useAuthStore.getState().setAuth(mockUser, "token", "refresh-token");
+      useAuthStore.getState().setAuth(mockUser);
 
       // Then logout
       useAuthStore.getState().logout();
 
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
-      expect(state.token).toBeNull();
-      expect(state.refreshToken).toBeNull();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
     });

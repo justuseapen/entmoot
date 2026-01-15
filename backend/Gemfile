@@ -41,12 +41,12 @@ gem "twilio-ruby", "~> 7.0"
 gem "rack-attack", "~> 6.7"
 
 # Error tracking (Sentry SDK - works with Glitchtip)
-gem "sentry-ruby", "~> 5.22"
 gem "sentry-rails", "~> 5.22"
+gem "sentry-ruby", "~> 5.22"
 gem "sentry-sidekiq", "~> 5.22"
 
 # Environment variables from .env file
-gem "dotenv-rails", groups: [:development, :test]
+gem "dotenv-rails", groups: %i[development test]
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"

@@ -32,7 +32,7 @@ module Api
             invitation: invitation_response(@invitation)
           }, status: :created
         else
-          render_errors(@invitation.errors.full_messages)
+          render_validation_errors(@invitation)
         end
       end
 
@@ -56,9 +56,9 @@ module Api
       def accept
         @invitation = Invitation.find_by(token: params[:token])
 
-        return render_not_found("Invitation not found") if @invitation.nil?
-        return render_gone("Invitation has expired") if @invitation.expired?
-        return render_gone("Invitation has already been accepted") if @invitation.accepted?
+        return render_invalid_invitation if @invitation.nil?
+        return render_expired_invitation if @invitation.expired?
+        return render_used_invitation if @invitation.accepted?
 
         process_invitation_acceptance
       end
@@ -68,14 +68,25 @@ module Api
       def set_family
         @family = Family.find(params[:family_id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Family not found" }, status: :not_found
+        render_error("This family doesn't exist or you don't have access to it.", status: :not_found)
       end
 
       def set_invitation
         @invitation = Invitation.find(params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Invitation not found" }, status: :not_found
+        render_invalid_invitation
       end
+
+      def render_invalid_invitation
+        render_error("This invitation link is invalid. Please check the link or request a new invitation.",
+                     status: :not_found)
+      end
+
+      def render_expired_invitation
+        render_error("This invitation has expired. Please ask for a new one.", status: :gone)
+      end
+
+      def render_used_invitation = render_error("This invitation has already been used.", status: :gone)
 
       def invitation_params
         params.require(:invitation).permit(:email, :role)
@@ -108,14 +119,6 @@ module Api
         else
           render_error("Failed to accept invitation")
         end
-      end
-
-      def render_not_found(message)
-        render json: { error: message }, status: :not_found
-      end
-
-      def render_gone(message)
-        render json: { error: message }, status: :gone
       end
 
       def find_or_require_user
@@ -152,7 +155,7 @@ module Api
         user = User.new(user_params_for_invitation)
         return user if user.save
 
-        render_errors(user.errors.full_messages)
+        render_validation_errors(user)
         nil
       end
 

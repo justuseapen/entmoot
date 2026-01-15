@@ -24,45 +24,44 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         expect(json_response["user"]["email"]).to eq("test@example.com")
       end
 
-      it "returns a JWT token in the Authorization header" do
+      it "returns user id, name, and avatar_url" do
+        user.update!(name: "Test User", avatar_url: "https://example.com/avatar.png")
         post "/api/v1/auth/login", params: valid_params
 
-        expect(response.headers["Authorization"]).to be_present
-        expect(response.headers["Authorization"]).to start_with("Bearer ")
+        expect(json_response["user"]["id"]).to eq(user.id)
+        expect(json_response["user"]["name"]).to eq("Test User")
+        expect(json_response["user"]["avatar_url"]).to eq("https://example.com/avatar.png")
       end
 
-      it "returns a refresh token" do
+      it "sets a session cookie for authenticated requests" do
         post "/api/v1/auth/login", params: valid_params
 
-        expect(json_response["refresh_token"]).to be_present
-      end
-
-      it "creates a refresh token for the user" do
-        expect do
-          post "/api/v1/auth/login", params: valid_params
-        end.to change(RefreshToken, :count).by(1)
-
-        refresh_token = RefreshToken.last
-        expect(refresh_token.user).to eq(user)
-        expect(refresh_token.expires_at).to be > 29.days.from_now
+        # After login, subsequent requests should be authenticated via session
+        get "/api/v1/auth/me"
+        expect(response).to have_http_status(:ok)
+        expect(json_response["user"]["email"]).to eq("test@example.com")
       end
     end
 
     context "with invalid credentials" do
-      it "returns 401 with wrong password" do
+      it "returns 401 with friendly message for wrong password" do
         post "/api/v1/auth/login", params: {
           user: { email: "test@example.com", password: "wrongpassword" }
         }
 
         expect(response).to have_http_status(:unauthorized)
+        expect(json_response["error"]).to eq("Incorrect email or password. Please try again.")
+        expect(json_response["suggestion"]).to be_nil
       end
 
-      it "returns 401 with non-existent email" do
+      it "returns 401 with friendly message and suggestion for non-existent email" do
         post "/api/v1/auth/login", params: {
           user: { email: "nonexistent@example.com", password: "password123" }
         }
 
         expect(response).to have_http_status(:unauthorized)
+        expect(json_response["error"]).to eq("No account found with this email.")
+        expect(json_response["suggestion"]).to eq("Would you like to create one?")
       end
     end
   end
@@ -71,8 +70,6 @@ RSpec.describe "Api::V1::Auth::Sessions" do
     let!(:user) { create(:user) }
 
     context "when authenticated" do
-      before { create(:refresh_token, user: user) }
-
       it "returns 200 and logs out successfully" do
         delete "/api/v1/auth/logout", headers: auth_headers(user)
 
@@ -80,19 +77,24 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         expect(json_response["message"]).to eq("Logged out successfully.")
       end
 
-      it "revokes all active refresh tokens" do
-        create(:refresh_token, user: user) # Create another refresh token
+      it "invalidates the session after logout" do
+        # Login via the actual endpoint to establish session
+        post "/api/v1/auth/login", params: {
+          user: { email: user.email, password: "password123" }
+        }
+        expect(response).to have_http_status(:ok)
 
-        delete "/api/v1/auth/logout", headers: auth_headers(user)
+        # Verify we're authenticated
+        get "/api/v1/auth/me"
+        expect(response).to have_http_status(:ok)
 
-        expect(user.refresh_tokens.active.count).to eq(0)
-        expect(user.refresh_tokens.pluck(:revoked_at).compact.count).to eq(2)
-      end
+        # Logout
+        delete "/api/v1/auth/logout"
+        expect(response).to have_http_status(:ok)
 
-      it "adds the JWT to the denylist" do
-        expect do
-          delete "/api/v1/auth/logout", headers: auth_headers(user)
-        end.to change(JwtDenylist, :count).by(1)
+        # Subsequent requests should be unauthenticated
+        get "/api/v1/auth/me"
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 

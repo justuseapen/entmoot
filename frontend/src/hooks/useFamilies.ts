@@ -34,32 +34,31 @@ export const familyKeys = {
 
 // Families queries
 export function useFamilies() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: familyKeys.list(),
-    queryFn: () => getFamilies(token!),
-    enabled: !!token,
+    queryFn: () => getFamilies(),
+    enabled: isAuthenticated,
     select: (data) => data.families,
   });
 }
 
 export function useFamily(id: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: familyKeys.detail(id),
-    queryFn: () => getFamily(id, token!),
-    enabled: !!token && !!id,
+    queryFn: () => getFamily(id),
+    enabled: isAuthenticated && !!id,
     select: (data) => data.family,
   });
 }
 
 // Family mutations
 export function useCreateFamily() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateFamilyData) => createFamily(data, token!),
+    mutationFn: (data: CreateFamilyData) => createFamily(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyKeys.lists() });
     },
@@ -67,11 +66,10 @@ export function useCreateFamily() {
 }
 
 export function useUpdateFamily(id: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateFamilyData) => updateFamily(id, data, token!),
+    mutationFn: (data: UpdateFamilyData) => updateFamily(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: familyKeys.lists() });
@@ -80,11 +78,10 @@ export function useUpdateFamily(id: number) {
 }
 
 export function useDeleteFamily(id: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => deleteFamily(id, token!),
+    mutationFn: () => deleteFamily(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyKeys.lists() });
     },
@@ -93,22 +90,20 @@ export function useDeleteFamily(id: number) {
 
 // Invitations queries and mutations
 export function useInvitations(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: familyKeys.invitations(familyId),
-    queryFn: () => getInvitations(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getInvitations(familyId),
+    enabled: isAuthenticated && !!familyId,
     select: (data) => data.invitations,
   });
 }
 
 export function useSendInvitation(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: InvitationData) =>
-      sendInvitation(familyId, data, token!),
+    mutationFn: (data: InvitationData) => sendInvitation(familyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: familyKeys.invitations(familyId),
@@ -118,12 +113,11 @@ export function useSendInvitation(familyId: number) {
 }
 
 export function useResendInvitation(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (invitationId: number) =>
-      resendInvitation(familyId, invitationId, token!),
+      resendInvitation(familyId, invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: familyKeys.invitations(familyId),
@@ -133,12 +127,11 @@ export function useResendInvitation(familyId: number) {
 }
 
 export function useCancelInvitation(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (invitationId: number) =>
-      cancelInvitation(familyId, invitationId, token!),
+      cancelInvitation(familyId, invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: familyKeys.invitations(familyId),
@@ -149,17 +142,16 @@ export function useCancelInvitation(familyId: number) {
 
 // Membership queries and mutations
 export function useMembers(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: familyKeys.members(familyId),
-    queryFn: () => getMembers(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getMembers(familyId),
+    enabled: isAuthenticated && !!familyId,
     select: (data) => data.members,
   });
 }
 
 export function useUpdateMemberRole(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -169,7 +161,7 @@ export function useUpdateMemberRole(familyId: number) {
     }: {
       membershipId: number;
       role: MemberRole;
-    }) => updateMemberRole(familyId, membershipId, role, token!),
+    }) => updateMemberRole(familyId, membershipId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyKeys.detail(familyId) });
       queryClient.invalidateQueries({ queryKey: familyKeys.members(familyId) });
@@ -178,12 +170,10 @@ export function useUpdateMemberRole(familyId: number) {
 }
 
 export function useRemoveMember(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (membershipId: number) =>
-      removeMember(familyId, membershipId, token!),
+    mutationFn: (membershipId: number) => removeMember(familyId, membershipId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: familyKeys.detail(familyId) });
       queryClient.invalidateQueries({ queryKey: familyKeys.members(familyId) });

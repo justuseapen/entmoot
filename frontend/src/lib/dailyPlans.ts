@@ -78,34 +78,21 @@ export interface UpdateDailyPlanData {
 }
 
 // API functions
-export async function getTodaysPlan(
-  familyId: number,
-  token: string
-): Promise<DailyPlan> {
-  return apiFetch<DailyPlan>(`/families/${familyId}/daily_plans/today`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getTodaysPlan(familyId: number): Promise<DailyPlan> {
+  return apiFetch<DailyPlan>(`/families/${familyId}/daily_plans/today`);
 }
 
 export async function getDailyPlan(
   familyId: number,
-  planId: number,
-  token: string
+  planId: number
 ): Promise<DailyPlan> {
-  return apiFetch<DailyPlan>(`/families/${familyId}/daily_plans/${planId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<DailyPlan>(`/families/${familyId}/daily_plans/${planId}`);
 }
 
 export async function updateDailyPlan(
   familyId: number,
   planId: number,
-  data: UpdateDailyPlanData,
-  token: string
+  data: UpdateDailyPlanData
 ): Promise<{
   message: string;
   daily_plan: DailyPlan;
@@ -118,9 +105,6 @@ export async function updateDailyPlan(
   }>(`/families/${familyId}/daily_plans/${planId}`, {
     method: "PATCH",
     body: JSON.stringify({ daily_plan: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 

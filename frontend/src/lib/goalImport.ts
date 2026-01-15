@@ -71,11 +71,6 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : "/api/v1";
 
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem("accessToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function importGoals({
   familyId,
   file,
@@ -96,7 +91,7 @@ export async function importGoals({
 
   const response = await fetch(`${API_BASE}/families/${familyId}/goal_import`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    credentials: "include",
     body: formData,
   });
 
@@ -116,9 +111,9 @@ export async function checkImportStatus(
     `${API_BASE}/families/${familyId}/goal_import/status?job_id=${encodeURIComponent(jobId)}`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...getAuthHeaders(),
       },
     }
   );

@@ -9,19 +9,9 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
-  # ==> JWT Configuration (devise-jwt)
-  config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.devise_jwt_secret_key || ENV.fetch("DEVISE_JWT_SECRET_KEY", nil) ||
-                 Rails.application.secret_key_base
-    jwt.expiration_time = 24.hours.to_i
-    jwt.dispatch_requests = [
-      ["POST", %r{^/api/v1/auth/login$}],
-      ["POST", %r{^/api/v1/auth/register$}]
-    ]
-    jwt.revocation_requests = [
-      ["DELETE", %r{^/api/v1/auth/logout$}]
-    ]
-  end
+  # ==> Session Configuration
+  # Using session-based authentication with cookies for API
+  # Sessions are stored server-side in the database via ActionDispatch::Session::CacheStore
 
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
@@ -111,7 +101,8 @@ Devise.setup do |config|
   # Notice that if you are skipping storage for all authentication paths, you
   # may want to disable generating routes to Devise's sessions controller by
   # passing skip: :sessions to `devise_for` in your config/routes.rb
-  config.skip_session_storage = %i[http_auth jwt]
+  # Don't skip session storage - we're using sessions for API auth
+  # config.skip_session_storage = %i[http_auth]
 
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX

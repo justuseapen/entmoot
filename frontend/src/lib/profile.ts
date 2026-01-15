@@ -112,50 +112,34 @@ export interface UserDataExport {
 }
 
 export async function updateProfile(
-  token: string,
   data: UpdateProfileData
 ): Promise<{ user: User }> {
   return apiFetch<{ user: User }>("/users/me/profile", {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(data),
   });
 }
 
 export async function changePassword(
-  token: string,
   data: ChangePasswordData
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>("/users/me/password", {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteAccount(
-  token: string,
   data: DeleteAccountData
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>("/users/me", {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(data),
   });
 }
 
-export async function exportUserData(token: string): Promise<UserDataExport> {
-  return apiFetch<UserDataExport>("/users/me/export", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function exportUserData(): Promise<UserDataExport> {
+  return apiFetch<UserDataExport>("/users/me/export");
 }
 
 export function downloadJson(data: UserDataExport, filename: string): void {

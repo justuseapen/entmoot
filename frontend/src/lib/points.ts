@@ -37,14 +37,9 @@ export interface PointsResponse {
 }
 
 // Get user's points and recent activity
-export async function getPoints(
-  token: string,
-  limit?: number
-): Promise<PointsResponse> {
+export async function getPoints(limit?: number): Promise<PointsResponse> {
   const params = limit ? `?limit=${limit}` : "";
-  return apiFetch(`/api/v1/users/me/points${params}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  return apiFetch(`/users/me/points${params}`);
 }
 
 // Point values for display

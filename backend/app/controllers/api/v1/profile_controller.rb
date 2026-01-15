@@ -17,7 +17,7 @@ module Api
         return render_invalid_current_password unless valid_current_password?
         return render_password_mismatch unless passwords_match?
 
-        if current_user.update(password: params[:password])
+        if current_user.update(password: params[:password], password_confirmation: params[:password_confirmation])
           render json: { message: "Password updated successfully" }, status: :ok
         else
           render_errors(current_user.errors.full_messages)

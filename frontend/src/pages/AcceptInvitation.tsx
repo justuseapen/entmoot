@@ -63,7 +63,7 @@ type PageState =
 export function AcceptInvitation() {
   const { token: inviteToken } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { token: authToken, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const { setCurrentFamily } = useFamilyStore();
   const { celebrateFirstAction } = useCelebration();
 
@@ -118,10 +118,7 @@ export function AcceptInvitation() {
 
     async function checkInvitation() {
       try {
-        const result = await getInvitationDetails(
-          inviteToken!,
-          authToken || undefined
-        );
+        const result = await getInvitationDetails(inviteToken!);
 
         if (cancelled) return;
 
@@ -153,7 +150,7 @@ export function AcceptInvitation() {
     return () => {
       cancelled = true;
     };
-  }, [inviteToken, authToken, navigate, setCurrentFamily, handleError]);
+  }, [inviteToken, navigate, setCurrentFamily, handleError]);
 
   async function onSignupSubmit(data: PasswordFormData) {
     if (!inviteToken) return;

@@ -14,22 +14,21 @@ export const notificationPreferencesKeys = {
 
 // Get notification preferences
 export function useNotificationPreferences() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: notificationPreferencesKeys.detail(),
-    queryFn: () => getNotificationPreferences(token!),
-    enabled: !!token,
+    queryFn: () => getNotificationPreferences(),
+    enabled: isAuthenticated,
   });
 }
 
 // Update notification preferences
 export function useUpdateNotificationPreferences() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: UpdateNotificationPreferencesData) =>
-      updateNotificationPreferences(data, token!),
+      updateNotificationPreferences(data),
     onSuccess: (response) => {
       // Update the cache with the new preferences
       queryClient.setQueryData(notificationPreferencesKeys.detail(), response);

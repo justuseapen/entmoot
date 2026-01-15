@@ -45,16 +45,10 @@ export interface ActivityFeedResponse {
 // API functions
 export async function getActivityFeed(
   familyId: number,
-  token: string,
   limit: number = 10
 ): Promise<ActivityFeedResponse> {
   return apiFetch<ActivityFeedResponse>(
-    `/families/${familyId}/activity_feed?limit=${limit}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/activity_feed?limit=${limit}`
   );
 }
 

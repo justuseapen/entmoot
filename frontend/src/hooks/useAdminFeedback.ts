@@ -22,34 +22,33 @@ export const adminFeedbackKeys = {
 
 // Hook to fetch admin feedback list
 export function useAdminFeedbackList(filters: AdminFeedbackFilters = {}) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery({
     queryKey: adminFeedbackKeys.list(filters),
-    queryFn: () => getAdminFeedbackList(filters, token!),
-    enabled: !!token,
+    queryFn: () => getAdminFeedbackList(filters),
+    enabled: isAuthenticated,
   });
 }
 
 // Hook to fetch single feedback detail
 export function useAdminFeedbackDetail(id: number | null) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery({
     queryKey: adminFeedbackKeys.detail(id!),
-    queryFn: () => getAdminFeedbackDetail(id!, token!),
-    enabled: !!token && !!id,
+    queryFn: () => getAdminFeedbackDetail(id!),
+    enabled: isAuthenticated && !!id,
   });
 }
 
 // Hook to update feedback
 export function useUpdateAdminFeedback() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateFeedbackData }) =>
-      updateAdminFeedback(id, data, token!),
+      updateAdminFeedback(id, data),
     onSuccess: (response, { id }) => {
       // Update the detail cache
       queryClient.setQueryData(adminFeedbackKeys.detail(id), response);

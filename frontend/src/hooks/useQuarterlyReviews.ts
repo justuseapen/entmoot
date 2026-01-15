@@ -26,47 +26,46 @@ export const quarterlyReviewKeys = {
 
 // Get current quarter's review (creates if not exists)
 export function useCurrentQuarterlyReview(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: quarterlyReviewKeys.current(familyId),
-    queryFn: () => getCurrentQuarterlyReview(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getCurrentQuarterlyReview(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get all quarterly reviews for the user
 export function useQuarterlyReviews(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: quarterlyReviewKeys.list(familyId),
-    queryFn: () => getQuarterlyReviews(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getQuarterlyReviews(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get a single quarterly review
 export function useQuarterlyReview(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: quarterlyReviewKeys.detail(familyId, reviewId),
-    queryFn: () => getQuarterlyReview(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getQuarterlyReview(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Get metrics for a quarterly review
 export function useQuarterlyReviewMetrics(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: quarterlyReviewKeys.metrics(familyId, reviewId),
-    queryFn: () => getQuarterlyReviewMetrics(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getQuarterlyReviewMetrics(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Update a quarterly review
 export function useUpdateQuarterlyReview(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,7 +75,7 @@ export function useUpdateQuarterlyReview(familyId: number) {
     }: {
       reviewId: number;
       data: UpdateQuarterlyReviewData;
-    }) => updateQuarterlyReview(familyId, reviewId, data, token!),
+    }) => updateQuarterlyReview(familyId, reviewId, data),
     onSuccess: (response, { reviewId }) => {
       // Update the current review cache
       if (response.quarterly_review) {

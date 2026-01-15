@@ -88,7 +88,6 @@ export interface GoalFilters {
 // API functions
 export async function getGoals(
   familyId: number,
-  token: string,
   filters?: GoalFilters
 ): Promise<{ goals: Goal[] }> {
   const params = new URLSearchParams();
@@ -101,23 +100,14 @@ export async function getGoals(
   const queryString = params.toString();
   const url = `/families/${familyId}/goals${queryString ? `?${queryString}` : ""}`;
 
-  return apiFetch<{ goals: Goal[] }>(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<{ goals: Goal[] }>(url);
 }
 
 export async function getGoal(
   familyId: number,
-  goalId: number,
-  token: string
+  goalId: number
 ): Promise<{ goal: Goal }> {
-  return apiFetch<{ goal: Goal }>(`/families/${familyId}/goals/${goalId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<{ goal: Goal }>(`/families/${familyId}/goals/${goalId}`);
 }
 
 export interface CreateGoalResponse {
@@ -129,48 +119,36 @@ export interface CreateGoalResponse {
 
 export async function createGoal(
   familyId: number,
-  data: CreateGoalData,
-  token: string
+  data: CreateGoalData
 ): Promise<CreateGoalResponse> {
   return apiFetch<CreateGoalResponse>(`/families/${familyId}/goals`, {
     method: "POST",
     body: JSON.stringify({ goal: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 export async function updateGoal(
   familyId: number,
   goalId: number,
-  data: UpdateGoalData,
-  token: string
+  data: UpdateGoalData
 ): Promise<{ message: string; goal: Goal }> {
   return apiFetch<{ message: string; goal: Goal }>(
     `/families/${familyId}/goals/${goalId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ goal: data }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
 
 export async function deleteGoal(
   familyId: number,
-  goalId: number,
-  token: string
+  goalId: number
 ): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(
     `/families/${familyId}/goals/${goalId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }
@@ -292,16 +270,12 @@ export interface GoalRefinementResponse {
 // AI Refinement API
 export async function refineGoal(
   familyId: number,
-  goalId: number,
-  token: string
+  goalId: number
 ): Promise<{ refinement: GoalRefinementResponse }> {
   return apiFetch<{ refinement: GoalRefinementResponse }>(
     `/families/${familyId}/goals/${goalId}/refine`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     }
   );
 }

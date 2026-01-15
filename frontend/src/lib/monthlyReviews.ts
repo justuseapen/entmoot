@@ -60,62 +60,39 @@ export interface UpdateMonthlyReviewData {
 
 // API functions
 export async function getCurrentMonthlyReview(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<MonthlyReview> {
   return apiFetch<MonthlyReview>(
-    `/api/v1/families/${familyId}/monthly_reviews/current`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/monthly_reviews/current`
   );
 }
 
 export async function getMonthlyReviews(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<MonthlyReviewsResponse> {
   return apiFetch<MonthlyReviewsResponse>(
-    `/api/v1/families/${familyId}/monthly_reviews`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/monthly_reviews`
   );
 }
 
 export async function getMonthlyReview(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<MonthlyReview> {
   return apiFetch<MonthlyReview>(
-    `/api/v1/families/${familyId}/monthly_reviews/${reviewId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/monthly_reviews/${reviewId}`
   );
 }
 
 export async function updateMonthlyReview(
   familyId: number,
   reviewId: number,
-  data: UpdateMonthlyReviewData,
-  token: string
+  data: UpdateMonthlyReviewData
 ): Promise<MonthlyReviewResponse> {
   return apiFetch<MonthlyReviewResponse>(
-    `/api/v1/families/${familyId}/monthly_reviews/${reviewId}`,
+    `/families/${familyId}/monthly_reviews/${reviewId}`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ monthly_review: data }),
     }
   );
@@ -123,16 +100,10 @@ export async function updateMonthlyReview(
 
 export async function getMonthlyReviewMetrics(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<{ metrics: MonthlyReviewMetrics }> {
   return apiFetch<{ metrics: MonthlyReviewMetrics }>(
-    `/api/v1/families/${familyId}/monthly_reviews/${reviewId}/metrics`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/monthly_reviews/${reviewId}/metrics`
   );
 }
 

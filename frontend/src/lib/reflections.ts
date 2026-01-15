@@ -111,7 +111,6 @@ export async function getReflectionPrompts(type?: ReflectionType): Promise<{
 // Get reflections for a family
 export async function getReflections(
   familyId: number,
-  token: string,
   filters?: {
     type?: ReflectionType;
     user_id?: number;
@@ -128,31 +127,21 @@ export async function getReflections(
   const queryString = params.toString();
   const url = `/families/${familyId}/reflections${queryString ? `?${queryString}` : ""}`;
 
-  return apiFetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch(url);
 }
 
 // Get a single reflection
 export async function getReflection(
   familyId: number,
-  reflectionId: number,
-  token: string
+  reflectionId: number
 ): Promise<Reflection> {
-  return apiFetch(`/families/${familyId}/reflections/${reflectionId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch(`/families/${familyId}/reflections/${reflectionId}`);
 }
 
 // Create a reflection
 export async function createReflection(
   familyId: number,
   data: CreateReflectionData,
-  token: string,
   dailyPlanId?: number
 ): Promise<{
   message: string;
@@ -166,9 +155,6 @@ export async function createReflection(
   return apiFetch(url, {
     method: "POST",
     body: JSON.stringify({ reflection: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
@@ -176,8 +162,7 @@ export async function createReflection(
 export async function updateReflection(
   familyId: number,
   reflectionId: number,
-  data: UpdateReflectionData,
-  token: string
+  data: UpdateReflectionData
 ): Promise<{
   message: string;
   reflection: Reflection;
@@ -186,23 +171,16 @@ export async function updateReflection(
   return apiFetch(`/families/${familyId}/reflections/${reflectionId}`, {
     method: "PATCH",
     body: JSON.stringify({ reflection: data }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 // Delete a reflection
 export async function deleteReflection(
   familyId: number,
-  reflectionId: number,
-  token: string
+  reflectionId: number
 ): Promise<{ message: string }> {
   return apiFetch(`/families/${familyId}/reflections/${reflectionId}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 

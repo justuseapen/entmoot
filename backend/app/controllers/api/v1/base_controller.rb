@@ -12,16 +12,18 @@ module Api
 
       private
 
-      def render_error(message, status: :unprocessable_content)
-        render json: { error: message }, status: status
-      end
-
+      # render_error is inherited from ErrorResponse concern via ApplicationController
+      # render_errors kept for backward compatibility with existing controllers
       def render_errors(errors, status: :unprocessable_content)
         render json: { errors: errors }, status: status
       end
 
       def render_forbidden
-        render json: { error: "You are not authorized to perform this action" }, status: :forbidden
+        render_error(
+          "You are not authorized to perform this action",
+          status: :forbidden,
+          suggestion: "Please contact an administrator if you believe this is a mistake."
+        )
       end
     end
   end
