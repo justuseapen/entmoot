@@ -273,3 +273,24 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - Check for unreplaced placeholder to detect missing env var: `apiKey === '%' + 'VITE_HEYDEV_API_KEY' + '%'`
   - HeyDev widget appears in bottom-right only when valid API key is configured
 ---
+
+## 2026-01-14 - US-016
+- Created HeyDev user context integration for feedback tracking
+- Created `frontend/src/lib/heydev.ts` with:
+  - `initHeyDev(user)` function that calls HeyDev.identify() or HeyDev.reset()
+  - Declares global Window.HeyDev type for TypeScript support
+  - Includes VITE_APP_VERSION in metadata if available
+- Added `HeyDevInitializer` component to App.tsx:
+  - Listens to auth store changes (user, isAuthenticated)
+  - Calls initHeyDev with user context when logged in, null when logged out
+  - Uses React.useEffect to respond to auth state changes
+- Gracefully handles missing HeyDev widget (no-op when window.HeyDev is undefined)
+- Files changed:
+  - `frontend/src/lib/heydev.ts` (new)
+  - `frontend/src/App.tsx`
+- **Learnings for future iterations:**
+  - Use `declare global { interface Window { ... } }` to extend Window type for third-party scripts
+  - Follow existing initializer pattern (NotificationWebSocketInitializer) for components that only run effects
+  - HeyDev widget exposes HeyDev.identify() and HeyDev.reset() methods on window object
+  - Import React and use React.useEffect when adding effects to files that don't already import useEffect
+---

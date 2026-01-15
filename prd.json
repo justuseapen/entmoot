@@ -237,8 +237,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created heydev.ts with initHeyDev() that calls HeyDev.identify() for authenticated users and HeyDev.reset() on logout. Gracefully handles missing widget."
     }
   ]
 }
