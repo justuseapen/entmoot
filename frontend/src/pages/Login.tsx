@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth";
 import { login } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/errors";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,11 +25,16 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+interface ServerError {
+  message: string;
+  suggestion?: string;
+}
+
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth, setLoading, isLoading } = useAuthStore();
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
 
   const from =
     (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
@@ -42,15 +48,15 @@ export function Login() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setError(null);
+    setServerError(null);
     setLoading(true);
     try {
       const response = await login(data);
       setAuth(response.user);
       navigate(from, { replace: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login failed";
-      setError(message);
+      const { message, suggestion } = getErrorMessage(err);
+      setServerError({ message, suggestion });
       setLoading(false);
     }
   };
@@ -64,9 +70,32 @@ export function Login() {
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {error && (
+            {serverError && (
               <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-                {error}
+                <p>{serverError.message}</p>
+                {serverError.suggestion && (
+                  <p className="mt-1">
+                    {serverError.suggestion}{" "}
+                    {serverError.suggestion.toLowerCase().includes("create") && (
+                      <Link
+                        to="/register"
+                        className="font-medium underline underline-offset-4 hover:opacity-80"
+                      >
+                        Create an account
+                      </Link>
+                    )}
+                  </p>
+                )}
+                {!serverError.suggestion && (
+                  <p className="mt-1">
+                    <Link
+                      to="/forgot-password"
+                      className="font-medium underline underline-offset-4 hover:opacity-80"
+                    >
+                      Forgot password?
+                    </Link>
+                  </p>
+                )}
               </div>
             )}
             <div className="space-y-2">
