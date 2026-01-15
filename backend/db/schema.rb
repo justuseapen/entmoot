@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_15_141642) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_15_142619) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -79,6 +79,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_141642) do
     t.text "intention"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "shutdown_shipped"
+    t.text "shutdown_blocked"
     t.index ["family_id"], name: "index_daily_plans_on_family_id"
     t.index ["user_id", "family_id", "date"], name: "index_daily_plans_on_user_id_and_family_id_and_date", unique: true
     t.index ["user_id"], name: "index_daily_plans_on_user_id"

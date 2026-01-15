@@ -50,6 +50,8 @@ module Api
       def daily_plan_params
         params.require(:daily_plan).permit(
           :intention,
+          :shutdown_shipped,
+          :shutdown_blocked,
           daily_tasks_attributes: %i[id title completed position goal_id _destroy],
           top_priorities_attributes: %i[id title priority_order goal_id _destroy],
           habit_completions_attributes: %i[id habit_id completed]
@@ -63,6 +65,7 @@ module Api
       def plan_attributes(plan)
         {
           id: plan.id, date: plan.date, intention: plan.intention,
+          shutdown_shipped: plan.shutdown_shipped, shutdown_blocked: plan.shutdown_blocked,
           user_id: plan.user_id, family_id: plan.family_id,
           completion_stats: plan.completion_stats,
           created_at: plan.created_at, updated_at: plan.updated_at
