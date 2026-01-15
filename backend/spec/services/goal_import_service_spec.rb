@@ -5,9 +5,11 @@ require "rails_helper"
 RSpec.describe GoalImportService do
   let(:family) { create(:family) }
   let(:user) { create(:user, name: "Daniel Smith") }
-  let!(:membership) { create(:family_membership, family: family, user: user, role: :admin) }
+  let(:membership) { create(:family_membership, family: family, user: user, role: :admin) }
   let(:mock_client) { instance_double(AnthropicClient) }
   let(:service) { described_class.new(family: family, user: user, client: mock_client) }
+
+  before { membership }
 
   describe "#import" do
     context "with valid CSV content" do
@@ -78,18 +80,17 @@ RSpec.describe GoalImportService do
     end
 
     context "with assignee names in the goal" do
-      let(:kathryn) { create(:user, name: "Kathryn Smith") }
-      let!(:kathryn_membership) { create(:family_membership, family: family, user: kathryn, role: :adult) }
+      # rubocop:disable RSpec/ExampleLength
+      it "matches and assigns family members by first name" do
+        kathryn = create(:user, name: "Kathryn Smith")
+        create(:family_membership, family: family, user: kathryn, role: :adult)
 
-      let(:csv_content) do
-        <<~CSV
+        csv_content = <<~CSV
           ,Title,Specific,Measurable,Achievable,Relevant,Time-bound
           ,Daily prayer,Daniel to lead prayer,Checklist,Yes,Yes,Daily
         CSV
-      end
 
-      let(:llm_response_with_assignee) do
-        {
+        llm_response_with_assignee = {
           "title" => "Daily prayer",
           "time_scale" => "daily",
           "specific" => "Daniel to lead family prayer",
@@ -100,30 +101,26 @@ RSpec.describe GoalImportService do
           "assignee_names" => ["Daniel"],
           "confidence" => 0.9
         }.to_json
-      end
 
-      before do
         allow(mock_client).to receive(:chat).and_return(llm_response_with_assignee)
-      end
 
-      it "matches and assigns family members by first name" do
         service.import(csv_content: csv_content)
 
         created_goal = Goal.last
         expect(created_goal.assignees).to include(user)
       end
+      # rubocop:enable RSpec/ExampleLength
     end
 
     context "with sub-goal generation enabled" do
-      let(:csv_content) do
-        <<~CSV
+      # rubocop:disable RSpec/ExampleLength
+      it "generates sub-goal suggestions for annual goals" do
+        csv_content = <<~CSV
           ,Title,Specific,Measurable,Achievable,Relevant,Time-bound
           ,Ultramarathon,Complete a 50K ultra marathon,Race completion,Yes,Self Mastery,EOY
         CSV
-      end
 
-      let(:goal_response) do
-        {
+        goal_response = {
           "title" => "Ultramarathon",
           "time_scale" => "annual",
           "specific" => "Complete a 50K ultra marathon",
@@ -134,10 +131,8 @@ RSpec.describe GoalImportService do
           "assignee_names" => [],
           "confidence" => 0.95
         }.to_json
-      end
 
-      let(:sub_goal_response) do
-        {
+        sub_goal_response = {
           "milestones" => [
             { "title" => "Build base endurance", "time_scale" => "quarterly", "due_offset_days" => 90 }
           ],
@@ -145,17 +140,13 @@ RSpec.describe GoalImportService do
             { "title" => "3 runs per week", "description" => "Minimum 3 running sessions", "frequency" => "weekly" }
           ]
         }.to_json
-      end
 
-      before do
         call_count = 0
         allow(mock_client).to receive(:chat) do
           call_count += 1
           call_count == 1 ? goal_response : sub_goal_response
         end
-      end
 
-      it "generates sub-goal suggestions for annual goals" do
         results = service.import(csv_content: csv_content, generate_sub_goals: true)
 
         expect(results[:sub_goal_suggestions]).not_to be_empty
@@ -163,6 +154,7 @@ RSpec.describe GoalImportService do
         expect(suggestion[:milestones]).not_to be_empty
         expect(suggestion[:weekly_tasks]).not_to be_empty
       end
+      # rubocop:enable RSpec/ExampleLength
     end
 
     context "with malformed CSV" do
@@ -230,25 +222,29 @@ RSpec.describe GoalImportService do
   end
 
   describe "assignee matching" do
-    let(:kathryn) { create(:user, name: "Kathryn Jones") }
-    let!(:kathryn_membership) { create(:family_membership, family: family, user: kathryn, role: :adult) }
-
-    before do
+    it "matches by exact first name (case insensitive)" do
       # Reload family members
       service.instance_variable_set(:@family_members, service.send(:load_family_members))
-    end
 
-    it "matches by exact first name (case insensitive)" do
       result = service.send(:match_assignee, "DANIEL")
       expect(result).to eq(user.id)
     end
 
     it "matches by first name" do
+      kathryn = create(:user, name: "Kathryn Jones")
+      create(:family_membership, family: family, user: kathryn, role: :adult)
+
+      # Reload family members after adding kathryn
+      service.instance_variable_set(:@family_members, service.send(:load_family_members))
+
       result = service.send(:match_assignee, "Kathryn")
       expect(result).to eq(kathryn.id)
     end
 
     it "returns nil for unmatched names" do
+      # Reload family members
+      service.instance_variable_set(:@family_members, service.send(:load_family_members))
+
       result = service.send(:match_assignee, "UnknownPerson")
       expect(result).to be_nil
     end

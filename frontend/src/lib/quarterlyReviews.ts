@@ -59,62 +59,39 @@ export interface UpdateQuarterlyReviewData {
 
 // API functions
 export async function getCurrentQuarterlyReview(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<QuarterlyReview> {
   return apiFetch<QuarterlyReview>(
-    `/api/v1/families/${familyId}/quarterly_reviews/current`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/quarterly_reviews/current`
   );
 }
 
 export async function getQuarterlyReviews(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<QuarterlyReviewsResponse> {
   return apiFetch<QuarterlyReviewsResponse>(
-    `/api/v1/families/${familyId}/quarterly_reviews`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/quarterly_reviews`
   );
 }
 
 export async function getQuarterlyReview(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<QuarterlyReview> {
   return apiFetch<QuarterlyReview>(
-    `/api/v1/families/${familyId}/quarterly_reviews/${reviewId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/quarterly_reviews/${reviewId}`
   );
 }
 
 export async function updateQuarterlyReview(
   familyId: number,
   reviewId: number,
-  data: UpdateQuarterlyReviewData,
-  token: string
+  data: UpdateQuarterlyReviewData
 ): Promise<QuarterlyReviewResponse> {
   return apiFetch<QuarterlyReviewResponse>(
-    `/api/v1/families/${familyId}/quarterly_reviews/${reviewId}`,
+    `/families/${familyId}/quarterly_reviews/${reviewId}`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ quarterly_review: data }),
     }
   );
@@ -122,16 +99,10 @@ export async function updateQuarterlyReview(
 
 export async function getQuarterlyReviewMetrics(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<{ metrics: QuarterlyReviewMetrics }> {
   return apiFetch<{ metrics: QuarterlyReviewMetrics }>(
-    `/api/v1/families/${familyId}/quarterly_reviews/${reviewId}/metrics`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/quarterly_reviews/${reviewId}/metrics`
   );
 }
 

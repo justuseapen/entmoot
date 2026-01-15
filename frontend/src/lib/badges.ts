@@ -38,19 +38,13 @@ export interface UserBadgesResponse {
 }
 
 // Get all available badges
-export async function getAllBadges(token: string): Promise<AllBadgesResponse> {
-  return apiFetch("/api/v1/badges", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export async function getAllBadges(): Promise<AllBadgesResponse> {
+  return apiFetch("/badges");
 }
 
 // Get user's badges with earned status
-export async function getUserBadges(
-  token: string
-): Promise<UserBadgesResponse> {
-  return apiFetch("/api/v1/users/me/badges", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export async function getUserBadges(): Promise<UserBadgesResponse> {
+  return apiFetch("/users/me/badges");
 }
 
 // Helper to get category label

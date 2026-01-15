@@ -25,47 +25,46 @@ export const monthlyReviewKeys = {
 
 // Get current month's review (creates if not exists)
 export function useCurrentMonthlyReview(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: monthlyReviewKeys.current(familyId),
-    queryFn: () => getCurrentMonthlyReview(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getCurrentMonthlyReview(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get all monthly reviews for the user
 export function useMonthlyReviews(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: monthlyReviewKeys.list(familyId),
-    queryFn: () => getMonthlyReviews(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getMonthlyReviews(familyId),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get a single monthly review
 export function useMonthlyReview(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: monthlyReviewKeys.detail(familyId, reviewId),
-    queryFn: () => getMonthlyReview(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getMonthlyReview(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Get metrics for a monthly review
 export function useMonthlyReviewMetrics(familyId: number, reviewId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: monthlyReviewKeys.metrics(familyId, reviewId),
-    queryFn: () => getMonthlyReviewMetrics(familyId, reviewId, token!),
-    enabled: !!token && !!familyId && !!reviewId,
+    queryFn: () => getMonthlyReviewMetrics(familyId, reviewId),
+    enabled: isAuthenticated && !!familyId && !!reviewId,
   });
 }
 
 // Update a monthly review
 export function useUpdateMonthlyReview(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,7 +74,7 @@ export function useUpdateMonthlyReview(familyId: number) {
     }: {
       reviewId: number;
       data: UpdateMonthlyReviewData;
-    }) => updateMonthlyReview(familyId, reviewId, data, token!),
+    }) => updateMonthlyReview(familyId, reviewId, data),
     onSuccess: (response, { reviewId }) => {
       // Update the current review cache
       if (response.monthly_review) {

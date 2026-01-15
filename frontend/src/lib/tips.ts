@@ -61,36 +61,20 @@ export const TIP_CONTENT: Record<
 };
 
 // API functions
-export async function getTips(token: string): Promise<TipsResponse> {
-  return apiFetch<TipsResponse>("/users/me/tips", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getTips(): Promise<TipsResponse> {
+  return apiFetch<TipsResponse>("/users/me/tips");
 }
 
-export async function markTipShown(
-  tipType: TipType,
-  token: string
-): Promise<TipsResponse> {
+export async function markTipShown(tipType: TipType): Promise<TipsResponse> {
   return apiFetch<TipsResponse>("/users/me/tips/mark_shown", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ tip_type: tipType }),
   });
 }
 
-export async function toggleTips(
-  enabled: boolean,
-  token: string
-): Promise<TipsResponse> {
+export async function toggleTips(enabled: boolean): Promise<TipsResponse> {
   return apiFetch<TipsResponse>("/users/me/tips/toggle", {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ enabled }),
   });
 }

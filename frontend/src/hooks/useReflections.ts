@@ -45,27 +45,26 @@ export function useReflections(
     to?: string;
   }
 ) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: reflectionKeys.list(familyId, filters),
-    queryFn: () => getReflections(familyId, token!, filters),
-    enabled: !!token && !!familyId,
+    queryFn: () => getReflections(familyId, filters),
+    enabled: isAuthenticated && !!familyId,
   });
 }
 
 // Get a single reflection
 export function useReflection(familyId: number, reflectionId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: reflectionKeys.detail(familyId, reflectionId),
-    queryFn: () => getReflection(familyId, reflectionId, token!),
-    enabled: !!token && !!familyId && !!reflectionId,
+    queryFn: () => getReflection(familyId, reflectionId),
+    enabled: isAuthenticated && !!familyId && !!reflectionId,
   });
 }
 
 // Create a reflection
 export function useCreateReflection(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,7 +74,7 @@ export function useCreateReflection(familyId: number) {
     }: {
       data: CreateReflectionData;
       dailyPlanId?: number;
-    }) => createReflection(familyId, data, token!, dailyPlanId),
+    }) => createReflection(familyId, data, dailyPlanId),
     onSuccess: () => {
       // Invalidate reflections list
       queryClient.invalidateQueries({
@@ -87,7 +86,6 @@ export function useCreateReflection(familyId: number) {
 
 // Update a reflection
 export function useUpdateReflection(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -97,7 +95,7 @@ export function useUpdateReflection(familyId: number) {
     }: {
       reflectionId: number;
       data: UpdateReflectionData;
-    }) => updateReflection(familyId, reflectionId, data, token!),
+    }) => updateReflection(familyId, reflectionId, data),
     onSuccess: (response) => {
       // Update the cache with the new reflection data
       queryClient.setQueryData(
@@ -114,12 +112,11 @@ export function useUpdateReflection(familyId: number) {
 
 // Delete a reflection
 export function useDeleteReflection(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (reflectionId: number) =>
-      deleteReflection(familyId, reflectionId, token!),
+      deleteReflection(familyId, reflectionId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: reflectionKeys.lists(),

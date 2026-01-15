@@ -75,62 +75,37 @@ export interface UpdateAnnualReviewData {
 
 // API functions
 export async function getCurrentAnnualReview(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<AnnualReview> {
-  return apiFetch<AnnualReview>(
-    `/api/v1/families/${familyId}/annual_reviews/current`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  return apiFetch<AnnualReview>(`/families/${familyId}/annual_reviews/current`);
 }
 
 export async function getAnnualReviews(
-  familyId: number,
-  token: string
+  familyId: number
 ): Promise<AnnualReviewsResponse> {
   return apiFetch<AnnualReviewsResponse>(
-    `/api/v1/families/${familyId}/annual_reviews`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/annual_reviews`
   );
 }
 
 export async function getAnnualReview(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<AnnualReview> {
   return apiFetch<AnnualReview>(
-    `/api/v1/families/${familyId}/annual_reviews/${reviewId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/annual_reviews/${reviewId}`
   );
 }
 
 export async function updateAnnualReview(
   familyId: number,
   reviewId: number,
-  data: UpdateAnnualReviewData,
-  token: string
+  data: UpdateAnnualReviewData
 ): Promise<AnnualReviewResponse> {
   return apiFetch<AnnualReviewResponse>(
-    `/api/v1/families/${familyId}/annual_reviews/${reviewId}`,
+    `/families/${familyId}/annual_reviews/${reviewId}`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ annual_review: data }),
     }
   );
@@ -138,16 +113,10 @@ export async function updateAnnualReview(
 
 export async function getAnnualReviewMetrics(
   familyId: number,
-  reviewId: number,
-  token: string
+  reviewId: number
 ): Promise<{ metrics: AnnualReviewMetrics }> {
   return apiFetch<{ metrics: AnnualReviewMetrics }>(
-    `/api/v1/families/${familyId}/annual_reviews/${reviewId}/metrics`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/families/${familyId}/annual_reviews/${reviewId}/metrics`
   );
 }
 

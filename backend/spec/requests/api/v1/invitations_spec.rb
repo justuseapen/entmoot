@@ -265,32 +265,35 @@ RSpec.describe "Api::V1::Invitations" do
     end
 
     context "with invalid token" do
-      it "returns 404" do
+      it "returns 404 with friendly message" do
         post "/api/v1/invitations/invalid-token/accept"
 
         expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq(
+          "This invitation link is invalid. Please check the link or request a new invitation."
+        )
       end
     end
 
     context "with expired invitation" do
       let(:expired_invitation) { create(:invitation, :expired, family: family, inviter: user) }
 
-      it "returns 410 gone" do
+      it "returns 410 gone with friendly message" do
         post "/api/v1/invitations/#{expired_invitation.token}/accept"
 
         expect(response).to have_http_status(:gone)
-        expect(json_response["error"]).to eq("Invitation has expired")
+        expect(json_response["error"]).to eq("This invitation has expired. Please ask for a new one.")
       end
     end
 
     context "with already accepted invitation" do
       let(:accepted_invitation) { create(:invitation, :accepted, family: family, inviter: user) }
 
-      it "returns 410 gone" do
+      it "returns 410 gone with friendly message" do
         post "/api/v1/invitations/#{accepted_invitation.token}/accept"
 
         expect(response).to have_http_status(:gone)
-        expect(json_response["error"]).to eq("Invitation has already been accepted")
+        expect(json_response["error"]).to eq("This invitation has already been used.")
       end
     end
   end

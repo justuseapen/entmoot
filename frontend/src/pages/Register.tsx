@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth";
 import { register as registerUser } from "@/lib/auth";
+import { ApiError, getErrorMessage } from "@/lib/errors";
 
 const registerSchema = z
   .object({
@@ -36,10 +37,16 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+interface ServerError {
+  message: string;
+  suggestion?: string;
+  fieldErrors: Record<string, string>;
+}
+
 export function Register() {
   const navigate = useNavigate();
   const { setAuth, setLoading, isLoading } = useAuthStore();
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
 
   const {
     register,
@@ -50,16 +57,37 @@ export function Register() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setError(null);
+    setServerError(null);
     setLoading(true);
     try {
       const response = await registerUser(data);
-      setAuth(response.user, response.token, response.refresh_token);
+      setAuth(response.user);
       navigate("/", { replace: true });
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Registration failed";
-      setError(message);
+      const { message, suggestion } = getErrorMessage(err);
+
+      // Extract field-specific errors from ApiError.errors array
+      const fieldErrors: Record<string, string> = {};
+      if (err instanceof ApiError && err.errors.length > 0) {
+        for (const errorMsg of err.errors) {
+          // Map backend error messages to form fields
+          const lowerError = errorMsg.toLowerCase();
+          if (lowerError.includes("email")) {
+            fieldErrors.email = errorMsg;
+          } else if (
+            lowerError.includes("password confirmation") ||
+            lowerError.includes("doesn't match")
+          ) {
+            fieldErrors.password_confirmation = errorMsg;
+          } else if (lowerError.includes("password")) {
+            fieldErrors.password = errorMsg;
+          } else if (lowerError.includes("name")) {
+            fieldErrors.name = errorMsg;
+          }
+        }
+      }
+
+      setServerError({ message, suggestion, fieldErrors });
       setLoading(false);
     }
   };
@@ -75,9 +103,22 @@ export function Register() {
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {error && (
+            {serverError && (
               <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-                {error}
+                <p>{serverError.message}</p>
+                {serverError.suggestion && (
+                  <p className="mt-1">
+                    {serverError.suggestion}{" "}
+                    {serverError.suggestion.toLowerCase().includes("sign") && (
+                      <Link
+                        to="/login"
+                        className="font-medium underline underline-offset-4 hover:opacity-80"
+                      >
+                        Sign in
+                      </Link>
+                    )}
+                  </p>
+                )}
               </div>
             )}
             <div className="space-y-2">
@@ -88,11 +129,11 @@ export function Register() {
                 placeholder="Your name"
                 autoComplete="name"
                 {...register("name")}
-                aria-invalid={!!errors.name}
+                aria-invalid={!!errors.name || !!serverError?.fieldErrors.name}
               />
-              {errors.name && (
+              {(errors.name || serverError?.fieldErrors.name) && (
                 <p className="text-destructive text-sm">
-                  {errors.name.message}
+                  {errors.name?.message || serverError?.fieldErrors.name}
                 </p>
               )}
             </div>
@@ -104,11 +145,13 @@ export function Register() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 {...register("email")}
-                aria-invalid={!!errors.email}
+                aria-invalid={
+                  !!errors.email || !!serverError?.fieldErrors.email
+                }
               />
-              {errors.email && (
+              {(errors.email || serverError?.fieldErrors.email) && (
                 <p className="text-destructive text-sm">
-                  {errors.email.message}
+                  {errors.email?.message || serverError?.fieldErrors.email}
                 </p>
               )}
             </div>
@@ -120,11 +163,14 @@ export function Register() {
                 placeholder="At least 8 characters"
                 autoComplete="new-password"
                 {...register("password")}
-                aria-invalid={!!errors.password}
+                aria-invalid={
+                  !!errors.password || !!serverError?.fieldErrors.password
+                }
               />
-              {errors.password && (
+              {(errors.password || serverError?.fieldErrors.password) && (
                 <p className="text-destructive text-sm">
-                  {errors.password.message}
+                  {errors.password?.message ||
+                    serverError?.fieldErrors.password}
                 </p>
               )}
             </div>
@@ -136,11 +182,16 @@ export function Register() {
                 placeholder="Confirm your password"
                 autoComplete="new-password"
                 {...register("password_confirmation")}
-                aria-invalid={!!errors.password_confirmation}
+                aria-invalid={
+                  !!errors.password_confirmation ||
+                  !!serverError?.fieldErrors.password_confirmation
+                }
               />
-              {errors.password_confirmation && (
+              {(errors.password_confirmation ||
+                serverError?.fieldErrors.password_confirmation) && (
                 <p className="text-destructive text-sm">
-                  {errors.password_confirmation.message}
+                  {errors.password_confirmation?.message ||
+                    serverError?.fieldErrors.password_confirmation}
                 </p>
               )}
             </div>

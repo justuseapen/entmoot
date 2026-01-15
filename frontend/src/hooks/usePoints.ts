@@ -12,22 +12,22 @@ export const pointsKeys = {
 
 // Get user's points summary (for dashboard)
 export function usePoints() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery<PointsResponse>({
     queryKey: pointsKeys.summary(),
-    queryFn: () => getPoints(token!, 10), // Get 10 recent activities for summary
-    enabled: !!token,
+    queryFn: () => getPoints(10), // Get 10 recent activities for summary
+    enabled: isAuthenticated,
     staleTime: 60000, // Cache for 1 minute
   });
 }
 
 // Get full points history
 export function usePointsHistory(limit: number = 50) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery<PointsResponse>({
     queryKey: pointsKeys.history(limit),
-    queryFn: () => getPoints(token!, limit),
-    enabled: !!token,
+    queryFn: () => getPoints(limit),
+    enabled: isAuthenticated,
     staleTime: 60000, // Cache for 1 minute
   });
 }

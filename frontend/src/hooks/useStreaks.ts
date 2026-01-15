@@ -10,11 +10,11 @@ export const streaksKeys = {
 
 // Get user's streaks
 export function useStreaks() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery<StreaksResponse>({
     queryKey: streaksKeys.list(),
-    queryFn: () => getStreaks(token!),
-    enabled: !!token,
+    queryFn: () => getStreaks(),
+    enabled: isAuthenticated,
     staleTime: 60000, // Cache for 1 minute
   });
 }

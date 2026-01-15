@@ -4,12 +4,10 @@ import type { User } from "@/lib/auth";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setAuth: (user: User, token: string, refreshToken: string) => void;
-  setTokens: (token: string, refreshToken: string) => void;
+  setAuth: (user: User) => void;
+  setUser: (user: User) => void;
   setLoading: (isLoading: boolean) => void;
   logout: () => void;
 }
@@ -18,29 +16,22 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
-      setAuth: (user, token, refreshToken) =>
+      setAuth: (user) =>
         set({
           user,
-          token,
-          refreshToken,
           isAuthenticated: true,
           isLoading: false,
         }),
-      setTokens: (token, refreshToken) =>
+      setUser: (user) =>
         set({
-          token,
-          refreshToken,
+          user,
         }),
       setLoading: (isLoading) => set({ isLoading }),
       logout: () =>
         set({
           user: null,
-          token: null,
-          refreshToken: null,
           isAuthenticated: false,
           isLoading: false,
         }),
@@ -49,8 +40,6 @@ export const useAuthStore = create<AuthState>()(
       name: "entmoot-auth",
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

@@ -28,39 +28,28 @@ export interface NotificationsResponse {
 
 // Get notifications
 export async function getNotifications(
-  token: string,
   limit?: number
 ): Promise<NotificationsResponse> {
   const params = limit ? `?limit=${limit}` : "";
-  return apiFetch(`/notifications${params}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch(`/notifications${params}`);
 }
 
 // Mark a single notification as read
 export async function markNotificationAsRead(
-  notificationId: number,
-  token: string
+  notificationId: number
 ): Promise<{ notification: Notification }> {
   return apiFetch(`/notifications/${notificationId}/mark_as_read`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 
 // Mark all notifications as read
-export async function markAllNotificationsAsRead(
-  token: string
-): Promise<{ success: boolean; message: string }> {
+export async function markAllNotificationsAsRead(): Promise<{
+  success: boolean;
+  message: string;
+}> {
   return apiFetch("/notifications/mark_all_as_read", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 }
 

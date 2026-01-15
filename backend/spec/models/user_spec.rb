@@ -17,15 +17,6 @@ RSpec.describe User do
     it { is_expected.to have_many(:refresh_tokens).dependent(:destroy) }
   end
 
-  describe "#jwt_payload" do
-    let(:user) { create(:user) }
-
-    it "returns a hash with user_id" do
-      payload = user.jwt_payload
-      expect(payload).to eq({ user_id: user.id })
-    end
-  end
-
   describe "devise modules" do
     it "uses database_authenticatable" do
       expect(described_class.devise_modules).to include(:database_authenticatable)
@@ -45,10 +36,6 @@ RSpec.describe User do
 
     it "uses validatable" do
       expect(described_class.devise_modules).to include(:validatable)
-    end
-
-    it "uses jwt_authenticatable" do
-      expect(described_class.devise_modules).to include(:jwt_authenticatable)
     end
   end
 

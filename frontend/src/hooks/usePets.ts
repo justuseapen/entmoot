@@ -22,32 +22,31 @@ export const petKeys = {
 
 // Pet queries
 export function usePets(familyId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: petKeys.list(familyId),
-    queryFn: () => getPets(familyId, token!),
-    enabled: !!token && !!familyId,
+    queryFn: () => getPets(familyId),
+    enabled: isAuthenticated && !!familyId,
     select: (data) => data.pets,
   });
 }
 
 export function usePet(familyId: number, petId: number) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: petKeys.detail(familyId, petId),
-    queryFn: () => getPet(familyId, petId, token!),
-    enabled: !!token && !!familyId && !!petId,
+    queryFn: () => getPet(familyId, petId),
+    enabled: isAuthenticated && !!familyId && !!petId,
     select: (data) => data.pet,
   });
 }
 
 // Pet mutations
 export function useCreatePet(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreatePetData) => createPet(familyId, data, token!),
+    mutationFn: (data: CreatePetData) => createPet(familyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: petKeys.list(familyId) });
     },
@@ -55,12 +54,10 @@ export function useCreatePet(familyId: number) {
 }
 
 export function useUpdatePet(familyId: number, petId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdatePetData) =>
-      updatePet(familyId, petId, data, token!),
+    mutationFn: (data: UpdatePetData) => updatePet(familyId, petId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: petKeys.list(familyId) });
       queryClient.invalidateQueries({
@@ -71,11 +68,10 @@ export function useUpdatePet(familyId: number, petId: number) {
 }
 
 export function useDeletePet(familyId: number) {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (petId: number) => deletePet(familyId, petId, token!),
+    mutationFn: (petId: number) => deletePet(familyId, petId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: petKeys.list(familyId) });
     },

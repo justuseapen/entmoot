@@ -10,20 +10,19 @@ export const tipsKeys = {
 };
 
 export function useTips() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: tipsKeys.detail(),
-    queryFn: () => getTips(token!),
-    enabled: !!token,
+    queryFn: () => getTips(),
+    enabled: isAuthenticated,
   });
 }
 
 export function useMarkTipShown() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tipType: TipType) => markTipShown(tipType, token!),
+    mutationFn: (tipType: TipType) => markTipShown(tipType),
     onSuccess: (data) => {
       queryClient.setQueryData(tipsKeys.detail(), data);
     },
@@ -31,11 +30,10 @@ export function useMarkTipShown() {
 }
 
 export function useToggleTips() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (enabled: boolean) => toggleTips(enabled, token!),
+    mutationFn: (enabled: boolean) => toggleTips(enabled),
     onSuccess: (data) => {
       queryClient.setQueryData(tipsKeys.detail(), data);
     },

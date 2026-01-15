@@ -87,8 +87,7 @@ export interface UpdateFeedbackData {
 
 // API functions
 export async function getAdminFeedbackList(
-  filters: AdminFeedbackFilters,
-  token: string
+  filters: AdminFeedbackFilters
 ): Promise<AdminFeedbackListResponse> {
   const params = new URLSearchParams();
 
@@ -103,34 +102,21 @@ export async function getAdminFeedbackList(
   const queryString = params.toString();
   const url = `/admin/feedback${queryString ? `?${queryString}` : ""}`;
 
-  return apiFetch<AdminFeedbackListResponse>(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<AdminFeedbackListResponse>(url);
 }
 
 export async function getAdminFeedbackDetail(
-  id: number,
-  token: string
+  id: number
 ): Promise<AdminFeedbackDetailResponse> {
-  return apiFetch<AdminFeedbackDetailResponse>(`/admin/feedback/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return apiFetch<AdminFeedbackDetailResponse>(`/admin/feedback/${id}`);
 }
 
 export async function updateAdminFeedback(
   id: number,
-  data: UpdateFeedbackData,
-  token: string
+  data: UpdateFeedbackData
 ): Promise<AdminFeedbackDetailResponse> {
   return apiFetch<AdminFeedbackDetailResponse>(`/admin/feedback/${id}`, {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ feedback_report: data }),
   });
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,13 @@ import {
   visibilityOptions,
 } from "@/lib/goals";
 import { AIRefinementPanel } from "@/components/AIRefinementPanel";
+import { ApiError, getErrorMessage } from "@/lib/errors";
+
+interface ServerError {
+  message: string;
+  suggestion?: string;
+  fieldErrors: Record<string, string>;
+}
 
 const goalSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
@@ -144,7 +152,7 @@ export function GoalModal({
   defaultValues,
   onGoalCreated,
 }: GoalModalProps) {
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
   const [mode, setMode] = useState<"single" | "wizard">("single");
   const [wizardStep, setWizardStep] = useState(0);
   const [refinement, setRefinement] = useState<GoalRefinementResponse | null>(
@@ -200,7 +208,7 @@ export function GoalModal({
   // Reset form when modal opens/closes or goal changes
   useEffect(() => {
     if (open) {
-      setError(null);
+      setServerError(null);
       setWizardStep(0);
       setRefinement(null);
       setShowRefinement(false);
@@ -246,15 +254,19 @@ export function GoalModal({
   // Handle AI refinement
   const handleRefineWithAI = async () => {
     if (!goal?.id) return;
-    setError(null);
+    setServerError(null);
     try {
       const result = await refineGoal.mutateAsync();
       setRefinement(result.refinement);
       setShowRefinement(true);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to get AI suggestions"
-      );
+      // AI errors are shown inline with retry button, not as toast
+      const { message } = getErrorMessage(err);
+      setServerError({
+        message,
+        suggestion: undefined,
+        fieldErrors: {},
+      });
     }
   };
 
@@ -284,7 +296,7 @@ export function GoalModal({
   };
 
   const onSubmit = async (data: GoalFormData) => {
-    setError(null);
+    setServerError(null);
     try {
       const goalData = {
         title: data.title,
@@ -305,8 +317,10 @@ export function GoalModal({
 
       if (isEditing) {
         await updateGoal.mutateAsync(goalData);
+        toast.success("Goal updated successfully");
       } else {
         const result = await createGoal.mutateAsync(goalData);
+        toast.success("Goal created successfully");
         if (onGoalCreated) {
           onGoalCreated(
             result.goal.id,
@@ -317,11 +331,60 @@ export function GoalModal({
       }
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : `Failed to ${isEditing ? "update" : "create"} goal`
-      );
+      const { message, suggestion } = getErrorMessage(err);
+
+      // Extract field-specific errors from ApiError.errors array
+      const fieldErrors: Record<string, string> = {};
+      if (err instanceof ApiError && err.errors.length > 0) {
+        for (const errorMsg of err.errors) {
+          const lowerError = errorMsg.toLowerCase();
+          if (lowerError.includes("title")) {
+            fieldErrors.title = errorMsg;
+          } else if (lowerError.includes("description")) {
+            fieldErrors.description = errorMsg;
+          } else if (
+            lowerError.includes("time_scale") ||
+            lowerError.includes("time scale")
+          ) {
+            fieldErrors.time_scale = errorMsg;
+          } else if (lowerError.includes("status")) {
+            fieldErrors.status = errorMsg;
+          } else if (lowerError.includes("visibility")) {
+            fieldErrors.visibility = errorMsg;
+          } else if (lowerError.includes("progress")) {
+            fieldErrors.progress = errorMsg;
+          } else if (
+            lowerError.includes("due_date") ||
+            lowerError.includes("due date")
+          ) {
+            fieldErrors.due_date = errorMsg;
+          } else if (lowerError.includes("specific")) {
+            fieldErrors.specific = errorMsg;
+          } else if (lowerError.includes("measurable")) {
+            fieldErrors.measurable = errorMsg;
+          } else if (lowerError.includes("achievable")) {
+            fieldErrors.achievable = errorMsg;
+          } else if (lowerError.includes("relevant")) {
+            fieldErrors.relevant = errorMsg;
+          } else if (
+            lowerError.includes("time_bound") ||
+            lowerError.includes("time bound")
+          ) {
+            fieldErrors.time_bound = errorMsg;
+          }
+        }
+      }
+
+      // If there are field-specific errors, show them inline
+      // Otherwise show a toast for network/transient errors
+      if (
+        Object.keys(fieldErrors).length > 0 ||
+        message !== "Something went wrong. Please try again."
+      ) {
+        setServerError({ message, suggestion, fieldErrors });
+      } else {
+        toast.error(message);
+      }
     }
   };
 
@@ -346,10 +409,12 @@ export function GoalModal({
           id="title"
           placeholder="What do you want to achieve?"
           {...register("title")}
-          aria-invalid={!!errors.title}
+          aria-invalid={!!errors.title || !!serverError?.fieldErrors.title}
         />
-        {errors.title && (
-          <p className="text-destructive text-sm">{errors.title.message}</p>
+        {(errors.title || serverError?.fieldErrors.title) && (
+          <p className="text-destructive text-sm">
+            {errors.title?.message || serverError?.fieldErrors.title}
+          </p>
         )}
       </div>
 
@@ -361,10 +426,14 @@ export function GoalModal({
           placeholder="Describe your goal in more detail..."
           {...register("description")}
           rows={3}
+          aria-invalid={
+            !!errors.description || !!serverError?.fieldErrors.description
+          }
         />
-        {errors.description && (
+        {(errors.description || serverError?.fieldErrors.description) && (
           <p className="text-destructive text-sm">
-            {errors.description.message}
+            {errors.description?.message ||
+              serverError?.fieldErrors.description}
           </p>
         )}
       </div>
@@ -523,10 +592,17 @@ export function GoalModal({
           placeholder="What exactly will you accomplish? Be detailed and clear."
           {...register("specific")}
           rows={2}
+          aria-invalid={!!serverError?.fieldErrors.specific}
         />
-        <p className="text-muted-foreground text-xs">
-          A specific goal answers: What, Who, Where, When, Why
-        </p>
+        {serverError?.fieldErrors.specific ? (
+          <p className="text-destructive text-xs">
+            {serverError.fieldErrors.specific}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            A specific goal answers: What, Who, Where, When, Why
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -536,10 +612,17 @@ export function GoalModal({
           placeholder="How will you track progress? What metrics will you use?"
           {...register("measurable")}
           rows={2}
+          aria-invalid={!!serverError?.fieldErrors.measurable}
         />
-        <p className="text-muted-foreground text-xs">
-          Include numbers, quantities, or specific outcomes you can measure
-        </p>
+        {serverError?.fieldErrors.measurable ? (
+          <p className="text-destructive text-xs">
+            {serverError.fieldErrors.measurable}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Include numbers, quantities, or specific outcomes you can measure
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -549,10 +632,17 @@ export function GoalModal({
           placeholder="Is this goal realistic? What resources do you need?"
           {...register("achievable")}
           rows={2}
+          aria-invalid={!!serverError?.fieldErrors.achievable}
         />
-        <p className="text-muted-foreground text-xs">
-          Consider your current abilities, time, and resources
-        </p>
+        {serverError?.fieldErrors.achievable ? (
+          <p className="text-destructive text-xs">
+            {serverError.fieldErrors.achievable}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Consider your current abilities, time, and resources
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -562,10 +652,17 @@ export function GoalModal({
           placeholder="Why does this goal matter? How does it align with your bigger picture?"
           {...register("relevant")}
           rows={2}
+          aria-invalid={!!serverError?.fieldErrors.relevant}
         />
-        <p className="text-muted-foreground text-xs">
-          Connect this goal to your values and long-term objectives
-        </p>
+        {serverError?.fieldErrors.relevant ? (
+          <p className="text-destructive text-xs">
+            {serverError.fieldErrors.relevant}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Connect this goal to your values and long-term objectives
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -575,10 +672,17 @@ export function GoalModal({
           placeholder="When will you achieve this? What are your milestones?"
           {...register("time_bound")}
           rows={2}
+          aria-invalid={!!serverError?.fieldErrors.time_bound}
         />
-        <p className="text-muted-foreground text-xs">
-          Set specific deadlines and checkpoints
-        </p>
+        {serverError?.fieldErrors.time_bound ? (
+          <p className="text-destructive text-xs">
+            {serverError.fieldErrors.time_bound}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Set specific deadlines and checkpoints
+          </p>
+        )}
       </div>
     </div>
   );
@@ -855,9 +959,14 @@ export function GoalModal({
         )}
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {error && (
+          {serverError && (
             <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-              {error}
+              <p>{serverError.message}</p>
+              {serverError.suggestion && (
+                <p className="text-muted-foreground mt-1">
+                  {serverError.suggestion}
+                </p>
+              )}
             </div>
           )}
 
@@ -915,27 +1024,51 @@ export function GoalModal({
                         your goal more specific, measurable, achievable,
                         relevant, and time-bound.
                       </p>
-                      <Button
-                        type="button"
-                        onClick={handleRefineWithAI}
-                        disabled={refineGoal.isPending}
-                        className="mt-4"
-                      >
-                        {refineGoal.isPending ? (
-                          <>
-                            <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            Analyzing goal...
-                          </>
-                        ) : (
-                          "Get AI Suggestions"
-                        )}
-                      </Button>
-                      {refineGoal.isError && (
-                        <p className="text-destructive text-sm">
-                          {refineGoal.error instanceof Error
-                            ? refineGoal.error.message
-                            : "Failed to get suggestions. Please try again."}
-                        </p>
+                      {refineGoal.isError ||
+                      (serverError && activeTab === "ai") ? (
+                        <div className="mx-auto max-w-md space-y-3">
+                          <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
+                            <p>
+                              {serverError?.message ||
+                                (refineGoal.error instanceof Error
+                                  ? refineGoal.error.message
+                                  : "Our AI assistant is temporarily unavailable.")}
+                            </p>
+                            <p className="text-muted-foreground mt-1">
+                              Please try again in a few minutes.
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={handleRefineWithAI}
+                            disabled={refineGoal.isPending}
+                          >
+                            {refineGoal.isPending ? (
+                              <>
+                                <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                Retrying...
+                              </>
+                            ) : (
+                              "Try Again"
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={handleRefineWithAI}
+                          disabled={refineGoal.isPending}
+                          className="mt-4"
+                        >
+                          {refineGoal.isPending ? (
+                            <>
+                              <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                              Analyzing goal...
+                            </>
+                          ) : (
+                            "Get AI Suggestions"
+                          )}
+                        </Button>
                       )}
                     </div>
                   )}

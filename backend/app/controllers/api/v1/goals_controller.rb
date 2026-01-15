@@ -28,7 +28,7 @@ module Api
         if @goal.save
           handle_goal_creation
         else
-          render_errors(@goal.errors.full_messages)
+          render_validation_errors(@goal)
         end
       end
 
@@ -43,7 +43,7 @@ module Api
           award_goal_completion_points if !was_completed_before && @goal.completed?
           render_updated_goal
         else
-          render_errors(@goal.errors.full_messages)
+          render_validation_errors(@goal)
         end
       end
 
@@ -61,8 +61,9 @@ module Api
         suggestions = service.refine
 
         render json: { suggestions: suggestions }
-      rescue GoalRefinementService::RefinementError => e
-        render json: { error: "AI refinement failed: #{e.message}" }, status: :service_unavailable
+      rescue GoalRefinementService::RefinementError
+        render_error("Our AI assistant is temporarily unavailable. Please try again in a few minutes.",
+                     status: :service_unavailable)
       end
 
       private
@@ -70,13 +71,13 @@ module Api
       def set_family
         @family = Family.find(params[:family_id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Family not found" }, status: :not_found
+        render_error("This family doesn't exist or you don't have access to it.", status: :not_found)
       end
 
       def set_goal
         @goal = @family.goals.includes(:creator, :assignees, :parent).find(params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Goal not found" }, status: :not_found
+        render_error("This goal doesn't exist or has been deleted.", status: :not_found)
       end
 
       def goal_params

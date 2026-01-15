@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe "Goal Imports API" do
   let(:family) { create(:family) }
   let(:user) { create(:user, name: "Daniel Smith") }
-  let!(:membership) { create(:family_membership, family: family, user: user, role: :admin) }
-
+  let(:membership) { create(:family_membership, family: family, user: user, role: :admin) }
+  let(:mock_client) { instance_double(AnthropicClient) }
   let(:csv_content) do
     <<~CSV
       ,Title,Specific,Measurable,Achievable,Relevant,Time-bound
@@ -14,7 +14,6 @@ RSpec.describe "Goal Imports API" do
       ,Daily Checkin,Checkin on top 3 items daily,Count checklists weekly,Yes,Yes,Daily by EOD
     CSV
   end
-
   let(:llm_response) do
     {
       "title" => "Daily Check-in",
@@ -30,9 +29,8 @@ RSpec.describe "Goal Imports API" do
     }.to_json
   end
 
-  let(:mock_client) { instance_double(AnthropicClient) }
-
   before do
+    membership
     allow(AnthropicClient).to receive(:new).and_return(mock_client)
     allow(mock_client).to receive(:chat).and_return(llm_response)
   end
@@ -71,51 +69,35 @@ RSpec.describe "Goal Imports API" do
     end
 
     context "with generate_sub_goals option" do
-      let(:sub_goal_response) do
-        {
-          "milestones" => [{ "title" => "Milestone 1", "time_scale" => "quarterly", "due_offset_days" => 90 }],
-          "weekly_tasks" => [{ "title" => "Weekly task", "description" => "Do this weekly", "frequency" => "weekly" }]
-        }.to_json
-      end
-
-      let(:annual_csv) do
-        <<~CSV
+      # rubocop:disable RSpec/ExampleLength
+      it "includes sub-goal suggestions in response" do
+        annual_csv = <<~CSV
           ,Title,Specific,Measurable,Achievable,Relevant,Time-bound
           ,Ultramarathon,Complete a 50K,Race completion,Yes,Yes,EOY
         CSV
-      end
 
-      let(:annual_goal_response) do
-        {
-          "title" => "Ultramarathon",
-          "time_scale" => "annual",
-          "specific" => "Complete a 50K ultra marathon",
-          "measurable" => "Race completion",
-          "achievable" => "Yes",
-          "relevant" => "Yes",
-          "time_bound" => "End of year",
-          "assignee_names" => [],
-          "confidence" => 0.95
+        annual_goal_response = {
+          "title" => "Ultramarathon", "time_scale" => "annual", "specific" => "Complete a 50K ultra marathon",
+          "measurable" => "Race completion", "achievable" => "Yes", "relevant" => "Yes",
+          "time_bound" => "End of year", "assignee_names" => [], "confidence" => 0.95
         }.to_json
-      end
 
-      before do
+        sub_goal_response = {
+          "milestones" => [{ "title" => "Milestone 1", "time_scale" => "quarterly", "due_offset_days" => 90 }],
+          "weekly_tasks" => [{ "title" => "Weekly task", "description" => "Do this weekly", "frequency" => "weekly" }]
+        }.to_json
+
         call_count = 0
-        allow(mock_client).to receive(:chat) do
-          call_count += 1
-          call_count == 1 ? annual_goal_response : sub_goal_response
-        end
-      end
+        allow(mock_client).to receive(:chat) { (call_count += 1) == 1 ? annual_goal_response : sub_goal_response }
 
-      it "includes sub-goal suggestions in response" do
         post "/api/v1/families/#{family.id}/goal_import",
              params: { csv_content: annual_csv, generate_sub_goals: true },
              headers: auth_headers(user)
 
         expect(response).to have_http_status(:created)
-        json = response.parsed_body
-        expect(json["results"]["sub_goal_suggestions"]).not_to be_empty
+        expect(response.parsed_body["results"]["sub_goal_suggestions"]).not_to be_empty
       end
+      # rubocop:enable RSpec/ExampleLength
     end
 
     context "without CSV content" do
@@ -164,9 +146,7 @@ RSpec.describe "Goal Imports API" do
     context "with large file (async processing)" do
       let(:large_csv) { "x" * 150.kilobytes }
 
-      before do
-        allow(GoalImportJob).to receive(:perform_later)
-      end
+      before { allow(GoalImportJob).to receive(:perform_later) }
 
       it "queues the job and returns processing status" do
         post "/api/v1/families/#{family.id}/goal_import",
@@ -196,20 +176,10 @@ RSpec.describe "Goal Imports API" do
 
     context "when job is completed" do
       let(:completed_result) do
-        {
-          created_count: 5,
-          failed_count: 1,
-          categories: ["Meta"],
-          goals: [],
-          failures: []
-        }
+        { created_count: 5, failed_count: 1, categories: ["Meta"], goals: [], failures: [] }
       end
 
-      before do
-        allow(Rails.cache).to receive(:read)
-          .with("goal_import:completed-job")
-          .and_return(completed_result)
-      end
+      before { allow(Rails.cache).to receive(:read).with("goal_import:completed-job").and_return(completed_result) }
 
       it "returns completed status with results" do
         get "/api/v1/families/#{family.id}/goal_import/status",

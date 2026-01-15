@@ -23,10 +23,8 @@ export interface StreaksResponse {
 }
 
 // Get user's streaks
-export async function getStreaks(token: string): Promise<StreaksResponse> {
-  return apiFetch("/api/v1/users/me/streaks", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export async function getStreaks(): Promise<StreaksResponse> {
+  return apiFetch("/users/me/streaks");
 }
 
 // Helper to get streak label

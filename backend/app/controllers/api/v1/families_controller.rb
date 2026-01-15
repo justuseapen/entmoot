@@ -22,7 +22,7 @@ module Api
         create_family_with_membership
         render_created_family
       rescue ActiveRecord::RecordInvalid => e
-        render_errors(e.record.errors.full_messages)
+        render_validation_errors(e.record)
       end
 
       def update
@@ -34,7 +34,7 @@ module Api
             family: family_response(@family)
           }
         else
-          render_errors(@family.errors.full_messages)
+          render_validation_errors(@family)
         end
       end
 
@@ -59,7 +59,10 @@ module Api
       def set_family
         @family = Family.find(params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Family not found" }, status: :not_found
+        render_error(
+          "This family doesn't exist or you don't have access to it.",
+          status: :not_found
+        )
       end
 
       def family_params

@@ -14,11 +14,11 @@ export function useLeaderboard(
   familyId: number,
   scope: LeaderboardScope = "all_time"
 ) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: leaderboardKeys.list(familyId, scope),
-    queryFn: () => getLeaderboard(familyId, token!, scope),
-    enabled: !!token && !!familyId,
+    queryFn: () => getLeaderboard(familyId, scope),
+    enabled: isAuthenticated && !!familyId,
     select: (data) => data.leaderboard,
   });
 }

@@ -34,5 +34,29 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- HeyDev Feedback Widget -->
+    <!-- Conditionally loads the HeyDev widget if API key is configured -->
+    <script>
+      (function() {
+        var apiKey = '%VITE_HEYDEV_API_KEY%';
+        var endpoint = '%VITE_HEYDEV_ENDPOINT%' || 'https://heydev.io';
+
+        // Only load widget if API key is present
+        if (!apiKey || apiKey === '%' + 'VITE_HEYDEV_API_KEY' + '%') {
+          console.log('HeyDev widget disabled: VITE_HEYDEV_API_KEY not configured');
+          return;
+        }
+
+        // Create and append the HeyDev script
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = endpoint + '/widget.js';
+        script.setAttribute('data-api-key', apiKey);
+        script.setAttribute('data-theme', 'auto');
+        script.setAttribute('data-error-tracking', 'true');
+        document.head.appendChild(script);
+      })();
+    </script>
   </body>
 </html>

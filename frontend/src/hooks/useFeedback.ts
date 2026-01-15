@@ -20,20 +20,18 @@ import {
 } from "@/lib/feedback";
 
 export function useCreateFeedback() {
-  const { token } = useAuthStore();
-
   return useMutation<CreateFeedbackResponse, Error, CreateFeedbackData>({
-    mutationFn: (data) => createFeedback(data, token ?? undefined),
+    mutationFn: (data) => createFeedback(data),
   });
 }
 
 export function useGetFeedback(id: number | null) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery<GetFeedbackResponse, Error>({
     queryKey: ["feedback", id],
-    queryFn: () => getFeedback(id!, token!),
-    enabled: !!id && !!token,
+    queryFn: () => getFeedback(id!),
+    enabled: !!id && isAuthenticated,
   });
 }
 
@@ -58,12 +56,12 @@ export function useFeedbackShortcut(onOpen: () => void) {
 
 // Hook to check feedback eligibility (NPS, etc.)
 export function useFeedbackEligibility() {
-  const { token, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery<FeedbackEligibility, Error>({
     queryKey: ["feedbackEligibility"],
-    queryFn: () => getFeedbackEligibility(token!),
-    enabled: isAuthenticated && !!token,
+    queryFn: () => getFeedbackEligibility(),
+    enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
@@ -71,22 +69,21 @@ export function useFeedbackEligibility() {
 
 // Hook to get NPS follow-up question based on score
 export function useNPSFollowUp(score: number | null) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return useQuery<NPSFollowUpResponse, Error>({
     queryKey: ["npsFollowUp", score],
-    queryFn: () => getNPSFollowUp(score!, token!),
-    enabled: score !== null && !!token,
+    queryFn: () => getNPSFollowUp(score!),
+    enabled: score !== null && isAuthenticated,
   });
 }
 
 // Hook to dismiss NPS prompt
 export function useDismissNPS() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation<DismissNPSResponse, Error>({
-    mutationFn: () => dismissNPS(token!),
+    mutationFn: () => dismissNPS(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feedbackEligibility"] });
     },
@@ -95,7 +92,6 @@ export function useDismissNPS() {
 
 // Hook to submit NPS feedback
 export function useSubmitNPS() {
-  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -103,8 +99,7 @@ export function useSubmitNPS() {
     Error,
     { score: number; followUp: string }
   >({
-    mutationFn: ({ score, followUp }) =>
-      submitNPSFeedback(score, followUp, token!),
+    mutationFn: ({ score, followUp }) => submitNPSFeedback(score, followUp),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feedbackEligibility"] });
     },
@@ -113,29 +108,25 @@ export function useSubmitNPS() {
 
 // Hook to submit feature feedback (thumbs up/down)
 export function useSubmitFeatureFeedback() {
-  const { token } = useAuthStore();
-
   return useMutation<
     CreateFeedbackResponse,
     Error,
     { feature: string; rating: "positive" | "negative"; feedback?: string }
   >({
     mutationFn: ({ feature, rating, feedback }) =>
-      submitFeatureFeedback(feature, rating, feedback, token!),
+      submitFeatureFeedback(feature, rating, feedback),
   });
 }
 
 // Hook to submit session feedback (emoji rating)
 export function useSubmitSessionFeedback() {
-  const { token } = useAuthStore();
-
   return useMutation<
     CreateFeedbackResponse,
     Error,
     { flowType: string; rating: SessionRating; feedback?: string }
   >({
     mutationFn: ({ flowType, rating, feedback }) =>
-      submitSessionFeedback(flowType, rating, feedback, token!),
+      submitSessionFeedback(flowType, rating, feedback),
   });
 }
 

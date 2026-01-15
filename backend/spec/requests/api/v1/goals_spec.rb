@@ -149,10 +149,11 @@ RSpec.describe "Api::V1::Goals" do
     end
 
     context "when family does not exist" do
-      it "returns 404" do
+      it "returns 404 with friendly message" do
         get "/api/v1/families/999999/goals", headers: auth_headers(user)
 
         expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("This family doesn't exist or you don't have access to it.")
       end
     end
 
@@ -234,10 +235,11 @@ RSpec.describe "Api::V1::Goals" do
     context "when goal does not exist" do
       before { create(:family_membership, :adult, family: family, user: user) }
 
-      it "returns 404" do
+      it "returns 404 with friendly message" do
         get "/api/v1/families/#{family.id}/goals/999999", headers: auth_headers(user)
 
         expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("This goal doesn't exist or has been deleted.")
       end
     end
   end
@@ -422,6 +424,7 @@ RSpec.describe "Api::V1::Goals" do
         post "/api/v1/families/#{family.id}/goals", params: invalid_params, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to eq("Title can't be blank")
         expect(json_response["errors"]).to include("Title can't be blank")
       end
 
@@ -600,6 +603,7 @@ RSpec.describe "Api::V1::Goals" do
               headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to eq("Title can't be blank")
         expect(json_response["errors"]).to include("Title can't be blank")
       end
 
@@ -813,11 +817,12 @@ RSpec.describe "Api::V1::Goals" do
         allow(GoalRefinementService).to receive(:new).and_return(failing_service)
       end
 
-      it "returns 503 service unavailable" do
+      it "returns 503 service unavailable with friendly message" do
         post "/api/v1/families/#{family.id}/goals/#{goal.id}/refine", headers: auth_headers(user)
 
         expect(response).to have_http_status(:service_unavailable)
-        expect(json_response["error"]).to include("AI refinement failed")
+        expected_message = "Our AI assistant is temporarily unavailable. Please try again in a few minutes."
+        expect(json_response["error"]).to eq(expected_message)
       end
     end
 
@@ -863,10 +868,11 @@ RSpec.describe "Api::V1::Goals" do
     context "when goal does not exist" do
       before { create(:family_membership, :adult, family: family, user: user) }
 
-      it "returns 404" do
+      it "returns 404 with friendly message" do
         post "/api/v1/families/#{family.id}/goals/999999/refine", headers: auth_headers(user)
 
         expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("This goal doesn't exist or has been deleted.")
       end
     end
 

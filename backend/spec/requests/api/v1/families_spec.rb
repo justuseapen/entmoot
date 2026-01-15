@@ -54,10 +54,11 @@ RSpec.describe "Api::V1::Families" do
     end
 
     context "when family does not exist" do
-      it "returns 404" do
+      it "returns 404 with friendly error message" do
         get "/api/v1/families/999999", headers: auth_headers(user)
 
         expect(response).to have_http_status(:not_found)
+        expect(json_response["error"]).to eq("This family doesn't exist or you don't have access to it.")
       end
     end
   end
@@ -103,12 +104,13 @@ RSpec.describe "Api::V1::Families" do
     end
 
     context "with invalid parameters" do
-      it "returns 422 when name is missing" do
+      it "returns 422 with validation errors when name is missing" do
         invalid_params = { family: { timezone: "America/New_York" } }
 
         post "/api/v1/families", params: invalid_params, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to eq("Name can't be blank")
         expect(json_response["errors"]).to include("Name can't be blank")
       end
     end
