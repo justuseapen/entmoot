@@ -126,15 +126,35 @@ export function DailyPlanner() {
       const shutdownShippedToSave = newShutdownShipped ?? shutdownShipped;
       const shutdownBlockedToSave = newShutdownBlocked ?? shutdownBlocked;
 
-      const priorityAttributes: TopPriorityAttributes[] = prioritiesToSave.map(
-        (priority) => ({
-          id: priority.id,
-          title: priority.title,
-          priority_order: priority.priority_order,
-          goal_id: priority.goal_id,
-          _destroy: priority._destroy,
-        })
-      );
+      // Filter out empty priorities (without id) and mark empty existing priorities for deletion
+      const priorityAttributes: TopPriorityAttributes[] = prioritiesToSave
+        .reduce<TopPriorityAttributes[]>((acc, priority) => {
+          // If priority has an id but empty title, mark for deletion
+          if (priority.id && !priority.title.trim()) {
+            acc.push({
+              id: priority.id,
+              title: priority.title,
+              priority_order: priority.priority_order,
+              goal_id: priority.goal_id,
+              _destroy: true,
+            });
+          }
+          // If priority has no id and empty title, skip it entirely
+          else if (!priority.id && !priority.title.trim()) {
+            // Skip - don't add to accumulator
+          }
+          // Otherwise include the priority normally
+          else {
+            acc.push({
+              id: priority.id,
+              title: priority.title,
+              priority_order: priority.priority_order,
+              goal_id: priority.goal_id,
+              _destroy: priority._destroy,
+            });
+          }
+          return acc;
+        }, []);
 
       const habitCompletionAttributes: HabitCompletionAttributes[] =
         habitCompletionsToSave.map((hc) => ({
