@@ -19,7 +19,9 @@ class DailyPlan < ApplicationRecord
 
   def self.find_or_create_for_today(user:, family:)
     today = Time.find_zone(family.timezone)&.today || Time.zone.today
-    find_or_create_by(user: user, family: family, date: today)
+    daily_plan = find_or_create_by(user: user, family: family, date: today)
+    HabitInitializerService.initialize_habits_for(user: user, family: family)
+    daily_plan
   end
 
   def yesterday_incomplete_tasks

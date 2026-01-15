@@ -27,6 +27,7 @@ class User < ApplicationRecord
   has_many :feedback_reports, dependent: :nullify
   has_many :device_tokens, dependent: :destroy
   has_many :outreach_histories, dependent: :destroy
+  has_many :habits, dependent: :destroy
 
   validates :name, presence: true
 
