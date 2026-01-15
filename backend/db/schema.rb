@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_210000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_15_141642) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -187,6 +187,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_210000) do
     t.index ["family_id", "visibility"], name: "index_goals_on_family_id_and_visibility"
     t.index ["family_id"], name: "index_goals_on_family_id"
     t.index ["parent_id"], name: "index_goals_on_parent_id"
+  end
+
+  create_table "habit_completions", force: :cascade do |t|
+    t.boolean "completed", default: false, null: false
+    t.bigint "habit_id", null: false
+    t.bigint "daily_plan_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["daily_plan_id"], name: "index_habit_completions_on_daily_plan_id"
+    t.index ["habit_id", "daily_plan_id"], name: "index_habit_completions_on_habit_id_and_daily_plan_id", unique: true
+    t.index ["habit_id"], name: "index_habit_completions_on_habit_id"
+  end
+
+  create_table "habits", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "position", null: false
+    t.boolean "is_active", default: true, null: false
+    t.bigint "user_id", null: false
+    t.bigint "family_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_habits_on_family_id"
+    t.index ["user_id", "family_id", "position"], name: "index_habits_on_user_id_and_family_id_and_position", unique: true
+    t.index ["user_id"], name: "index_habits_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -472,6 +496,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_210000) do
   add_foreign_key "goals", "families"
   add_foreign_key "goals", "goals", column: "parent_id"
   add_foreign_key "goals", "users", column: "creator_id"
+  add_foreign_key "habit_completions", "daily_plans"
+  add_foreign_key "habit_completions", "habits"
+  add_foreign_key "habits", "families"
+  add_foreign_key "habits", "users"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "monthly_reviews", "families"
