@@ -1,244 +1,92 @@
 {
   "project": "Entmoot",
-  "branchName": "ralph/error-messaging-heydev",
-  "description": "Better Error Messaging & HeyDev Feedback Widget - Replace generic error messages with friendly, actionable messages and integrate HeyDev feedback widget for user feedback collection",
+  "branchName": "ralph/production-auth-fixes",
+  "description": "Fix production authentication failures after JWT-to-session migration",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create ErrorResponse concern for backend",
-      "description": "As a developer, I need a reusable concern for consistent error response formatting across all API controllers.",
+      "title": "Fix session cookie domain configuration",
+      "description": "As a user, I need my login session to work across subdomains so API requests are authenticated.",
       "acceptanceCriteria": [
-        "Create app/controllers/concerns/error_response.rb",
-        "Add render_error(message, status:, errors: [], suggestion: nil) method",
-        "Add render_validation_errors(record, suggestion: nil) method for ActiveRecord errors",
-        "Add render_not_found(resource_name, suggestion: nil) method",
-        "Response format: { error: string, errors?: string[], suggestion?: string }",
-        "Lint passes"
+        "Add domain: :all to session cookie configuration in backend/config/application.rb",
+        "Change same_site: :lax to same_site: :none for cross-origin cookie sending",
+        "Keep secure: Rails.env.production? setting",
+        "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Added session middleware to config/application.rb"
     },
     {
       "id": "US-002",
-      "title": "Update ApplicationController to use ErrorResponse",
-      "description": "As a developer, I need the base controller to include the ErrorResponse concern.",
+      "title": "Update ActionCable connection for session auth",
+      "description": "As a developer, I need ActionCable to authenticate via session cookies instead of JWT tokens.",
       "acceptanceCriteria": [
-        "Include ErrorResponse concern in ApplicationController",
-        "Update handle_not_found to use render_not_found with friendly message",
-        "Update handle_unexpected_error to use render_error",
-        "Lint passes",
-        "Existing tests pass"
+        "Remove JWT token decoding from backend/app/channels/application_cable/connection.rb",
+        "Use request.session and env['warden'] to get authenticated user",
+        "Handle case where no session exists by rejecting connection",
+        "Typecheck passes"
       ],
       "priority": 2,
       "passes": true,
-      "notes": ""
+      "notes": "Simplified to use env['warden'] directly - cleaner than request.session approach"
     },
     {
       "id": "US-003",
-      "title": "Add friendly error messages to registrations controller",
-      "description": "As a user, I want helpful error messages when registration fails.",
+      "title": "Add CORS expose headers for cookies",
+      "description": "As a developer, I need CORS to properly expose Set-Cookie headers for session management.",
       "acceptanceCriteria": [
-        "Email taken error: 'This email is already registered.' with suggestion 'Try signing in instead.'",
-        "Password too short: 'Password must be at least 6 characters.'",
-        "Use render_validation_errors with custom message mapping",
-        "Lint passes"
+        "Add expose: ['Set-Cookie'] to CORS configuration in backend/config/initializers/cors.rb",
+        "Typecheck passes"
       ],
       "priority": 3,
       "passes": true,
-      "notes": ""
+      "notes": "Added expose: %w[Set-Cookie] to CORS config"
     },
     {
       "id": "US-004",
-      "title": "Add friendly error messages to sessions controller",
-      "description": "As a user, I want helpful error messages when login fails.",
+      "title": "Add request spec for cross-origin session auth",
+      "description": "As a developer, I need regression tests to verify session auth works correctly.",
       "acceptanceCriteria": [
-        "Invalid credentials: 'Incorrect email or password. Please try again.'",
-        "Account not found: 'No account found with this email.' with suggestion 'Would you like to create one?'",
-        "Lint passes"
+        "Add spec testing that session cookie is set on login in backend/spec/requests/api/v1/auth/sessions_spec.rb",
+        "Add spec testing that session cookie authenticates subsequent requests",
+        "Add spec testing logout clears session",
+        "All tests pass",
+        "Typecheck passes"
       ],
       "priority": 4,
       "passes": true,
-      "notes": ""
+      "notes": "Added 5 specs: session cookie on login, session auth with JWT, session persistence, logout clears session. Also added warden.set_user on login and warden.logout on logout."
     },
     {
       "id": "US-005",
-      "title": "Add friendly error messages to passwords controller",
-      "description": "As a user, I want helpful error messages for password reset.",
+      "title": "Add ActionCable connection spec for session auth",
+      "description": "As a developer, I need tests verifying ActionCable authenticates via sessions.",
       "acceptanceCriteria": [
-        "Email not found: 'We couldn't find an account with this email.'",
-        "Invalid token: 'This password reset link has expired. Please request a new one.'",
-        "Lint passes"
+        "Create backend/spec/channels/connection_spec.rb",
+        "Add spec testing connection with valid session succeeds",
+        "Add spec testing connection without session is rejected",
+        "All tests pass",
+        "Typecheck passes"
       ],
       "priority": 5,
       "passes": true,
-      "notes": ""
+      "notes": "Created spec/channels/application_cable/connection_spec.rb with 3 tests: valid session connects, no session rejected, nil warden user rejected. All 1626 tests pass."
     },
     {
       "id": "US-006",
-      "title": "Add friendly error messages to families controller",
-      "description": "As a user, I want clear error messages for family operations.",
+      "title": "Update frontend WebSocket to handle reconnection",
+      "description": "As a user, I need WebSocket to gracefully handle authentication state changes.",
       "acceptanceCriteria": [
-        "Family not found: 'This family doesn't exist or you don't have access to it.'",
-        "Validation errors use render_validation_errors",
-        "Lint passes"
+        "WebSocket reconnects when auth state changes in frontend/src/hooks/useNotificationWebSocket.ts",
+        "WebSocket disconnects cleanly on logout",
+        "No stale connection attempts after logout",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
       "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-007",
-      "title": "Add friendly error messages to goals controller",
-      "description": "As a user, I want clear error messages for goal operations.",
-      "acceptanceCriteria": [
-        "Goal not found: 'This goal doesn't exist or has been deleted.'",
-        "AI refinement failure: 'Our AI assistant is temporarily unavailable. Please try again in a few minutes.'",
-        "Validation errors show field-specific messages",
-        "Lint passes"
-      ],
-      "priority": 7,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-008",
-      "title": "Add friendly error messages to invitations controller",
-      "description": "As a user, I want clear error messages for invitation flow.",
-      "acceptanceCriteria": [
-        "Expired invitation: 'This invitation has expired. Please ask for a new one.'",
-        "Already used: 'This invitation has already been used.'",
-        "Invalid token: 'This invitation link is invalid. Please check the link or request a new invitation.'",
-        "Lint passes"
-      ],
-      "priority": 8,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-009",
-      "title": "Create ApiError class in frontend",
-      "description": "As a developer, I need a custom error class to hold structured error data from the API.",
-      "acceptanceCriteria": [
-        "Create src/lib/errors.ts with ApiError class extending Error",
-        "ApiError has properties: message, errors (string[]), suggestion (string | undefined), status (number)",
-        "Export getErrorMessage(error: unknown) helper that returns { message: string, suggestion?: string }",
-        "Handles network errors: 'Unable to connect. Please check your internet connection.'",
-        "Handles unknown errors: 'Something went wrong. Please try again.'",
-        "Typecheck passes"
-      ],
-      "priority": 9,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-010",
-      "title": "Update apiFetch to throw ApiError",
-      "description": "As a developer, I need the API client to throw ApiError with structured data.",
-      "acceptanceCriteria": [
-        "Update src/lib/api.ts apiFetch function",
-        "Parse error response JSON and create ApiError instance",
-        "Include status code, message, errors array, and suggestion",
-        "Backward compatible with old error format (just message string)",
-        "Typecheck passes"
-      ],
-      "priority": 10,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-011",
-      "title": "Update registration form error display",
-      "description": "As a user, I want to see helpful error messages on the registration form.",
-      "acceptanceCriteria": [
-        "Display field-specific errors next to form fields when available",
-        "Show main error message in alert above form",
-        "Show suggestion with link (e.g., 'Try signing in instead' links to /login)",
-        "Error text styled in red, consistent with app design",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-012",
-      "title": "Update login form error display",
-      "description": "As a user, I want to see helpful error messages on the login form.",
-      "acceptanceCriteria": [
-        "Display error message prominently above form",
-        "Show suggestion with actionable link (e.g., 'Create an account' links to /register)",
-        "Show 'Forgot password?' link when credentials are wrong",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-013",
-      "title": "Update goal form error display",
-      "description": "As a user, I want to see clear validation errors when creating or editing goals.",
-      "acceptanceCriteria": [
-        "Field-specific errors appear next to each field",
-        "AI refinement errors show with retry button",
-        "Use toast for transient/dismissible errors",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-014",
-      "title": "Add HeyDev environment variables",
-      "description": "As a developer, I need HeyDev configuration in environment variables.",
-      "acceptanceCriteria": [
-        "Add VITE_HEYDEV_API_KEY to frontend/.env.example with comment",
-        "Add VITE_HEYDEV_ENDPOINT to frontend/.env.example (optional, for self-hosted)",
-        "Document that API key is obtained from heydev.io",
-        "Typecheck passes"
-      ],
-      "priority": 14,
-      "passes": true,
-      "notes": "User will manually add the actual API key to .env and Coolify after signing up at heydev.io"
-    },
-    {
-      "id": "US-015",
-      "title": "Add HeyDev widget script to frontend",
-      "description": "As a user, I want a feedback button available on all pages.",
-      "acceptanceCriteria": [
-        "Add HeyDev script tag to index.html",
-        "Script loads from heydev.io CDN or configured endpoint",
-        "Configure data-api-key from VITE_HEYDEV_API_KEY env var",
-        "Set data-theme='auto' to match app theme",
-        "Set data-error-tracking='true' to capture JS errors",
-        "Widget gracefully disabled if API key not present (check for empty string)",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill - confirm widget button appears in bottom-right"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "Widget loads when valid API key is configured; gracefully disables with console message when not"
-    },
-    {
-      "id": "US-016",
-      "title": "Pass user context to HeyDev widget",
-      "description": "As a developer, I want feedback to include user context for follow-up.",
-      "acceptanceCriteria": [
-        "Create src/lib/heydev.ts with initHeyDev() function",
-        "When user is logged in, call HeyDev.identify() with user ID and email",
-        "Call initHeyDev from App.tsx after auth state is known",
-        "Include app version from VITE_APP_VERSION if available",
-        "Handle case where HeyDev is not loaded (API key missing)",
-        "Typecheck passes"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "Created heydev.ts with initHeyDev() that calls HeyDev.identify() for authenticated users and HeyDev.reset() on logout. Gracefully handles missing widget."
+      "notes": "Changed from token-based to session-based auth. Added connection ID tracking to prevent stale reconnections. Verified login/logout/re-login flow in browser."
     }
   ]
 }

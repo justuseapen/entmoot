@@ -44,10 +44,12 @@ module Backend
     config.api_only = true
 
     # Add session and cookie middleware for session-based authentication
+    # Required for cross-origin session support with frontend
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore,
                           key: "_entmoot_session",
-                          same_site: :lax,
+                          domain: :all,
+                          same_site: :none,
                           secure: Rails.env.production?
 
     # Use Sidekiq for background job processing

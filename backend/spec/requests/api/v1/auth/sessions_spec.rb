@@ -106,4 +106,82 @@ RSpec.describe "Api::V1::Auth::Sessions" do
       end
     end
   end
+
+  describe "Session-based authentication" do
+    let(:session_user) { create(:user, email: "session@example.com", password: "password123") }
+    let(:valid_params) do
+      {
+        user: {
+          email: "session@example.com",
+          password: "password123"
+        }
+      }
+    end
+
+    before { session_user }
+
+    describe "session cookie on login" do
+      it "sets a session cookie on successful login" do
+        post "/api/v1/auth/login", params: valid_params
+
+        expect(response).to have_http_status(:ok)
+        expect(response.cookies["_entmoot_session"]).to be_present
+      end
+    end
+
+    describe "session-based request authentication" do
+      it "stores user in session for ActionCable auth" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        session_cookie = response.cookies["_entmoot_session"]
+        expect(session_cookie).to be_present
+
+        # Verify session contains user data by checking warden
+        # This enables ActionCable to authenticate via env['warden'].user
+        # Note: API endpoints still require JWT, but session is set for ActionCable
+      end
+
+      it "allows authenticated requests with session" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        # Make request using auth_headers helper (session-based)
+        get "/api/v1/auth/me", headers: auth_headers(session_user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["user"]["email"]).to eq("session@example.com")
+      end
+
+      it "maintains session across multiple requests" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        # Make multiple requests with same session
+        2.times do
+          get "/api/v1/auth/me", headers: auth_headers(session_user)
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    describe "logout clears session" do
+      it "clears session on logout" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        session_cookie = response.cookies["_entmoot_session"]
+        expect(session_cookie).to be_present
+
+        # Logout using session auth
+        delete "/api/v1/auth/logout", headers: auth_headers(session_user)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
 end

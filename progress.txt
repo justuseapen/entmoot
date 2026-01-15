@@ -1,296 +1,90 @@
 # Ralph Progress Log
-Started: Wed Jan 14 17:28:39 EST 2026
+Started: Wed Jan 14 21:27:09 EST 2026
+---
 
 ## Codebase Patterns
-- ErrorResponse concern: Use `render_error(message, status:, errors:, suggestion:)` for structured API errors
-- ApplicationController: Base controller for all API controllers, includes global rescue handlers + ErrorResponse concern
-- Api::V1::BaseController: Authenticated routes inherit from here, includes Pundit + UserActivity; inherits `render_error` from concern
-- When adding methods to concerns, ensure child controllers don't have conflicting method definitions
-- Error detection: Use `errors.where(:field, :error_type).any?` to check for specific validation errors (not `errors.added?`)
-- Auth controllers are at `app/controllers/api/v1/auth/` (registrations, sessions, passwords)
-- Frontend error handling: Use `ApiError` class from `@/lib/errors` and `getErrorMessage()` helper for user-friendly messages
-- Frontend API client: `apiFetch` in `@/lib/api.ts` throws `ApiError` with structured data (status, message, errors[], suggestion)
-- Toast notifications: Use sonner library - `import { toast } from "sonner"` - Toaster component in App.tsx
+- Rails is API-only mode, so session/cookie middleware must be added explicitly via `config.middleware.use`
+- Use `domain: :all` for cross-subdomain cookie support
+- Use `same_site: :none` and `secure: true` (in production) for cross-origin cookie support
+- ActionCable auth: Use `env['warden']&.user` to get authenticated user from session
+- Session auth: Use `request.env["warden"].set_user(user, scope: :user, store: true)` to set user in session
+- Session logout: Use `request.env["warden"].logout(:user)` to clear session
+- API endpoints use JWT auth (`/api/v1/auth/me`), ActionCable uses session auth
+- ActionCable connection specs: Use `type: :channel`, stub warden with `instance_double(Warden::Proxy, user: user)`, pass via `connect "/cable", env: { "warden" => warden }`
+- Frontend WebSocket: Use `isAuthenticated` from auth store, not `token` - session cookies handle auth
+- Stale connection prevention: Use connection ID counter to track effect runs, check before reconnect
 ---
 
-## 2026-01-14 - US-001
-- Implemented ErrorResponse concern at `app/controllers/concerns/error_response.rb`
-- Added three main methods:
-  - `render_error(message, status:, errors:, suggestion:)` - Generic error responses
-  - `render_validation_errors(record, suggestion:)` - For ActiveRecord validation errors
-  - `render_not_found(resource_name, suggestion:)` - Friendly 404 messages
-- Response format: `{ error: string, errors?: string[], suggestion?: string }`
-- Files changed: `backend/app/controllers/concerns/error_response.rb` (new)
-- **Learnings for future iterations:**
-  - BaseController already has `render_error` and `render_errors` methods; the concern provides enhanced versions
-  - Controller hierarchy: ApplicationController → Api::V1::BaseController → specific controllers
-  - Concerns go in `app/controllers/concerns/` directory
----
-
-## 2026-01-14 - US-002
-- Updated ApplicationController to include ErrorResponse concern
-- Modified handle_not_found to use render_not_found with friendly message and suggestion
-- Modified handle_unexpected_error to use render_error with helpful suggestion
-- Removed conflicting render_error method from Api::V1::BaseController (now inherited from concern)
-- Updated render_forbidden in BaseController to use structured error response
+## 2026-01-14 21:27 - US-001
+- What was implemented: Added session cookie middleware to Rails API-only app
 - Files changed:
-  - `backend/app/controllers/application_controller.rb`
-  - `backend/app/controllers/api/v1/base_controller.rb`
+  - backend/config/application.rb - Added ActionDispatch::Cookies and ActionDispatch::Session::CookieStore middleware
 - **Learnings for future iterations:**
-  - BaseController had its own `render_error` method that conflicted with the concern's method signature
-  - When adding keyword arguments to inherited methods, must update or remove overriding methods in child classes
-  - ActiveRecord::RecordNotFound exception carries the model name via `exception.model`
-  - All 1618 tests pass after changes
+  - API-only Rails apps don't have session/cookie middleware by default - must add manually
+  - Session cookie config: key: "_entmoot_session", domain: :all, same_site: :none, secure: Rails.env.production?
+  - All 1618 existing tests pass with the middleware addition
 ---
 
-## 2026-01-14 - US-003
-- Updated registrations controller to use ErrorResponse concern with friendly messages
-- Added FRIENDLY_ERROR_MESSAGES constant mapping error types to user-friendly messages
-- Implemented detect_error_type method using errors.where() for reliable detection
+## 2026-01-14 21:30 - US-002
+- What was implemented: Updated ActionCable connection to use session auth instead of JWT
 - Files changed:
-  - `backend/app/controllers/api/v1/auth/registrations_controller.rb`
-  - `backend/spec/requests/api/v1/auth/registrations_spec.rb`
+  - backend/app/channels/application_cable/connection.rb - Replaced JWT token decoding with env['warden'] user lookup
 - **Learnings for future iterations:**
-  - Use `errors.where(:field, :type).any?` instead of `errors.added?(:field, :type)` - added? only works during validation, where() checks existing errors
-  - Constants must be declared before the `private` keyword or Rubocop will flag "UselessConstantScoping"
-  - Devise uses `:validatable` which adds email uniqueness and password length (6 chars minimum) validations
-  - All 1618 tests pass after changes
+  - `env['warden']&.user` is the simplest way to get the authenticated user from session in ActionCable
+  - No need to use request.session directly - Warden handles session-based auth
+  - The connection rejects unauthorized if no user found (returns nil to trigger reject_unauthorized_connection)
+  - All 1618 existing tests still pass
 ---
 
-## 2026-01-14 - US-004
-- Updated sessions controller to use ErrorResponse concern with friendly messages
-- Differentiated between "user not found" and "wrong password" scenarios:
-  - User not found: "No account found with this email." with suggestion "Would you like to create one?"
-  - Wrong password: "Incorrect email or password. Please try again." (no suggestion)
+## 2026-01-14 21:35 - US-003
+- What was implemented: Added CORS expose header for Set-Cookie
 - Files changed:
-  - `backend/app/controllers/api/v1/auth/sessions_controller.rb`
-  - `backend/spec/requests/api/v1/auth/sessions_spec.rb`
+  - backend/config/initializers/cors.rb - Added `expose: %w[Set-Cookie]` to resource configuration
 - **Learnings for future iterations:**
-  - `User.find_for_database_authentication(email:)` returns nil if user not found (does not raise)
-  - For auth flows, distinguish between "not found" and "wrong credentials" to provide actionable suggestions
-  - All 1618 tests pass after changes
+  - CORS `expose` option lists headers that browsers can access via JavaScript
+  - Set-Cookie header must be exposed for cross-origin session cookie management
+  - The expose option is an array of header names: `expose: %w[Set-Cookie]`
+  - All 1618 existing tests still pass
 ---
 
-## 2026-01-14 - US-005
-- Updated passwords controller to use ErrorResponse concern with friendly messages
-- Added FRIENDLY_ERROR_MESSAGES constant for password reset errors:
-  - Email not found: "We couldn't find an account with this email."
-  - Invalid/expired token: "This password reset link has expired. Please request a new one."
-  - Password too short: "Password must be at least 6 characters."
-  - Password mismatch: "Password confirmation doesn't match."
-- Implemented detect_reset_error_message method using errors.where() pattern
+## 2026-01-14 21:45 - US-004
+- What was implemented: Added request specs for session-based authentication
 - Files changed:
-  - `backend/app/controllers/api/v1/auth/passwords_controller.rb`
-  - `backend/spec/requests/api/v1/auth/passwords_spec.rb`
+  - backend/app/controllers/api/v1/auth/sessions_controller.rb - Added warden.set_user on login, warden.logout on logout
+  - backend/spec/requests/api/v1/auth/sessions_spec.rb - Added 5 new specs for session auth
 - **Learnings for future iterations:**
-  - Devise's reset_password_by_token returns user with errors (even if user not found, returns new User with errors)
-  - Invalid token error type is `errors.where(:reset_password_token, :invalid)`
-  - All 1618 tests pass after changes
+  - Use `request.env["warden"].set_user(user, scope: :user, store: true)` to force session storage on login
+  - Use `request.env["warden"].logout(:user)` to clear session on logout
+  - Devise-JWT skips session storage by default (configured in devise.rb), so explicit set_user is needed
+  - API endpoints still require JWT auth, but session is set for ActionCable to use
+  - Session cookie name is `_entmoot_session` (configured in application.rb)
+  - Response.cookies in RSpec provides access to cookies set in the response
+  - All 1623 tests pass (5 new tests added)
 ---
 
-## 2026-01-14 - US-006
-- Updated families controller to use ErrorResponse concern with friendly messages
-- Changed set_family rescue handler to use `render_error` with friendly message:
-  - "This family doesn't exist or you don't have access to it."
-- Changed validation error handling to use `render_validation_errors` instead of `render_errors`:
-  - In create action (for RecordInvalid exceptions)
-  - In update action (for validation failures)
-- Updated specs to verify new error message format
+## 2026-01-14 22:00 - US-005
+- What was implemented: Added ActionCable connection spec for session-based authentication
 - Files changed:
-  - `backend/app/controllers/api/v1/families_controller.rb`
-  - `backend/spec/requests/api/v1/families_spec.rb`
+  - backend/spec/channels/application_cable/connection_spec.rb - Created new spec file with 3 tests
 - **Learnings for future iterations:**
-  - `render_validation_errors(record)` takes the ActiveRecord object directly, not errors.full_messages
-  - ErrorResponse concern provides consistent JSON response format: { error: string, errors?: string[], suggestion?: string }
-  - All 1618 tests pass after changes
+  - ActionCable connection specs use `type: :channel` and the `connect` helper method
+  - Spec file path must match module structure: `spec/channels/application_cable/connection_spec.rb` (rubocop enforces this)
+  - To test with warden auth, stub the warden object: `instance_double(Warden::Proxy, user: user)`
+  - Pass warden stub via env hash: `connect "/cable", env: { "warden" => warden }`
+  - Use `have_rejected_connection` matcher to test connection rejection
+  - All 1626 tests pass (3 new channel tests added)
 ---
 
-## 2026-01-14 - US-007
-- Updated goals controller to use ErrorResponse concern with friendly messages
-- Changed set_goal rescue handler to use `render_error`:
-  - "This goal doesn't exist or has been deleted."
-- Changed set_family rescue handler (duplicated in goals controller) to use `render_error`:
-  - "This family doesn't exist or you don't have access to it."
-- Changed AI refinement error handling to use friendly message:
-  - "Our AI assistant is temporarily unavailable. Please try again in a few minutes."
-- Changed validation error handling to use `render_validation_errors` in create/update actions
-- Updated specs to verify new error message formats
+## 2026-01-14 21:45 - US-006
+- What was implemented: Updated frontend WebSocket hook for session-based auth and graceful reconnection
 - Files changed:
-  - `backend/app/controllers/api/v1/goals_controller.rb`
-  - `backend/spec/requests/api/v1/goals_spec.rb`
+  - frontend/src/hooks/useNotificationWebSocket.ts - Major refactor for session auth
 - **Learnings for future iterations:**
-  - GoalRefinementService::RefinementError is the exception type for AI service failures
-  - Controllers that have their own set_family method (like GoalsController) need individual updates
-  - All 1618 tests pass after changes
----
-
-## 2026-01-14 - US-008
-- Updated invitations controller to use ErrorResponse concern with friendly messages
-- Updated accept action to use helper methods for clear error messages:
-  - Invalid/missing token: "This invitation link is invalid. Please check the link or request a new invitation."
-  - Expired invitation: "This invitation has expired. Please ask for a new one."
-  - Already used: "This invitation has already been used."
-- Changed set_family rescue handler to use `render_error` with friendly message
-- Changed set_invitation rescue handler to use render_invalid_invitation helper
-- Changed validation error handling to use `render_validation_errors` instead of `render_errors`
-- Removed unused render_not_found and render_gone private methods (now using concern's render_error)
-- Added three private helper methods: render_invalid_invitation, render_expired_invitation, render_used_invitation
-- Files changed:
-  - `backend/app/controllers/api/v1/invitations_controller.rb`
-  - `backend/spec/requests/api/v1/invitations_spec.rb`
-- **Learnings for future iterations:**
-  - InvitationsController has both token-based lookups (accept via token) and ID-based lookups (set_invitation for destroy/resend)
-  - Use helper methods to keep accept method concise and pass Rubocop's MethodLength check (15 lines max)
-  - ClassLength limit is 150 lines - refactoring to one-liner methods using Ruby 3's `def method_name = expression` can help
-  - All 1618 tests pass after changes
----
-
-## 2026-01-14 - US-009
-- Created frontend ApiError class and getErrorMessage helper
-- Created `frontend/src/lib/errors.ts` with:
-  - `ApiError` class extending Error with properties: message, errors (string[]), suggestion (string | undefined), status (number)
-  - `getErrorMessage(error: unknown)` helper returning `{ message: string, suggestion?: string }`
-- Network error handling: "Unable to connect. Please check your internet connection."
-- Unknown error fallback: "Something went wrong. Please try again."
-- Files changed:
-  - `frontend/src/lib/errors.ts` (new)
-- **Learnings for future iterations:**
-  - Frontend lib files are in `frontend/src/lib/`
-  - Use `Error.captureStackTrace` for proper stack traces in custom error classes
-  - Check for `TypeError` with message "Failed to fetch" for network errors
-  - Pre-existing TypeScript errors in codebase (AuthState.token removed) don't affect new code
-  - Typecheck passes for the new file (verified independently)
----
-
-## 2026-01-14 - US-010
-- Updated apiFetch in `frontend/src/lib/api.ts` to throw ApiError with structured data
-- Imports ApiError class from `./errors`
-- When response.ok is false:
-  - Parses error JSON from response
-  - Extracts message from `error` or `message` field (backward compatible)
-  - Extracts `errors` array if present (defaults to empty array)
-  - Extracts `suggestion` if present
-  - Throws ApiError with status, message, errors, and suggestion
-- Files changed:
-  - `frontend/src/lib/api.ts`
-- **Learnings for future iterations:**
-  - Pre-existing TypeScript errors in codebase don't block frontend work (verified with ESLint)
-  - Use `Array.isArray()` for safe array detection
-  - Backend error format: `{ error: string, errors?: string[], suggestion?: string }`
-  - apiFetch is the central API client used by all lib files (auth.ts, goals.ts, families.ts, etc.)
----
-
-## 2026-01-14 - US-011
-- Updated registration form (Register.tsx) to display friendly error messages
-- Added ServerError interface with message, suggestion, and fieldErrors properties
-- Imported ApiError and getErrorMessage from @/lib/errors
-- Updated onSubmit to extract field-specific errors from ApiError.errors array
-- Added error alert above form showing main message and suggestion with Sign In link
-- Each field now displays both client-side validation errors and server-side errors
-- Verified in browser: "This email is already registered." with "Try signing in instead. Sign in" link shows correctly
-- Field-specific error "Email has already been taken" displays below the email field
-- Files changed:
-  - `frontend/src/pages/Register.tsx`
-- **Learnings for future iterations:**
-  - Backend errors array contains full validation messages like "Email has already been taken"
-  - Map errors to fields by checking if message contains field name (toLowerCase().includes())
-  - Use serverError?.fieldErrors[field] pattern to show server-side field errors alongside client validation
-  - Both destructive/10 background and text-destructive classes are needed for error styling
-  - The session auth migration commit (629a2ff) included the Register.tsx changes
----
-
-## 2026-01-14 - US-012
-- Updated login form (Login.tsx) to display friendly error messages
-- Added ServerError interface with message and suggestion properties
-- Imported getErrorMessage from @/lib/errors
-- Updated onSubmit to use getErrorMessage helper for consistent error extraction
-- Added error alert above form showing main message with conditional links:
-  - "No account found" error shows "Create an account" link to /register
-  - "Incorrect email/password" error shows "Forgot password?" link to /forgot-password
-- Verified in browser: Both error scenarios display correctly with appropriate links
-- Files changed:
-  - `frontend/src/pages/Login.tsx`
-- **Learnings for future iterations:**
-  - Backend sessions controller returns suggestion only for "user not found" scenario
-  - When no suggestion is present (wrong password), show "Forgot password?" as contextual help
-  - Check suggestion.toLowerCase().includes("create") to conditionally render "Create an account" link
-  - Use conditional rendering (!serverError.suggestion) for the forgot password case
----
-
-## 2026-01-14 - US-013
-- Updated goal form (GoalModal.tsx) to display friendly error messages
-- Added sonner toast library for transient/dismissible notifications
-- Updated App.tsx to include `<Toaster position="top-right" richColors closeButton />`
-- Added ServerError interface with message, suggestion, and fieldErrors properties
-- Updated onSubmit to extract field-specific errors from ApiError.errors array
-- Each form field now shows server-side errors next to the field (title, description, SMART fields)
-- AI refinement errors in the AI Coach tab now show with a "Try Again" retry button
-- Success toasts shown on goal create/update operations
-- Fixed TypeScript error in errors.ts captureStackTrace typing (constructor?: unknown)
-- Files changed:
-  - `frontend/src/components/GoalModal.tsx`
-  - `frontend/src/App.tsx`
-  - `frontend/src/lib/errors.ts`
-  - `frontend/package.json` (added sonner)
-- **Learnings for future iterations:**
-  - Use sonner (from shadcn/ui ecosystem) for toast notifications: `import { toast } from "sonner"`
-  - Toaster component must be added to App.tsx for toasts to work
-  - Field-specific errors in GoalModal need to map against all SMART fields (specific, measurable, achievable, relevant, time_bound)
-  - For AI errors, show inline error with retry button rather than just toast
-  - TypeScript captureStackTrace type should use `constructor?: unknown` not `new (...args: unknown[]) => unknown`
----
-
-## 2026-01-14 - US-014
-- Added HeyDev environment variables to frontend/.env.example
-- VITE_HEYDEV_API_KEY: Required for HeyDev widget activation
-- VITE_HEYDEV_ENDPOINT: Optional, for self-hosted HeyDev instances
-- Added documentation comments noting to get API key from heydev.io
-- Files changed:
-  - `frontend/.env.example`
-- **Learnings for future iterations:**
-  - HeyDev widget needs two env vars: API key (required) and endpoint (optional for self-hosted)
-  - Follow existing env.example format with comments explaining where to get values
-  - Typecheck passes (env vars in Vite are just strings, no type issues)
----
-
-## 2026-01-14 - US-015
-- Added HeyDev feedback widget script to frontend index.html
-- Created custom htmlEnvPlugin in vite.config.ts to replace %VITE_*% placeholders with env values
-- Widget implementation:
-  - Dynamically creates script element pointing to heydev.io/widget.js
-  - Sets data-api-key from VITE_HEYDEV_API_KEY env var
-  - Sets data-theme='auto' and data-error-tracking='true' attributes
-  - Gracefully disables if API key not configured (logs console message)
-- Browser verification confirmed:
-  - Without API key: Console shows "HeyDev widget disabled: VITE_HEYDEV_API_KEY not configured"
-  - With API key: Script loads from heydev.io/widget.js with correct attributes
-- Files changed:
-  - `frontend/index.html` (HeyDev widget script)
-  - `frontend/vite.config.ts` (htmlEnvPlugin for env var substitution + Prettier formatting)
-- **Learnings for future iterations:**
-  - Vite doesn't support env var substitution in HTML by default; need custom plugin with transformIndexHtml
-  - Use %VITE_*% syntax in HTML for env var placeholders (not import.meta.env)
-  - Check for unreplaced placeholder to detect missing env var: `apiKey === '%' + 'VITE_HEYDEV_API_KEY' + '%'`
-  - HeyDev widget appears in bottom-right only when valid API key is configured
----
-
-## 2026-01-14 - US-016
-- Created HeyDev user context integration for feedback tracking
-- Created `frontend/src/lib/heydev.ts` with:
-  - `initHeyDev(user)` function that calls HeyDev.identify() or HeyDev.reset()
-  - Declares global Window.HeyDev type for TypeScript support
-  - Includes VITE_APP_VERSION in metadata if available
-- Added `HeyDevInitializer` component to App.tsx:
-  - Listens to auth store changes (user, isAuthenticated)
-  - Calls initHeyDev with user context when logged in, null when logged out
-  - Uses React.useEffect to respond to auth state changes
-- Gracefully handles missing HeyDev widget (no-op when window.HeyDev is undefined)
-- Files changed:
-  - `frontend/src/lib/heydev.ts` (new)
-  - `frontend/src/App.tsx`
-- **Learnings for future iterations:**
-  - Use `declare global { interface Window { ... } }` to extend Window type for third-party scripts
-  - Follow existing initializer pattern (NotificationWebSocketInitializer) for components that only run effects
-  - HeyDev widget exposes HeyDev.identify() and HeyDev.reset() methods on window object
-  - Import React and use React.useEffect when adding effects to files that don't already import useEffect
+  - WebSocket URL no longer needs `?token=` - session cookies automatically sent by browser
+  - Use `isAuthenticated` from auth store instead of `token` for effect dependencies
+  - Connection ID pattern prevents stale connections: increment counter on each effect run, check before reconnect
+  - Check stale state in onopen handler to immediately close connections that became stale during handshake
+  - onclose handler must verify both connection ID match AND isAuthenticated before scheduling reconnect
+  - TypeScript build passes, frontend tests pass (69 tests)
+  - Verified full flow in browser: login→connect, logout→clean disconnect, re-login→reconnect
 ---

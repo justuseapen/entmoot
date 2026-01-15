@@ -12,7 +12,7 @@ interface WebSocketMessage {
 export type NotificationCallback = (notification: Notification) => void;
 
 // ActionCable WebSocket hook for real-time notifications
-// Note: With session-based auth, WebSocket authentication is handled via cookies
+// Uses session cookies for auth (set during login) - no token in URL needed
 export function useNotificationWebSocket(
   onNotification?: NotificationCallback
 ) {
@@ -22,6 +22,8 @@ export function useNotificationWebSocket(
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  // Connection ID to prevent stale connections from reconnecting after logout
+  const connectionIdRef = useRef(0);
   const isAuthenticatedRef = useRef(isAuthenticated);
   const onNotificationRef = useRef(onNotification);
 
@@ -35,8 +37,12 @@ export function useNotificationWebSocket(
   }, [onNotification]);
 
   useEffect(() => {
+    // Increment connection ID on each effect run to invalidate stale connections
+    connectionIdRef.current += 1;
+    const currentConnectionId = connectionIdRef.current;
+
     if (!isAuthenticated) {
-      // Clean up if not authenticated
+      // Clean up if not authenticated (logout)
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -49,15 +55,20 @@ export function useNotificationWebSocket(
     }
 
     function connect() {
+      // Check if this connection attempt is stale (auth state changed)
       if (
-        !isAuthenticatedRef.current ||
-        wsRef.current?.readyState === WebSocket.OPEN
+        currentConnectionId !== connectionIdRef.current ||
+        !isAuthenticatedRef.current
       ) {
         return;
       }
 
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        return;
+      }
+
       // Determine WebSocket URL based on environment
-      // With session-based auth, the cookie will be sent automatically
+      // Auth is handled via session cookies (set during login), no token needed in URL
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = import.meta.env.DEV
         ? "localhost:3000"
@@ -68,6 +79,12 @@ export function useNotificationWebSocket(
       wsRef.current = ws;
 
       ws.onopen = () => {
+        // Don't proceed if connection became stale
+        if (currentConnectionId !== connectionIdRef.current) {
+          ws.close();
+          return;
+        }
+
         // Subscribe to the notifications channel
         const subscribeMessage = {
           command: "subscribe",
@@ -131,8 +148,13 @@ export function useNotificationWebSocket(
 
       ws.onclose = () => {
         wsRef.current = null;
-        // Attempt to reconnect after 5 seconds if still authenticated
-        if (isAuthenticatedRef.current) {
+        // Only reconnect if:
+        // 1. This connection is still current (not stale)
+        // 2. User is still authenticated
+        if (
+          currentConnectionId === connectionIdRef.current &&
+          isAuthenticatedRef.current
+        ) {
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, 5000);
@@ -143,10 +165,12 @@ export function useNotificationWebSocket(
     connect();
 
     return () => {
+      // Clear any pending reconnection attempts
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
+      // Close existing connection cleanly
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
