@@ -8,6 +8,30 @@ export interface GoalSummary {
   status: string;
 }
 
+// Habit type
+export interface Habit {
+  id: number;
+  name: string;
+  position: number;
+  is_active: boolean;
+}
+
+// Habit Completion type
+export interface HabitCompletion {
+  id: number;
+  habit_id: number;
+  daily_plan_id: number;
+  completed: boolean;
+  habit: Habit;
+}
+
+// Habit Completion attributes for creating/updating
+export interface HabitCompletionAttributes {
+  id?: number;
+  habit_id: number;
+  completed: boolean;
+}
+
 // Daily Task type
 export interface DailyTask {
   id?: number;
@@ -41,11 +65,14 @@ export interface DailyPlan {
   id: number;
   date: string;
   intention: string | null;
+  shutdown_shipped: string | null;
+  shutdown_blocked: string | null;
   user_id: number;
   family_id: number;
   completion_stats: CompletionStats;
   daily_tasks: DailyTask[];
   top_priorities: TopPriority[];
+  habit_completions: HabitCompletion[];
   yesterday_incomplete_tasks: DailyTask[];
   created_at: string;
   updated_at: string;
@@ -73,8 +100,11 @@ export interface TopPriorityAttributes {
 // Update data type
 export interface UpdateDailyPlanData {
   intention?: string | null;
+  shutdown_shipped?: string | null;
+  shutdown_blocked?: string | null;
   daily_tasks_attributes?: DailyTaskAttributes[];
   top_priorities_attributes?: TopPriorityAttributes[];
+  habit_completions_attributes?: HabitCompletionAttributes[];
 }
 
 // API functions
@@ -128,4 +158,14 @@ export function isToday(dateString: string): boolean {
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear()
   );
+}
+
+// Habits API response
+export interface HabitsResponse {
+  habits: Habit[];
+}
+
+// Get habits for a family (user's active habits)
+export async function getHabits(familyId: number): Promise<HabitsResponse> {
+  return apiFetch<HabitsResponse>(`/families/${familyId}/habits`);
 }

@@ -41,6 +41,7 @@ Rails.application.routes.draw do
         resources :daily_plans, only: %i[show update] do
           get "today", on: :collection
         end
+        resources :habits, only: [:index]
         resources :reflections, only: %i[index show create update destroy]
         resources :weekly_reviews, only: %i[index show update destroy] do
           get "current", on: :collection

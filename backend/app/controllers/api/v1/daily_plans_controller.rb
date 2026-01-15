@@ -50,8 +50,11 @@ module Api
       def daily_plan_params
         params.require(:daily_plan).permit(
           :intention,
+          :shutdown_shipped,
+          :shutdown_blocked,
           daily_tasks_attributes: %i[id title completed position goal_id _destroy],
-          top_priorities_attributes: %i[id title priority_order goal_id _destroy]
+          top_priorities_attributes: %i[id title priority_order goal_id _destroy],
+          habit_completions_attributes: %i[id habit_id completed]
         )
       end
 
@@ -62,6 +65,7 @@ module Api
       def plan_attributes(plan)
         {
           id: plan.id, date: plan.date, intention: plan.intention,
+          shutdown_shipped: plan.shutdown_shipped, shutdown_blocked: plan.shutdown_blocked,
           user_id: plan.user_id, family_id: plan.family_id,
           completion_stats: plan.completion_stats,
           created_at: plan.created_at, updated_at: plan.updated_at
@@ -72,7 +76,8 @@ module Api
         {
           daily_tasks: plan.daily_tasks.map { |task| task_response(task) },
           top_priorities: plan.top_priorities.map { |priority| priority_response(priority) },
-          yesterday_incomplete_tasks: plan.yesterday_incomplete_tasks.map { |task| task_response(task) }
+          yesterday_incomplete_tasks: plan.yesterday_incomplete_tasks.map { |task| task_response(task) },
+          habit_completions: plan.habit_completions.includes(:habit).map { |hc| habit_completion_response(hc) }
         }
       end
 
@@ -103,6 +108,21 @@ module Api
           title: goal.title,
           time_scale: goal.time_scale,
           status: goal.status
+        }
+      end
+
+      def habit_completion_response(habit_completion)
+        {
+          id: habit_completion.id,
+          habit_id: habit_completion.habit_id,
+          daily_plan_id: habit_completion.daily_plan_id,
+          completed: habit_completion.completed,
+          habit: {
+            id: habit_completion.habit.id,
+            name: habit_completion.habit.name,
+            position: habit_completion.habit.position,
+            is_active: habit_completion.habit.is_active
+          }
         }
       end
 

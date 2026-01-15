@@ -1,90 +1,174 @@
 # Ralph Progress Log
-Started: Wed Jan 14 21:27:09 EST 2026
+Started: Thu Jan 15 09:15:55 EST 2026
 ---
 
 ## Codebase Patterns
-- Rails is API-only mode, so session/cookie middleware must be added explicitly via `config.middleware.use`
-- Use `domain: :all` for cross-subdomain cookie support
-- Use `same_site: :none` and `secure: true` (in production) for cross-origin cookie support
-- ActionCable auth: Use `env['warden']&.user` to get authenticated user from session
-- Session auth: Use `request.env["warden"].set_user(user, scope: :user, store: true)` to set user in session
-- Session logout: Use `request.env["warden"].logout(:user)` to clear session
-- API endpoints use JWT auth (`/api/v1/auth/me`), ActionCable uses session auth
-- ActionCable connection specs: Use `type: :channel`, stub warden with `instance_double(Warden::Proxy, user: user)`, pass via `connect "/cable", env: { "warden" => warden }`
-- Frontend WebSocket: Use `isAuthenticated` from auth store, not `token` - session cookies handle auth
-- Stale connection prevention: Use connection ID counter to track effect runs, check before reconnect
+- All model files must start with `# frozen_string_literal: true`
+- Use double quotes for strings in Ruby
+- Run migrations from `/Users/justuseapen/Dropbox/code/entmoot/backend` directory
+- Use `bundle exec rails db:migrate` and `bundle exec rspec` from backend directory
+- Frontend types in `frontend/src/lib/*.ts`, hooks in `frontend/src/hooks/*.ts`
+- TanStack Query hooks use query keys pattern: `const xxxKeys = { all: ["xxx"], list: (id) => [...] }`
+- Run frontend typecheck with `npm run build` from frontend directory
 ---
 
-## 2026-01-14 21:27 - US-001
-- What was implemented: Added session cookie middleware to Rails API-only app
-- Files changed:
-  - backend/config/application.rb - Added ActionDispatch::Cookies and ActionDispatch::Session::CookieStore middleware
+## 2026-01-15 09:18 - US-001
+- **What was implemented:** Created Habit and HabitCompletion models with migrations
+- **Files changed:**
+  - `backend/db/migrate/20260115141634_create_habits.rb` - habits table with name, position, is_active, user_id, family_id
+  - `backend/db/migrate/20260115141642_create_habit_completions.rb` - habit_completions table with habit_id, daily_plan_id, completed
+  - `backend/app/models/habit.rb` - Habit model with associations and validations
+  - `backend/app/models/habit_completion.rb` - HabitCompletion model with associations
+  - `backend/app/models/daily_plan.rb` - Added has_many :habit_completions
+  - `backend/db/schema.rb` - Updated schema
 - **Learnings for future iterations:**
-  - API-only Rails apps don't have session/cookie middleware by default - must add manually
-  - Session cookie config: key: "_entmoot_session", domain: :all, same_site: :none, secure: Rails.env.production?
-  - All 1618 existing tests pass with the middleware addition
+  - Unique indexes were added to prevent duplicate habits per user/family/position and duplicate completions per habit/daily_plan
+  - The DailyPlan model is the central model for daily planning features
+  - All 1613 backend tests pass after changes
 ---
 
-## 2026-01-14 21:30 - US-002
-- What was implemented: Updated ActionCable connection to use session auth instead of JWT
-- Files changed:
-  - backend/app/channels/application_cable/connection.rb - Replaced JWT token decoding with env['warden'] user lookup
+## 2026-01-15 09:25 - US-002
+- **What was implemented:** Created HabitInitializerService to seed default habits for users
+- **Files changed:**
+  - `backend/app/services/habit_initializer_service.rb` - Service to create 9 default habits with sequential positions (1-9)
+  - `backend/app/models/daily_plan.rb` - Integrated HabitInitializerService.initialize_habits_for in find_or_create_for_today
+  - `backend/app/models/user.rb` - Added has_many :habits association
 - **Learnings for future iterations:**
-  - `env['warden']&.user` is the simplest way to get the authenticated user from session in ActionCable
-  - No need to use request.session directly - Warden handles session-based auth
-  - The connection rejects unauthorized if no user found (returns nil to trigger reject_unauthorized_connection)
-  - All 1618 existing tests still pass
+  - Service classes use class methods (class << self pattern) for stateless operations
+  - The HabitInitializerService is idempotent - checks user.habits.exists?(family: family) before creating
+  - Use `exists?(family: family)` instead of `where(family: family).exists?` (Rails/WhereExists rubocop rule)
+  - All 1613 backend tests continue to pass
 ---
 
-## 2026-01-14 21:35 - US-003
-- What was implemented: Added CORS expose header for Set-Cookie
-- Files changed:
-  - backend/config/initializers/cors.rb - Added `expose: %w[Set-Cookie]` to resource configuration
+## 2026-01-15 09:45 - US-003
+- **What was implemented:** Added habits API endpoints and updated daily_plans to support habit_completions
+- **Files changed:**
+  - `backend/app/controllers/api/v1/habits_controller.rb` - New controller with index action
+  - `backend/app/policies/habit_policy.rb` - New policy with index? allowing family members
+  - `backend/config/routes.rb` - Added habits route under families namespace
+  - `backend/app/controllers/api/v1/daily_plans_controller.rb` - Added habit_completions_attributes to permitted params and response
+  - `backend/app/models/daily_plan.rb` - Added accepts_nested_attributes_for :habit_completions
+  - `backend/spec/factories/habits.rb` - New factory for Habit
+  - `backend/spec/factories/habit_completions.rb` - New factory for HabitCompletion
+  - `backend/spec/requests/api/v1/habits_spec.rb` - New request specs (8 tests)
 - **Learnings for future iterations:**
-  - CORS `expose` option lists headers that browsers can access via JavaScript
-  - Set-Cookie header must be exposed for cross-origin session cookie management
-  - The expose option is an array of header names: `expose: %w[Set-Cookie]`
-  - All 1618 existing tests still pass
+  - HabitPolicy uses `user.member_of?(record)` where record is the Family passed to authorize
+  - The daily_plans_controller includes habit_completions with nested habit data in responses
+  - Use `includes(:habit)` when mapping habit_completions to avoid N+1 queries
+  - All 1621 backend tests pass (8 new tests added)
 ---
 
-## 2026-01-14 21:45 - US-004
-- What was implemented: Added request specs for session-based authentication
-- Files changed:
-  - backend/app/controllers/api/v1/auth/sessions_controller.rb - Added warden.set_user on login, warden.logout on logout
-  - backend/spec/requests/api/v1/auth/sessions_spec.rb - Added 5 new specs for session auth
+## 2026-01-15 09:52 - US-004
+- **What was implemented:** Added shutdown_shipped and shutdown_blocked columns to daily_plans for end-of-day reflection notes
+- **Files changed:**
+  - `backend/db/migrate/20260115142619_add_shutdown_notes_to_daily_plans.rb` - Migration adding shutdown_shipped and shutdown_blocked text columns
+  - `backend/app/controllers/api/v1/daily_plans_controller.rb` - Updated daily_plan_params to permit new params, updated plan_attributes to include them in response
+  - `backend/db/schema.rb` - Updated schema
 - **Learnings for future iterations:**
-  - Use `request.env["warden"].set_user(user, scope: :user, store: true)` to force session storage on login
-  - Use `request.env["warden"].logout(:user)` to clear session on logout
-  - Devise-JWT skips session storage by default (configured in devise.rb), so explicit set_user is needed
-  - API endpoints still require JWT auth, but session is set for ActionCable to use
-  - Session cookie name is `_entmoot_session` (configured in application.rb)
-  - Response.cookies in RSpec provides access to cookies set in the response
-  - All 1623 tests pass (5 new tests added)
+  - The daily_plan_params method centralizes permitted params - add new fields there
+  - The plan_attributes method builds the response hash - add new fields there for API response
+  - Simple column additions just need: migration + permit params + include in response
+  - All 1621 backend tests continue to pass
 ---
 
-## 2026-01-14 22:00 - US-005
-- What was implemented: Added ActionCable connection spec for session-based authentication
-- Files changed:
-  - backend/spec/channels/application_cable/connection_spec.rb - Created new spec file with 3 tests
+## 2026-01-15 10:05 - US-005
+- **What was implemented:** Updated frontend TypeScript types for habits and shutdown notes
+- **Files changed:**
+  - `frontend/src/lib/dailyPlans.ts` - Added Habit, HabitCompletion, HabitCompletionAttributes types; added shutdown_shipped, shutdown_blocked, habit_completions to DailyPlan type; added getHabits API function
+  - `frontend/src/hooks/useHabits.ts` - New hook with TanStack Query for fetching user's habits
 - **Learnings for future iterations:**
-  - ActionCable connection specs use `type: :channel` and the `connect` helper method
-  - Spec file path must match module structure: `spec/channels/application_cable/connection_spec.rb` (rubocop enforces this)
-  - To test with warden auth, stub the warden object: `instance_double(Warden::Proxy, user: user)`
-  - Pass warden stub via env hash: `connect "/cable", env: { "warden" => warden }`
-  - Use `have_rejected_connection` matcher to test connection rejection
-  - All 1626 tests pass (3 new channel tests added)
+  - Frontend types mirror backend API responses - include all fields returned by the controller
+  - TanStack Query hooks follow the pattern: query keys object + useQuery with enabled condition
+  - Use `@/lib/` for API functions and `@/hooks/` for query hooks
+  - The useAuthStore provides `isAuthenticated` for gating queries
+  - Typecheck with `npm run build` from frontend directory
 ---
 
-## 2026-01-14 21:45 - US-006
-- What was implemented: Updated frontend WebSocket hook for session-based auth and graceful reconnection
-- Files changed:
-  - frontend/src/hooks/useNotificationWebSocket.ts - Major refactor for session auth
+## 2026-01-15 10:40 - US-006
+- **What was implemented:** Redesigned Top 3 Outcomes section with goal linking capability
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Renamed section, added subtitle, added goal selector dropdown with filtering, added badge display for linked goals
 - **Learnings for future iterations:**
-  - WebSocket URL no longer needs `?token=` - session cookies automatically sent by browser
-  - Use `isAuthenticated` from auth store instead of `token` for effect dependencies
-  - Connection ID pattern prevents stale connections: increment counter on each effect run, check before reconnect
-  - Check stale state in onopen handler to immediately close connections that became stale during handshake
-  - onclose handler must verify both connection ID match AND isAuthenticated before scheduling reconnect
-  - TypeScript build passes, frontend tests pass (69 tests)
-  - Verified full flow in browser: login→connect, logout→clean disconnect, re-login→reconnect
+  - Use shadcn Select component for dropdowns, imports: Select, SelectContent, SelectItem, SelectTrigger
+  - Filter goals by time_scale with `goals?.filter((g) => g.time_scale !== "daily")`
+  - TopPriority type already has goal_id and goal fields for linking to goals
+  - Badge component from `@/components/ui/badge` for displaying tags
+  - getTimeScaleLabel from `@/lib/goals` converts time_scale enum to human-readable label
+  - Radix Select uses portals for dropdowns - won't appear in accessibility snapshots during browser testing
+- Backend habits API must return wrapped format `{ habits: [...] }` for frontend useHabits hook
+- When creating new nested records with accepts_nested_attributes_for, omit `id` field (don't send id: 0)
+---
+
+## 2026-01-15 11:30 - US-007
+- **What was implemented:** Built Non-Negotiables habit tracker UI with checkboxes in responsive grid
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Added Non-Negotiables Card section with habit checkboxes, completion counter, toggle handler, and strikethrough styling
+  - `backend/app/controllers/api/v1/habits_controller.rb` - Fixed API to return wrapped `{ habits: [...] }` format
+  - `backend/spec/requests/api/v1/habits_spec.rb` - Updated specs to expect wrapped format
+- **Learnings for future iterations:**
+  - Use shadcn Checkbox component from `@/components/ui/checkbox` with `onCheckedChange` prop
+  - Radix Checkbox uses `checked === true` comparison (returns boolean | "indeterminate")
+  - For responsive grid: `grid grid-cols-2 gap-3 md:grid-cols-3`
+  - Strikethrough styling: `className={isCompleted ? "text-muted-foreground line-through" : ""}`
+  - When creating new habit_completions, conditionally include id: `...(hc.id > 0 ? { id: hc.id } : {})`
+  - The saveChanges function signature extended to accept 4th parameter for habitCompletions
+  - All 1621 backend tests pass
+---
+
+## 2026-01-15 12:15 - US-008
+- **What was implemented:** Built Shutdown Notes UI section with structured end-of-day reflection prompts
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Removed Daily Intention card, added Shutdown Notes card with Sunset icon, two textareas with auto-save on blur
+- **Learnings for future iterations:**
+  - Use Sunset icon from lucide-react for end-of-day/shutdown themed sections
+  - The saveChanges function can be extended with additional optional parameters for new fields
+  - For text areas with auto-save on blur: create a local state setter, onChange handler to update local state, and onBlur handler to call saveChanges
+  - When removing a card, also remove its related handlers (e.g., handleIntentionChange, handleIntentionBlur were removed with the Daily Intention card)
+  - State variables can be kept even if UI is removed (intention still persists in saveChanges for backwards compatibility)
+  - Typecheck passes
+  - Browser verification confirmed auto-save works with the "Saved" status indicator
+---
+
+## 2026-01-15 13:00 - US-009
+- **What was implemented:** Removed Daily Tasks section from UI for a cleaner daily focus card
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Major cleanup removing task-related UI and state
+- **What was removed:**
+  - Today's Tasks Card component with task checklist
+  - Yesterday's Unfinished Tasks Card component
+  - Progress Card showing completion percentage
+  - `newTaskTitle` state and `setNewTaskTitle` setter
+  - Task handlers: `handleAddTask`, `handleToggleTask`, `handleRemoveTask`, `handleLinkTaskToGoal`, `handleCarryOverTask`, `handleDragEnd`
+  - `localTasks`, `initialTasks`, `tasks`, `visibleTasks`, `completionPercentage`, `yesterdayIncompleteTasks` variables
+  - DndContext and SortableContext imports from @dnd-kit
+  - `DailyTask`, `DailyTaskAttributes` type imports
+  - `Progress`, `SortableTaskItem`, `InlineEmptyState` component imports
+  - `Plus`, `CheckCircle2`, `AlertCircle`, `ArrowRight` icon imports
+- **Learnings for future iterations:**
+  - When removing major UI sections, also clean up: state variables, handlers, imports, and computed values
+  - The saveChanges function signature was simplified to remove the tasks parameter
+  - Keep the DailyTask model and API unchanged for backwards compatibility
+  - The Daily Focus Card now shows only: Top 3 Outcomes, Non-Negotiables, and Shutdown Notes
+  - Removed 301 lines of code, significantly simplifying the component
+  - Typecheck passes
+  - Browser verification confirmed the cleaner UI works correctly
+---
+
+## 2026-01-15 13:45 - US-010
+- **What was implemented:** Updated daily planner header and styling
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Changed header subtitle from 'Start your day with intention' to 'Daily Focus Card'
+- **Verified:**
+  - Desktop view: Cards use mb-6 spacing, header displays correctly
+  - Mobile view: Cards stack vertically, Non-Negotiables grid switches from 3 columns to 2 columns
+  - Save status bar functionality preserved
+  - Navigation buttons remain at bottom and wrap nicely on mobile
+  - Typecheck passes
+  - Browser verification confirmed on both desktop and mobile viewports
+- **Learnings for future iterations:**
+  - The Daily Planner page is now fully redesigned as a "Daily Focus Card" with 3 main sections:
+    1. Top 3 Outcomes Today (with goal linking)
+    2. Non-Negotiables (habit tracker with responsive grid)
+    3. Shutdown Notes (structured end-of-day reflection)
+  - Responsive grid classes: `grid grid-cols-2 gap-3 md:grid-cols-3` for 2-col mobile, 3-col desktop
 ---

@@ -7,18 +7,22 @@ class DailyPlan < ApplicationRecord
   has_many :daily_tasks, -> { order(:position) }, dependent: :destroy, inverse_of: :daily_plan
   has_many :top_priorities, -> { order(:priority_order) }, dependent: :destroy, inverse_of: :daily_plan
   has_many :reflections, dependent: :destroy
+  has_many :habit_completions, dependent: :destroy
 
   validates :date, presence: true
   validates :date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_date }
 
   accepts_nested_attributes_for :daily_tasks, allow_destroy: true
   accepts_nested_attributes_for :top_priorities, allow_destroy: true
+  accepts_nested_attributes_for :habit_completions
 
   scope :for_date, ->(date) { where(date: date) }
 
   def self.find_or_create_for_today(user:, family:)
     today = Time.find_zone(family.timezone)&.today || Time.zone.today
-    find_or_create_by(user: user, family: family, date: today)
+    daily_plan = find_or_create_by(user: user, family: family, date: today)
+    HabitInitializerService.initialize_habits_for(user: user, family: family)
+    daily_plan
   end
 
   def yesterday_incomplete_tasks
