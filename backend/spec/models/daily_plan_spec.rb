@@ -94,30 +94,46 @@ RSpec.describe DailyPlan do
   describe "#completion_stats" do
     let(:daily_plan) { create(:daily_plan) }
 
-    context "when there are no tasks" do
+    context "when there are no priorities or habit completions" do
       it "returns zero stats" do
         expect(daily_plan.completion_stats).to eq(total: 0, completed: 0, percentage: 0)
       end
     end
 
-    context "when there are tasks" do
+    context "when there are priorities and habits" do
       before do
-        create_list(:daily_task, 2, :completed, daily_plan: daily_plan)
-        create_list(:daily_task, 2, :incomplete, daily_plan: daily_plan)
+        create(:top_priority, daily_plan: daily_plan, title: "Priority 1", priority_order: 1, completed: true)
+        create(:top_priority, daily_plan: daily_plan, title: "Priority 2", priority_order: 2, completed: false)
+        habit = create(:habit, user: daily_plan.user, family: daily_plan.family)
+        create(:habit_completion, daily_plan: daily_plan, habit: habit, completed: true)
       end
 
-      it "returns correct stats" do
-        expect(daily_plan.completion_stats).to eq(total: 4, completed: 2, percentage: 50)
+      it "returns correct stats for priorities and habits combined" do
+        expect(daily_plan.completion_stats).to eq(total: 3, completed: 2, percentage: 67)
       end
     end
 
-    context "when all tasks are completed" do
+    context "when all priorities and habits are completed" do
       before do
-        create_list(:daily_task, 3, :completed, daily_plan: daily_plan)
+        create(:top_priority, daily_plan: daily_plan, title: "Priority 1", priority_order: 1, completed: true)
+        create(:top_priority, daily_plan: daily_plan, title: "Priority 2", priority_order: 2, completed: true)
+        habit = create(:habit, user: daily_plan.user, family: daily_plan.family)
+        create(:habit_completion, daily_plan: daily_plan, habit: habit, completed: true)
       end
 
       it "returns 100 percent" do
         expect(daily_plan.completion_stats).to eq(total: 3, completed: 3, percentage: 100)
+      end
+    end
+
+    context "when priorities have empty titles" do
+      before do
+        create(:top_priority, daily_plan: daily_plan, title: "Real priority", priority_order: 1, completed: true)
+        # Empty title priorities should not be counted
+      end
+
+      it "excludes priorities with empty titles" do
+        expect(daily_plan.completion_stats).to eq(total: 1, completed: 1, percentage: 100)
       end
     end
   end

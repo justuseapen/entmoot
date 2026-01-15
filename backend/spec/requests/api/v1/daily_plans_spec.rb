@@ -48,27 +48,32 @@ RSpec.describe "Api::V1::DailyPlans" do
       it "includes top priorities in response" do
         today = Time.find_zone("America/New_York").today
         plan = create(:daily_plan, user: user, family: family, date: today)
-        priority = create(:top_priority, daily_plan: plan, title: "Top priority", priority_order: 1)
+        priority = create(:top_priority, daily_plan: plan, title: "Top priority", priority_order: 1, completed: true)
 
         get "/api/v1/families/#{family.id}/daily_plans/today", headers: auth_headers(user)
 
         expect(json_response["top_priorities"].length).to eq(1)
         expect(json_response["top_priorities"].first["id"]).to eq(priority.id)
         expect(json_response["top_priorities"].first["title"]).to eq("Top priority")
+        expect(json_response["top_priorities"].first["completed"]).to be true
       end
 
       it "includes completion stats in response" do
         today = Time.find_zone("America/New_York").today
         plan = create(:daily_plan, user: user, family: family, date: today)
-        create(:daily_task, :completed, daily_plan: plan)
-        create(:daily_task, :incomplete, daily_plan: plan)
+        # Create priorities (now tracked in completion_stats)
+        create(:top_priority, daily_plan: plan, title: "Priority 1", priority_order: 1, completed: true)
+        create(:top_priority, daily_plan: plan, title: "Priority 2", priority_order: 2, completed: false)
+        # Create habit completion (also tracked in completion_stats)
+        habit = create(:habit, user: user, family: family)
+        create(:habit_completion, daily_plan: plan, habit: habit, completed: true)
 
         get "/api/v1/families/#{family.id}/daily_plans/today", headers: auth_headers(user)
 
         expect(json_response["completion_stats"]).to eq({
-                                                          "total" => 2,
-                                                          "completed" => 1,
-                                                          "percentage" => 50
+                                                          "total" => 3,
+                                                          "completed" => 2,
+                                                          "percentage" => 67
                                                         })
       end
 
@@ -298,6 +303,24 @@ RSpec.describe "Api::V1::DailyPlans" do
 
         expect(response).to have_http_status(:ok)
         expect(json_response["daily_plan"]["top_priorities"].first["title"]).to eq("Updated")
+      end
+
+      it "marks priority as completed" do
+        priority = create(:top_priority, daily_plan: daily_plan, title: "My priority", completed: false)
+
+        patch "/api/v1/families/#{family.id}/daily_plans/#{daily_plan.id}",
+              params: {
+                daily_plan: {
+                  top_priorities_attributes: [
+                    { id: priority.id, completed: true }
+                  ]
+                }
+              },
+              headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["daily_plan"]["top_priorities"].first["completed"]).to be true
+        expect(priority.reload.completed).to be true
       end
 
       it "removes top priorities" do

@@ -45,8 +45,15 @@ class DailyPlan < ApplicationRecord
   end
 
   def completion_stats
-    total = daily_tasks.count
-    completed = daily_tasks.where(completed: true).count
+    priority_total = top_priorities.where.not(title: [nil, ""]).count
+    priority_completed = top_priorities.where.not(title: [nil, ""]).where(completed: true).count
+
+    habit_total = habit_completions.count
+    habit_completed = habit_completions.where(completed: true).count
+
+    total = priority_total + habit_total
+    completed = priority_completed + habit_completed
+
     {
       total: total,
       completed: completed,

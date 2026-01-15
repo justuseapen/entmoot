@@ -50,6 +50,7 @@ export interface TopPriority {
   priority_order: number;
   goal_id: number | null;
   goal: GoalSummary | null;
+  completed?: boolean;
   _destroy?: boolean;
 }
 
@@ -94,6 +95,7 @@ export interface TopPriorityAttributes {
   title: string;
   priority_order: number;
   goal_id?: number | null;
+  completed?: boolean;
   _destroy?: boolean;
 }
 

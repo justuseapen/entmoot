@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,11 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthStore } from "@/stores/auth";
 import { useFamilyStore } from "@/stores/family";
 import { useFamilies } from "@/hooks/useFamilies";
-import { useTodaysPlan } from "@/hooks/useDailyPlans";
+import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
+import { useHabits } from "@/hooks/useHabits";
 import { useGoals } from "@/hooks/useGoals";
+import { cn } from "@/lib/utils";
+import type { TopPriority } from "@/lib/dailyPlans";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { formatTodayDate } from "@/lib/dailyPlans";
@@ -63,6 +68,55 @@ export function Dashboard() {
   const { data: activities, isLoading: activitiesLoading } = useActivityFeed(
     currentFamily?.id ?? 0,
     5
+  );
+
+  // Fetch habits for dashboard
+  const { data: habits } = useHabits(currentFamily?.id ?? 0);
+
+  // Mutation for updating daily plan
+  const updatePlan = useUpdateDailyPlan(currentFamily?.id ?? 0);
+
+  // Handler for toggling priority completion
+  const handleTogglePriority = useCallback(
+    async (priority: TopPriority, completed: boolean) => {
+      if (!todaysPlan || !currentFamily || !priority.id) return;
+
+      await updatePlan.mutateAsync({
+        planId: todaysPlan.id,
+        data: {
+          top_priorities_attributes: [
+            {
+              id: priority.id,
+              title: priority.title,
+              priority_order: priority.priority_order,
+              goal_id: priority.goal_id,
+              completed,
+            },
+          ],
+        },
+      });
+    },
+    [todaysPlan, currentFamily, updatePlan]
+  );
+
+  // Handler for toggling habit completion
+  const handleToggleHabit = useCallback(
+    async (habitId: number, completed: boolean) => {
+      if (!todaysPlan || !currentFamily) return;
+
+      await updatePlan.mutateAsync({
+        planId: todaysPlan.id,
+        data: {
+          habit_completions_attributes: [
+            {
+              habit_id: habitId,
+              completed,
+            },
+          ],
+        },
+      });
+    },
+    [todaysPlan, currentFamily, updatePlan]
   );
 
   const showCreationWizard =
@@ -250,13 +304,14 @@ export function Dashboard() {
                             />
                           </div>
 
-                          {/* Top Priorities */}
-                          {todaysPlan.top_priorities.length > 0 && (
+                          {/* Top Priorities with checkboxes */}
+                          {todaysPlan.top_priorities.filter((p) => p.title)
+                            .length > 0 && (
                             <div>
                               <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
                                 Top Priorities
                               </p>
-                              <ul className="space-y-1">
+                              <ul className="space-y-2">
                                 {todaysPlan.top_priorities
                                   .filter((p) => p.title)
                                   .slice(0, 3)
@@ -265,12 +320,82 @@ export function Dashboard() {
                                       key={priority.id || index}
                                       className="flex items-center gap-2 text-sm"
                                     >
-                                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600">
+                                      <Checkbox
+                                        checked={priority.completed ?? false}
+                                        onCheckedChange={(checked) =>
+                                          handleTogglePriority(
+                                            priority,
+                                            checked === true
+                                          )
+                                        }
+                                        disabled={updatePlan.isPending}
+                                      />
+                                      <span
+                                        className={cn(
+                                          "flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium",
+                                          priority.completed
+                                            ? "bg-green-100 text-green-600"
+                                            : "bg-blue-100 text-blue-600"
+                                        )}
+                                      >
                                         {index + 1}
                                       </span>
-                                      {priority.title}
+                                      <span
+                                        className={
+                                          priority.completed
+                                            ? "text-muted-foreground line-through"
+                                            : ""
+                                        }
+                                      >
+                                        {priority.title}
+                                      </span>
                                     </li>
                                   ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Non-Negotiables (Habits) with checkboxes */}
+                          {habits && habits.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+                                Non-Negotiables
+                              </p>
+                              <ul className="space-y-2">
+                                {habits.slice(0, 5).map((habit) => {
+                                  const completion =
+                                    todaysPlan.habit_completions.find(
+                                      (hc) => hc.habit_id === habit.id
+                                    );
+                                  const isCompleted =
+                                    completion?.completed ?? false;
+                                  return (
+                                    <li
+                                      key={habit.id}
+                                      className="flex items-center gap-2 text-sm"
+                                    >
+                                      <Checkbox
+                                        checked={isCompleted}
+                                        onCheckedChange={(checked) =>
+                                          handleToggleHabit(
+                                            habit.id,
+                                            checked === true
+                                          )
+                                        }
+                                        disabled={updatePlan.isPending}
+                                      />
+                                      <span
+                                        className={
+                                          isCompleted
+                                            ? "text-muted-foreground line-through"
+                                            : ""
+                                        }
+                                      >
+                                        {habit.name}
+                                      </span>
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             </div>
                           )}
@@ -291,7 +416,7 @@ export function Dashboard() {
                           {todaysPlan.top_priorities.filter((p) => p.title)
                             .length === 0 &&
                             !todaysPlan.intention &&
-                            todaysPlan.completion_stats.total === 0 && (
+                            (!habits || habits.length === 0) && (
                               <p className="text-muted-foreground text-sm">
                                 No plan set for today yet.{" "}
                                 <Link

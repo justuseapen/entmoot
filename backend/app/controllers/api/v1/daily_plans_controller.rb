@@ -53,7 +53,7 @@ module Api
           :shutdown_shipped,
           :shutdown_blocked,
           daily_tasks_attributes: %i[id title completed position goal_id _destroy],
-          top_priorities_attributes: %i[id title priority_order goal_id _destroy],
+          top_priorities_attributes: %i[id title priority_order goal_id completed _destroy],
           habit_completions_attributes: %i[id habit_id completed]
         )
       end
@@ -98,7 +98,8 @@ module Api
           title: priority.title,
           priority_order: priority.priority_order,
           goal_id: priority.goal_id,
-          goal: priority.goal ? goal_summary(priority.goal) : nil
+          goal: priority.goal ? goal_summary(priority.goal) : nil,
+          completed: priority.completed
         }
       end
 
