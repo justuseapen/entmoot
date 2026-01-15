@@ -14,7 +14,19 @@ class DailyPlan < ApplicationRecord
 
   accepts_nested_attributes_for :daily_tasks, allow_destroy: true
   accepts_nested_attributes_for :top_priorities, allow_destroy: true
-  accepts_nested_attributes_for :habit_completions
+
+  # Custom setter for habit_completions to handle upserts (find or create)
+  def habit_completions_attributes=(attributes_collection)
+    attributes_collection.each do |attributes|
+      attributes = attributes.with_indifferent_access
+      habit_id = attributes[:habit_id]
+      next unless habit_id
+
+      completion = habit_completions.find_or_initialize_by(habit_id: habit_id)
+      completion.completed = attributes[:completed] if attributes.key?(:completed)
+      completion.save! if completion.changed?
+    end
+  end
 
   scope :for_date, ->(date) { where(date: date) }
 
