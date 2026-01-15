@@ -12,30 +12,37 @@ interface WebSocketMessage {
 export type NotificationCallback = (notification: Notification) => void;
 
 // ActionCable WebSocket hook for real-time notifications
+// Uses session cookies for auth (set during login) - no token in URL needed
 export function useNotificationWebSocket(
   onNotification?: NotificationCallback
 ) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const tokenRef = useRef(token);
+  // Connection ID to prevent stale connections from reconnecting after logout
+  const connectionIdRef = useRef(0);
+  const isAuthenticatedRef = useRef(isAuthenticated);
   const onNotificationRef = useRef(onNotification);
 
   // Keep refs updated
   useEffect(() => {
-    tokenRef.current = token;
-  }, [token]);
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     onNotificationRef.current = onNotification;
   }, [onNotification]);
 
   useEffect(() => {
-    if (!token) {
-      // Clean up if no token
+    // Increment connection ID on each effect run to invalidate stale connections
+    connectionIdRef.current += 1;
+    const currentConnectionId = connectionIdRef.current;
+
+    if (!isAuthenticated) {
+      // Clean up if not authenticated (logout)
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -48,22 +55,36 @@ export function useNotificationWebSocket(
     }
 
     function connect() {
-      const currentToken = tokenRef.current;
-      if (!currentToken || wsRef.current?.readyState === WebSocket.OPEN) {
+      // Check if this connection attempt is stale (auth state changed)
+      if (
+        currentConnectionId !== connectionIdRef.current ||
+        !isAuthenticatedRef.current
+      ) {
+        return;
+      }
+
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
         return;
       }
 
       // Determine WebSocket URL based on environment
+      // Auth is handled via session cookies (set during login), no token needed in URL
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = import.meta.env.DEV
         ? "localhost:3000"
         : window.location.host;
-      const wsUrl = `${wsProtocol}//${wsHost}/cable?token=${encodeURIComponent(currentToken)}`;
+      const wsUrl = `${wsProtocol}//${wsHost}/cable`;
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        // Don't proceed if connection became stale
+        if (currentConnectionId !== connectionIdRef.current) {
+          ws.close();
+          return;
+        }
+
         // Subscribe to the notifications channel
         const subscribeMessage = {
           command: "subscribe",
@@ -127,8 +148,13 @@ export function useNotificationWebSocket(
 
       ws.onclose = () => {
         wsRef.current = null;
-        // Attempt to reconnect after 5 seconds if still authenticated
-        if (tokenRef.current) {
+        // Only reconnect if:
+        // 1. This connection is still current (not stale)
+        // 2. User is still authenticated
+        if (
+          currentConnectionId === connectionIdRef.current &&
+          isAuthenticatedRef.current
+        ) {
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, 5000);
@@ -139,14 +165,16 @@ export function useNotificationWebSocket(
     connect();
 
     return () => {
+      // Clear any pending reconnection attempts
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
+      // Close existing connection cleanly
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
       }
     };
-  }, [token, queryClient]);
+  }, [isAuthenticated, queryClient]);
 }
