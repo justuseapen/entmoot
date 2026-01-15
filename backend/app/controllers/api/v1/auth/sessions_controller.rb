@@ -21,6 +21,8 @@ module Api
 
           if token && current_user
             revoke_current_session(token)
+            # Clear session for session-based auth
+            request.env["warden"].logout(:user)
             render json: { message: "Logged out successfully." }, status: :ok
           else
             render json: { error: "Could not log out. No active session." }, status: :unauthorized
@@ -32,6 +34,9 @@ module Api
         def render_login_success(user)
           jwt_token = generate_jwt(user)
           refresh_token = create_refresh_token(user)
+
+          # Set user in session for session-based auth (cross-origin support)
+          request.env["warden"].set_user(user, scope: :user, store: true)
 
           response.headers["Authorization"] = "Bearer #{jwt_token}"
           render json: {

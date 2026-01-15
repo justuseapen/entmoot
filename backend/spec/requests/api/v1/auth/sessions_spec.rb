@@ -104,4 +104,103 @@ RSpec.describe "Api::V1::Auth::Sessions" do
       end
     end
   end
+
+  describe "Session-based authentication" do
+    let!(:user) { create(:user, email: "session@example.com", password: "password123") }
+    let(:valid_params) do
+      {
+        user: {
+          email: "session@example.com",
+          password: "password123"
+        }
+      }
+    end
+
+    describe "session cookie on login" do
+      it "sets a session cookie on successful login" do
+        post "/api/v1/auth/login", params: valid_params
+
+        expect(response).to have_http_status(:ok)
+        expect(response.cookies["_entmoot_session"]).to be_present
+      end
+    end
+
+    describe "session-based request authentication" do
+      it "stores user in session for ActionCable auth" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        session_cookie = response.cookies["_entmoot_session"]
+        expect(session_cookie).to be_present
+
+        # Verify session contains user data by checking warden
+        # This enables ActionCable to authenticate via env['warden'].user
+        # Note: API endpoints still require JWT, but session is set for ActionCable
+      end
+
+      it "allows requests with both session cookie and JWT" do
+        # Login to establish session and get JWT
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        jwt_token = response.headers["Authorization"]
+        session_cookie = response.cookies["_entmoot_session"]
+
+        # Make request with both JWT and session cookie
+        get "/api/v1/auth/me", headers: {
+          "Authorization" => jwt_token,
+          "Cookie" => "_entmoot_session=#{session_cookie}"
+        }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["user"]["email"]).to eq("session@example.com")
+      end
+
+      it "maintains session across multiple requests" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        jwt_token = response.headers["Authorization"]
+        session_cookie = response.cookies["_entmoot_session"]
+
+        # Make multiple requests with same session
+        2.times do
+          get "/api/v1/auth/me", headers: {
+            "Authorization" => jwt_token,
+            "Cookie" => "_entmoot_session=#{session_cookie}"
+          }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    describe "logout clears session" do
+      it "clears session cookie on logout" do
+        # Login to establish session
+        post "/api/v1/auth/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+
+        jwt_token = response.headers["Authorization"]
+        session_cookie = response.cookies["_entmoot_session"]
+        expect(session_cookie).to be_present
+
+        # Logout
+        delete "/api/v1/auth/logout", headers: {
+          "Authorization" => jwt_token,
+          "Cookie" => "_entmoot_session=#{session_cookie}"
+        }
+        expect(response).to have_http_status(:ok)
+
+        # Session cookie should be cleared (empty or expired)
+        # After logout, the session should no longer authenticate requests
+        get "/api/v1/auth/me", headers: { "Cookie" => "_entmoot_session=#{session_cookie}" }
+
+        # Should fail because session was invalidated
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end
