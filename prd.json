@@ -203,7 +203,7 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "User will manually add the actual API key to .env and Coolify after signing up at heydev.io"
     },
     {

@@ -239,3 +239,16 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - For AI errors, show inline error with retry button rather than just toast
   - TypeScript captureStackTrace type should use `constructor?: unknown` not `new (...args: unknown[]) => unknown`
 ---
+
+## 2026-01-14 - US-014
+- Added HeyDev environment variables to frontend/.env.example
+- VITE_HEYDEV_API_KEY: Required for HeyDev widget activation
+- VITE_HEYDEV_ENDPOINT: Optional, for self-hosted HeyDev instances
+- Added documentation comments noting to get API key from heydev.io
+- Files changed:
+  - `frontend/.env.example`
+- **Learnings for future iterations:**
+  - HeyDev widget needs two env vars: API key (required) and endpoint (optional for self-hosted)
+  - Follow existing env.example format with comments explaining where to get values
+  - Typecheck passes (env vars in Vite are just strings, no type issues)
+---
