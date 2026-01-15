@@ -38,7 +38,6 @@ import {
 import {
   Plus,
   Target,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
@@ -48,6 +47,7 @@ import {
   Link2,
   X,
   ListChecks,
+  Sunset,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -96,6 +96,8 @@ export function DailyPlanner() {
     () => plan?.habit_completions || [],
     [plan]
   );
+  const initialShutdownShipped = plan?.shutdown_shipped || "";
+  const initialShutdownBlocked = plan?.shutdown_blocked || "";
 
   // Local edits state (tracks modifications on top of server data)
   const [localIntention, setLocalIntention] = useState<string | null>(null);
@@ -106,12 +108,20 @@ export function DailyPlanner() {
   const [localHabitCompletions, setLocalHabitCompletions] = useState<
     HabitCompletion[] | null
   >(null);
+  const [localShutdownShipped, setLocalShutdownShipped] = useState<
+    string | null
+  >(null);
+  const [localShutdownBlocked, setLocalShutdownBlocked] = useState<
+    string | null
+  >(null);
 
   // Use local edits if they exist, otherwise use server data
   const intention = localIntention ?? initialIntention;
   const tasks = localTasks ?? initialTasks;
   const priorities = localPriorities ?? initialPriorities;
   const habitCompletions = localHabitCompletions ?? initialHabitCompletions;
+  const shutdownShipped = localShutdownShipped ?? initialShutdownShipped;
+  const shutdownBlocked = localShutdownBlocked ?? initialShutdownBlocked;
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -136,7 +146,9 @@ export function DailyPlanner() {
       newTasks?: DailyTask[],
       newPriorities?: TopPriority[],
       newIntention?: string,
-      newHabitCompletions?: HabitCompletion[]
+      newHabitCompletions?: HabitCompletion[],
+      newShutdownShipped?: string,
+      newShutdownBlocked?: string
     ) => {
       if (!plan) return;
 
@@ -151,6 +163,8 @@ export function DailyPlanner() {
       const prioritiesToSave = newPriorities ?? priorities;
       const intentionToSave = newIntention ?? intention;
       const habitCompletionsToSave = newHabitCompletions ?? habitCompletions;
+      const shutdownShippedToSave = newShutdownShipped ?? shutdownShipped;
+      const shutdownBlockedToSave = newShutdownBlocked ?? shutdownBlocked;
 
       const taskAttributes: DailyTaskAttributes[] = tasksToSave.map(
         (task, index) => ({
@@ -189,6 +203,8 @@ export function DailyPlanner() {
             daily_tasks_attributes: taskAttributes,
             top_priorities_attributes: priorityAttributes,
             habit_completions_attributes: habitCompletionAttributes,
+            shutdown_shipped: shutdownShippedToSave,
+            shutdown_blocked: shutdownBlockedToSave,
           },
         });
         // Clear local edits after successful save (server data will be updated via query invalidation)
@@ -196,6 +212,8 @@ export function DailyPlanner() {
         setLocalTasks(null);
         setLocalPriorities(null);
         setLocalHabitCompletions(null);
+        setLocalShutdownShipped(null);
+        setLocalShutdownBlocked(null);
 
         // Show saved status
         setSaveStatus("saved");
@@ -218,6 +236,8 @@ export function DailyPlanner() {
       priorities,
       intention,
       habitCompletions,
+      shutdownShipped,
+      shutdownBlocked,
       updatePlan,
       celebrateFirstAction,
     ]
@@ -359,17 +379,6 @@ export function DailyPlanner() {
     return currentPriorities.slice(0, 3);
   }, [priorities]);
 
-  // Intention handlers
-  const handleIntentionChange = (value: string) => {
-    setLocalIntention(value);
-  };
-
-  const handleIntentionBlur = () => {
-    if (localIntention !== null) {
-      saveChanges(undefined, undefined, localIntention);
-    }
-  };
-
   // Habit completion handler
   const handleToggleHabitCompletion = (habitId: number, completed: boolean) => {
     // Find existing completion or create a new one
@@ -400,12 +409,48 @@ export function DailyPlanner() {
     }
   };
 
+  // Shutdown notes handlers
+  const handleShutdownShippedChange = (value: string) => {
+    setLocalShutdownShipped(value);
+  };
+
+  const handleShutdownShippedBlur = () => {
+    if (localShutdownShipped !== null) {
+      saveChanges(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        localShutdownShipped
+      );
+    }
+  };
+
+  const handleShutdownBlockedChange = (value: string) => {
+    setLocalShutdownBlocked(value);
+  };
+
+  const handleShutdownBlockedBlur = () => {
+    if (localShutdownBlocked !== null) {
+      saveChanges(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        localShutdownBlocked
+      );
+    }
+  };
+
   // Check if there are unsaved changes
   const hasUnsavedChanges =
     localIntention !== null ||
     localTasks !== null ||
     localPriorities !== null ||
-    localHabitCompletions !== null;
+    localHabitCompletions !== null ||
+    localShutdownShipped !== null ||
+    localShutdownBlocked !== null;
 
   // Manual save handler
   const handleManualSave = () => {
@@ -413,7 +458,9 @@ export function DailyPlanner() {
       localTasks ?? undefined,
       localPriorities ?? undefined,
       localIntention ?? undefined,
-      localHabitCompletions ?? undefined
+      localHabitCompletions ?? undefined,
+      localShutdownShipped ?? undefined,
+      localShutdownBlocked ?? undefined
     );
   };
 
@@ -683,25 +730,6 @@ export function DailyPlanner() {
           </Card>
         )}
 
-        {/* Daily Intention */}
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="text-primary h-5 w-5" />
-              Daily Intention
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="What's your intention for today? How do you want to show up?"
-              value={intention}
-              onChange={(e) => handleIntentionChange(e.target.value)}
-              onBlur={handleIntentionBlur}
-              className="min-h-[80px] resize-none"
-            />
-          </CardContent>
-        </Card>
-
         {/* Previous Day Incomplete Tasks */}
         {yesterdayIncompleteTasks.length > 0 && (
           <Card className="mb-6 border-amber-200 bg-amber-50">
@@ -801,6 +829,42 @@ export function DailyPlanner() {
                 showAction={false}
               />
             )}
+          </CardContent>
+        </Card>
+
+        {/* Shutdown Notes */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Sunset className="text-primary h-5 w-5" />
+              Shutdown Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                What shipped today?
+              </label>
+              <Textarea
+                placeholder="What did you accomplish? What got done?"
+                value={shutdownShipped}
+                onChange={(e) => handleShutdownShippedChange(e.target.value)}
+                onBlur={handleShutdownShippedBlur}
+                className="mt-1.5 min-h-[80px] resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                What blocked me?
+              </label>
+              <Textarea
+                placeholder="What obstacles or blockers did you encounter?"
+                value={shutdownBlocked}
+                onChange={(e) => handleShutdownBlockedChange(e.target.value)}
+                onBlur={handleShutdownBlockedBlur}
+                className="mt-1.5 min-h-[80px] resize-none"
+              />
+            </div>
           </CardContent>
         </Card>
 
