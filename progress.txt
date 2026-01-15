@@ -95,4 +95,22 @@ Started: Thu Jan 15 09:15:55 EST 2026
   - Badge component from `@/components/ui/badge` for displaying tags
   - getTimeScaleLabel from `@/lib/goals` converts time_scale enum to human-readable label
   - Radix Select uses portals for dropdowns - won't appear in accessibility snapshots during browser testing
+- Backend habits API must return wrapped format `{ habits: [...] }` for frontend useHabits hook
+- When creating new nested records with accepts_nested_attributes_for, omit `id` field (don't send id: 0)
+---
+
+## 2026-01-15 11:30 - US-007
+- **What was implemented:** Built Non-Negotiables habit tracker UI with checkboxes in responsive grid
+- **Files changed:**
+  - `frontend/src/pages/DailyPlanner.tsx` - Added Non-Negotiables Card section with habit checkboxes, completion counter, toggle handler, and strikethrough styling
+  - `backend/app/controllers/api/v1/habits_controller.rb` - Fixed API to return wrapped `{ habits: [...] }` format
+  - `backend/spec/requests/api/v1/habits_spec.rb` - Updated specs to expect wrapped format
+- **Learnings for future iterations:**
+  - Use shadcn Checkbox component from `@/components/ui/checkbox` with `onCheckedChange` prop
+  - Radix Checkbox uses `checked === true` comparison (returns boolean | "indeterminate")
+  - For responsive grid: `grid grid-cols-2 gap-3 md:grid-cols-3`
+  - Strikethrough styling: `className={isCompleted ? "text-muted-foreground line-through" : ""}`
+  - When creating new habit_completions, conditionally include id: `...(hc.id > 0 ? { id: hc.id } : {})`
+  - The saveChanges function signature extended to accept 4th parameter for habitCompletions
+  - All 1621 backend tests pass
 ---
