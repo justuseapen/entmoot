@@ -42,9 +42,19 @@ import {
   Save,
   Loader2,
   Check,
+  Link2,
+  X,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { getTimeScaleLabel } from "@/lib/goals";
 
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
@@ -279,6 +289,29 @@ export function DailyPlanner() {
     }
   };
 
+  const handleLinkPriorityToGoal = (index: number, goalId: number | null) => {
+    const currentPriorities = ensureThreePriorities();
+    const selectedGoal = goals?.find((g) => g.id === goalId);
+    const newPriorities = currentPriorities.map((p, i) =>
+      i === index
+        ? {
+            ...p,
+            goal_id: goalId,
+            goal: selectedGoal
+              ? {
+                  id: selectedGoal.id,
+                  title: selectedGoal.title,
+                  time_scale: selectedGoal.time_scale,
+                  status: selectedGoal.status,
+                }
+              : null,
+          }
+        : p
+    );
+    setLocalPriorities(newPriorities);
+    saveChanges(undefined, newPriorities);
+  };
+
   const ensureThreePriorities = useCallback((): TopPriority[] => {
     const currentPriorities = [...priorities];
     while (currentPriorities.length < 3) {
@@ -444,29 +477,95 @@ export function DailyPlanner() {
           </Card>
         )}
 
-        {/* Top 3 Priorities */}
+        {/* Top 3 Outcomes Today */}
         <Card className="mb-6">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Target className="text-primary h-5 w-5" />
-              Top 3 Priorities
+              Top 3 Outcomes Today
             </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              What tasks drive your weekly plan forward?
+            </p>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {displayPriorities.map((priority, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
-                  {index + 1}
-                </span>
-                <Input
-                  placeholder={`Priority ${index + 1}`}
-                  value={priority.title}
-                  onChange={(e) => handlePriorityChange(index, e.target.value)}
-                  onBlur={handlePriorityBlur}
-                  className="flex-1"
-                />
-              </div>
-            ))}
+          <CardContent className="space-y-4">
+            {displayPriorities.map((priority, index) => {
+              // Filter goals to non-daily only
+              const filteredGoals =
+                goals?.filter((g) => g.time_scale !== "daily") || [];
+              return (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
+                      {index + 1}
+                    </span>
+                    <Input
+                      placeholder={`Outcome ${index + 1}`}
+                      value={priority.title}
+                      onChange={(e) =>
+                        handlePriorityChange(index, e.target.value)
+                      }
+                      onBlur={handlePriorityBlur}
+                      className="flex-1"
+                    />
+                    <Select
+                      value={priority.goal_id?.toString() || ""}
+                      onValueChange={(value) =>
+                        handleLinkPriorityToGoal(
+                          index,
+                          value ? parseInt(value) : null
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-10 shrink-0" size="sm">
+                        <Link2 className="h-4 w-4" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredGoals.length > 0 ? (
+                          filteredGoals.map((goal) => (
+                            <SelectItem
+                              key={goal.id}
+                              value={goal.id.toString()}
+                            >
+                              <span className="truncate">{goal.title}</span>
+                              <span className="text-muted-foreground ml-2 text-xs">
+                                ({getTimeScaleLabel(goal.time_scale)})
+                              </span>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="text-muted-foreground px-2 py-1.5 text-sm">
+                            No goals available
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {priority.goal && (
+                    <div className="ml-10 flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {getTimeScaleLabel(
+                          priority.goal.time_scale as
+                            | "daily"
+                            | "weekly"
+                            | "monthly"
+                            | "quarterly"
+                            | "annual"
+                        )}
+                        : {priority.goal.title}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleLinkPriorityToGoal(index, null)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
