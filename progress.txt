@@ -252,3 +252,24 @@ Started: Wed Jan 14 17:28:39 EST 2026
   - Follow existing env.example format with comments explaining where to get values
   - Typecheck passes (env vars in Vite are just strings, no type issues)
 ---
+
+## 2026-01-14 - US-015
+- Added HeyDev feedback widget script to frontend index.html
+- Created custom htmlEnvPlugin in vite.config.ts to replace %VITE_*% placeholders with env values
+- Widget implementation:
+  - Dynamically creates script element pointing to heydev.io/widget.js
+  - Sets data-api-key from VITE_HEYDEV_API_KEY env var
+  - Sets data-theme='auto' and data-error-tracking='true' attributes
+  - Gracefully disables if API key not configured (logs console message)
+- Browser verification confirmed:
+  - Without API key: Console shows "HeyDev widget disabled: VITE_HEYDEV_API_KEY not configured"
+  - With API key: Script loads from heydev.io/widget.js with correct attributes
+- Files changed:
+  - `frontend/index.html` (HeyDev widget script)
+  - `frontend/vite.config.ts` (htmlEnvPlugin for env var substitution + Prettier formatting)
+- **Learnings for future iterations:**
+  - Vite doesn't support env var substitution in HTML by default; need custom plugin with transformIndexHtml
+  - Use %VITE_*% syntax in HTML for env var placeholders (not import.meta.env)
+  - Check for unreplaced placeholder to detect missing env var: `apiKey === '%' + 'VITE_HEYDEV_API_KEY' + '%'`
+  - HeyDev widget appears in bottom-right only when valid API key is configured
+---

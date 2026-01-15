@@ -12,9 +12,16 @@ function htmlEnvPlugin(): Plugin {
       order: "pre",
       handler(html, ctx) {
         // Load env vars for the current mode
-        const env = loadEnv(ctx.server?.config.mode || "production", process.cwd(), "VITE_");
+        const env = loadEnv(
+          ctx.server?.config.mode || "production",
+          process.cwd(),
+          "VITE_"
+        );
         // Replace %VITE_*% placeholders
-        return html.replace(/%VITE_(\w+)%/g, (_, key) => env[`VITE_${key}`] || "");
+        return html.replace(
+          /%VITE_(\w+)%/g,
+          (_, key) => env[`VITE_${key}`] || ""
+        );
       },
     },
   };
