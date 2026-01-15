@@ -40,6 +40,7 @@ import { MembersList } from "@/components/MembersList";
 import { PendingInvitations } from "@/components/PendingInvitations";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
 import { PetsList } from "@/components/PetsList";
+import { HabitsList } from "@/components/HabitsList";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import type { MemberRole } from "@/lib/families";
@@ -281,6 +282,9 @@ export function FamilySettings() {
 
           {/* Pets List */}
           <PetsList familyId={familyId} currentUserRole={currentUserRole} />
+
+          {/* Habits List */}
+          <HabitsList familyId={familyId} />
 
           {/* Invite Button */}
           {canInvite && (

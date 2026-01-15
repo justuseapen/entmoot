@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +18,8 @@ import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useHabits } from "@/hooks/useHabits";
 import { useGoals } from "@/hooks/useGoals";
 import { cn } from "@/lib/utils";
-import type { TopPriority } from "@/lib/dailyPlans";
+import type { TopPriority, HabitCompletion } from "@/lib/dailyPlans";
+import type { Habit } from "@/lib/habits";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { formatTodayDate } from "@/lib/dailyPlans";
@@ -37,6 +39,107 @@ import { StreaksSummary } from "@/components/StreaksSummary";
 import { BadgeShowcase } from "@/components/BadgeShowcase";
 import { PointsDisplay } from "@/components/PointsDisplay";
 import { FirstReflectionPrompt } from "@/components/FirstReflectionPrompt";
+
+// Non-Negotiables section with incomplete first, completed under "Show more"
+interface NonNegotiablesSectionProps {
+  habits: Habit[];
+  habitCompletions: HabitCompletion[];
+  onToggleHabit: (habitId: number, completed: boolean) => void;
+  isPending: boolean;
+}
+
+function NonNegotiablesSection({
+  habits,
+  habitCompletions,
+  onToggleHabit,
+  isPending,
+}: NonNegotiablesSectionProps) {
+  const [showCompleted, setShowCompleted] = useState(false);
+
+  // Separate incomplete and completed habits
+  const incompleteHabits = habits.filter((habit) => {
+    const completion = habitCompletions.find((hc) => hc.habit_id === habit.id);
+    return !completion?.completed;
+  });
+
+  const completedHabits = habits.filter((habit) => {
+    const completion = habitCompletions.find((hc) => hc.habit_id === habit.id);
+    return completion?.completed;
+  });
+
+  return (
+    <div>
+      <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+        Non-Negotiables
+      </p>
+
+      {/* Incomplete habits always shown */}
+      {incompleteHabits.length > 0 && (
+        <ul className="space-y-2">
+          {incompleteHabits.map((habit) => (
+            <li key={habit.id} className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={false}
+                onCheckedChange={(checked) =>
+                  onToggleHabit(habit.id, checked === true)
+                }
+                disabled={isPending}
+              />
+              <span>{habit.name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Completed habits with expandable section */}
+      {completedHabits.length > 0 && (
+        <div className={incompleteHabits.length > 0 ? "mt-3" : ""}>
+          <button
+            type="button"
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
+          >
+            <span>
+              {showCompleted ? "Hide" : "Show"} {completedHabits.length}{" "}
+              completed
+            </span>
+            <ChevronDown
+              className={cn(
+                "h-3 w-3 transition-transform",
+                showCompleted && "rotate-180"
+              )}
+            />
+          </button>
+          {showCompleted && (
+            <ul className="mt-2 space-y-2">
+              {completedHabits.map((habit) => (
+                <li key={habit.id} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={true}
+                    onCheckedChange={(checked) =>
+                      onToggleHabit(habit.id, checked === true)
+                    }
+                    disabled={isPending}
+                  />
+                  <span className="text-muted-foreground line-through">
+                    {habit.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Empty state when all habits are completed */}
+      {incompleteHabits.length === 0 && completedHabits.length > 0 && (
+        <p className="text-muted-foreground mb-2 text-sm">
+          All habits complete!
+        </p>
+      )}
+    </div>
+  );
+}
 
 // Get time-based greeting
 function getGreeting(): string {
@@ -357,47 +460,12 @@ export function Dashboard() {
 
                           {/* Non-Negotiables (Habits) with checkboxes */}
                           {habits && habits.length > 0 && (
-                            <div>
-                              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                                Non-Negotiables
-                              </p>
-                              <ul className="space-y-2">
-                                {habits.slice(0, 5).map((habit) => {
-                                  const completion =
-                                    todaysPlan.habit_completions.find(
-                                      (hc) => hc.habit_id === habit.id
-                                    );
-                                  const isCompleted =
-                                    completion?.completed ?? false;
-                                  return (
-                                    <li
-                                      key={habit.id}
-                                      className="flex items-center gap-2 text-sm"
-                                    >
-                                      <Checkbox
-                                        checked={isCompleted}
-                                        onCheckedChange={(checked) =>
-                                          handleToggleHabit(
-                                            habit.id,
-                                            checked === true
-                                          )
-                                        }
-                                        disabled={updatePlan.isPending}
-                                      />
-                                      <span
-                                        className={
-                                          isCompleted
-                                            ? "text-muted-foreground line-through"
-                                            : ""
-                                        }
-                                      >
-                                        {habit.name}
-                                      </span>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
+                            <NonNegotiablesSection
+                              habits={habits}
+                              habitCompletions={todaysPlan.habit_completions}
+                              onToggleHabit={handleToggleHabit}
+                              isPending={updatePlan.isPending}
+                            />
                           )}
 
                           {/* Intention */}

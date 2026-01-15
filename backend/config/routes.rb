@@ -41,7 +41,9 @@ Rails.application.routes.draw do
         resources :daily_plans, only: %i[show update] do
           get "today", on: :collection
         end
-        resources :habits, only: [:index]
+        resources :habits, only: %i[index create update destroy] do
+          post "update_positions", on: :collection
+        end
         resources :reflections, only: %i[index show create update destroy]
         resources :weekly_reviews, only: %i[index show update destroy] do
           get "current", on: :collection
