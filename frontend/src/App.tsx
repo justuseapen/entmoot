@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import { queryClient } from "./lib/api";
 import { LandingPage } from "./pages/LandingPage";
 import { Login } from "./pages/Login";
@@ -57,6 +58,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <CelebrationProvider>
           <BrowserRouter>
+            <Toaster position="top-right" richColors closeButton />
             <GlobalLoadingIndicator />
             <OfflineIndicator />
             <NotificationWebSocketInitializer />

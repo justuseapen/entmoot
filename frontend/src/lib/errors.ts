@@ -21,7 +21,7 @@ export class ApiError extends Error {
 
     // Maintains proper stack trace for where error was thrown (V8 engines)
     const ErrorWithCapture = Error as ErrorConstructor & {
-      captureStackTrace?: (target: object, constructor?: Function) => void;
+      captureStackTrace?: (target: object, constructor?: unknown) => void;
     };
     if (typeof ErrorWithCapture.captureStackTrace === "function") {
       ErrorWithCapture.captureStackTrace(this, ApiError);
