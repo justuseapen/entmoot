@@ -14,8 +14,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added session middleware to config/application.rb"
     },
     {
       "id": "US-002",
@@ -28,8 +28,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Simplified to use env['warden'] directly - cleaner than request.session approach"
     },
     {
       "id": "US-003",
@@ -40,8 +40,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added expose: %w[Set-Cookie] to CORS config"
     },
     {
       "id": "US-004",
@@ -55,8 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added 5 specs: session cookie on login, session auth with JWT, session persistence, logout clears session. Also added warden.set_user on login and warden.logout on logout."
     },
     {
       "id": "US-005",
@@ -70,8 +70,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created spec/channels/application_cable/connection_spec.rb with 3 tests: valid session connects, no session rejected, nil warden user rejected. All 1626 tests pass."
     },
     {
       "id": "US-006",
@@ -85,8 +85,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Changed from token-based to session-based auth. Added connection ID tracking to prevent stale reconnections. Verified login/logout/re-login flow in browser."
     }
   ]
 }
