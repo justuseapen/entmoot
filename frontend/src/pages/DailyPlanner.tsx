@@ -349,9 +349,7 @@ export function DailyPlanner() {
           <h1 className="mt-1 text-3xl font-bold text-gray-900">
             {formatTodayDate()}
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Start your day with intention
-          </p>
+          <p className="text-muted-foreground mt-2">Daily Focus Card</p>
         </div>
 
         {/* Save Status Bar */}
