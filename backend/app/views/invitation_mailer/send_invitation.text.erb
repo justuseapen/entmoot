@@ -1,0 +1,16 @@
+You're invited to join <%= @family.name %>!
+
+<%= @inviter.name %> has invited you to join their family on Entmoot.
+
+Entmoot helps families plan, reflect, and grow together through:
+- Shared Goals - Set and track goals as a family
+- Daily Planning - Start each day with intention
+- Weekly Reviews - Celebrate wins together
+
+You've been invited as: <%= @invitation.role.titleize %>
+
+Accept your invitation: <%= @accept_url %>
+
+This invitation expires in 7 days. If you don't want to join, you can ignore this email.
+
+Questions? Just reply to this email.

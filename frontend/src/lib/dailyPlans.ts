@@ -8,6 +8,13 @@ export interface GoalSummary {
   status: string;
 }
 
+// User summary for assignee
+export interface UserSummary {
+  id: number;
+  name: string;
+  avatar_url: string | null;
+}
+
 // Habit type
 export interface Habit {
   id: number;
@@ -40,6 +47,8 @@ export interface DailyTask {
   position: number;
   goal_id: number | null;
   goal: GoalSummary | null;
+  assignee_id: number | null;
+  assignee: UserSummary | null;
   _destroy?: boolean;
 }
 
@@ -86,6 +95,7 @@ export interface DailyTaskAttributes {
   completed?: boolean;
   position?: number;
   goal_id?: number | null;
+  assignee_id?: number | null;
   _destroy?: boolean;
 }
 

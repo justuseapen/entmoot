@@ -63,6 +63,7 @@ Rails.application.routes.draw do
         end
         resource :leaderboard, only: [:show]
         resource :activity_feed, only: [:show]
+        resources :my_deadlines, only: [:index]
       end
 
       # User preferences (scoped to current user via /users/me)

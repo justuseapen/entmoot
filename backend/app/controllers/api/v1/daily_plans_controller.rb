@@ -52,7 +52,7 @@ module Api
           :intention,
           :shutdown_shipped,
           :shutdown_blocked,
-          daily_tasks_attributes: %i[id title completed position goal_id _destroy],
+          daily_tasks_attributes: %i[id title completed position goal_id assignee_id _destroy],
           top_priorities_attributes: %i[id title priority_order goal_id completed _destroy],
           habit_completions_attributes: %i[id habit_id completed]
         )
@@ -88,7 +88,17 @@ module Api
           completed: task.completed,
           position: task.position,
           goal_id: task.goal_id,
-          goal: task.goal ? goal_summary(task.goal) : nil
+          goal: task.goal ? goal_summary(task.goal) : nil,
+          assignee_id: task.assignee_id,
+          assignee: task.assignee ? user_summary(task.assignee) : nil
+        }
+      end
+
+      def user_summary(user)
+        {
+          id: user.id,
+          name: user.name,
+          avatar_url: user.avatar_url
         }
       end
 

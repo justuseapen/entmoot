@@ -26,6 +26,7 @@ module Api
         end
 
         if @invitation.save
+          SendInvitationEmailJob.perform_later(@invitation.id)
           track_first_family_invite
           render json: {
             message: "Invitation sent successfully.",
@@ -46,6 +47,7 @@ module Api
         authorize @invitation
 
         @invitation.update!(expires_at: 7.days.from_now) if @invitation.expired?
+        SendInvitationEmailJob.perform_later(@invitation.id)
 
         render json: {
           message: "Invitation resent successfully.",

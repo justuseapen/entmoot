@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_15_195052) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -94,6 +94,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_195052) do
     t.bigint "goal_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "assignee_id"
+    t.index ["assignee_id"], name: "index_daily_tasks_on_assignee_id"
     t.index ["daily_plan_id", "position"], name: "index_daily_tasks_on_daily_plan_id_and_position"
     t.index ["daily_plan_id"], name: "index_daily_tasks_on_daily_plan_id"
     t.index ["goal_id"], name: "index_daily_tasks_on_goal_id"
@@ -488,6 +490,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_195052) do
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
   add_foreign_key "daily_tasks", "goals"
+  add_foreign_key "daily_tasks", "users", column: "assignee_id"
   add_foreign_key "device_tokens", "users"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"

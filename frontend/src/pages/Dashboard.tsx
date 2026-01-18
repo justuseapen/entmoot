@@ -17,6 +17,7 @@ import { useFamilies } from "@/hooks/useFamilies";
 import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useHabits } from "@/hooks/useHabits";
 import { useGoals } from "@/hooks/useGoals";
+import { useMyDeadlines } from "@/hooks/useMyDeadlines";
 import { cn } from "@/lib/utils";
 import type { TopPriority, HabitCompletion } from "@/lib/dailyPlans";
 import type { Habit } from "@/lib/habits";
@@ -159,8 +160,13 @@ export function Dashboard() {
     currentFamily?.id ?? 0
   );
 
-  // Fetch upcoming goals (due within 7 days, not completed)
+  // Fetch upcoming goals (due within 7 days, not completed) - for family view
   const { data: goals, isLoading: goalsLoading } = useGoals(
+    currentFamily?.id ?? 0
+  );
+
+  // Fetch my assigned deadlines (goals and tasks assigned to current user)
+  const { data: myDeadlines, isLoading: deadlinesLoading } = useMyDeadlines(
     currentFamily?.id ?? 0
   );
 
@@ -511,7 +517,100 @@ export function Dashboard() {
                   </Card>
                 )}
 
-                {/* Upcoming Goals */}
+                {/* My Assignments - Goals and tasks assigned to current user */}
+                {currentFamily && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">My Assignments</CardTitle>
+                        <Button asChild variant="ghost" size="sm">
+                          <Link to={`/families/${currentFamily.id}/goals`}>
+                            View All Goals
+                          </Link>
+                        </Button>
+                      </div>
+                      <CardDescription>
+                        Goals and tasks assigned to you with upcoming deadlines
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {deadlinesLoading ? (
+                        <p className="text-muted-foreground text-sm">
+                          Loading...
+                        </p>
+                      ) : myDeadlines &&
+                        (myDeadlines.goals.length > 0 ||
+                          myDeadlines.tasks.length > 0) ? (
+                        <div className="space-y-4">
+                          {/* Assigned Goals */}
+                          {myDeadlines.goals.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+                                Goals Due Soon
+                              </p>
+                              <ul className="space-y-2">
+                                {myDeadlines.goals.map((goal) => (
+                                  <li
+                                    key={goal.id}
+                                    className="flex items-center justify-between rounded-lg border p-3"
+                                  >
+                                    <div>
+                                      <p className="font-medium">{goal.title}</p>
+                                      <p
+                                        className={`text-xs ${
+                                          goal.due_date &&
+                                          isOverdue(goal.due_date)
+                                            ? "font-medium text-red-600"
+                                            : "text-muted-foreground"
+                                        }`}
+                                      >
+                                        {goal.due_date && isOverdue(goal.due_date)
+                                          ? "Overdue"
+                                          : `Due ${formatDueDate(goal.due_date)}`}
+                                      </p>
+                                    </div>
+                                    <span className="text-muted-foreground text-sm">
+                                      {goal.progress}%
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Assigned Tasks */}
+                          {myDeadlines.tasks.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+                                Tasks Assigned to You
+                              </p>
+                              <ul className="space-y-2">
+                                {myDeadlines.tasks.map((task) => (
+                                  <li
+                                    key={task.id}
+                                    className="flex items-center gap-2 text-sm"
+                                  >
+                                    <Checkbox checked={task.completed} disabled />
+                                    <span>{task.title}</span>
+                                    <span className="text-muted-foreground text-xs">
+                                      (from {task.owner_name}&apos;s plan)
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">
+                          No upcoming deadlines assigned to you.
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Upcoming Goals - All family goals */}
                 {currentFamily && (
                   <Card>
                     <CardHeader className="pb-3">
@@ -526,7 +625,7 @@ export function Dashboard() {
                         </Button>
                       </div>
                       <CardDescription>
-                        Goals due within the next 7 days
+                        Family goals due within the next 7 days
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -576,7 +675,7 @@ export function Dashboard() {
                         </ul>
                       ) : (
                         <p className="text-muted-foreground text-sm">
-                          No goals due soon. Keep up the great work!
+                          No family goals due soon. Keep up the great work!
                         </p>
                       )}
                     </CardContent>

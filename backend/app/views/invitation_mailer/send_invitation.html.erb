@@ -1,0 +1,20 @@
+<h1>You're invited to join <%= @family.name %>!</h1>
+
+<p><strong><%= @inviter.name %></strong> has invited you to join their family on Entmoot.</p>
+
+<p>Entmoot helps families plan, reflect, and grow together through:</p>
+<ul>
+  <li><strong>Shared Goals</strong> - Set and track goals as a family</li>
+  <li><strong>Daily Planning</strong> - Start each day with intention</li>
+  <li><strong>Weekly Reviews</strong> - Celebrate wins together</li>
+</ul>
+
+<p>You've been invited as: <strong><%= @invitation.role.titleize %></strong></p>
+
+<p style="text-align: center;">
+  <a href="<%= @accept_url %>" class="button">Accept Invitation</a>
+</p>
+
+<p>This invitation expires in 7 days. If you don't want to join, you can ignore this email.</p>
+
+<p>Questions? Just reply to this email.</p>
