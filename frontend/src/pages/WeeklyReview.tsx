@@ -44,6 +44,7 @@ import {
   Activity,
   HeartPulse,
   Link2,
+  Skull,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -120,6 +121,8 @@ export function WeeklyReview() {
     { text: "", goalId: null },
     { text: "", goalId: null },
   ]);
+  // Section 5: Kill List
+  const [killList, setKillList] = useState("");
   // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
@@ -169,6 +172,8 @@ export function WeeklyReview() {
         }
         setWeeklyPriorityItems(parsedItems);
       }
+      // Section 5: Kill List
+      setKillList(currentReview.kill_list || "");
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -379,6 +384,19 @@ export function WeeklyReview() {
       console.error("Failed to update weekly_priorities:", error);
     }
   }, [currentReview, updateReview, weeklyPriorityItems]);
+
+  // Handle Section 5 kill list blur (auto-save)
+  const handleKillListBlur = useCallback(async () => {
+    if (!currentReview) return;
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: { kill_list: killList },
+      });
+    } catch (error) {
+      console.error("Failed to update kill_list:", error);
+    }
+  }, [currentReview, updateReview, killList]);
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -1115,6 +1133,36 @@ export function WeeklyReview() {
     );
   };
 
+  // Render Section 5: Kill List
+  const renderKillListSection = () => {
+    if (!currentReview) return null;
+
+    return (
+      <Card className="mb-6 border-slate-200 bg-slate-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Skull className="h-5 w-5 text-slate-600" />
+            Section 5: Kill List (Explicit Neglect)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-slate-600">
+            List items you are intentionally deprioritizing this week to protect
+            focus.
+          </p>
+
+          <Textarea
+            value={killList}
+            onChange={(e) => setKillList(e.target.value)}
+            onBlur={handleKillListBlur}
+            placeholder="What are you NOT doing this week? What are you saying no to? What can wait?"
+            className="min-h-[120px] resize-none"
+          />
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
@@ -1527,6 +1575,9 @@ export function WeeklyReview() {
 
         {/* Section 4: This Week's Priorities */}
         {renderWeeklyPrioritiesSection()}
+
+        {/* Section 5: Kill List */}
+        {renderKillListSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
