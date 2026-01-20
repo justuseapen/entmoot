@@ -125,3 +125,14 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Goal link changes save immediately (unlike text blur) since dropdown change is a discrete action
   - Link2 icon from lucide-react used for the linked goal badge
 ---
+
+## 2026-01-20 - US-010: Create Section 5: Kill List
+- What was implemented: Added Section 5 card for explicitly deprioritizing items (kill list)
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Followed the same pattern as previous sections: state variable, useEffect initialization, blur handler, render function
+  - Skull icon from lucide-react fits the "kill" theme well
+  - Slate color scheme (border-slate-200, bg-slate-50/50, text-slate-600) provides neutral/gray appearance distinct from other sections
+  - The kill_list field is a simple text field (not jsonb array), so no parsing needed like weekly_priorities
+---
