@@ -23,7 +23,8 @@ RSpec.describe Notification do
           goal_update: "goal_update",
           family_invite: "family_invite",
           badge_earned: "badge_earned",
-          streak_milestone: "streak_milestone"
+          streak_milestone: "streak_milestone",
+          mention: "mention"
         )
         .backed_by_column_of_type(:string)
     end

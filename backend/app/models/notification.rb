@@ -10,7 +10,8 @@ class Notification < ApplicationRecord
     goal_update: "goal_update",
     family_invite: "family_invite",
     badge_earned: "badge_earned",
-    streak_milestone: "streak_milestone"
+    streak_milestone: "streak_milestone",
+    mention: "mention"
   }, validate: true
 
   validates :title, presence: true

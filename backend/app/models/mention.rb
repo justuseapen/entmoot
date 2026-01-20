@@ -10,4 +10,15 @@ class Mention < ApplicationRecord
     scope: %i[mentionable_type mentionable_id user_id text_field],
     message: :already_mentioned
   }
+
+  after_create :send_notification
+
+  private
+
+  def send_notification
+    # Don't notify users who mention themselves
+    return if user_id == mentioned_user_id
+
+    NotificationService.notify_mention(mention: self)
+  end
 end
