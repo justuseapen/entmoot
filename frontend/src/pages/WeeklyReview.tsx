@@ -39,6 +39,7 @@ import {
   FileText,
   ExternalLink,
   ClipboardList,
+  Activity,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -65,6 +66,27 @@ export function WeeklyReview() {
   // Section 1: Review (Evidence-based)
   const [winsShipped, setWinsShipped] = useState("");
   const [lossesFriction, setLossesFriction] = useState("");
+  // Section 2: Metrics Snapshot
+  const [workoutsCompleted, setWorkoutsCompleted] = useState<number | null>(
+    null
+  );
+  const [workoutsPlanned, setWorkoutsPlanned] = useState<number | null>(null);
+  const [walksCompleted, setWalksCompleted] = useState<number | null>(null);
+  const [walksPlanned, setWalksPlanned] = useState<number | null>(7);
+  const [writingSessionsCompleted, setWritingSessionsCompleted] = useState<
+    number | null
+  >(null);
+  const [writingSessionsPlanned, setWritingSessionsPlanned] = useState<
+    number | null
+  >(null);
+  const [houseResetsCompleted, setHouseResetsCompleted] = useState<
+    number | null
+  >(null);
+  const [houseResetsPlanned, setHouseResetsPlanned] = useState<number | null>(
+    7
+  );
+  const [mealsPrepHeld, setMealsPrepHeld] = useState<boolean | null>(null);
+  const [metricsNotes, setMetricsNotes] = useState("");
   // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
@@ -81,6 +103,17 @@ export function WeeklyReview() {
       // Section 1: Review (Evidence-based)
       setWinsShipped(currentReview.wins_shipped || "");
       setLossesFriction(currentReview.losses_friction || "");
+      // Section 2: Metrics Snapshot
+      setWorkoutsCompleted(currentReview.workouts_completed);
+      setWorkoutsPlanned(currentReview.workouts_planned);
+      setWalksCompleted(currentReview.walks_completed);
+      setWalksPlanned(currentReview.walks_planned ?? 7);
+      setWritingSessionsCompleted(currentReview.writing_sessions_completed);
+      setWritingSessionsPlanned(currentReview.writing_sessions_planned);
+      setHouseResetsCompleted(currentReview.house_resets_completed);
+      setHouseResetsPlanned(currentReview.house_resets_planned ?? 7);
+      setMealsPrepHeld(currentReview.meals_prepped_held);
+      setMetricsNotes(currentReview.metrics_notes || "");
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -133,6 +166,61 @@ export function WeeklyReview() {
     },
     [currentReview, updateReview]
   );
+
+  // Handle Section 2 metrics field blur (auto-save)
+  type MetricsNumberField =
+    | "workouts_completed"
+    | "workouts_planned"
+    | "walks_completed"
+    | "walks_planned"
+    | "writing_sessions_completed"
+    | "writing_sessions_planned"
+    | "house_resets_completed"
+    | "house_resets_planned";
+
+  const handleMetricsNumberBlur = useCallback(
+    async (field: MetricsNumberField, value: number | null) => {
+      if (!currentReview) return;
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { [field]: value },
+        });
+      } catch (error) {
+        console.error(`Failed to update ${field}:`, error);
+      }
+    },
+    [currentReview, updateReview]
+  );
+
+  const handleMealsPrepChange = useCallback(
+    async (checked: boolean | null) => {
+      if (!currentReview) return;
+      setMealsPrepHeld(checked);
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { meals_prepped_held: checked ?? undefined },
+        });
+      } catch (error) {
+        console.error("Failed to update meals_prepped_held:", error);
+        setMealsPrepHeld(mealsPrepHeld); // revert on error
+      }
+    },
+    [currentReview, updateReview, mealsPrepHeld]
+  );
+
+  const handleMetricsNotesBlur = useCallback(async () => {
+    if (!currentReview) return;
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: { metrics_notes: metricsNotes },
+      });
+    } catch (error) {
+      console.error("Failed to update metrics_notes:", error);
+    }
+  }, [currentReview, updateReview, metricsNotes]);
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -427,9 +515,233 @@ export function WeeklyReview() {
               id="losses-friction"
               value={lossesFriction}
               onChange={(e) => setLossesFriction(e.target.value)}
-              onBlur={() => handleSection1Blur("losses_friction", lossesFriction)}
+              onBlur={() =>
+                handleSection1Blur("losses_friction", lossesFriction)
+              }
               placeholder="What didn't work? What created friction? What do you wish had gone differently?"
               className="min-h-[120px] resize-none"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Calculate completion percentage helper
+  const calcPercentage = (
+    completed: number | null,
+    planned: number | null
+  ): number | null => {
+    if (completed === null || planned === null || planned === 0) return null;
+    return Math.round((completed / planned) * 100);
+  };
+
+  // Render Section 2: Metrics Snapshot
+  const renderMetricsSnapshotSection = () => {
+    if (!currentReview) return null;
+
+    // Helper to parse number from input (empty string = null)
+    const parseNumberInput = (value: string): number | null => {
+      if (value === "") return null;
+      const num = parseInt(value, 10);
+      return isNaN(num) ? null : num;
+    };
+
+    // Metric row component for completed / planned pairs
+    const MetricRow = ({
+      label,
+      completedValue,
+      plannedValue,
+      onCompletedChange,
+      onPlannedChange,
+      onCompletedBlur,
+      onPlannedBlur,
+      plannedDisabled = false,
+    }: {
+      label: string;
+      completedValue: number | null;
+      plannedValue: number | null;
+      onCompletedChange: (val: number | null) => void;
+      onPlannedChange: (val: number | null) => void;
+      onCompletedBlur: () => void;
+      onPlannedBlur: () => void;
+      plannedDisabled?: boolean;
+    }) => {
+      const percentage = calcPercentage(completedValue, plannedValue);
+
+      return (
+        <div className="flex items-center gap-3 rounded-lg bg-white p-3">
+          <div className="min-w-[140px] flex-1 text-sm font-medium">
+            {label}
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min={0}
+              value={completedValue ?? ""}
+              onChange={(e) =>
+                onCompletedChange(parseNumberInput(e.target.value))
+              }
+              onBlur={onCompletedBlur}
+              className="w-16 text-center"
+              placeholder="0"
+            />
+            <span className="text-muted-foreground text-sm">/</span>
+            <Input
+              type="number"
+              min={0}
+              value={plannedValue ?? ""}
+              onChange={(e) =>
+                onPlannedChange(parseNumberInput(e.target.value))
+              }
+              onBlur={onPlannedBlur}
+              className="w-16 text-center"
+              placeholder="0"
+              disabled={plannedDisabled}
+            />
+          </div>
+          {percentage !== null && (
+            <span
+              className={`min-w-[50px] text-right text-sm font-semibold ${
+                percentage >= 80
+                  ? "text-green-600"
+                  : percentage >= 50
+                    ? "text-yellow-600"
+                    : "text-red-500"
+              }`}
+            >
+              {percentage}%
+            </span>
+          )}
+          {percentage === null && <span className="min-w-[50px]" />}
+        </div>
+      );
+    };
+
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Activity className="h-5 w-5 text-purple-600" />
+            Section 2: Metrics Snapshot (Tally from Daily Cards)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2">
+            <MetricRow
+              label="Workouts completed"
+              completedValue={workoutsCompleted}
+              plannedValue={workoutsPlanned}
+              onCompletedChange={setWorkoutsCompleted}
+              onPlannedChange={setWorkoutsPlanned}
+              onCompletedBlur={() =>
+                handleMetricsNumberBlur("workouts_completed", workoutsCompleted)
+              }
+              onPlannedBlur={() =>
+                handleMetricsNumberBlur("workouts_planned", workoutsPlanned)
+              }
+            />
+            <MetricRow
+              label="Daily walks completed"
+              completedValue={walksCompleted}
+              plannedValue={walksPlanned}
+              onCompletedChange={setWalksCompleted}
+              onPlannedChange={setWalksPlanned}
+              onCompletedBlur={() =>
+                handleMetricsNumberBlur("walks_completed", walksCompleted)
+              }
+              onPlannedBlur={() =>
+                handleMetricsNumberBlur("walks_planned", walksPlanned)
+              }
+            />
+            <MetricRow
+              label="Writing sessions"
+              completedValue={writingSessionsCompleted}
+              plannedValue={writingSessionsPlanned}
+              onCompletedChange={setWritingSessionsCompleted}
+              onPlannedChange={setWritingSessionsPlanned}
+              onCompletedBlur={() =>
+                handleMetricsNumberBlur(
+                  "writing_sessions_completed",
+                  writingSessionsCompleted
+                )
+              }
+              onPlannedBlur={() =>
+                handleMetricsNumberBlur(
+                  "writing_sessions_planned",
+                  writingSessionsPlanned
+                )
+              }
+            />
+            <MetricRow
+              label="House resets"
+              completedValue={houseResetsCompleted}
+              plannedValue={houseResetsPlanned}
+              onCompletedChange={setHouseResetsCompleted}
+              onPlannedChange={setHouseResetsPlanned}
+              onCompletedBlur={() =>
+                handleMetricsNumberBlur(
+                  "house_resets_completed",
+                  houseResetsCompleted
+                )
+              }
+              onPlannedBlur={() =>
+                handleMetricsNumberBlur(
+                  "house_resets_planned",
+                  houseResetsPlanned
+                )
+              }
+            />
+          </div>
+
+          {/* Meals prepped / system held - Y/N toggle */}
+          <div className="flex items-center justify-between rounded-lg bg-white p-3">
+            <Label className="text-sm font-medium">
+              Meals prepped / system held
+            </Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={mealsPrepHeld === true ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleMealsPrepChange(true)}
+                className={
+                  mealsPrepHeld === true
+                    ? "bg-green-600 hover:bg-green-700"
+                    : ""
+                }
+              >
+                Yes
+              </Button>
+              <Button
+                type="button"
+                variant={mealsPrepHeld === false ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleMealsPrepChange(false)}
+                className={
+                  mealsPrepHeld === false ? "bg-red-500 hover:bg-red-600" : ""
+                }
+              >
+                No
+              </Button>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="metrics-notes"
+              className="text-sm font-medium text-gray-600"
+            >
+              Notes (only if something broke)
+            </Label>
+            <Textarea
+              id="metrics-notes"
+              value={metricsNotes}
+              onChange={(e) => setMetricsNotes(e.target.value)}
+              onBlur={handleMetricsNotesBlur}
+              placeholder="What caused issues this week? Leave blank if everything went smoothly."
+              className="min-h-[80px] resize-none"
             />
           </div>
         </CardContent>
@@ -840,6 +1152,9 @@ export function WeeklyReview() {
 
         {/* Section 1: Review (Evidence-based) */}
         {renderReviewSection()}
+
+        {/* Section 2: Metrics Snapshot */}
+        {renderMetricsSnapshotSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
