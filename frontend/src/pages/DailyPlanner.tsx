@@ -127,8 +127,8 @@ export function DailyPlanner() {
       const shutdownBlockedToSave = newShutdownBlocked ?? shutdownBlocked;
 
       // Filter out empty priorities (without id) and mark empty existing priorities for deletion
-      const priorityAttributes: TopPriorityAttributes[] = prioritiesToSave
-        .reduce<TopPriorityAttributes[]>((acc, priority) => {
+      const priorityAttributes: TopPriorityAttributes[] =
+        prioritiesToSave.reduce<TopPriorityAttributes[]>((acc, priority) => {
           // If priority has an id but empty title, mark for deletion
           if (priority.id && !priority.title.trim()) {
             acc.push({
@@ -456,7 +456,10 @@ export function DailyPlanner() {
                         )
                       }
                     >
-                      <SelectTrigger className="w-10 shrink-0" size="sm">
+                      <SelectTrigger
+                        className="h-10 w-11 shrink-0 px-2"
+                        aria-label="Link to goal"
+                      >
                         <Link2 className="h-4 w-4" />
                       </SelectTrigger>
                       <SelectContent>
@@ -538,7 +541,10 @@ export function DailyPlanner() {
                       <Checkbox
                         checked={isCompleted}
                         onCheckedChange={(checked) =>
-                          handleToggleHabitCompletion(habit.id, checked === true)
+                          handleToggleHabitCompletion(
+                            habit.id,
+                            checked === true
+                          )
                         }
                       />
                       <span
