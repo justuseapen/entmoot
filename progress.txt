@@ -136,3 +136,16 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Slate color scheme (border-slate-200, bg-slate-50/50, text-slate-600) provides neutral/gray appearance distinct from other sections
   - The kill_list field is a simple text field (not jsonb array), so no parsing needed like weekly_priorities
 ---
+
+## 2026-01-20 - US-011: Create Section 6: Forward Setup
+- What was implemented: Added Section 6 card with three checkboxes for forward planning
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Followed established pattern: state variables, useEffect initialization, checkbox change handler, render function
+  - FastForward icon from lucide-react fits the "forward setup" theme
+  - Emerald color scheme (border-emerald-200, bg-emerald-50/50) provides fresh/forward-looking appearance
+  - ForwardSetupField type union ensures type safety for the 3 boolean fields
+  - Checkbox changes auto-save immediately via handleForwardSetupChange callback (same pattern as system health checks)
+  - These fields default to false with NOT NULL in DB, so use ?? false in initialization (not || false since false is a valid value)
+---
