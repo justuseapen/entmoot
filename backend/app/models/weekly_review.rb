@@ -50,6 +50,22 @@ class WeeklyReview < ApplicationRecord
     aggregate_task_stats(plans)
   end
 
+  # Tally habit completions by habit name across the week
+  # Returns a hash like { "Workout" => 3, "Walk" => 5, "Writing" => 2, "House Reset" => 7 }
+  def habit_tally
+    plans = daily_plans.includes(habit_completions: :habit)
+    tally = Hash.new(0)
+
+    plans.each do |plan|
+      plan.habit_completions.where(completed: true).find_each do |completion|
+        habit_name = completion.habit.name
+        tally[habit_name] += 1
+      end
+    end
+
+    tally
+  end
+
   # Aggregate goals progress changes for the week
   def goal_progress_metrics
     goals = visible_goals

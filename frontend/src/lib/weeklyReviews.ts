@@ -27,6 +27,11 @@ export interface DailyPlanSummary {
   date: string;
 }
 
+// Habit tally from daily plans (habit name -> completion count)
+export interface HabitTally {
+  [habitName: string]: number;
+}
+
 export interface WeeklyReview {
   id: number;
   week_start_date: string;
@@ -71,6 +76,7 @@ export interface WeeklyReview {
   // Computed/metadata
   metrics?: WeeklyReviewMetrics;
   daily_plans: DailyPlanSummary[];
+  habit_tally?: HabitTally;
   created_at: string;
   updated_at: string;
 }

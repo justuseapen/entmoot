@@ -101,6 +101,7 @@ module Api
         response = review_attributes(review)
         response[:metrics] = review.metrics if include_metrics
         response[:daily_plans] = daily_plans_summary(review)
+        response[:habit_tally] = review.habit_tally if include_metrics
         response
       end
 

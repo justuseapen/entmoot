@@ -19,6 +19,7 @@ import {
   getWeekNumber,
   WEEKLY_REVIEW_STEPS,
   type DailyPlanSummary,
+  type HabitTally,
 } from "@/lib/weeklyReviews";
 import type { Goal } from "@/lib/goals";
 import {
@@ -49,6 +50,7 @@ import {
   Circle,
   CheckCircle,
   PartyPopper,
+  RefreshCw,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -138,6 +140,93 @@ export function WeeklyReview() {
   const [priorities, setPriorities] = useState<string[]>(["", "", ""]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Map habit names to metric fields (case-insensitive matching)
+  // Habit names are user-defined but we try to match common patterns
+  const getMetricsFromHabitTally = useCallback(
+    (
+      tally: HabitTally
+    ): {
+      workouts: number;
+      walks: number;
+      writing: number;
+      houseResets: number;
+    } => {
+      let workouts = 0;
+      let walks = 0;
+      let writing = 0;
+      let houseResets = 0;
+
+      for (const [habitName, count] of Object.entries(tally)) {
+        const lowerName = habitName.toLowerCase();
+        // Match workout patterns
+        if (
+          lowerName.includes("workout") ||
+          lowerName.includes("exercise") ||
+          lowerName.includes("gym") ||
+          lowerName.includes("training")
+        ) {
+          workouts += count;
+        }
+        // Match walk patterns
+        else if (
+          lowerName.includes("walk") ||
+          lowerName.includes("steps") ||
+          lowerName.includes("cardio")
+        ) {
+          walks += count;
+        }
+        // Match writing patterns
+        else if (
+          lowerName.includes("writ") ||
+          lowerName.includes("journal") ||
+          lowerName.includes("blog")
+        ) {
+          writing += count;
+        }
+        // Match house reset patterns
+        else if (
+          lowerName.includes("house") ||
+          lowerName.includes("clean") ||
+          lowerName.includes("tidy") ||
+          lowerName.includes("reset")
+        ) {
+          houseResets += count;
+        }
+      }
+
+      return { workouts, walks, writing, houseResets };
+    },
+    []
+  );
+
+  // Force refresh metrics from habit tally (override existing values)
+  const refreshMetricsFromTally = useCallback(async () => {
+    if (!currentReview?.habit_tally) return;
+
+    const calculated = getMetricsFromHabitTally(currentReview.habit_tally);
+
+    // Update local state
+    setWorkoutsCompleted(calculated.workouts);
+    setWalksCompleted(calculated.walks);
+    setWritingSessionsCompleted(calculated.writing);
+    setHouseResetsCompleted(calculated.houseResets);
+
+    // Save to backend
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: {
+          workouts_completed: calculated.workouts,
+          walks_completed: calculated.walks,
+          writing_sessions_completed: calculated.writing,
+          house_resets_completed: calculated.houseResets,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to refresh metrics from daily plans:", error);
+    }
+  }, [currentReview, getMetricsFromHabitTally, updateReview]);
 
   // Completion criteria check - returns an object with each criterion and overall status
   type CompletionCriteria = {
@@ -285,8 +374,36 @@ export function WeeklyReview() {
         while (p.length < 3) p.push("");
         setPriorities(p.slice(0, 5));
       }
+
+      // Auto-populate metrics from habit tally if values are null
+      // This happens after loading existing data, so it won't override saved values
+      if (currentReview.habit_tally) {
+        const calculated = getMetricsFromHabitTally(currentReview.habit_tally);
+        // Only set if current DB value is null (don't override user input)
+        if (
+          currentReview.workouts_completed === null &&
+          calculated.workouts > 0
+        ) {
+          setWorkoutsCompleted(calculated.workouts);
+        }
+        if (currentReview.walks_completed === null && calculated.walks > 0) {
+          setWalksCompleted(calculated.walks);
+        }
+        if (
+          currentReview.writing_sessions_completed === null &&
+          calculated.writing > 0
+        ) {
+          setWritingSessionsCompleted(calculated.writing);
+        }
+        if (
+          currentReview.house_resets_completed === null &&
+          calculated.houseResets > 0
+        ) {
+          setHouseResetsCompleted(calculated.houseResets);
+        }
+      }
     }
-  }, [currentReview]);
+  }, [currentReview, getMetricsFromHabitTally]);
 
   // Handle source review checkbox change (auto-save)
   const handleSourceReviewChange = useCallback(
@@ -998,6 +1115,31 @@ export function WeeklyReview() {
               }
             />
           </div>
+
+          {/* Refresh from Daily Plans button */}
+          {currentReview?.habit_tally &&
+            Object.keys(currentReview.habit_tally).length > 0 && (
+              <div className="flex items-center justify-between rounded-lg border border-dashed border-purple-200 bg-purple-50/50 p-3">
+                <div className="text-sm">
+                  <span className="font-medium text-purple-700">
+                    Auto-fill available
+                  </span>
+                  <p className="text-purple-600">
+                    Populate completed counts from your Daily Focus Cards
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshMetricsFromTally}
+                  className="shrink-0 border-purple-300 text-purple-700 hover:bg-purple-100"
+                >
+                  <RefreshCw className="mr-1 h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
+            )}
 
           {/* Meals prepped / system held - Y/N toggle */}
           <div className="flex items-center justify-between rounded-lg bg-white p-3">
