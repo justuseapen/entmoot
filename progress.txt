@@ -149,3 +149,18 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Checkbox changes auto-save immediately via handleForwardSetupChange callback (same pattern as system health checks)
   - These fields default to false with NOT NULL in DB, so use ?? false in initialization (not || false since false is a valid value)
 ---
+
+## 2026-01-20 - US-012: Add weekly review completion logic
+- What was implemented: Added completion criteria checker and completion status UI to weekly review page
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Created CompletionCriteria type to track all 7 criteria states plus overall completion status
+  - checkCompletionCriteria function calculates criteria on every render (no memoization needed since state changes trigger re-renders anyway)
+  - Completion status card placed between StandaloneTip and Section 0 to be visible at top
+  - Three states: in-progress (blue card with checklist), ready-to-complete (green button enabled), completed (celebration card with PartyPopper icon)
+  - Progress bar shows percentage via (completedCount / totalCount) * 100
+  - Criteria checklist uses 2-column grid on sm+ breakpoints for compact display
+  - Circle and CheckCircle icons from lucide-react used for unchecked/checked states
+  - handleMarkAsComplete callback sets completed: true on the review, similar to handleComplete but without legacy field handling
+---
