@@ -38,6 +38,7 @@ import {
   X,
   FileText,
   ExternalLink,
+  ClipboardList,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -61,6 +62,10 @@ export function WeeklyReview() {
   const [currentStep, setCurrentStep] = useState(0);
   const [showPastReviews, setShowPastReviews] = useState(false);
   const [sourceReviewCompleted, setSourceReviewCompleted] = useState(false);
+  // Section 1: Review (Evidence-based)
+  const [winsShipped, setWinsShipped] = useState("");
+  const [lossesFriction, setLossesFriction] = useState("");
+  // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
   const [lessonsLearned, setLessonsLearned] = useState("");
@@ -73,6 +78,9 @@ export function WeeklyReview() {
     if (currentReview) {
       // Section 0: Source Review
       setSourceReviewCompleted(currentReview.source_review_completed || false);
+      // Section 1: Review (Evidence-based)
+      setWinsShipped(currentReview.wins_shipped || "");
+      setLossesFriction(currentReview.losses_friction || "");
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -105,6 +113,22 @@ export function WeeklyReview() {
         console.error("Failed to update source review:", error);
         // Revert on error
         setSourceReviewCompleted(!checked);
+      }
+    },
+    [currentReview, updateReview]
+  );
+
+  // Handle Section 1 textarea blur (auto-save)
+  const handleSection1Blur = useCallback(
+    async (field: "wins_shipped" | "losses_friction", value: string) => {
+      if (!currentReview) return;
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { [field]: value },
+        });
+      } catch (error) {
+        console.error(`Failed to update ${field}:`, error);
       }
     },
     [currentReview, updateReview]
@@ -354,6 +378,59 @@ export function WeeklyReview() {
             >
               I have reviewed all my Daily Focus Cards for this week
             </Label>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Render Section 1: Review (Evidence-based)
+  const renderReviewSection = () => {
+    if (!currentReview) return null;
+
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ClipboardList className="h-5 w-5 text-blue-600" />
+            Section 1: Review (Evidence-based)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="wins-shipped"
+              className="flex items-center gap-2 text-sm font-medium"
+            >
+              <Trophy className="h-4 w-4 text-yellow-500" />
+              Wins (things that shipped or moved forward)
+            </Label>
+            <Textarea
+              id="wins-shipped"
+              value={winsShipped}
+              onChange={(e) => setWinsShipped(e.target.value)}
+              onBlur={() => handleSection1Blur("wins_shipped", winsShipped)}
+              placeholder="What did you ship? What moved forward? What are you proud of this week?"
+              className="min-h-[120px] resize-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="losses-friction"
+              className="flex items-center gap-2 text-sm font-medium"
+            >
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+              Losses / Friction
+            </Label>
+            <Textarea
+              id="losses-friction"
+              value={lossesFriction}
+              onChange={(e) => setLossesFriction(e.target.value)}
+              onBlur={() => handleSection1Blur("losses_friction", lossesFriction)}
+              placeholder="What didn't work? What created friction? What do you wish had gone differently?"
+              className="min-h-[120px] resize-none"
+            />
           </div>
         </CardContent>
       </Card>
@@ -760,6 +837,9 @@ export function WeeklyReview() {
 
         {/* Section 0: Source Review */}
         {renderSourceReviewSection()}
+
+        {/* Section 1: Review (Evidence-based) */}
+        {renderReviewSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
