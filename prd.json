@@ -293,8 +293,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created MentionParserService with extract_mentions(text, family_id) method. Uses regex /@(\\w+)/i to match mentions, looks up family members by first name (case-insensitive). Returns unique User objects. Comprehensive RSpec tests (21 examples) cover single/multiple mentions, case-insensitivity, duplicates, edge cases, and invalid inputs. All tests pass, rubocop clean."
     },
     {
       "id": "US-016",

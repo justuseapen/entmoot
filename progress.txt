@@ -208,3 +208,17 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Unique index on [mentionable_type, mentionable_id, user_id, mentioned_user_id, text_field] prevents duplicate mentions in the same field
   - Pre-existing test failures (Goal model) are due to calendar sync feature referencing missing `notes` column - unrelated to mentions work
 ---
+
+## 2026-01-20 - US-015: Create MentionParserService to extract @mentions from text
+- What was implemented: Created MentionParserService to parse text for @firstname mentions and return matching User objects
+- Files changed:
+  - backend/app/services/mention_parser_service.rb (new)
+  - backend/spec/services/mention_parser_service_spec.rb (new)
+- **Learnings for future iterations:**
+  - Use `/@(\w+)/i` regex pattern to match @mentions - \w+ captures word characters (letters, numbers, underscore)
+  - To match user first name: split full name and take first word, compare case-insensitively with downcased mention text
+  - Family.members returns users through family_memberships association - use .select to filter in Ruby rather than complex SQL joins
+  - RSpec `contain_exactly` matcher is ideal for testing arrays where order doesn't matter
+  - Handle edge cases: nil/blank text, invalid family_id, non-existent usernames all return empty array
+  - Service uses class << self pattern with class methods, matching other services in codebase
+---
