@@ -358,3 +358,23 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - handleBlur needs setTimeout delay (150ms) to allow click events on dropdown items before closing
   - useFamilyMembers wraps useMembers from useFamilies.ts, getting currentFamily from useFamilyStore
 ---
+
+## 2026-01-20 - US-022: Replace textareas with MentionInput across app
+- What was implemented: Replaced all mentionable text fields with MentionInput component to enable @mentions
+- Files changed:
+  - frontend/src/components/GoalModal.tsx (replaced description Textarea with MentionInput)
+  - frontend/src/pages/DailyPlanner.tsx (replaced top priority Input and shutdown textareas with MentionInput)
+  - frontend/src/pages/WeeklyReview.tsx (replaced 6 fields: wins_shipped, losses_friction, metrics_notes, system_to_adjust, weekly_priorities, kill_list)
+  - frontend/src/pages/MonthlyReview.tsx (replaced lessons_learned Textarea)
+  - frontend/src/pages/QuarterlyReview.tsx (replaced insights Textarea)
+  - frontend/src/pages/AnnualReview.tsx (replaced lessons_learned Textarea and next_year_theme Input)
+- **Learnings for future iterations:**
+  - MentionInput supports both multiline (default) and single-line modes via `multiline={false}` prop
+  - When replacing Textarea: use MentionInput without multiline prop, pass value and onChange directly (not e.target.value)
+  - When replacing Input: use MentionInput with `multiline={false}`, pass value and onChange directly
+  - For react-hook-form integration, use `watch("field")` and `setValue("field", value)` instead of `{...register("field")}`
+  - After removing Textarea imports, check if unused - TypeScript will error with TS6133 if declared but never read
+  - Updated placeholder text to include "@name to mention family members" hint
+  - Some files needed Textarea import kept for non-mentionable fields (e.g., WeeklyReview legacy lessonsLearned)
+  - Input import was only needed in DailyPlanner for the priority inputs, which are now MentionInput with multiline=false
+---
