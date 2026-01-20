@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useFamily } from "@/hooks/useFamilies";
+import { useGoals } from "@/hooks/useGoals";
 import {
   useCurrentWeeklyReview,
   useWeeklyReviews,
@@ -19,6 +20,7 @@ import {
   WEEKLY_REVIEW_STEPS,
   type DailyPlanSummary,
 } from "@/lib/weeklyReviews";
+import type { Goal } from "@/lib/goals";
 import {
   BarChart3,
   ChevronLeft,
@@ -41,6 +43,7 @@ import {
   ClipboardList,
   Activity,
   HeartPulse,
+  Link2,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -56,6 +59,10 @@ export function WeeklyReview() {
     useCurrentWeeklyReview(familyId);
   const { data: reviewsData, isLoading: loadingReviews } =
     useWeeklyReviews(familyId);
+  // Fetch quarterly goals for linking
+  const { data: quarterlyGoals } = useGoals(familyId, {
+    time_scale: "quarterly",
+  });
 
   // Mutations
   const updateReview = useUpdateWeeklyReview(familyId);
@@ -102,6 +109,17 @@ export function WeeklyReview() {
     boolean | null
   >(null);
   const [systemToAdjust, setSystemToAdjust] = useState("");
+  // Section 4: This Week's Priorities
+  // Each priority is stored as "text|goalId" or just "text" if no goal linked
+  const [weeklyPriorityItems, setWeeklyPriorityItems] = useState<
+    Array<{ text: string; goalId: number | null }>
+  >([
+    { text: "", goalId: null },
+    { text: "", goalId: null },
+    { text: "", goalId: null },
+    { text: "", goalId: null },
+    { text: "", goalId: null },
+  ]);
   // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
@@ -135,6 +153,22 @@ export function WeeklyReview() {
       setCleaningSystemHeld(currentReview.cleaning_system_held);
       setTrainingVolumeSustainable(currentReview.training_volume_sustainable);
       setSystemToAdjust(currentReview.system_to_adjust || "");
+      // Section 4: Weekly Priorities (parse from newline-separated "text|goalId" format)
+      if (currentReview.weekly_priorities) {
+        const lines = currentReview.weekly_priorities.split("\n");
+        const parsedItems = lines.slice(0, 5).map((line) => {
+          const [text, goalIdStr] = line.split("|");
+          return {
+            text: text || "",
+            goalId: goalIdStr ? parseInt(goalIdStr, 10) : null,
+          };
+        });
+        // Ensure we always have exactly 5 items
+        while (parsedItems.length < 5) {
+          parsedItems.push({ text: "", goalId: null });
+        }
+        setWeeklyPriorityItems(parsedItems);
+      }
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -291,6 +325,60 @@ export function WeeklyReview() {
       console.error("Failed to update system_to_adjust:", error);
     }
   }, [currentReview, updateReview, systemToAdjust]);
+
+  // Handle Section 4 priority item change
+  const handlePriorityItemChange = useCallback(
+    (index: number, text: string) => {
+      setWeeklyPriorityItems((prev) => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], text };
+        return updated;
+      });
+    },
+    []
+  );
+
+  // Handle Section 4 goal link change
+  const handlePriorityGoalChange = useCallback(
+    async (index: number, goalId: number | null) => {
+      if (!currentReview) return;
+      const newItems = [...weeklyPriorityItems];
+      newItems[index] = { ...newItems[index], goalId };
+      setWeeklyPriorityItems(newItems);
+      // Serialize and save immediately when goal changes
+      const serialized = newItems
+        .map((item) =>
+          item.goalId ? `${item.text}|${item.goalId}` : item.text
+        )
+        .join("\n");
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { weekly_priorities: serialized },
+        });
+      } catch (error) {
+        console.error("Failed to update weekly_priorities:", error);
+      }
+    },
+    [currentReview, updateReview, weeklyPriorityItems]
+  );
+
+  // Handle Section 4 blur (auto-save)
+  const handleWeeklyPrioritiesBlur = useCallback(async () => {
+    if (!currentReview) return;
+    // Serialize priorities to "text|goalId" format
+    const serialized = weeklyPriorityItems
+      .map((item) => (item.goalId ? `${item.text}|${item.goalId}` : item.text))
+      .join("\n");
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: { weekly_priorities: serialized },
+      });
+    } catch (error) {
+      console.error("Failed to update weekly_priorities:", error);
+    }
+  }, [currentReview, updateReview, weeklyPriorityItems]);
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -848,9 +936,7 @@ export function WeeklyReview() {
             variant={value === true ? "default" : "outline"}
             size="sm"
             onClick={() => onChange(true)}
-            className={
-              value === true ? "bg-green-600 hover:bg-green-700" : ""
-            }
+            className={value === true ? "bg-green-600 hover:bg-green-700" : ""}
           >
             Yes
           </Button>
@@ -930,6 +1016,100 @@ export function WeeklyReview() {
               />
             </div>
           )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Helper to get goal by ID
+  const getGoalById = (goalId: number): Goal | undefined => {
+    return quarterlyGoals?.find((g) => g.id === goalId);
+  };
+
+  // Render Section 4: This Week's Priorities
+  const renderWeeklyPrioritiesSection = () => {
+    if (!currentReview) return null;
+
+    // Priority row component
+    const PriorityRow = ({
+      index,
+      item,
+    }: {
+      index: number;
+      item: { text: string; goalId: number | null };
+    }) => {
+      const linkedGoal = item.goalId ? getGoalById(item.goalId) : null;
+
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            {/* Priority number badge */}
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600">
+              {index + 1}
+            </div>
+
+            {/* Priority input */}
+            <Input
+              value={item.text}
+              onChange={(e) => handlePriorityItemChange(index, e.target.value)}
+              onBlur={handleWeeklyPrioritiesBlur}
+              placeholder={`Priority ${index + 1}`}
+              className="flex-1"
+            />
+
+            {/* Goal link dropdown */}
+            <select
+              value={item.goalId ?? ""}
+              onChange={(e) =>
+                handlePriorityGoalChange(
+                  index,
+                  e.target.value ? parseInt(e.target.value, 10) : null
+                )
+              }
+              className="h-10 w-10 cursor-pointer rounded-md border border-gray-200 bg-white px-2 text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              title="Link to quarterly goal"
+            >
+              <option value="">{item.goalId ? "✓" : "🔗"}</option>
+              {quarterlyGoals?.map((goal) => (
+                <option key={goal.id} value={goal.id}>
+                  {goal.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Show linked goal badge */}
+          {linkedGoal && (
+            <div className="ml-11 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                <Link2 className="h-3 w-3" />
+                {linkedGoal.title}
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Target className="h-5 w-5 text-indigo-600" />
+            Section 4: This Week&apos;s Priorities (Max 5)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Each priority must: Advance a Quarterly Objective, and be
+            schedulable on specific days.
+          </p>
+
+          <div className="space-y-3 rounded-lg bg-gray-50 p-3">
+            {weeklyPriorityItems.map((item, index) => (
+              <PriorityRow key={index} index={index} item={item} />
+            ))}
+          </div>
         </CardContent>
       </Card>
     );
@@ -1344,6 +1524,9 @@ export function WeeklyReview() {
 
         {/* Section 3: System Health Check */}
         {renderSystemHealthCheckSection()}
+
+        {/* Section 4: This Week's Priorities */}
+        {renderWeeklyPrioritiesSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
