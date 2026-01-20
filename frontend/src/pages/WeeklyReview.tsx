@@ -46,6 +46,9 @@ import {
   Link2,
   Skull,
   FastForward,
+  Circle,
+  CheckCircle,
+  PartyPopper,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -135,6 +138,88 @@ export function WeeklyReview() {
   const [priorities, setPriorities] = useState<string[]>(["", "", ""]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Completion criteria check - returns an object with each criterion and overall status
+  type CompletionCriteria = {
+    sourceReviewCompleted: boolean;
+    winsShippedFilled: boolean;
+    lossesFrictionFilled: boolean;
+    metricsComplete: boolean;
+    systemHealthAnswered: boolean;
+    hasWeeklyPriority: boolean;
+    forwardSetupComplete: boolean;
+    allComplete: boolean;
+    completedCount: number;
+    totalCount: number;
+  };
+
+  const checkCompletionCriteria = (): CompletionCriteria => {
+    // 1. Source review completed
+    const sourceReviewCompletedCheck = sourceReviewCompleted === true;
+
+    // 2. Wins shipped has content
+    const winsShippedFilled = winsShipped.trim().length > 0;
+
+    // 3. Losses/friction has content
+    const lossesFrictionFilled = lossesFriction.trim().length > 0;
+
+    // 4. All metrics have values (completed AND planned for each)
+    const metricsComplete =
+      workoutsCompleted !== null &&
+      workoutsPlanned !== null &&
+      walksCompleted !== null &&
+      walksPlanned !== null &&
+      writingSessionsCompleted !== null &&
+      writingSessionsPlanned !== null &&
+      houseResetsCompleted !== null &&
+      houseResetsPlanned !== null &&
+      mealsPrepHeld !== null;
+
+    // 5. All system health checks answered (not null)
+    const systemHealthAnswered =
+      dailyFocusUsedEveryDay !== null &&
+      weeklyPrioritiesClear !== null &&
+      cleaningSystemHeld !== null &&
+      trainingVolumeSustainable !== null;
+
+    // 6. At least 1 weekly priority set (non-empty text)
+    const hasWeeklyPriority = weeklyPriorityItems.some(
+      (item) => item.text.trim().length > 0
+    );
+
+    // 7. All forward setup checkboxes checked
+    const forwardSetupComplete =
+      workoutsBlocked && mondayTop3Decided && mondayFocusCardPrepped;
+
+    // Count completed criteria
+    const criteria = [
+      sourceReviewCompletedCheck,
+      winsShippedFilled,
+      lossesFrictionFilled,
+      metricsComplete,
+      systemHealthAnswered,
+      hasWeeklyPriority,
+      forwardSetupComplete,
+    ];
+    const completedCount = criteria.filter(Boolean).length;
+    const totalCount = criteria.length;
+
+    return {
+      sourceReviewCompleted: sourceReviewCompletedCheck,
+      winsShippedFilled,
+      lossesFrictionFilled,
+      metricsComplete,
+      systemHealthAnswered,
+      hasWeeklyPriority,
+      forwardSetupComplete,
+      allComplete: completedCount === totalCount,
+      completedCount,
+      totalCount,
+    };
+  };
+
+  // Get completion criteria (recalculates on state changes)
+  const completionCriteria = checkCompletionCriteria();
 
   // Load existing review data
   useEffect(() => {
@@ -1286,6 +1371,146 @@ export function WeeklyReview() {
     );
   };
 
+  // Handle mark as complete
+  const handleMarkAsComplete = useCallback(async () => {
+    if (!currentReview || !completionCriteria.allComplete) return;
+
+    setIsSaving(true);
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: { completed: true },
+      });
+    } catch (error) {
+      console.error("Failed to mark review as complete:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [currentReview, completionCriteria.allComplete, updateReview]);
+
+  // Render completion status
+  const renderCompletionStatus = () => {
+    if (!currentReview) return null;
+
+    // If already completed, show success state
+    if (currentReview.completed) {
+      return (
+        <Card className="mb-6 border-green-200 bg-green-50">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="rounded-full bg-green-100 p-2">
+              <PartyPopper className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-green-800">
+                Review Complete! 🎉
+              </p>
+              <p className="text-sm text-green-600">
+                You&apos;ve finished your weekly review. Great work staying on
+                track!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Otherwise show progress and criteria checklist
+    const criteriaItems = [
+      {
+        label: "Source review completed",
+        done: completionCriteria.sourceReviewCompleted,
+      },
+      {
+        label: "Wins / shipped recorded",
+        done: completionCriteria.winsShippedFilled,
+      },
+      {
+        label: "Losses / friction recorded",
+        done: completionCriteria.lossesFrictionFilled,
+      },
+      { label: "Metrics filled in", done: completionCriteria.metricsComplete },
+      {
+        label: "System health check answered",
+        done: completionCriteria.systemHealthAnswered,
+      },
+      {
+        label: "At least 1 priority set",
+        done: completionCriteria.hasWeeklyPriority,
+      },
+      {
+        label: "Forward setup complete",
+        done: completionCriteria.forwardSetupComplete,
+      },
+    ];
+
+    const progressPercentage = Math.round(
+      (completionCriteria.completedCount / completionCriteria.totalCount) * 100
+    );
+
+    return (
+      <Card className="mb-6 border-blue-200 bg-blue-50/50">
+        <CardContent className="py-4">
+          <div className="flex items-start gap-4">
+            <div
+              className={`rounded-full p-2 ${completionCriteria.allComplete ? "bg-green-100" : "bg-blue-100"}`}
+            >
+              {completionCriteria.allComplete ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <ListChecks className="h-6 w-6 text-blue-600" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-gray-800">
+                  {completionCriteria.allComplete
+                    ? "Ready to complete!"
+                    : "Completion Progress"}
+                </p>
+                <span className="text-sm font-medium text-gray-600">
+                  {completionCriteria.completedCount}/
+                  {completionCriteria.totalCount} sections
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="mt-2 h-2" />
+
+              {/* Criteria checklist */}
+              <div className="mt-3 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                {criteriaItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 text-sm text-gray-600"
+                  >
+                    {item.done ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-gray-300" />
+                    )}
+                    <span className={item.done ? "text-gray-700" : ""}>
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mark as Complete button */}
+              {completionCriteria.allComplete && (
+                <Button
+                  onClick={handleMarkAsComplete}
+                  disabled={isSaving}
+                  className="mt-4 w-full bg-green-600 hover:bg-green-700 sm:w-auto"
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  {isSaving ? "Completing..." : "Mark as Complete"}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
@@ -1683,6 +1908,9 @@ export function WeeklyReview() {
 
         {/* Tip for first weekly review */}
         <StandaloneTip tipType="first_weekly_review" className="mb-4" />
+
+        {/* Completion Status */}
+        {renderCompletionStatus()}
 
         {/* Section 0: Source Review */}
         {renderSourceReviewSection()}
