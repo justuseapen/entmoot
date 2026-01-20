@@ -40,6 +40,7 @@ import {
   ExternalLink,
   ClipboardList,
   Activity,
+  HeartPulse,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -87,6 +88,20 @@ export function WeeklyReview() {
   );
   const [mealsPrepHeld, setMealsPrepHeld] = useState<boolean | null>(null);
   const [metricsNotes, setMetricsNotes] = useState("");
+  // Section 3: System Health Check
+  const [dailyFocusUsedEveryDay, setDailyFocusUsedEveryDay] = useState<
+    boolean | null
+  >(null);
+  const [weeklyPrioritiesClear, setWeeklyPrioritiesClear] = useState<
+    boolean | null
+  >(null);
+  const [cleaningSystemHeld, setCleaningSystemHeld] = useState<boolean | null>(
+    null
+  );
+  const [trainingVolumeSustainable, setTrainingVolumeSustainable] = useState<
+    boolean | null
+  >(null);
+  const [systemToAdjust, setSystemToAdjust] = useState("");
   // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
@@ -114,6 +129,12 @@ export function WeeklyReview() {
       setHouseResetsPlanned(currentReview.house_resets_planned ?? 7);
       setMealsPrepHeld(currentReview.meals_prepped_held);
       setMetricsNotes(currentReview.metrics_notes || "");
+      // Section 3: System Health Check
+      setDailyFocusUsedEveryDay(currentReview.daily_focus_used_every_day);
+      setWeeklyPrioritiesClear(currentReview.weekly_priorities_clear);
+      setCleaningSystemHeld(currentReview.cleaning_system_held);
+      setTrainingVolumeSustainable(currentReview.training_volume_sustainable);
+      setSystemToAdjust(currentReview.system_to_adjust || "");
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -221,6 +242,55 @@ export function WeeklyReview() {
       console.error("Failed to update metrics_notes:", error);
     }
   }, [currentReview, updateReview, metricsNotes]);
+
+  // Handle Section 3 boolean change (auto-save)
+  type SystemHealthField =
+    | "daily_focus_used_every_day"
+    | "weekly_priorities_clear"
+    | "cleaning_system_held"
+    | "training_volume_sustainable";
+
+  const handleSystemHealthChange = useCallback(
+    async (field: SystemHealthField, value: boolean | null) => {
+      if (!currentReview) return;
+      // Update local state immediately
+      switch (field) {
+        case "daily_focus_used_every_day":
+          setDailyFocusUsedEveryDay(value);
+          break;
+        case "weekly_priorities_clear":
+          setWeeklyPrioritiesClear(value);
+          break;
+        case "cleaning_system_held":
+          setCleaningSystemHeld(value);
+          break;
+        case "training_volume_sustainable":
+          setTrainingVolumeSustainable(value);
+          break;
+      }
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { [field]: value },
+        });
+      } catch (error) {
+        console.error(`Failed to update ${field}:`, error);
+      }
+    },
+    [currentReview, updateReview]
+  );
+
+  const handleSystemToAdjustBlur = useCallback(async () => {
+    if (!currentReview) return;
+    try {
+      await updateReview.mutateAsync({
+        reviewId: currentReview.id,
+        data: { system_to_adjust: systemToAdjust },
+      });
+    } catch (error) {
+      console.error("Failed to update system_to_adjust:", error);
+    }
+  }, [currentReview, updateReview, systemToAdjust]);
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -749,6 +819,122 @@ export function WeeklyReview() {
     );
   };
 
+  // Render Section 3: System Health Check
+  const renderSystemHealthCheckSection = () => {
+    if (!currentReview) return null;
+
+    // Check if any answer is "No" (false)
+    const hasAnyNo =
+      dailyFocusUsedEveryDay === false ||
+      weeklyPrioritiesClear === false ||
+      cleaningSystemHeld === false ||
+      trainingVolumeSustainable === false;
+
+    // Health check question component
+    const HealthCheckQuestion = ({
+      label,
+      value,
+      onChange,
+    }: {
+      label: string;
+      value: boolean | null;
+      onChange: (val: boolean) => void;
+    }) => (
+      <div className="flex items-center justify-between rounded-lg bg-white p-3">
+        <span className="flex-1 text-sm font-medium">{label}</span>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant={value === true ? "default" : "outline"}
+            size="sm"
+            onClick={() => onChange(true)}
+            className={
+              value === true ? "bg-green-600 hover:bg-green-700" : ""
+            }
+          >
+            Yes
+          </Button>
+          <Button
+            type="button"
+            variant={value === false ? "default" : "outline"}
+            size="sm"
+            onClick={() => onChange(false)}
+            className={value === false ? "bg-red-500 hover:bg-red-600" : ""}
+          >
+            No
+          </Button>
+        </div>
+      </div>
+    );
+
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <HeartPulse className="h-5 w-5 text-rose-600" />
+            Section 3: System Health Check (Yes / No)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Answer quickly. No explanations unless No.
+          </p>
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2">
+            <HealthCheckQuestion
+              label="Daily Focus Card used every day?"
+              value={dailyFocusUsedEveryDay}
+              onChange={(val) =>
+                handleSystemHealthChange("daily_focus_used_every_day", val)
+              }
+            />
+            <HealthCheckQuestion
+              label="Weekly priorities were clear by Monday?"
+              value={weeklyPrioritiesClear}
+              onChange={(val) =>
+                handleSystemHealthChange("weekly_priorities_clear", val)
+              }
+            />
+            <HealthCheckQuestion
+              label="Cleaning system held without resentment?"
+              value={cleaningSystemHeld}
+              onChange={(val) =>
+                handleSystemHealthChange("cleaning_system_held", val)
+              }
+            />
+            <HealthCheckQuestion
+              label="Training volume felt sustainable?"
+              value={trainingVolumeSustainable}
+              onChange={(val) =>
+                handleSystemHealthChange("training_volume_sustainable", val)
+              }
+            />
+          </div>
+
+          {/* Show textarea only if any answer is No */}
+          {hasAnyNo && (
+            <div className="space-y-2">
+              <Label
+                htmlFor="system-to-adjust"
+                className="text-sm font-medium text-orange-600"
+              >
+                If any No, name the system to adjust:
+              </Label>
+              <Textarea
+                id="system-to-adjust"
+                value={systemToAdjust}
+                onChange={(e) => setSystemToAdjust(e.target.value)}
+                onBlur={handleSystemToAdjustBlur}
+                placeholder="Which system needs adjustment? What's one small change you could make?"
+                className="min-h-[80px] resize-none border-orange-200 focus:border-orange-400"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
@@ -1155,6 +1341,9 @@ export function WeeklyReview() {
 
         {/* Section 2: Metrics Snapshot */}
         {renderMetricsSnapshotSection()}
+
+        {/* Section 3: System Health Check */}
+        {renderSystemHealthCheckSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
