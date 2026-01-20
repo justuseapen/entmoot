@@ -363,8 +363,8 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added mentioned_by scope to Goal, DailyPlan, WeeklyReview, MonthlyReview, QuarterlyReview, AnnualReview models. Updated all corresponding index actions in controllers to support mentioned_by query param. Added new index action to DailyPlans controller with route. Added DailyPlanPolicy#index? for authorization. 12 new request specs cover all mentioned_by filters. All tests pass."
     },
     {
       "id": "US-020",

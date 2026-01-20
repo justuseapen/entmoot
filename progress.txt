@@ -288,3 +288,33 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - NotificationService class was close to 150 line limit - refactoring required to add new methods
   - Factory for mentions requires association stubs; use `association :mentionable, factory: :goal`
 ---
+
+## 2026-01-20 - US-019: Add mentioned_by filter to all content APIs
+- What was implemented: Added mentioned_by query parameter filter to all content APIs
+- Files changed:
+  - backend/app/models/goal.rb (added mentioned_by scope)
+  - backend/app/models/daily_plan.rb (added mentioned_by scope)
+  - backend/app/models/weekly_review.rb (added mentioned_by scope)
+  - backend/app/models/monthly_review.rb (added mentioned_by scope)
+  - backend/app/models/quarterly_review.rb (added mentioned_by scope)
+  - backend/app/models/annual_review.rb (added mentioned_by scope)
+  - backend/app/controllers/api/v1/goals_controller.rb (added mentioned_by to filtered_goals)
+  - backend/app/controllers/api/v1/daily_plans_controller.rb (added index action with mentioned_by)
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/monthly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/quarterly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/annual_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/policies/daily_plan_policy.rb (added index? method)
+  - backend/config/routes.rb (added :index to daily_plans)
+  - backend/spec/requests/api/v1/goals_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/daily_plans_spec.rb (added index endpoint tests)
+  - backend/spec/requests/api/v1/weekly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/monthly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/quarterly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/annual_reviews_spec.rb (added mentioned_by filter tests)
+- **Learnings for future iterations:**
+  - Use `.mentioned_by(params[:mentioned_by])` scope pattern - scope handles nil by returning all records if user_id is nil
+  - DailyPlans controller previously had no index action - added it along with route and policy method
+  - Scope uses `.joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct` - distinct prevents duplicates when multiple mentions exist
+  - Pre-existing rubocop offenses (callback order, ABC size) and goal spec failures (calendar sync) are unrelated to this work
+---
