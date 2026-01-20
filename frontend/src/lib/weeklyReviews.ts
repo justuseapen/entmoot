@@ -26,11 +26,43 @@ export interface WeeklyReview {
   week_start_date: string;
   user_id: number;
   family_id: number;
+  // Legacy fields (kept for backward compatibility)
   wins: string[];
   challenges: string[];
   next_week_priorities: string[];
   lessons_learned: string | null;
   completed: boolean;
+  // Section 0: Source Review
+  source_review_completed: boolean;
+  // Section 1: Review (Evidence-based)
+  wins_shipped: string | null;
+  losses_friction: string | null;
+  // Section 2: Metrics Snapshot
+  workouts_completed: number | null;
+  workouts_planned: number | null;
+  walks_completed: number | null;
+  walks_planned: number | null;
+  writing_sessions_completed: number | null;
+  writing_sessions_planned: number | null;
+  house_resets_completed: number | null;
+  house_resets_planned: number | null;
+  meals_prepped_held: boolean | null;
+  metrics_notes: string | null;
+  // Section 3: System Health Check
+  daily_focus_used_every_day: boolean | null;
+  weekly_priorities_clear: boolean | null;
+  cleaning_system_held: boolean | null;
+  training_volume_sustainable: boolean | null;
+  system_to_adjust: string | null;
+  // Section 4: Weekly Priorities
+  weekly_priorities: string | null;
+  // Section 5: Kill List
+  kill_list: string | null;
+  // Section 6: Forward Setup
+  workouts_blocked: boolean;
+  monday_top_3_decided: boolean;
+  monday_focus_card_prepped: boolean;
+  // Computed/metadata
   metrics?: WeeklyReviewMetrics;
   created_at: string;
   updated_at: string;
@@ -46,11 +78,42 @@ export interface WeeklyReviewResponse {
 }
 
 export interface UpdateWeeklyReviewData {
+  // Legacy fields
   wins?: string[];
   challenges?: string[];
   next_week_priorities?: string[];
   lessons_learned?: string;
   completed?: boolean;
+  // Section 0: Source Review
+  source_review_completed?: boolean;
+  // Section 1: Review (Evidence-based)
+  wins_shipped?: string;
+  losses_friction?: string;
+  // Section 2: Metrics Snapshot
+  workouts_completed?: number;
+  workouts_planned?: number;
+  walks_completed?: number;
+  walks_planned?: number;
+  writing_sessions_completed?: number;
+  writing_sessions_planned?: number;
+  house_resets_completed?: number;
+  house_resets_planned?: number;
+  meals_prepped_held?: boolean;
+  metrics_notes?: string;
+  // Section 3: System Health Check
+  daily_focus_used_every_day?: boolean;
+  weekly_priorities_clear?: boolean;
+  cleaning_system_held?: boolean;
+  training_volume_sustainable?: boolean;
+  system_to_adjust?: string;
+  // Section 4: Weekly Priorities
+  weekly_priorities?: string;
+  // Section 5: Kill List
+  kill_list?: string;
+  // Section 6: Forward Setup
+  workouts_blocked?: boolean;
+  monday_top_3_decided?: boolean;
+  monday_focus_card_prepped?: boolean;
 }
 
 // API functions
