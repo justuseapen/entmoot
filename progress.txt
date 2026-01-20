@@ -342,3 +342,19 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - useGoals already accepted GoalFilters, so no hook changes needed there - just added mentioned_by to GoalFilters type
   - Pre-existing ESLint errors (react-hooks/set-state-in-effect, react-hooks/incompatible-library) are unrelated to this work
 ---
+
+## 2026-01-20 - US-021: Create MentionInput component with autocomplete
+- What was implemented: Created MentionInput component with @ detection, autocomplete dropdown, keyboard navigation, and MentionDisplay for read-only highlighting
+- Files changed:
+  - frontend/src/components/ui/mention-input.tsx (new)
+  - frontend/src/hooks/useFamilyMembers.ts (new)
+- **Learnings for future iterations:**
+  - Can't export hooks from component files due to react-refresh/only-export-components rule - put hooks in separate files
+  - Avoid accessing refs during render - use CSS classes for positioning instead of reading ref.current
+  - Use `/@(\w*)$/` regex to detect @ mentions at cursor position
+  - FamilyMember type has `user_id` (not `id`) and `name` fields - use `name.split(" ")[0]` for first name
+  - Dropdown positioning: use `absolute top-full left-0 right-0 z-50 mt-1` classes instead of inline styles with ref access
+  - itemRefs pattern with Map allows scrolling selected item into view via `itemRefs.current.get(index)?.scrollIntoView()`
+  - handleBlur needs setTimeout delay (150ms) to allow click events on dropdown items before closing
+  - useFamilyMembers wraps useMembers from useFamilies.ts, getting currentFamily from useFamilyStore
+---
