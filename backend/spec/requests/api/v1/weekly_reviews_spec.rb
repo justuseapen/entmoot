@@ -106,13 +106,23 @@ RSpec.describe "Api::V1::WeeklyReviews" do
         expect(json_response["metrics"]).to have_key("goal_progress")
       end
 
-      it "includes all review fields" do
+      it "includes all review fields including new template fields", :aggregate_failures do
         get "/api/v1/families/#{family.id}/weekly_reviews/current", headers: auth_headers(user)
 
+        # Legacy fields
         expect(json_response).to include(
-          "id", "week_start_date", "user_id", "family_id",
-          "wins", "challenges", "next_week_priorities",
-          "lessons_learned", "completed"
+          "id", "week_start_date", "user_id", "family_id", "wins", "challenges",
+          "next_week_priorities", "lessons_learned", "completed"
+        )
+        # New template fields (all 21 new fields)
+        expect(json_response.keys).to include(
+          "source_review_completed", "wins_shipped", "losses_friction",
+          "workouts_completed", "workouts_planned", "walks_completed", "walks_planned",
+          "writing_sessions_completed", "writing_sessions_planned",
+          "house_resets_completed", "house_resets_planned", "meals_prepped_held", "metrics_notes",
+          "daily_focus_used_every_day", "weekly_priorities_clear", "cleaning_system_held",
+          "training_volume_sustainable", "system_to_adjust", "weekly_priorities", "kill_list",
+          "workouts_blocked", "monday_top_3_decided", "monday_focus_card_prepped"
         )
       end
     end
@@ -252,6 +262,120 @@ RSpec.describe "Api::V1::WeeklyReviews" do
         expect(response).to have_http_status(:ok)
         expect(json_response["weekly_review"]).to include(
           "wins" => ["Win"], "challenges" => ["Issue"], "completed" => true
+        )
+      end
+
+      # New template fields tests
+      it "updates source_review_completed" do
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: { source_review_completed: true } },
+              headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]["source_review_completed"]).to be(true)
+      end
+
+      it "updates wins_shipped and losses_friction text fields" do
+        params = {
+          wins_shipped: "Shipped the new dashboard feature\nCompleted API integration",
+          losses_friction: "Blocked on code review for 2 days"
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params },
+              headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]["wins_shipped"]).to eq(params[:wins_shipped])
+        expect(json_response["weekly_review"]["losses_friction"]).to eq(params[:losses_friction])
+      end
+
+      it "updates metrics snapshot fields", :aggregate_failures do
+        params = {
+          workouts_completed: 4, workouts_planned: 5, walks_completed: 6, walks_planned: 7,
+          writing_sessions_completed: 3, writing_sessions_planned: 5,
+          house_resets_completed: 5, house_resets_planned: 7,
+          meals_prepped_held: true, metrics_notes: "Missed workout due to travel"
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params }, headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]).to include(
+          "workouts_completed" => 4, "workouts_planned" => 5,
+          "walks_completed" => 6, "walks_planned" => 7,
+          "writing_sessions_completed" => 3, "writing_sessions_planned" => 5,
+          "house_resets_completed" => 5, "house_resets_planned" => 7,
+          "meals_prepped_held" => true, "metrics_notes" => "Missed workout due to travel"
+        )
+      end
+
+      it "updates system health check boolean fields", :aggregate_failures do
+        params = {
+          daily_focus_used_every_day: true, weekly_priorities_clear: true,
+          cleaning_system_held: false, training_volume_sustainable: true,
+          system_to_adjust: "Cleaning system - need to split weekday tasks"
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params }, headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]).to include(
+          "daily_focus_used_every_day" => true, "weekly_priorities_clear" => true,
+          "cleaning_system_held" => false, "training_volume_sustainable" => true,
+          "system_to_adjust" => "Cleaning system - need to split weekday tasks"
+        )
+      end
+
+      it "updates weekly_priorities and kill_list text fields" do
+        params = {
+          weekly_priorities: "1. Ship dashboard\n2. Review PRs\n3. Plan sprint",
+          kill_list: "Social media scrolling\nUnplanned meetings"
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params },
+              headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]["weekly_priorities"]).to eq(params[:weekly_priorities])
+        expect(json_response["weekly_review"]["kill_list"]).to eq(params[:kill_list])
+      end
+
+      it "updates forward setup boolean fields" do
+        params = {
+          workouts_blocked: true,
+          monday_top_3_decided: true,
+          monday_focus_card_prepped: true
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params },
+              headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        review = json_response["weekly_review"]
+        expect(review["workouts_blocked"]).to be(true)
+        expect(review["monday_top_3_decided"]).to be(true)
+        expect(review["monday_focus_card_prepped"]).to be(true)
+      end
+
+      it "updates all new template fields at once", :aggregate_failures do
+        params = {
+          source_review_completed: true, wins_shipped: "Shipped feature X", losses_friction: "Blocked on Y",
+          workouts_completed: 4, workouts_planned: 5, walks_completed: 7, walks_planned: 7,
+          writing_sessions_completed: 2, writing_sessions_planned: 3,
+          house_resets_completed: 6, house_resets_planned: 7, meals_prepped_held: true, metrics_notes: nil,
+          daily_focus_used_every_day: true, weekly_priorities_clear: true,
+          cleaning_system_held: true, training_volume_sustainable: true, system_to_adjust: nil,
+          weekly_priorities: "Priority 1\nPriority 2", kill_list: "Distraction item",
+          workouts_blocked: true, monday_top_3_decided: true, monday_focus_card_prepped: true
+        }
+        patch "/api/v1/families/#{family.id}/weekly_reviews/#{weekly_review.id}",
+              params: { weekly_review: params }, headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["weekly_review"]).to include(
+          "source_review_completed" => true, "wins_shipped" => "Shipped feature X",
+          "workouts_completed" => 4, "daily_focus_used_every_day" => true,
+          "weekly_priorities" => "Priority 1\nPriority 2", "workouts_blocked" => true
         )
       end
     end
