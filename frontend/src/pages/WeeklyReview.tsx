@@ -45,6 +45,7 @@ import {
   HeartPulse,
   Link2,
   Skull,
+  FastForward,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -123,6 +124,10 @@ export function WeeklyReview() {
   ]);
   // Section 5: Kill List
   const [killList, setKillList] = useState("");
+  // Section 6: Forward Setup
+  const [workoutsBlocked, setWorkoutsBlocked] = useState(false);
+  const [mondayTop3Decided, setMondayTop3Decided] = useState(false);
+  const [mondayFocusCardPrepped, setMondayFocusCardPrepped] = useState(false);
   // Legacy fields
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
@@ -174,6 +179,12 @@ export function WeeklyReview() {
       }
       // Section 5: Kill List
       setKillList(currentReview.kill_list || "");
+      // Section 6: Forward Setup
+      setWorkoutsBlocked(currentReview.workouts_blocked ?? false);
+      setMondayTop3Decided(currentReview.monday_top_3_decided ?? false);
+      setMondayFocusCardPrepped(
+        currentReview.monday_focus_card_prepped ?? false
+      );
       // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
@@ -397,6 +408,39 @@ export function WeeklyReview() {
       console.error("Failed to update kill_list:", error);
     }
   }, [currentReview, updateReview, killList]);
+
+  // Handle Section 6 forward setup checkbox change (auto-save)
+  type ForwardSetupField =
+    | "workouts_blocked"
+    | "monday_top_3_decided"
+    | "monday_focus_card_prepped";
+
+  const handleForwardSetupChange = useCallback(
+    async (field: ForwardSetupField, checked: boolean) => {
+      if (!currentReview) return;
+      // Update local state immediately
+      switch (field) {
+        case "workouts_blocked":
+          setWorkoutsBlocked(checked);
+          break;
+        case "monday_top_3_decided":
+          setMondayTop3Decided(checked);
+          break;
+        case "monday_focus_card_prepped":
+          setMondayFocusCardPrepped(checked);
+          break;
+      }
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { [field]: checked },
+        });
+      } catch (error) {
+        console.error(`Failed to update ${field}:`, error);
+      }
+    },
+    [currentReview, updateReview]
+  );
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -1163,6 +1207,85 @@ export function WeeklyReview() {
     );
   };
 
+  // Render Section 6: Forward Setup
+  const renderForwardSetupSection = () => {
+    if (!currentReview) return null;
+
+    return (
+      <Card className="mb-6 border-emerald-200 bg-emerald-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FastForward className="h-5 w-5 text-emerald-600" />
+            Section 6: Forward Setup (5 minutes max)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3 rounded-lg bg-white p-3">
+            {/* Workouts blocked on calendar */}
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="workouts-blocked"
+                checked={workoutsBlocked}
+                onCheckedChange={(checked) =>
+                  handleForwardSetupChange("workouts_blocked", checked === true)
+                }
+                className="h-5 w-5"
+              />
+              <Label
+                htmlFor="workouts-blocked"
+                className="cursor-pointer text-sm font-medium"
+              >
+                Block workouts on calendar
+              </Label>
+            </div>
+
+            {/* Pre-decide top 3 priorities for Monday */}
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="monday-top-3"
+                checked={mondayTop3Decided}
+                onCheckedChange={(checked) =>
+                  handleForwardSetupChange(
+                    "monday_top_3_decided",
+                    checked === true
+                  )
+                }
+                className="h-5 w-5"
+              />
+              <Label
+                htmlFor="monday-top-3"
+                className="cursor-pointer text-sm font-medium"
+              >
+                Pre-decide top 3 priorities for Monday
+              </Label>
+            </div>
+
+            {/* Prep first Daily Focus Card for Monday */}
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="monday-focus-card"
+                checked={mondayFocusCardPrepped}
+                onCheckedChange={(checked) =>
+                  handleForwardSetupChange(
+                    "monday_focus_card_prepped",
+                    checked === true
+                  )
+                }
+                className="h-5 w-5"
+              />
+              <Label
+                htmlFor="monday-focus-card"
+                className="cursor-pointer text-sm font-medium"
+              >
+                Prep first Daily Focus Card for Monday
+              </Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
@@ -1578,6 +1701,9 @@ export function WeeklyReview() {
 
         {/* Section 5: Kill List */}
         {renderKillListSection()}
+
+        {/* Section 6: Forward Setup */}
+        {renderForwardSetupSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
