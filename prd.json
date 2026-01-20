@@ -1,176 +1,456 @@
 {
   "project": "Entmoot",
-  "branchName": "ralph/daily-focus-card-redesign",
-  "description": "Redesign Daily Planner to match Daily Focus Card Template with Top 3 Outcomes, Non-Negotiables habit tracker, and Shutdown Notes",
+  "branchName": "ralph/mentions-weekly-review-redesign",
+  "description": "Add @mention functionality, fix goal linking UI, and redesign weekly review to match Apple Notes template system",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create Habit model and migration",
-      "description": "As a developer, I need to store habit definitions and daily completion status.",
+      "title": "Fix goal link button clickability in Daily Planner",
+      "description": "As a user, I want to click the link icon to select a goal for my top priority.",
       "acceptanceCriteria": [
-        "Create habits table with: name (string), position (integer), user_id (references), family_id (references), is_active (boolean default true)",
-        "Create habit_completions table with: habit_id (references), daily_plan_id (references), completed (boolean default false)",
-        "Create Habit model with: belongs_to :user, belongs_to :family, has_many :habit_completions",
-        "Create HabitCompletion model with: belongs_to :habit, belongs_to :daily_plan",
-        "Add has_many :habit_completions to DailyPlan model",
-        "Run migration successfully",
-        "Typecheck passes"
+        "Investigate SelectTrigger size='sm' prop - may need to remove or adjust",
+        "Ensure link icon button has proper clickable area (padding, min-width)",
+        "Ensure dropdown opens when clicking the link icon",
+        "Test on mobile and desktop viewports",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Fixed by removing size=sm prop, increasing width to w-11 (44px), height to h-10 (40px), and reducing padding to px-2 for proper touch targets. Added aria-label for accessibility."
     },
     {
       "id": "US-002",
-      "title": "Seed default habits for users",
-      "description": "As a user, I want preset habits available when I first use the daily planner.",
+      "title": "Add new fields to WeeklyReview model for template sections",
+      "description": "As a developer, I need database fields matching the new weekly review template structure.",
       "acceptanceCriteria": [
-        "Create HabitInitializerService in backend/app/services/",
-        "Service creates 9 habits: Prayer AM, Bible Study, Planning, Workout, Walk, Writing, Reading, House Reset, Prayer PM",
-        "Habits have sequential position values (1-9)",
-        "Service is idempotent - does not create duplicates if called again",
-        "Call service in DailyPlan.find_or_create_for_today when user has no habits",
+        "Add migration for weekly_reviews table with new fields:",
+        "- source_review_completed (boolean, default false)",
+        "- wins_shipped (text) - replaces 'wins'",
+        "- losses_friction (text) - replaces 'challenges'",
+        "- workouts_completed (integer)",
+        "- workouts_planned (integer)",
+        "- walks_completed (integer)",
+        "- walks_planned (integer, default 7)",
+        "- writing_sessions_completed (integer)",
+        "- writing_sessions_planned (integer)",
+        "- house_resets_completed (integer)",
+        "- house_resets_planned (integer, default 7)",
+        "- meals_prepped_held (boolean)",
+        "- metrics_notes (text)",
+        "- daily_focus_used_every_day (boolean)",
+        "- weekly_priorities_clear (boolean)",
+        "- cleaning_system_held (boolean)",
+        "- training_volume_sustainable (boolean)",
+        "- system_to_adjust (text)",
+        "- weekly_priorities (text) - replaces 'next_week_priorities'",
+        "- kill_list (text) - explicit neglect items",
+        "- workouts_blocked (boolean, default false)",
+        "- monday_top_3_decided (boolean, default false)",
+        "- monday_focus_card_prepped (boolean, default false)",
+        "Keep existing: week_start_date, user_id, family_id, completed, created_at, updated_at",
+        "Remove or deprecate: wins, challenges, next_week_priorities, lessons_learned",
+        "Run migration successfully",
         "Typecheck passes"
       ],
       "priority": 2,
       "passes": true,
-      "notes": ""
+      "notes": "Added migration with all 21 new fields for template sections. Old jsonb columns (wins, challenges, next_week_priorities) and lessons_learned kept for backward compatibility. System health check booleans are intentionally nullable (nil = unanswered). All 51 WeeklyReview tests pass."
     },
     {
       "id": "US-003",
-      "title": "Add habits API endpoints",
-      "description": "As a developer, I need API endpoints to manage habits and completions.",
+      "title": "Update WeeklyReview API to support new fields",
+      "description": "As a developer, I need the API to accept and return the new weekly review fields.",
       "acceptanceCriteria": [
-        "Create HabitsController at backend/app/controllers/api/v1/habits_controller.rb",
-        "GET /api/v1/families/:family_id/habits returns user's active habits ordered by position",
-        "Add routes in config/routes.rb under families namespace",
-        "Create HabitPolicy with index action allowing authenticated family members",
-        "Update daily_plans_controller to permit habit_completions_attributes",
-        "Add accepts_nested_attributes_for :habit_completions to DailyPlan model",
-        "Write request specs for habits endpoint",
+        "Update weekly_reviews_controller to permit all new params",
+        "Update serializer/JSON response to include all new fields",
+        "Maintain backward compatibility for any existing reviews",
+        "Write request specs for create/update with new fields",
         "Typecheck passes"
       ],
       "priority": 3,
       "passes": true,
-      "notes": ""
+      "notes": "Added all 21 new template fields to permitted params and JSON response. Refactored controller into smaller helper methods for rubocop compliance. All 38 request specs pass including 7 new tests for template fields."
     },
     {
       "id": "US-004",
-      "title": "Add shutdown_notes to daily_plans",
-      "description": "As a user, I need to record structured shutdown notes at end of day.",
+      "title": "Update frontend WeeklyReview type",
+      "description": "As a developer, I need TypeScript types for the new weekly review structure.",
       "acceptanceCriteria": [
-        "Add shutdown_shipped (text) column to daily_plans table",
-        "Add shutdown_blocked (text) column to daily_plans table",
-        "Update daily_plans_controller to permit :shutdown_shipped and :shutdown_blocked params",
-        "Run migration successfully",
+        "Update WeeklyReview type in frontend with all new fields",
+        "Match field names exactly with backend (snake_case from API)",
+        "Add proper types (number, boolean, string | null)",
+        "Update useWeeklyReview hook if needed",
         "Typecheck passes"
       ],
       "priority": 4,
       "passes": true,
-      "notes": ""
+      "notes": "Updated WeeklyReview and UpdateWeeklyReviewData interfaces in frontend/src/lib/weeklyReviews.ts with all 21 new template fields. Used nullable types (| null) for optional fields that can be unanswered. Forward setup booleans are non-nullable (default false). TypeScript build passes."
     },
     {
       "id": "US-005",
-      "title": "Update frontend types for habits and shutdown notes",
-      "description": "As a developer, I need TypeScript types for the new data structures.",
+      "title": "Create new WeeklyReview UI - Section 0: Source Review",
+      "description": "As a user, I want to see a reminder to review my Daily Focus Cards before starting.",
       "acceptanceCriteria": [
-        "Add Habit type to frontend/src/lib/dailyPlans.ts: id, name, position, is_active",
-        "Add HabitCompletion type: id, habit_id, daily_plan_id, completed, habit (nested Habit)",
-        "Add shutdown_shipped and shutdown_blocked (string | null) to DailyPlan type",
-        "Add habit_completions array to DailyPlan type",
-        "Create frontend/src/hooks/useHabits.ts with useHabits(familyId) hook using TanStack Query",
-        "Typecheck passes"
+        "Add Section 0 card with header 'Source Review (Non-negotiable)'",
+        "Display instruction text: 'Before writing anything below: Lay out all Daily Focus Cards from the week (or open the daily notes). Do not rely on memory. Tally first, reflect second.'",
+        "Add checkbox for source_review_completed",
+        "Display list/links to this week's daily plans (7 cards)",
+        "Section appears first, before all other sections",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
       "passes": true,
-      "notes": ""
+      "notes": "Added Section 0 card with amber styling, 7-day calendar grid showing links to existing daily plans or placeholders for missing days, and auto-saving checkbox. Backend updated to include daily_plans summary in API response. TypeScript build passes."
     },
     {
       "id": "US-006",
-      "title": "Redesign Top 3 Outcomes section",
-      "description": "As a user, I want my Top 3 outcomes to be explicitly linked to weekly goals.",
+      "title": "Create Section 1: Review (Evidence-based)",
+      "description": "As a user, I want to record wins and losses from the week.",
       "acceptanceCriteria": [
-        "Rename CardTitle from 'Top 3 Priorities' to 'Top 3 Outcomes Today'",
-        "Add subtitle text below title: 'What tasks drive your weekly plan forward?'",
-        "Add goal selector dropdown to each outcome input row",
-        "Filter goals dropdown to only show weekly, monthly, quarterly, annual goals (not daily)",
-        "Display linked goal as small badge/tag when selected",
+        "Add Section 1 card with header 'Review (Evidence-based)'",
+        "Two textarea fields:",
+        "  - 'Wins (things that shipped or moved forward)' -> wins_shipped",
+        "  - 'Losses / Friction' -> losses_friction",
+        "Both fields are multiline textareas",
+        "Auto-save on blur",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
       "passes": true,
-      "notes": ""
+      "notes": "Added Section 1 card with ClipboardList icon, two auto-saving textareas (wins_shipped and losses_friction). Uses onBlur for auto-save. TypeScript build passes."
     },
     {
       "id": "US-007",
-      "title": "Build Non-Negotiables habit tracker UI",
-      "description": "As a user, I want a checklist of my daily habits to track completion.",
+      "title": "Create Section 2: Metrics Snapshot",
+      "description": "As a user, I want to tally habit completion from my Daily Focus Cards.",
       "acceptanceCriteria": [
-        "Add new Card section titled 'Non-Negotiables' after Top 3 Outcomes card",
-        "Fetch habits using useHabits hook",
-        "Display habits as labeled checkboxes in a responsive grid (3 columns on desktop, 2 on mobile)",
-        "Toggle checkbox calls saveChanges with updated habit_completions_attributes",
-        "Show completion count in card header (e.g., '7/9 complete')",
-        "Use Checkbox component from shadcn/ui",
+        "Add Section 2 card with header 'Metrics Snapshot (Tally from Daily Cards)'",
+        "Input pairs for each metric (completed / planned):",
+        "  - Workouts completed ___ / planned ___",
+        "  - Daily walks completed ___ / 7",
+        "  - Writing sessions completed ___ / planned ___",
+        "  - House reset completed ___ / 7",
+        "  - Meals prepped / system held: Y/N checkbox",
+        "Textarea for 'Notes (only if something broke)' -> metrics_notes",
+        "Display completion percentages next to each metric",
+        "Auto-save on blur",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Build Shutdown Notes UI section",
-      "description": "As a user, I want structured prompts for end-of-day reflection.",
+      "title": "Create Section 3: System Health Check",
+      "description": "As a user, I want to quickly assess if my systems are working.",
       "acceptanceCriteria": [
-        "Remove the 'Daily Intention' card",
-        "Add new 'Shutdown Notes' card at bottom of page (before navigation buttons)",
-        "First textarea with label 'What shipped today?' bound to shutdown_shipped",
-        "Second textarea with label 'What blocked me?' bound to shutdown_blocked",
-        "Both textareas auto-save on blur using existing pattern",
-        "Use Sunset icon from lucide-react for card header",
+        "Add Section 3 card with header 'System Health Check (Yes / No)'",
+        "Instruction text: 'Answer quickly. No explanations unless No.'",
+        "Y/N toggle buttons for each question:",
+        "  - Daily Focus Card used every day?",
+        "  - Weekly priorities were clear by Monday?",
+        "  - Cleaning system held without resentment?",
+        "  - Training volume felt sustainable?",
+        "Show textarea 'If any No, name the system to adjust:' only if any answer is No",
+        "Auto-save on change",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-009",
-      "title": "Remove Daily Tasks section from UI",
-      "description": "As a user, I want a cleaner daily focus card without the general tasks list.",
+      "title": "Create Section 4: This Week's Priorities",
+      "description": "As a user, I want to set max 5 priorities that advance quarterly objectives.",
       "acceptanceCriteria": [
-        "Remove the 'Today's Tasks' Card component from DailyPlanner.tsx",
-        "Remove the 'Yesterday's Unfinished Tasks' Card component",
-        "Remove the Progress Card component showing completion percentage",
-        "Remove newTaskTitle state and related handlers (handleAddTask, handleToggleTask, etc.)",
-        "Remove DndContext and SortableContext imports (no longer needed)",
-        "Keep DailyTask model and API unchanged for backwards compatibility",
+        "Add Section 4 card with header 'This Week's Priorities (Max 5)'",
+        "Display rule text: 'Each priority must: Advance a Quarterly Objective, and Be schedulable on specific days.'",
+        "5 numbered input fields (1-5)",
+        "Each priority can optionally link to a quarterly goal (dropdown)",
+        "Show linked goal as badge if selected",
+        "Auto-save on blur",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-010",
-      "title": "Update daily planner header and styling",
-      "description": "As a user, I want the daily focus card to look clean and focused.",
+      "title": "Create Section 5: Kill List",
+      "description": "As a user, I want to explicitly list what I'm NOT doing this week.",
       "acceptanceCriteria": [
-        "Change header subtitle from 'Start your day with intention' to 'Daily Focus Card'",
-        "Adjust vertical spacing between cards (mb-6 is good)",
-        "Ensure 3-card layout works on mobile (stack vertically)",
-        "Keep Save status bar functionality",
-        "Keep navigation buttons at bottom",
+        "Add Section 5 card with header 'Kill List (Explicit Neglect)'",
+        "Instruction text: 'List items you are intentionally deprioritizing this week to protect focus.'",
+        "Multiline textarea for kill_list",
+        "Auto-save on blur",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Create Section 6: Forward Setup",
+      "description": "As a user, I want to prep for Monday before finishing the review.",
+      "acceptanceCriteria": [
+        "Add Section 6 card with header 'Forward Setup (5 minutes max)'",
+        "Three checkboxes:",
+        "  - Block workouts on calendar -> workouts_blocked",
+        "  - Pre-decide top 3 priorities for Monday -> monday_top_3_decided",
+        "  - Prep first Daily Focus Card for Monday -> monday_focus_card_prepped",
+        "Auto-save on check",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Add weekly review completion logic",
+      "description": "As a user, the review should be marked complete when all sections are filled.",
+      "acceptanceCriteria": [
+        "Review is 'completed' when:",
+        "  - source_review_completed is true",
+        "  - wins_shipped has content",
+        "  - losses_friction has content",
+        "  - All metrics have values",
+        "  - All system health checks answered",
+        "  - At least 1 weekly priority set",
+        "  - All forward setup checkboxes checked",
+        "Show completion status at top of page",
+        "Show 'Mark as Complete' button when criteria met",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Auto-populate metrics from daily plans",
+      "description": "As a user, I want the system to pre-fill metrics by tallying my daily habit completions.",
+      "acceptanceCriteria": [
+        "When weekly review loads, calculate from daily_plans:",
+        "  - Count 'Workout' habit completions across 7 days",
+        "  - Count 'Walk' habit completions across 7 days",
+        "  - Count 'Writing' habit completions across 7 days",
+        "  - Count 'House Reset' habit completions across 7 days",
+        "Pre-populate the 'completed' fields with these counts",
+        "User can still manually override the values",
+        "Add 'Refresh from Daily Plans' button to recalculate",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Create Mention model and migration",
+      "description": "As a developer, I need to store mentions of family members in text content.",
+      "acceptanceCriteria": [
+        "Create mentions table with: mentionable_type (string), mentionable_id (integer), user_id (references), mentioned_user_id (references), text_field (string), created_at",
+        "Add polymorphic association (mentionable belongs to Goal, DailyPlan, TopPriority, WeeklyReview, or other Review models)",
+        "Create Mention model with: belongs_to :user, belongs_to :mentioned_user (class_name: 'User'), belongs_to :mentionable (polymorphic)",
+        "Add has_many :mentions, as: :mentionable to Goal, DailyPlan, TopPriority, WeeklyReview, MonthlyReview, QuarterlyReview, AnnualReview models",
+        "Add has_many :mentions, foreign_key: :mentioned_user_id to User model",
+        "Add index on [mentionable_type, mentionable_id]",
+        "Add index on mentioned_user_id",
+        "Run migration successfully",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Create MentionParserService to extract @mentions from text",
+      "description": "As a developer, I need a service to parse text and extract @firstname mentions.",
+      "acceptanceCriteria": [
+        "Create MentionParserService in backend/app/services/",
+        "Service method extract_mentions(text, family_id) returns array of user objects",
+        "Regex pattern matches @firstname (case-insensitive, word boundary)",
+        "Looks up users by first name within the specified family (case-insensitive match)",
+        "Returns empty array if no matches found",
+        "Write RSpec unit tests for the service",
+        "Test edge cases: multiple mentions, duplicate mentions, non-existent names",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add concern for mention processing",
+      "description": "As a developer, I want DRY code for processing mentions across multiple models.",
+      "acceptanceCriteria": [
+        "Create Mentionable concern in backend/app/models/concerns/mentionable.rb",
+        "Concern adds has_many :mentions, as: :mentionable",
+        "Concern adds after_save :process_mentions callback",
+        "Concern adds class method mentionable_fields to define which fields to scan",
+        "process_mentions method scans all defined fields for @mentions",
+        "Creates Mention records for new mentions",
+        "Deletes Mention records for removed mentions",
+        "Only processes if relevant fields changed",
+        "Write RSpec tests for the concern",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Include Mentionable in all relevant models",
+      "description": "As a user, when I save content with @mentions, the system should create Mention records.",
+      "acceptanceCriteria": [
+        "Include Mentionable concern in Goal model, define fields: [:title, :description, :notes]",
+        "Include Mentionable concern in TopPriority model, define fields: [:title]",
+        "Include Mentionable concern in DailyPlan model, define fields: [:shutdown_shipped, :shutdown_blocked]",
+        "Include Mentionable concern in WeeklyReview model, define fields: [:wins_shipped, :losses_friction, :metrics_notes, :system_to_adjust, :weekly_priorities, :kill_list]",
+        "Include Mentionable concern in MonthlyReview, QuarterlyReview, AnnualReview models with appropriate fields",
+        "Write RSpec model tests for each",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Send notifications when users are mentioned",
+      "description": "As a user, when someone mentions me, I should receive a notification.",
+      "acceptanceCriteria": [
+        "Add after_create callback to Mention model to send notification",
+        "Uses NotificationService.create_and_broadcast",
+        "Notification title: '{Mentioner Name} mentioned you'",
+        "Notification body includes context (e.g., 'in their weekly review' or 'in goal: {title}')",
+        "Notification links to the mentionable record",
+        "Add :mention to notification_type enum in Notification model if needed",
+        "Write RSpec tests for notification delivery",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Add mentioned_by filter to all content APIs",
+      "description": "As a user, I want to filter content where I was mentioned.",
+      "acceptanceCriteria": [
+        "Add mentioned_by query param to Goals, DailyPlans, WeeklyReviews, MonthlyReviews, QuarterlyReviews, AnnualReviews endpoints",
+        "Add scope :mentioned_by to each model",
+        "Scope joins mentions table and filters by mentioned_user_id",
+        "Write request specs for each endpoint",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Update frontend types for mentions",
+      "description": "As a developer, I need TypeScript types for mentions.",
+      "acceptanceCriteria": [
+        "Add Mention type to frontend/src/lib/api.ts",
+        "Add mentions array to Goal, DailyPlan, WeeklyReview, and other Review types",
+        "Add mentionedBy optional param to all content hooks",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Create MentionInput component with autocomplete",
+      "description": "As a user, when I type @ in a text field, I want to see an autocomplete list of family members.",
+      "acceptanceCriteria": [
+        "Create MentionInput component in frontend/src/components/ui/",
+        "Component wraps Input or Textarea based on multiline prop",
+        "Detects @ character and shows dropdown of family members",
+        "Filters family members as user continues typing after @",
+        "Inserts @firstname when user selects from dropdown",
+        "Highlights @mentions in the text with blue/primary color",
+        "Uses Popover component for dropdown positioning",
+        "Keyboard navigation: arrow keys to select, Enter to insert, Esc to close",
+        "Accepts all standard input/textarea props",
+        "Export useFamilyMembers hook to fetch family members",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Replace textareas with MentionInput across app",
+      "description": "As a user, I want @mention autocomplete in all text fields.",
+      "acceptanceCriteria": [
+        "Replace textareas in Goals form (title, description, notes)",
+        "Replace textareas in DailyPlanner (top priorities, shutdown notes)",
+        "Replace textareas in new WeeklyReview form (all text fields)",
+        "Replace textareas in other Review forms",
+        "Display existing mentions as highlighted text",
+        "Typecheck passes",
+        "Verify in browser for each form using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Add mention filters to all content pages",
+      "description": "As a user, I want to filter content where I was mentioned.",
+      "acceptanceCriteria": [
+        "Add 'Mentioned Me' filter toggle to Goals page",
+        "Add 'Mentioned Me' filter toggle to Reviews pages (all types)",
+        "When enabled, pass mentionedBy param to respective hooks",
+        "Show active filter state in UI",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Add recent mentions endpoint and UI indicator",
+      "description": "As a user, I want to see when I have recent mentions.",
+      "acceptanceCriteria": [
+        "Add GET /api/v1/families/:family_id/mentions/recent endpoint",
+        "Endpoint returns mentions of current user from last 7 days",
+        "Include mentionable details (type, id, title/summary)",
+        "Create useMentions hook in frontend",
+        "Display recent mention count in navigation or header (if > 0)",
+        "Click indicator navigates to mentions view or shows dropdown",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
       "notes": ""
     }
   ]
