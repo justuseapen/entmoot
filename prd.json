@@ -330,8 +330,8 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Included Mentionable concern in Goal (:title, :description), TopPriority (:title), DailyPlan (:shutdown_shipped, :shutdown_blocked), WeeklyReview (6 fields), MonthlyReview (:lessons_learned), QuarterlyReview (:insights), AnnualReview (:lessons_learned, :next_year_theme). Created new specs for MonthlyReview, QuarterlyReview, AnnualReview. Added Mentionable describe blocks to existing specs. All 44 Mentionable tests pass."
     },
     {
       "id": "US-018",

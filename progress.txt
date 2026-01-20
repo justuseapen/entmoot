@@ -242,3 +242,29 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Use `rubocop:disable RSpec/BeforeAfterAll` inline comments to acknowledge intentional use of before(:all)/after(:all)
   - Pre-existing Goal model failures (saved_change_to_notes?) are from calendar sync feature - unrelated to this work
 ---
+
+## 2026-01-20 - US-017: Include Mentionable concern in all relevant models
+- What was implemented: Added Mentionable concern with mentionable_fields to 7 models, created/updated RSpec tests
+- Files changed:
+  - backend/app/models/goal.rb (added include Mentionable, mentionable_fields :title, :description)
+  - backend/app/models/top_priority.rb (added include Mentionable, mentionable_fields :title)
+  - backend/app/models/daily_plan.rb (added include Mentionable, mentionable_fields :shutdown_shipped, :shutdown_blocked)
+  - backend/app/models/weekly_review.rb (added include Mentionable, mentionable_fields for 6 template fields)
+  - backend/app/models/monthly_review.rb (added include Mentionable, mentionable_fields :lessons_learned)
+  - backend/app/models/quarterly_review.rb (added include Mentionable, mentionable_fields :insights)
+  - backend/app/models/annual_review.rb (added include Mentionable, mentionable_fields :lessons_learned, :next_year_theme)
+  - backend/spec/models/goal_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/top_priority_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/daily_plan_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/weekly_review_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/monthly_review_spec.rb (new file)
+  - backend/spec/models/quarterly_review_spec.rb (new file)
+  - backend/spec/models/annual_review_spec.rb (new file)
+- **Learnings for future iterations:**
+  - When including Mentionable, remove the `has_many :mentions` declaration since the concern provides it
+  - Use comment without "Note:" prefix to avoid rubocop Style/CommentAnnotation warning (use "# Mentions association is provided..." not "# Note: Mentions association...")
+  - Goal model uses `creator` not `user` - Mentionable concern handles this via find_creator helper
+  - TopPriority accesses family through daily_plan - Mentionable concern handles this via find_user_via_daily_plan
+  - Pre-existing rubocop offenses in Goal (callback order) and DailyPlan (ABC size) are unrelated to Mentionable changes
+  - Pre-existing Goal model spec failures (assigned_to?, visible_to?) are from goal assignment feature - unrelated to mentions work
+---
