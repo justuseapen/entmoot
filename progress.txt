@@ -378,3 +378,22 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Some files needed Textarea import kept for non-mentionable fields (e.g., WeeklyReview legacy lessonsLearned)
   - Input import was only needed in DailyPlanner for the priority inputs, which are now MentionInput with multiline=false
 ---
+
+## 2026-01-20 - US-023: Add mention filters to all content pages
+- What was implemented: Added "Mentioned Me" filter toggle buttons to Goals page and all Review past reviews sections
+- Files changed:
+  - frontend/src/pages/Goals.tsx (added handleMentionedMeToggle, AtSign icon import, filter button in filter card)
+  - frontend/src/pages/WeeklyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section, conditional empty state messages)
+  - frontend/src/pages/MonthlyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+  - frontend/src/pages/QuarterlyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+  - frontend/src/pages/AnnualReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+- **Learnings for future iterations:**
+  - Goals page already had filter state and card, so added mentioned_by alongside existing time_scale, status, assignee_id filters
+  - Review pages didn't have filter state, so added reviewFilters state with respective Filter types (WeeklyReviewFilters, etc.)
+  - Toggle pattern: when filter.mentioned_by exists, clear it; otherwise set to user?.id
+  - Button styling: when active use bg-blue-600 hover:bg-blue-700; when inactive use outline variant
+  - AtSign icon from lucide-react fits the mention theme
+  - Empty state messages adjust based on hasActiveFilter: "No reviews with mentions" vs "No past reviews yet"
+  - useAuthStore import needed in Review pages to get user.id for the filter
+  - Import XxxFilters type from respective lib file (e.g., import type { WeeklyReviewFilters } from "@/lib/weeklyReviews")
+---

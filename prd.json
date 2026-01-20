@@ -432,8 +432,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 23,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added Mentioned Me filter toggle button with AtSign icon to Goals page (in filter card alongside existing filters) and to all Review past reviews sections (WeeklyReview, MonthlyReview, QuarterlyReview, AnnualReview). When enabled, passes mentioned_by param with current user ID to respective hooks. Active filter shows as solid blue button. Empty state messages adjust when filter is active. TypeScript build passes."
     },
     {
       "id": "US-024",
