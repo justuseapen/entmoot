@@ -33,20 +33,31 @@ import {
   ClipboardList,
   Plus,
   X,
+  AtSign,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/auth";
+import type { QuarterlyReviewFilters } from "@/lib/quarterlyReviews";
 import { InlineEmptyState } from "@/components/EmptyState";
 
 export function QuarterlyReview() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  // Filter state for past reviews
+  const [reviewFilters, setReviewFilters] = useState<QuarterlyReviewFilters>(
+    {}
+  );
 
   // Fetch data
   const { data: family, isLoading: loadingFamily } = useFamily(familyId);
   const { data: currentReview, isLoading: loadingReview } =
     useCurrentQuarterlyReview(familyId);
-  const { data: reviewsData, isLoading: loadingReviews } =
-    useQuarterlyReviews(familyId);
+  const { data: reviewsData, isLoading: loadingReviews } = useQuarterlyReviews(
+    familyId,
+    reviewFilters
+  );
 
   // Mutations
   const updateReview = useUpdateQuarterlyReview(familyId);
@@ -223,6 +234,14 @@ export function QuarterlyReview() {
     }
   };
 
+  // Toggle mentioned me filter for past reviews
+  const handleMentionedMeToggle = () => {
+    setReviewFilters((prev) => ({
+      ...prev,
+      mentioned_by: prev.mentioned_by ? undefined : user?.id,
+    }));
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
@@ -230,84 +249,112 @@ export function QuarterlyReview() {
         (r) => r.id !== currentReview?.id
       ) || [];
 
-    if (pastReviews.length === 0) {
-      return (
-        <InlineEmptyState
-          variant="quarterly_reviews"
-          title="No past reviews yet"
-          description="Complete your first quarterly review to see it here."
-          showAction={false}
-        />
-      );
-    }
+    const showNoResults = pastReviews.length === 0;
+    const hasActiveFilter = !!reviewFilters.mentioned_by;
 
     return (
       <div className="space-y-4">
-        {pastReviews.slice(0, 8).map((review) => (
-          <Card key={review.id} className="bg-white/80">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center justify-between text-base">
-                <span className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatQuarterYear(review.quarter_start_date)}
-                </span>
-                {review.completed && (
-                  <span className="flex items-center gap-1 text-xs text-green-600">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Completed
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {review.achievements.length > 0 && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Trophy className="h-3 w-3 text-amber-500" />
-                    Achievements
-                  </p>
-                  <ul className="mt-1 list-inside list-disc text-sm">
-                    {review.achievements.slice(0, 3).map((achievement, idx) => (
-                      <li key={idx}>{achievement}</li>
-                    ))}
-                    {review.achievements.length > 3 && (
-                      <li className="text-muted-foreground">
-                        +{review.achievements.length - 3} more
-                      </li>
+        {/* Filter toggle */}
+        <div className="flex justify-end">
+          <Button
+            variant={hasActiveFilter ? "default" : "outline"}
+            size="sm"
+            onClick={handleMentionedMeToggle}
+            className={hasActiveFilter ? "bg-blue-600 hover:bg-blue-700" : ""}
+          >
+            <AtSign className="mr-1 h-4 w-4" />
+            Mentioned Me
+          </Button>
+        </div>
+
+        {showNoResults ? (
+          <InlineEmptyState
+            variant="quarterly_reviews"
+            title={
+              hasActiveFilter
+                ? "No reviews with mentions"
+                : "No past reviews yet"
+            }
+            description={
+              hasActiveFilter
+                ? "No past reviews mention you."
+                : "Complete your first quarterly review to see it here."
+            }
+            showAction={false}
+          />
+        ) : (
+          <div className="space-y-4">
+            {pastReviews.slice(0, 8).map((review) => (
+              <Card key={review.id} className="bg-white/80">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {formatQuarterYear(review.quarter_start_date)}
+                    </span>
+                    {review.completed && (
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Completed
+                      </span>
                     )}
-                  </ul>
-                </div>
-              )}
-              {review.obstacles.length > 0 && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Mountain className="h-3 w-3 text-slate-500" />
-                    Obstacles
-                  </p>
-                  <ul className="mt-1 list-inside list-disc text-sm">
-                    {review.obstacles.slice(0, 2).map((obstacle, idx) => (
-                      <li key={idx}>{obstacle}</li>
-                    ))}
-                    {review.obstacles.length > 2 && (
-                      <li className="text-muted-foreground">
-                        +{review.obstacles.length - 2} more
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              )}
-              {review.insights && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Lightbulb className="h-3 w-3 text-yellow-500" />
-                    Insights
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-sm">{review.insights}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {review.achievements.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Trophy className="h-3 w-3 text-amber-500" />
+                        Achievements
+                      </p>
+                      <ul className="mt-1 list-inside list-disc text-sm">
+                        {review.achievements
+                          .slice(0, 3)
+                          .map((achievement, idx) => (
+                            <li key={idx}>{achievement}</li>
+                          ))}
+                        {review.achievements.length > 3 && (
+                          <li className="text-muted-foreground">
+                            +{review.achievements.length - 3} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  {review.obstacles.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Mountain className="h-3 w-3 text-slate-500" />
+                        Obstacles
+                      </p>
+                      <ul className="mt-1 list-inside list-disc text-sm">
+                        {review.obstacles.slice(0, 2).map((obstacle, idx) => (
+                          <li key={idx}>{obstacle}</li>
+                        ))}
+                        {review.obstacles.length > 2 && (
+                          <li className="text-muted-foreground">
+                            +{review.obstacles.length - 2} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  {review.insights && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Lightbulb className="h-3 w-3 text-yellow-500" />
+                        Insights
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm">
+                        {review.insights}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     );
   };

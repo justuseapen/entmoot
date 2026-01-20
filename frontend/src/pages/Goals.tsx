@@ -35,7 +35,7 @@ import {
   statusOptions,
 } from "@/lib/goals";
 import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
-import { TreePine, Sparkles, Upload } from "lucide-react";
+import { TreePine, Sparkles, Upload, AtSign } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { EmptyState } from "@/components/EmptyState";
 
@@ -123,6 +123,13 @@ export function Goals() {
     setFilters((prev) => ({
       ...prev,
       assignee_id: value === "all" ? undefined : parseInt(value),
+    }));
+  };
+
+  const handleMentionedMeToggle = () => {
+    setFilters((prev) => ({
+      ...prev,
+      mentioned_by: prev.mentioned_by ? undefined : user?.id,
     }));
   };
 
@@ -225,7 +232,10 @@ export function Goals() {
   };
 
   const hasActiveFilters =
-    filters.time_scale || filters.status || filters.assignee_id;
+    filters.time_scale ||
+    filters.status ||
+    filters.assignee_id ||
+    filters.mentioned_by;
 
   if (loadingFamily || loadingGoals) {
     return (
@@ -366,6 +376,19 @@ export function Goals() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Mentioned Me toggle */}
+              <Button
+                variant={filters.mentioned_by ? "default" : "outline"}
+                size="sm"
+                onClick={handleMentionedMeToggle}
+                className={
+                  filters.mentioned_by ? "bg-blue-600 hover:bg-blue-700" : ""
+                }
+              >
+                <AtSign className="mr-1 h-4 w-4" />
+                Mentioned Me
+              </Button>
             </div>
           </CardContent>
         </Card>

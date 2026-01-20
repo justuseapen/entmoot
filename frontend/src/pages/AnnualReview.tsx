@@ -36,20 +36,29 @@ import {
   Flame,
   Plus,
   X,
+  AtSign,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/auth";
+import type { AnnualReviewFilters } from "@/lib/annualReviews";
 import { InlineEmptyState } from "@/components/EmptyState";
 
 export function AnnualReview() {
   const { id } = useParams<{ id: string }>();
   const familyId = parseInt(id || "0");
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  // Filter state for past reviews
+  const [reviewFilters, setReviewFilters] = useState<AnnualReviewFilters>({});
 
   // Fetch data
   const { data: family, isLoading: loadingFamily } = useFamily(familyId);
   const { data: currentReview, isLoading: loadingReview } =
     useCurrentAnnualReview(familyId);
-  const { data: reviewsData, isLoading: loadingReviews } =
-    useAnnualReviews(familyId);
+  const { data: reviewsData, isLoading: loadingReviews } = useAnnualReviews(
+    familyId,
+    reviewFilters
+  );
 
   // Mutations
   const updateReview = useUpdateAnnualReview(familyId);
@@ -246,87 +255,119 @@ export function AnnualReview() {
     }
   };
 
+  // Toggle mentioned me filter for past reviews
+  const handleMentionedMeToggle = () => {
+    setReviewFilters((prev) => ({
+      ...prev,
+      mentioned_by: prev.mentioned_by ? undefined : user?.id,
+    }));
+  };
+
   // Render past reviews
   const renderPastReviews = () => {
     const pastReviews =
       reviewsData?.annual_reviews.filter((r) => r.id !== currentReview?.id) ||
       [];
 
-    if (pastReviews.length === 0) {
-      return (
-        <InlineEmptyState
-          variant="annual_reviews"
-          title="No past reviews yet"
-          description="Complete your first annual review to see it here."
-          showAction={false}
-        />
-      );
-    }
+    const showNoResults = pastReviews.length === 0;
+    const hasActiveFilter = !!reviewFilters.mentioned_by;
 
     return (
       <div className="space-y-4">
-        {pastReviews.slice(0, 8).map((review) => (
-          <Card key={review.id} className="bg-white/80">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center justify-between text-base">
-                <span className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatYear(review.year)}
-                </span>
-                {review.completed && (
-                  <span className="flex items-center gap-1 text-xs text-green-600">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Completed
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {review.next_year_theme && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Compass className="h-3 w-3 text-indigo-500" />
-                    Theme
-                  </p>
-                  <p className="mt-1 font-medium text-indigo-700">
-                    {review.next_year_theme}
-                  </p>
-                </div>
-              )}
-              {review.year_highlights.length > 0 && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Star className="h-3 w-3 text-amber-500" />
-                    Highlights
-                  </p>
-                  <ul className="mt-1 list-inside list-disc text-sm">
-                    {review.year_highlights
-                      .slice(0, 3)
-                      .map((highlight, idx) => (
-                        <li key={idx}>{highlight}</li>
-                      ))}
-                    {review.year_highlights.length > 3 && (
-                      <li className="text-muted-foreground">
-                        +{review.year_highlights.length - 3} more
-                      </li>
+        {/* Filter toggle */}
+        <div className="flex justify-end">
+          <Button
+            variant={hasActiveFilter ? "default" : "outline"}
+            size="sm"
+            onClick={handleMentionedMeToggle}
+            className={hasActiveFilter ? "bg-blue-600 hover:bg-blue-700" : ""}
+          >
+            <AtSign className="mr-1 h-4 w-4" />
+            Mentioned Me
+          </Button>
+        </div>
+
+        {showNoResults ? (
+          <InlineEmptyState
+            variant="annual_reviews"
+            title={
+              hasActiveFilter
+                ? "No reviews with mentions"
+                : "No past reviews yet"
+            }
+            description={
+              hasActiveFilter
+                ? "No past reviews mention you."
+                : "Complete your first annual review to see it here."
+            }
+            showAction={false}
+          />
+        ) : (
+          <div className="space-y-4">
+            {pastReviews.slice(0, 8).map((review) => (
+              <Card key={review.id} className="bg-white/80">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {formatYear(review.year)}
+                    </span>
+                    {review.completed && (
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Completed
+                      </span>
                     )}
-                  </ul>
-                </div>
-              )}
-              {review.lessons_learned && (
-                <div>
-                  <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                    <Lightbulb className="h-3 w-3 text-yellow-500" />
-                    Lessons
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-sm">
-                    {review.lessons_learned}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {review.next_year_theme && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Compass className="h-3 w-3 text-indigo-500" />
+                        Theme
+                      </p>
+                      <p className="mt-1 font-medium text-indigo-700">
+                        {review.next_year_theme}
+                      </p>
+                    </div>
+                  )}
+                  {review.year_highlights.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Star className="h-3 w-3 text-amber-500" />
+                        Highlights
+                      </p>
+                      <ul className="mt-1 list-inside list-disc text-sm">
+                        {review.year_highlights
+                          .slice(0, 3)
+                          .map((highlight, idx) => (
+                            <li key={idx}>{highlight}</li>
+                          ))}
+                        {review.year_highlights.length > 3 && (
+                          <li className="text-muted-foreground">
+                            +{review.year_highlights.length - 3} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  {review.lessons_learned && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
+                        <Lightbulb className="h-3 w-3 text-yellow-500" />
+                        Lessons
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm">
+                        {review.lessons_learned}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
