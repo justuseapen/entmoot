@@ -110,3 +110,18 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - The system_to_adjust textarea uses onBlur for auto-save (same pattern as other textareas)
   - Rose color scheme (text-rose-600) for the section header to distinguish from other sections
 ---
+
+## 2026-01-20 - US-009: Create Section 4: This Week's Priorities
+- What was implemented: Added Section 4 card with 5 numbered priority inputs and optional quarterly goal linking
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Priorities stored in `weekly_priorities` field as newline-separated "text|goalId" format (e.g., "Write blog post|42\nReview code")
+  - Used native HTML select element (not shadcn Select) for goal dropdown - simpler and avoids SelectTrigger sizing issues
+  - useGoals hook with `time_scale: "quarterly"` filter to fetch only quarterly goals
+  - Goal type must be imported with `import type { Goal }` due to `verbatimModuleSyntax` in tsconfig
+  - Target icon and indigo color theme for priorities section
+  - PriorityRow inline component for cleaner code - each row has number badge, input, dropdown, and optional badge
+  - Goal link changes save immediately (unlike text blur) since dropdown change is a discrete action
+  - Link2 icon from lucide-react used for the linked goal badge
+---

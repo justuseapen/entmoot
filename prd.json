@@ -180,8 +180,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added Section 4 with Target icon and indigo color theme. 5 numbered priority inputs with native select dropdown for goal linking. Linked goals show as badges with Link2 icon. Priorities stored as newline-separated 'text|goalId' format. Auto-saves on blur and on goal change. TypeScript build passes."
     },
     {
       "id": "US-010",
