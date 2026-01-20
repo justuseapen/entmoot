@@ -9,6 +9,8 @@ Started: Tue Jan 20 16:20:13 EST 2026
 - When adding nullable boolean fields intentionally (e.g., for "unanswered" state), rubocop will warn but can be ignored in migrations
 - Polymorphic associations: use `belongs_to :X, polymorphic: true` and `has_many :Y, as: :X, dependent: :destroy`
 - When using `t.references` with custom foreign key, Rails auto-creates index - don't duplicate with `add_index`
+- ActiveSupport::Concern structure: `extend ActiveSupport::Concern`, `included do...end`, `class_methods do...end`
+- Use `saved_change_to_attribute?(field)` in after_save callbacks to check if specific field changed
 
 ---
 
@@ -221,4 +223,22 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - RSpec `contain_exactly` matcher is ideal for testing arrays where order doesn't matter
   - Handle edge cases: nil/blank text, invalid family_id, non-existent usernames all return empty array
   - Service uses class << self pattern with class methods, matching other services in codebase
+---
+
+## 2026-01-20 - US-016: Add concern for mention processing
+- What was implemented: Created Mentionable concern with DRY code for processing @mentions across multiple models
+- Files changed:
+  - backend/app/models/concerns/mentionable.rb (new)
+  - backend/spec/models/concerns/mentionable_spec.rb (new)
+- **Learnings for future iterations:**
+  - ActiveSupport::Concern pattern: use `extend ActiveSupport::Concern`, `included do ... end`, and `class_methods do ... end`
+  - Use `unless reflect_on_association(:mentions)` to avoid re-declaring association if model already has it
+  - Use `saved_change_to_attribute?(field)` to check if a specific field changed after save (not `changed?` which is pre-save)
+  - For rubocop, rename `get_X` accessor methods to just `X` or use verb form like `mentionable_text_fields`
+  - Models access family differently: some have `belongs_to :family`, others get family via `daily_plan.family`
+  - Models access user differently: some have `belongs_to :user`, Goal uses `belongs_to :creator`
+  - Split complex methods into smaller helper methods to satisfy rubocop ABC size limits
+  - Testing concerns: use `before(:all)` with `include(described_class)` and `mentionable_fields` to configure real models for testing
+  - Use `rubocop:disable RSpec/BeforeAfterAll` inline comments to acknowledge intentional use of before(:all)/after(:all)
+  - Pre-existing Goal model failures (saved_change_to_notes?) are from calendar sync feature - unrelated to this work
 ---
