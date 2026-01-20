@@ -268,3 +268,23 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Pre-existing rubocop offenses in Goal (callback order) and DailyPlan (ABC size) are unrelated to Mentionable changes
   - Pre-existing Goal model spec failures (assigned_to?, visible_to?) are from goal assignment feature - unrelated to mentions work
 ---
+
+## 2026-01-20 - US-018: Send notifications when users are mentioned
+- What was implemented: Added notification delivery for @mentions with context-aware body and links
+- Files changed:
+  - backend/app/models/mention.rb (added after_create callback)
+  - backend/app/models/notification.rb (added :mention to enum)
+  - backend/app/services/notification_service.rb (added notify_mention method and helpers)
+  - backend/spec/models/mention_spec.rb (new - 16 test examples)
+  - backend/spec/factories/mentions.rb (new)
+  - backend/spec/factories/notifications.rb (added :mention trait)
+  - backend/spec/models/notification_spec.rb (updated enum test)
+- **Learnings for future iterations:**
+  - Skip self-notifications: check `user_id == mentioned_user_id` in callback before sending
+  - Use hash lookup (STATIC_MENTIONABLE_CONTEXTS) for static context strings to reduce cyclomatic complexity
+  - Split `mention_notification_link` into smaller helpers (`mentionable_link_path`, `review_link_path`) to satisfy rubocop
+  - DailyPlan uses `date` field, not `plan_date` - be careful when building links
+  - MonthlyReview uses `month` field, AnnualReview uses `year` (integer), QuarterlyReview uses `quarter_start_date`
+  - NotificationService class was close to 150 line limit - refactoring required to add new methods
+  - Factory for mentions requires association stubs; use `association :mentionable, factory: :goal`
+---

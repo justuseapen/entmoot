@@ -348,8 +348,8 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added :mention to notification_type enum. Created notify_mention method in NotificationService with context-aware body/links for all 7 mentionable types. Added after_create callback to Mention model that skips self-mentions. 16 new RSpec tests covering all mentionable types and edge cases. 71 total mention-related tests pass."
     },
     {
       "id": "US-019",
