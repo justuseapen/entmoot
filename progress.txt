@@ -7,6 +7,8 @@ Started: Tue Jan 20 16:20:13 EST 2026
 - Use `aria-label` for icon-only interactive elements
 - Migrations are excluded from rubocop via `.rubocop.yml` - no need to worry about method length for migrations
 - When adding nullable boolean fields intentionally (e.g., for "unanswered" state), rubocop will warn but can be ignored in migrations
+- Polymorphic associations: use `belongs_to :X, polymorphic: true` and `has_many :Y, as: :X, dependent: :destroy`
+- When using `t.references` with custom foreign key, Rails auto-creates index - don't duplicate with `add_index`
 
 ---
 
@@ -182,4 +184,27 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Auto-populate only when DB value is null (don't override user's manual input)
   - RefreshCw icon from lucide-react is good for refresh/recalculate buttons
   - HabitTally uses TypeScript index signature: `{ [habitName: string]: number }`
+---
+
+## 2026-01-20 - US-014: Create Mention model and migration
+- What was implemented: Created mentions table and Mention model with polymorphic association, added has_many :mentions to all mentionable models
+- Files changed:
+  - backend/db/migrate/20260120170348_create_mentions.rb (new)
+  - backend/app/models/mention.rb (new)
+  - backend/app/models/user.rb (added mentions and mentions_created associations)
+  - backend/app/models/goal.rb (added has_many :mentions)
+  - backend/app/models/daily_plan.rb (added has_many :mentions)
+  - backend/app/models/top_priority.rb (added has_many :mentions)
+  - backend/app/models/weekly_review.rb (added has_many :mentions)
+  - backend/app/models/monthly_review.rb (added has_many :mentions)
+  - backend/app/models/quarterly_review.rb (added has_many :mentions)
+  - backend/app/models/annual_review.rb (added has_many :mentions)
+  - backend/db/schema.rb (auto-updated)
+- **Learnings for future iterations:**
+  - Polymorphic associations: `belongs_to :mentionable, polymorphic: true` and `has_many :mentions, as: :mentionable`
+  - When using `t.references` with `foreign_key: { to_table: :users }`, Rails auto-creates an index on that column - don't add a duplicate index
+  - User has two mention associations: `mentions_created` (where user_id is the author) and `mentions` (where mentioned_user_id is the recipient)
+  - Rubocop complains about redundant `foreign_key: :user_id` when the foreign key name matches the association name - just omit it
+  - Unique index on [mentionable_type, mentionable_id, user_id, mentioned_user_id, text_field] prevents duplicate mentions in the same field
+  - Pre-existing test failures (Goal model) are due to calendar sync feature referencing missing `notes` column - unrelated to mentions work
 ---
