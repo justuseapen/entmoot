@@ -64,6 +64,9 @@ Rails.application.routes.draw do
         resource :leaderboard, only: [:show]
         resource :activity_feed, only: [:show]
         resources :my_deadlines, only: [:index]
+        resources :mentions, only: [] do
+          get "recent", on: :collection
+        end
       end
 
       # User preferences (scoped to current user via /users/me)

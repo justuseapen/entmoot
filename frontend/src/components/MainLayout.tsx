@@ -19,6 +19,7 @@ import { Breadcrumbs } from "./Breadcrumbs";
 import { MobileNav } from "./MobileNav";
 import { FamilySwitcher } from "./FamilySwitcher";
 import { NotificationBell } from "./NotificationBell";
+import { MentionIndicator } from "./MentionIndicator";
 import { GuidedTour } from "./GuidedTour";
 import { FeedbackReporter, FeedbackButton } from "./FeedbackReporter";
 import { useFeedbackShortcut } from "@/hooks/useFeedback";
@@ -190,6 +191,9 @@ export function MainLayout({ children }: MainLayoutProps) {
             <div className="hidden sm:block">
               <FamilySwitcher />
             </div>
+
+            {/* Mention Indicator */}
+            <MentionIndicator />
 
             {/* Notification Bell */}
             <NotificationBell />
