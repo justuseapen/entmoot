@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Goal < ApplicationRecord
+  include Mentionable
+
   belongs_to :family
   belongs_to :creator, class_name: "User"
   belongs_to :parent, class_name: "Goal", optional: true
@@ -9,7 +11,9 @@ class Goal < ApplicationRecord
   has_many :goal_assignments, dependent: :destroy
   has_many :assignees, through: :goal_assignments, source: :user
   has_many :calendar_sync_mappings, as: :syncable, dependent: :destroy
-  has_many :mentions, as: :mentionable, dependent: :destroy
+
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :title, :description
 
   enum :time_scale, {
     daily: 0,

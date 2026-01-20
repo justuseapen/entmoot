@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class MonthlyReview < ApplicationRecord
+  include Mentionable
+
   belongs_to :user
   belongs_to :family
 
-  has_many :mentions, as: :mentionable, dependent: :destroy
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :lessons_learned
 
   validates :month, presence: true
   validates :month, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_month }

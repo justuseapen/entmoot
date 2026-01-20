@@ -6,6 +6,45 @@ RSpec.describe WeeklyReview do
   describe "associations" do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:family) }
+    it { is_expected.to have_many(:mentions).dependent(:destroy) }
+  end
+
+  describe "Mentionable concern" do
+    let(:family) { create(:family) }
+    let(:user) { create(:user, name: "Alice Smith") }
+    let(:bob) { create(:user, name: "Bob Jones") }
+
+    before do
+      create(:family_membership, family: family, user: user, role: :admin)
+      create(:family_membership, family: family, user: bob, role: :adult)
+    end
+
+    it "defines all template mentionable_fields" do
+      expected_fields = %i[wins_shipped losses_friction metrics_notes system_to_adjust weekly_priorities kill_list]
+      expect(described_class.mentionable_text_fields).to eq(expected_fields)
+    end
+
+    it "creates mentions when saving with @mentions in wins_shipped" do
+      review = create(:weekly_review, user: user, family: family, wins_shipped: "Shipped feature with @bob")
+
+      expect(review.mentions.count).to eq(1)
+      expect(review.mentions.first.mentioned_user).to eq(bob)
+      expect(review.mentions.first.text_field).to eq("wins_shipped")
+    end
+
+    it "creates mentions when saving with @mentions in losses_friction" do
+      review = create(:weekly_review, user: user, family: family, losses_friction: "Blocked by sync with @bob")
+
+      expect(review.mentions.count).to eq(1)
+      expect(review.mentions.first.text_field).to eq("losses_friction")
+    end
+
+    it "creates mentions when saving with @mentions in weekly_priorities" do
+      review = create(:weekly_review, user: user, family: family, weekly_priorities: "1. Help @bob with docs")
+
+      expect(review.mentions.count).to eq(1)
+      expect(review.mentions.first.text_field).to eq("weekly_priorities")
+    end
   end
 
   describe "validations" do

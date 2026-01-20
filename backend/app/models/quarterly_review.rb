@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class QuarterlyReview < ApplicationRecord
+  include Mentionable
+
   belongs_to :user
   belongs_to :family
 
-  has_many :mentions, as: :mentionable, dependent: :destroy
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :insights
 
   validates :quarter_start_date, presence: true
   validates :quarter_start_date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_quarter }

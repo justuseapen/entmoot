@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class WeeklyReview < ApplicationRecord
+  include Mentionable
+
   belongs_to :user
   belongs_to :family
 
-  has_many :mentions, as: :mentionable, dependent: :destroy
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :wins_shipped, :losses_friction, :metrics_notes, :system_to_adjust, :weekly_priorities, :kill_list
 
   validates :week_start_date, presence: true
   validates :week_start_date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_week }
