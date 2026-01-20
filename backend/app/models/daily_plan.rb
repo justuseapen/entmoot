@@ -8,6 +8,7 @@ class DailyPlan < ApplicationRecord
   has_many :top_priorities, -> { order(:priority_order) }, dependent: :destroy, inverse_of: :daily_plan
   has_many :reflections, dependent: :destroy
   has_many :habit_completions, dependent: :destroy
+  has_many :mentions, as: :mentionable, dependent: :destroy
 
   validates :date, presence: true
   validates :date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_date }

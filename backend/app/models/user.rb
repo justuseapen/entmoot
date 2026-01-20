@@ -28,6 +28,10 @@ class User < ApplicationRecord
   has_many :device_tokens, dependent: :destroy
   has_many :outreach_histories, dependent: :destroy
   has_many :habits, dependent: :destroy
+  has_one :google_calendar_credential, dependent: :destroy
+  has_many :calendar_sync_mappings, dependent: :destroy
+  has_many :mentions_created, class_name: "Mention", dependent: :destroy, inverse_of: :user
+  has_many :mentions, foreign_key: :mentioned_user_id, dependent: :destroy, inverse_of: :mentioned_user
 
   validates :name, presence: true
 
@@ -67,5 +71,9 @@ class User < ApplicationRecord
     return false if first_action_completed?(action_type)
 
     update(first_actions: (first_actions || {}).merge(action_type.to_s => Time.current.iso8601))
+  end
+
+  def calendar_sync_enabled?
+    google_calendar_credential&.active?
   end
 end

@@ -4,6 +4,8 @@ class AnnualReview < ApplicationRecord
   belongs_to :user
   belongs_to :family
 
+  has_many :mentions, as: :mentionable, dependent: :destroy
+
   validates :year, presence: true
   validates :year, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_year }
 

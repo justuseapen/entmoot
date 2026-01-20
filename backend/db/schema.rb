@@ -270,6 +270,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_20_212323) do
     t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
   end
 
+  create_table "mentions", force: :cascade do |t|
+    t.string "mentionable_type", null: false
+    t.bigint "mentionable_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "mentioned_user_id", null: false
+    t.string "text_field", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["mentionable_type", "mentionable_id", "user_id", "mentioned_user_id", "text_field"], name: "index_mentions_uniqueness", unique: true
+    t.index ["mentionable_type", "mentionable_id"], name: "index_mentions_on_mentionable_type_and_mentionable_id"
+    t.index ["mentioned_user_id"], name: "index_mentions_on_mentioned_user_id"
+    t.index ["user_id"], name: "index_mentions_on_user_id"
+  end
+
   create_table "monthly_reviews", force: :cascade do |t|
     t.date "month", null: false
     t.bigint "user_id", null: false
@@ -564,6 +578,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_20_212323) do
   add_foreign_key "habits", "users"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "mentions", "users"
+  add_foreign_key "mentions", "users", column: "mentioned_user_id"
   add_foreign_key "monthly_reviews", "families"
   add_foreign_key "monthly_reviews", "users"
   add_foreign_key "notification_preferences", "users"

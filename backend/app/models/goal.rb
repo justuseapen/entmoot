@@ -8,6 +8,8 @@ class Goal < ApplicationRecord
   has_many :children, class_name: "Goal", foreign_key: :parent_id, dependent: :nullify, inverse_of: :parent
   has_many :goal_assignments, dependent: :destroy
   has_many :assignees, through: :goal_assignments, source: :user
+  has_many :calendar_sync_mappings, as: :syncable, dependent: :destroy
+  has_many :mentions, as: :mentionable, dependent: :destroy
 
   enum :time_scale, {
     daily: 0,
@@ -69,6 +71,48 @@ class Goal < ApplicationRecord
       user.member_of?(family)
     else
       false
+    end
+  end
+
+  # Returns all user IDs that should have this goal synced to their calendar
+  def user_ids
+    assignees.pluck(:id)
+  end
+
+  # Calendar sync callbacks
+  after_commit :schedule_calendar_sync, on: %i[create update], if: :should_sync_to_calendar?
+  after_destroy :remove_from_calendars
+
+  private
+
+  def should_sync_to_calendar?
+    # Only sync if relevant attributes changed
+    saved_change_to_title? ||
+      saved_change_to_due_date? ||
+      saved_change_to_status? ||
+      saved_change_to_description? ||
+      saved_change_to_notes?
+  end
+
+  def schedule_calendar_sync
+    assignees.each do |user|
+      next unless user.calendar_sync_enabled?
+
+      CalendarSyncJob.perform_later(
+        user.id,
+        syncable_type: "Goal",
+        syncable_id: id
+      )
+    end
+  end
+
+  def remove_from_calendars
+    calendar_sync_mappings.each do |mapping|
+      CalendarRemoveEventJob.perform_later(
+        mapping.user_id,
+        mapping.google_event_id,
+        mapping.google_calendar_id
+      )
     end
   end
 end

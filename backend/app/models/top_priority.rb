@@ -6,6 +6,8 @@ class TopPriority < ApplicationRecord
   belongs_to :daily_plan
   belongs_to :goal, optional: true
 
+  has_many :mentions, as: :mentionable, dependent: :destroy
+
   validates :title, presence: true
   validates :priority_order, presence: true,
                              numericality: { only_integer: true, in: 1..MAX_PRIORITIES }
