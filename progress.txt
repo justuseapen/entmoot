@@ -82,3 +82,17 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Textarea components accept standard `onChange` (not `onCheckedChange` like Checkbox)
   - State variables follow naming pattern: camelCase for React state (winsShipped), snake_case for API fields (wins_shipped)
 ---
+
+## 2026-01-20 - US-007: Create Section 2: Metrics Snapshot
+- What was implemented: Added Section 2 card with metrics input pairs, percentage display, meals prepped toggle, and notes textarea
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Used inline MetricRow component for cleaner code - each row has completed/planned inputs and percentage display
+  - parseNumberInput helper converts empty string to null for proper API handling
+  - calcPercentage helper returns null if either completed or planned is null (so percentage is only shown when both values exist)
+  - For Y/N toggles, use paired Buttons with conditional styling instead of Checkbox
+  - Color-coded percentages: green ≥80%, yellow ≥50%, red <50%
+  - The Activity icon from lucide-react fits the metrics/tracking theme
+  - Type MetricsNumberField was defined inline using union type for type safety on blur handlers
+---
