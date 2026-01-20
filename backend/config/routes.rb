@@ -38,7 +38,7 @@ Rails.application.routes.draw do
         resource :goal_import, only: [:create] do
           get :status, on: :member
         end
-        resources :daily_plans, only: %i[show update] do
+        resources :daily_plans, only: %i[index show update] do
           get "today", on: :collection
         end
         resources :habits, only: %i[index create update destroy] do
@@ -100,6 +100,16 @@ Rails.application.routes.draw do
         resource :tips, only: [:show] do
           post "mark_shown", on: :member
           patch "toggle", on: :member
+        end
+        # Google Calendar integration
+        resource :google_calendar, only: %i[show destroy], controller: "google_calendar" do
+          get "auth_url", on: :member
+          get "callback", on: :member
+          get "calendars", on: :member
+          post "connect", on: :member
+          post "sync", on: :member
+          post "pause", on: :member
+          post "resume", on: :member
         end
       end
 

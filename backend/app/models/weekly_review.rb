@@ -13,6 +13,9 @@ class WeeklyReview < ApplicationRecord
   validates :week_start_date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_week }
 
   scope :for_week, ->(date) { where(week_start_date: date) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   # Find or create the weekly review for the current week
   def self.find_or_create_for_current_week(user:, family:)

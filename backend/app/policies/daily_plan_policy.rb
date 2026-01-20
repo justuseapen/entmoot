@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class DailyPlanPolicy < ApplicationPolicy
+  def index?
+    user.member_of?(record)
+  end
+
   def today?
     user.member_of?(record)
   end

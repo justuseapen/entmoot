@@ -8,6 +8,76 @@ RSpec.describe "Api::V1::DailyPlans" do
 
   before { create(:family_membership, :adult, family: family, user: user) }
 
+  describe "GET /api/v1/families/:family_id/daily_plans" do
+    context "when user is authenticated and a family member" do
+      it "returns the user's daily plans" do
+        plan1 = create(:daily_plan, user: user, family: family, date: Date.current)
+        plan2 = create(:daily_plan, user: user, family: family, date: Date.current - 1.day)
+
+        get "/api/v1/families/#{family.id}/daily_plans", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["daily_plans"].length).to eq(2)
+        expect(json_response["daily_plans"].pluck("id")).to contain_exactly(plan1.id, plan2.id)
+      end
+
+      it "returns plans ordered by date descending" do
+        create(:daily_plan, user: user, family: family, date: Date.current - 2.days)
+        create(:daily_plan, user: user, family: family, date: Date.current - 1.day)
+        create(:daily_plan, user: user, family: family, date: Date.current)
+
+        get "/api/v1/families/#{family.id}/daily_plans", headers: auth_headers(user)
+
+        dates = json_response["daily_plans"].pluck("date")
+        expect(dates).to eq(dates.sort.reverse)
+      end
+
+      it "filters by mentioned_by" do
+        mentioned_user = create(:user)
+        create(:family_membership, :adult, family: family, user: mentioned_user)
+
+        mentioned_plan = create(:daily_plan, user: user, family: family, date: Date.current)
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_plan, text_field: "intention")
+        create(:daily_plan, user: user, family: family, date: Date.current - 1.day)
+
+        get "/api/v1/families/#{family.id}/daily_plans",
+            params: { mentioned_by: mentioned_user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["daily_plans"].length).to eq(1)
+        expect(json_response["daily_plans"].first["id"]).to eq(mentioned_plan.id)
+      end
+
+      it "returns empty array when no mentions match" do
+        create(:daily_plan, user: user, family: family, date: Date.current)
+
+        get "/api/v1/families/#{family.id}/daily_plans",
+            params: { mentioned_by: user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["daily_plans"]).to eq([])
+      end
+    end
+
+    context "when user is not a family member" do
+      let(:other_family) { create(:family) }
+
+      it "returns forbidden" do
+        get "/api/v1/families/#{other_family.id}/daily_plans", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when not authenticated" do
+      it "returns unauthorized" do
+        get "/api/v1/families/#{family.id}/daily_plans"
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
   describe "GET /api/v1/families/:family_id/daily_plans/today" do
     context "when user is authenticated and a family member" do
       it "creates a new daily plan if none exists" do

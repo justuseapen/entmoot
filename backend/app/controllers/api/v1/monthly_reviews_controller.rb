@@ -11,6 +11,7 @@ module Api
 
         @reviews = policy_scope(MonthlyReview)
                    .where(family: @family, user: current_user)
+                   .mentioned_by(params[:mentioned_by])
                    .order(month: :desc)
 
         render json: { monthly_reviews: @reviews.map { |r| monthly_review_response(r, include_metrics: false) } }

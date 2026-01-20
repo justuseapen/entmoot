@@ -24,6 +24,7 @@ module Api
 
         @reviews = policy_scope(WeeklyReview)
                    .where(family: @family, user: current_user)
+                   .mentioned_by(params[:mentioned_by])
                    .order(week_start_date: :desc)
 
         render json: { weekly_reviews: @reviews.map { |r| weekly_review_response(r, include_metrics: false) } }

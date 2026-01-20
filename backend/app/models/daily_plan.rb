@@ -34,6 +34,9 @@ class DailyPlan < ApplicationRecord
   end
 
   scope :for_date, ->(date) { where(date: date) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   def self.find_or_create_for_today(user:, family:)
     today = Time.find_zone(family.timezone)&.today || Time.zone.today

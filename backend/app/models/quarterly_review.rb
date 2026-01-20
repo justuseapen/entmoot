@@ -13,6 +13,9 @@ class QuarterlyReview < ApplicationRecord
   validates :quarter_start_date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_quarter }
 
   scope :for_quarter, ->(date) { where(quarter_start_date: date) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   # Quarter start dates: Q1=Jan 1, Q2=Apr 1, Q3=Jul 1, Q4=Oct 1
   QUARTER_START_MONTHS = [1, 4, 7, 10].freeze

@@ -13,6 +13,9 @@ class MonthlyReview < ApplicationRecord
   validates :month, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_month }
 
   scope :for_month, ->(date) { where(month: date) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   # Find or create the monthly review for the current month
   def self.find_or_create_for_current_month(user:, family:)

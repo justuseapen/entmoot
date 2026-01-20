@@ -52,6 +52,32 @@ RSpec.describe "Api::V1::WeeklyReviews" do
 
         expect(json_response["weekly_reviews"].first).not_to have_key("metrics")
       end
+
+      it "filters by mentioned_by" do
+        mentioned_user = create(:user)
+        create(:family_membership, :adult, family: family, user: mentioned_user)
+
+        mentioned_review = create(:weekly_review, user: user, family: family, week_start_date: Date.current.beginning_of_week)
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "wins_shipped")
+        create(:weekly_review, :last_week, user: user, family: family)
+
+        get "/api/v1/families/#{family.id}/weekly_reviews",
+            params: { mentioned_by: mentioned_user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["weekly_reviews"].length).to eq(1)
+        expect(json_response["weekly_reviews"].first["id"]).to eq(mentioned_review.id)
+      end
+
+      it "returns empty array when no mentions match" do
+        create(:weekly_review, user: user, family: family)
+
+        get "/api/v1/families/#{family.id}/weekly_reviews",
+            params: { mentioned_by: user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["weekly_reviews"]).to eq([])
+      end
     end
 
     context "when user is not a family member" do
