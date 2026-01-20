@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_20_212323) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -70,6 +70,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
     t.datetime "updated_at", null: false
     t.index ["category"], name: "index_badges_on_category"
     t.index ["name"], name: "index_badges_on_name", unique: true
+  end
+
+  create_table "calendar_sync_mappings", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "syncable_type", null: false
+    t.bigint "syncable_id", null: false
+    t.string "google_event_id", null: false
+    t.string "google_calendar_id", null: false
+    t.datetime "last_synced_at"
+    t.string "etag"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "google_event_id"], name: "idx_sync_mapping_event", unique: true
+    t.index ["user_id", "syncable_type", "syncable_id"], name: "idx_sync_mapping_unique", unique: true
+    t.index ["user_id"], name: "index_calendar_sync_mappings_on_user_id"
   end
 
   create_table "daily_plans", force: :cascade do |t|
@@ -191,6 +206,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
     t.index ["family_id", "visibility"], name: "index_goals_on_family_id_and_visibility"
     t.index ["family_id"], name: "index_goals_on_family_id"
     t.index ["parent_id"], name: "index_goals_on_parent_id"
+  end
+
+  create_table "google_calendar_credentials", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "access_token", null: false
+    t.text "refresh_token", null: false
+    t.datetime "token_expires_at", null: false
+    t.string "calendar_id", null: false
+    t.string "calendar_name"
+    t.string "google_email"
+    t.datetime "last_sync_at"
+    t.string "sync_status", default: "active", null: false
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_google_calendar_credentials_on_user_id", unique: true
   end
 
   create_table "habit_completions", force: :cascade do |t|
@@ -477,6 +508,29 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
     t.boolean "completed", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "source_review_completed", default: false, null: false
+    t.text "wins_shipped"
+    t.text "losses_friction"
+    t.integer "workouts_completed"
+    t.integer "workouts_planned"
+    t.integer "walks_completed"
+    t.integer "walks_planned", default: 7
+    t.integer "writing_sessions_completed"
+    t.integer "writing_sessions_planned"
+    t.integer "house_resets_completed"
+    t.integer "house_resets_planned", default: 7
+    t.boolean "meals_prepped_held"
+    t.text "metrics_notes"
+    t.boolean "daily_focus_used_every_day"
+    t.boolean "weekly_priorities_clear"
+    t.boolean "cleaning_system_held"
+    t.boolean "training_volume_sustainable"
+    t.text "system_to_adjust"
+    t.text "weekly_priorities"
+    t.text "kill_list"
+    t.boolean "workouts_blocked", default: false, null: false
+    t.boolean "monday_top_3_decided", default: false, null: false
+    t.boolean "monday_focus_card_prepped", default: false, null: false
     t.index ["family_id"], name: "index_weekly_reviews_on_family_id"
     t.index ["user_id", "family_id", "week_start_date"], name: "index_weekly_reviews_unique_week", unique: true
     t.index ["user_id"], name: "index_weekly_reviews_on_user_id"
@@ -486,6 +540,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "annual_reviews", "families"
   add_foreign_key "annual_reviews", "users"
+  add_foreign_key "calendar_sync_mappings", "users"
   add_foreign_key "daily_plans", "families"
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
@@ -502,6 +557,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_15_212325) do
   add_foreign_key "goals", "families"
   add_foreign_key "goals", "goals", column: "parent_id"
   add_foreign_key "goals", "users", column: "creator_id"
+  add_foreign_key "google_calendar_credentials", "users"
   add_foreign_key "habit_completions", "daily_plans"
   add_foreign_key "habit_completions", "habits"
   add_foreign_key "habits", "families"
