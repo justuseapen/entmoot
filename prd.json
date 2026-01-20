@@ -377,8 +377,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added Mention interface to api.ts with polymorphic mentionable fields. Added mentions?: Mention[] to Goal, DailyPlan, WeeklyReview, MonthlyReview, QuarterlyReview, AnnualReview types. Added XxxFilters interfaces with mentioned_by?: number to all content lib files. Updated API functions to pass mentioned_by param. Updated hooks (useGoals, useDailyPlans, useWeeklyReviews, useMonthlyReviews, useQuarterlyReviews, useAnnualReviews) to accept filters. TypeScript build passes."
     },
     {
       "id": "US-021",

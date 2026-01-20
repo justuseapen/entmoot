@@ -318,3 +318,27 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Scope uses `.joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct` - distinct prevents duplicates when multiple mentions exist
   - Pre-existing rubocop offenses (callback order, ABC size) and goal spec failures (calendar sync) are unrelated to this work
 ---
+
+## 2026-01-20 - US-020: Update frontend types for mentions
+- What was implemented: Added TypeScript types and hooks support for mentions and mentionedBy filtering
+- Files changed:
+  - frontend/src/lib/api.ts (added Mention interface)
+  - frontend/src/lib/goals.ts (added mentions to Goal, mentioned_by to GoalFilters, updated getGoals)
+  - frontend/src/lib/dailyPlans.ts (added mentions to DailyPlan, DailyPlanFilters, getDailyPlans function)
+  - frontend/src/lib/weeklyReviews.ts (added mentions to WeeklyReview, WeeklyReviewFilters, updated getWeeklyReviews)
+  - frontend/src/lib/monthlyReviews.ts (added mentions to MonthlyReview, MonthlyReviewFilters, updated getMonthlyReviews)
+  - frontend/src/lib/quarterlyReviews.ts (added mentions to QuarterlyReview, QuarterlyReviewFilters, updated getQuarterlyReviews)
+  - frontend/src/lib/annualReviews.ts (added mentions to AnnualReview, AnnualReviewFilters, updated getAnnualReviews)
+  - frontend/src/hooks/useDailyPlans.ts (added useDailyPlans hook with filters, updated query keys)
+  - frontend/src/hooks/useWeeklyReviews.ts (added filters param to useWeeklyReviews, updated query keys)
+  - frontend/src/hooks/useMonthlyReviews.ts (added filters param to useMonthlyReviews, updated query keys)
+  - frontend/src/hooks/useQuarterlyReviews.ts (added filters param to useQuarterlyReviews, updated query keys)
+  - frontend/src/hooks/useAnnualReviews.ts (added filters param to useAnnualReviews, updated query keys)
+- **Learnings for future iterations:**
+  - Mention type uses snake_case field names to match API response (mentionable_type, mentioned_user_id, etc.)
+  - mentions array is optional (`mentions?: Mention[]`) since it may not be included in all API responses
+  - Filter types (XxxFilters) follow the pattern: `{ mentioned_by?: number }`
+  - Query key factories need to include filters in the key array for proper cache invalidation: `list: (familyId, filters?) => [..., filters]`
+  - useGoals already accepted GoalFilters, so no hook changes needed there - just added mentioned_by to GoalFilters type
+  - Pre-existing ESLint errors (react-hooks/set-state-in-effect, react-hooks/incompatible-library) are unrelated to this work
+---
