@@ -256,8 +256,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added habit_tally method to WeeklyReview model that counts habit completions by name. Includes intelligent matching for workout/walk/writing/house reset patterns. Frontend auto-populates null metric fields on load and provides 'Refresh from Daily Plans' button in Section 2. TypeScript build passes."
     },
     {
       "id": "US-014",

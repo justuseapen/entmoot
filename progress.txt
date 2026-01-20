@@ -164,3 +164,22 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Circle and CheckCircle icons from lucide-react used for unchecked/checked states
   - handleMarkAsComplete callback sets completed: true on the review, similar to handleComplete but without legacy field handling
 ---
+
+## 2026-01-20 - US-013: Auto-populate metrics from daily plans
+- What was implemented: Added habit_tally method to backend and auto-populate logic to frontend
+- Files changed:
+  - backend/app/models/weekly_review.rb (added habit_tally method)
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (include habit_tally in response)
+  - frontend/src/lib/weeklyReviews.ts (added HabitTally type)
+  - frontend/src/pages/WeeklyReview.tsx (added auto-populate and refresh button)
+- **Learnings for future iterations:**
+  - Habit names are user-defined, so use case-insensitive substring matching to map habits to metric categories
+  - Pattern: "workout"/"exercise"/"gym"/"training" -> workouts_completed
+  - Pattern: "walk"/"steps"/"cardio" -> walks_completed
+  - Pattern: "writ"/"journal"/"blog" -> writing_sessions_completed
+  - Pattern: "house"/"clean"/"tidy"/"reset" -> house_resets_completed
+  - Use find_each instead of each when iterating over ActiveRecord collections (rubocop Rails/FindEach)
+  - Auto-populate only when DB value is null (don't override user's manual input)
+  - RefreshCw icon from lucide-react is good for refresh/recalculate buttons
+  - HabitTally uses TypeScript index signature: `{ [habitName: string]: number }`
+---
