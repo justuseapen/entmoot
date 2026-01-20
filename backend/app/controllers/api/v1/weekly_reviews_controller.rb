@@ -100,7 +100,14 @@ module Api
       def weekly_review_response(review, include_metrics: false)
         response = review_attributes(review)
         response[:metrics] = review.metrics if include_metrics
+        response[:daily_plans] = daily_plans_summary(review)
         response
+      end
+
+      def daily_plans_summary(review)
+        review.daily_plans.map do |plan|
+          { id: plan.id, date: plan.date }
+        end
       end
 
       def review_attributes(review)

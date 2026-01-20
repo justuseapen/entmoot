@@ -21,6 +21,12 @@ export interface WeeklyReviewMetrics {
   goal_progress: GoalProgressMetrics;
 }
 
+// Daily plan summary for weekly review
+export interface DailyPlanSummary {
+  id: number;
+  date: string;
+}
+
 export interface WeeklyReview {
   id: number;
   week_start_date: string;
@@ -64,6 +70,7 @@ export interface WeeklyReview {
   monday_focus_card_prepped: boolean;
   // Computed/metadata
   metrics?: WeeklyReviewMetrics;
+  daily_plans: DailyPlanSummary[];
   created_at: string;
   updated_at: string;
 }

@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +17,7 @@ import {
   formatWeekRange,
   getWeekNumber,
   WEEKLY_REVIEW_STEPS,
+  type DailyPlanSummary,
 } from "@/lib/weeklyReviews";
 import {
   BarChart3,
@@ -33,6 +36,8 @@ import {
   ListChecks,
   Plus,
   X,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { InlineEmptyState } from "@/components/EmptyState";
@@ -55,6 +60,7 @@ export function WeeklyReview() {
   // Local state
   const [currentStep, setCurrentStep] = useState(0);
   const [showPastReviews, setShowPastReviews] = useState(false);
+  const [sourceReviewCompleted, setSourceReviewCompleted] = useState(false);
   const [wins, setWins] = useState<string[]>([""]);
   const [challenges, setChallenges] = useState<string[]>([""]);
   const [lessonsLearned, setLessonsLearned] = useState("");
@@ -65,6 +71,9 @@ export function WeeklyReview() {
   // Load existing review data
   useEffect(() => {
     if (currentReview) {
+      // Section 0: Source Review
+      setSourceReviewCompleted(currentReview.source_review_completed || false);
+      // Legacy fields
       if (currentReview.wins?.length > 0) {
         setWins([...currentReview.wins, ""]);
       }
@@ -81,6 +90,25 @@ export function WeeklyReview() {
       }
     }
   }, [currentReview]);
+
+  // Handle source review checkbox change (auto-save)
+  const handleSourceReviewChange = useCallback(
+    async (checked: boolean) => {
+      if (!currentReview) return;
+      setSourceReviewCompleted(checked);
+      try {
+        await updateReview.mutateAsync({
+          reviewId: currentReview.id,
+          data: { source_review_completed: checked },
+        });
+      } catch (error) {
+        console.error("Failed to update source review:", error);
+        // Revert on error
+        setSourceReviewCompleted(!checked);
+      }
+    },
+    [currentReview, updateReview]
+  );
 
   // Handle array item changes
   const handleArrayItemChange = (
@@ -218,6 +246,118 @@ export function WeeklyReview() {
       default:
         return <ListChecks className="h-5 w-5" />;
     }
+  };
+
+  // Generate all dates for the week starting from week_start_date
+  const getWeekDates = (weekStartDate: string): Date[] => {
+    const dates: Date[] = [];
+    const start = new Date(weekStartDate);
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  };
+
+  // Format date for display (e.g., "Mon Jan 20")
+  const formatDayDate = (date: Date): string => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Check if a daily plan exists for a given date
+  const getDailyPlanForDate = (
+    date: Date,
+    plans: DailyPlanSummary[]
+  ): DailyPlanSummary | undefined => {
+    const dateStr = date.toISOString().split("T")[0];
+    return plans.find((p) => p.date === dateStr);
+  };
+
+  // Render Section 0: Source Review
+  const renderSourceReviewSection = () => {
+    if (!currentReview) return null;
+
+    const weekDates = getWeekDates(currentReview.week_start_date);
+    const dailyPlans = currentReview.daily_plans || [];
+
+    return (
+      <Card className="mb-6 border-amber-200 bg-amber-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg text-amber-800">
+            <FileText className="h-5 w-5" />
+            Section 0: Source Review (Non-negotiable)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-amber-900/80">
+            Before writing anything below: Lay out all Daily Focus Cards from
+            the week (or open the daily notes). Do not rely on memory. Tally
+            first, reflect second.
+          </p>
+
+          {/* Daily plan links */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+            {weekDates.map((date) => {
+              const plan = getDailyPlanForDate(date, dailyPlans);
+              const isToday = date.toDateString() === new Date().toDateString();
+
+              if (plan) {
+                return (
+                  <Link
+                    key={date.toISOString()}
+                    to={`/families/${familyId}/planner?date=${plan.date}`}
+                    className={`flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors hover:bg-amber-100 ${
+                      isToday
+                        ? "border-amber-400 bg-amber-100"
+                        : "border-amber-200 bg-white"
+                    }`}
+                  >
+                    <span>{formatDayDate(date)}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </Link>
+                );
+              }
+
+              return (
+                <div
+                  key={date.toISOString()}
+                  className={`flex items-center justify-center rounded-lg border border-dashed px-3 py-2 text-xs ${
+                    isToday
+                      ? "border-amber-300 bg-amber-50 text-amber-600"
+                      : "border-gray-300 text-gray-400"
+                  }`}
+                >
+                  {formatDayDate(date)}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Checkbox */}
+          <div className="flex items-center space-x-3 rounded-lg bg-white p-3">
+            <Checkbox
+              id="source-review-completed"
+              checked={sourceReviewCompleted}
+              onCheckedChange={(checked) =>
+                handleSourceReviewChange(checked === true)
+              }
+              className="h-5 w-5"
+            />
+            <Label
+              htmlFor="source-review-completed"
+              className="cursor-pointer text-sm font-medium"
+            >
+              I have reviewed all my Daily Focus Cards for this week
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
+    );
   };
 
   // Render past reviews
@@ -617,6 +757,9 @@ export function WeeklyReview() {
 
         {/* Tip for first weekly review */}
         <StandaloneTip tipType="first_weekly_review" className="mb-4" />
+
+        {/* Section 0: Source Review */}
+        {renderSourceReviewSection()}
 
         {/* Progress indicator */}
         <div className="mb-6">
