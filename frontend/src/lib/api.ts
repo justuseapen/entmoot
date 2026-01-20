@@ -1,6 +1,17 @@
 import { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "./errors";
 
+// Mention type - represents an @mention of a user in content
+export interface Mention {
+  id: number;
+  mentionable_type: string;
+  mentionable_id: number;
+  user_id: number;
+  mentioned_user_id: number;
+  text_field: string;
+  created_at: string;
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

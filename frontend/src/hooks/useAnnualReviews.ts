@@ -7,13 +7,15 @@ import {
   updateAnnualReview,
   getAnnualReviewMetrics,
   type UpdateAnnualReviewData,
+  type AnnualReviewFilters,
 } from "@/lib/annualReviews";
 
 // Query keys
 export const annualReviewKeys = {
   all: ["annualReviews"] as const,
   lists: () => [...annualReviewKeys.all, "list"] as const,
-  list: (familyId: number) => [...annualReviewKeys.lists(), familyId] as const,
+  list: (familyId: number, filters?: AnnualReviewFilters) =>
+    [...annualReviewKeys.lists(), familyId, filters] as const,
   current: (familyId: number) =>
     [...annualReviewKeys.all, "current", familyId] as const,
   details: () => [...annualReviewKeys.all, "detail"] as const,
@@ -34,11 +36,14 @@ export function useCurrentAnnualReview(familyId: number) {
 }
 
 // Get all annual reviews for the user
-export function useAnnualReviews(familyId: number) {
+export function useAnnualReviews(
+  familyId: number,
+  filters?: AnnualReviewFilters
+) {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: annualReviewKeys.list(familyId),
-    queryFn: () => getAnnualReviews(familyId),
+    queryKey: annualReviewKeys.list(familyId, filters),
+    queryFn: () => getAnnualReviews(familyId, filters),
     enabled: isAuthenticated && !!familyId,
   });
 }

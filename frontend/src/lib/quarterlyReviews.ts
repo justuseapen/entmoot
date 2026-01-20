@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type Mention } from "@/lib/api";
 
 // Types
 export interface GoalCompletionMetrics {
@@ -36,8 +36,14 @@ export interface QuarterlyReview {
   next_quarter_objectives: string[];
   completed: boolean;
   metrics?: QuarterlyReviewMetrics;
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
+}
+
+// Filter params for listing quarterly reviews
+export interface QuarterlyReviewFilters {
+  mentioned_by?: number;
 }
 
 export interface QuarterlyReviewsResponse {
@@ -67,11 +73,17 @@ export async function getCurrentQuarterlyReview(
 }
 
 export async function getQuarterlyReviews(
-  familyId: number
+  familyId: number,
+  filters?: QuarterlyReviewFilters
 ): Promise<QuarterlyReviewsResponse> {
-  return apiFetch<QuarterlyReviewsResponse>(
-    `/families/${familyId}/quarterly_reviews`
-  );
+  const params = new URLSearchParams();
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
+
+  const queryString = params.toString();
+  const url = `/families/${familyId}/quarterly_reviews${queryString ? `?${queryString}` : ""}`;
+
+  return apiFetch<QuarterlyReviewsResponse>(url);
 }
 
 export async function getQuarterlyReview(

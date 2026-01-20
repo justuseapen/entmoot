@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { apiFetch, type Mention } from "./api";
 
 // Types for goal summary in daily plan responses
 export interface GoalSummary {
@@ -84,8 +84,14 @@ export interface DailyPlan {
   top_priorities: TopPriority[];
   habit_completions: HabitCompletion[];
   yesterday_incomplete_tasks: DailyTask[];
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
+}
+
+// Filter params for listing daily plans
+export interface DailyPlanFilters {
+  mentioned_by?: number;
 }
 
 // Task attributes for creating/updating
@@ -120,6 +126,20 @@ export interface UpdateDailyPlanData {
 }
 
 // API functions
+export async function getDailyPlans(
+  familyId: number,
+  filters?: DailyPlanFilters
+): Promise<{ daily_plans: DailyPlan[] }> {
+  const params = new URLSearchParams();
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
+
+  const queryString = params.toString();
+  const url = `/families/${familyId}/daily_plans${queryString ? `?${queryString}` : ""}`;
+
+  return apiFetch<{ daily_plans: DailyPlan[] }>(url);
+}
+
 export async function getTodaysPlan(familyId: number): Promise<DailyPlan> {
   return apiFetch<DailyPlan>(`/families/${familyId}/daily_plans/today`);
 }

@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type Mention } from "@/lib/api";
 
 // Types
 export interface TaskCompletionMetrics {
@@ -77,8 +77,14 @@ export interface WeeklyReview {
   metrics?: WeeklyReviewMetrics;
   daily_plans: DailyPlanSummary[];
   habit_tally?: HabitTally;
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
+}
+
+// Filter params for listing weekly reviews
+export interface WeeklyReviewFilters {
+  mentioned_by?: number;
 }
 
 export interface WeeklyReviewsResponse {
@@ -137,11 +143,17 @@ export async function getCurrentWeeklyReview(
 }
 
 export async function getWeeklyReviews(
-  familyId: number
+  familyId: number,
+  filters?: WeeklyReviewFilters
 ): Promise<WeeklyReviewsResponse> {
-  return apiFetch<WeeklyReviewsResponse>(
-    `/families/${familyId}/weekly_reviews`
-  );
+  const params = new URLSearchParams();
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
+
+  const queryString = params.toString();
+  const url = `/families/${familyId}/weekly_reviews${queryString ? `?${queryString}` : ""}`;
+
+  return apiFetch<WeeklyReviewsResponse>(url);
 }
 
 export async function getWeeklyReview(

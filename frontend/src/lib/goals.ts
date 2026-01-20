@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { apiFetch, type Mention } from "./api";
 
 // User type for goal responses
 export interface GoalUser {
@@ -22,6 +22,7 @@ export interface Goal {
   family_id: number;
   creator: GoalUser;
   assignees: GoalUser[];
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
   // SMART fields (included in detail view)
@@ -83,6 +84,7 @@ export interface GoalFilters {
   status?: GoalStatus;
   visibility?: GoalVisibility;
   assignee_id?: number;
+  mentioned_by?: number;
 }
 
 // API functions
@@ -96,6 +98,8 @@ export async function getGoals(
   if (filters?.visibility) params.append("visibility", filters.visibility);
   if (filters?.assignee_id)
     params.append("assignee_id", filters.assignee_id.toString());
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
 
   const queryString = params.toString();
   const url = `/families/${familyId}/goals${queryString ? `?${queryString}` : ""}`;

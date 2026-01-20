@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type Mention } from "@/lib/api";
 
 // Types
 export interface GoalsAchievedMetrics {
@@ -50,8 +50,14 @@ export interface AnnualReview {
   next_year_goals: string[];
   completed: boolean;
   metrics?: AnnualReviewMetrics;
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
+}
+
+// Filter params for listing annual reviews
+export interface AnnualReviewFilters {
+  mentioned_by?: number;
 }
 
 export interface AnnualReviewsResponse {
@@ -81,11 +87,17 @@ export async function getCurrentAnnualReview(
 }
 
 export async function getAnnualReviews(
-  familyId: number
+  familyId: number,
+  filters?: AnnualReviewFilters
 ): Promise<AnnualReviewsResponse> {
-  return apiFetch<AnnualReviewsResponse>(
-    `/families/${familyId}/annual_reviews`
-  );
+  const params = new URLSearchParams();
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
+
+  const queryString = params.toString();
+  const url = `/families/${familyId}/annual_reviews${queryString ? `?${queryString}` : ""}`;
+
+  return apiFetch<AnnualReviewsResponse>(url);
 }
 
 export async function getAnnualReview(
