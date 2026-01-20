@@ -397,3 +397,23 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - useAuthStore import needed in Review pages to get user.id for the filter
   - Import XxxFilters type from respective lib file (e.g., import type { WeeklyReviewFilters } from "@/lib/weeklyReviews")
 ---
+
+## 2026-01-20 - US-024: Add recent mentions endpoint and UI indicator
+- What was implemented: Added recent mentions API endpoint and MentionIndicator UI component with dropdown
+- Files changed:
+  - backend/app/controllers/api/v1/mentions_controller.rb (new)
+  - backend/config/routes.rb (added mentions resource with recent route)
+  - backend/spec/requests/api/v1/mentions_spec.rb (new - 6 test examples)
+  - frontend/src/lib/mentions.ts (new - RecentMention type, getRecentMentions API, helpers)
+  - frontend/src/hooks/useMentions.ts (new - useRecentMentions hook)
+  - frontend/src/components/MentionIndicator.tsx (new - popover with mention list)
+  - frontend/src/components/MainLayout.tsx (added MentionIndicator to header)
+- **Learnings for future iterations:**
+  - Mentions endpoint filters by mentioned_user_id for current user, uses 7.days.ago.. range syntax for rubocop compliance
+  - Mentionable title/link helpers need to handle different model fields: Goal.title, DailyPlan.date, WeeklyReview.week_start_date, etc.
+  - Split large case statements into multiple smaller methods to satisfy rubocop cyclomatic complexity limits
+  - Use hash lookup (STATIC_TITLES) for simple cases, delegate complex formatting to helper methods
+  - MentionIndicator follows NotificationBell pattern: Popover with list of items, count badge, navigation on click
+  - Query key pattern for mentions: `["mentions", "recent", familyId]`
+  - RecentMention type includes mentioner object with id/name, not just user_id
+---

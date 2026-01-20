@@ -450,8 +450,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 24,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added GET /api/v1/families/:family_id/mentions/recent endpoint that returns mentions from last 7 days with mentionable details (type, id, title, link). Created MentionIndicator component with popover dropdown showing recent mentions. Added useMentions hook and mentions.ts lib. Indicator shows in header with count badge (blue). Clicking mention navigates to related content. All backend tests pass (6 examples), TypeScript build passes."
     }
   ]
 }
