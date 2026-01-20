@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useFamily } from "@/hooks/useFamilies";
@@ -341,11 +341,11 @@ export function QuarterlyReview() {
             <p className="text-muted-foreground text-center text-sm">
               Reflect on your key insights from this quarter
             </p>
-            <Textarea
+            <MentionInput
               value={insights}
-              onChange={(e) => setInsights(e.target.value)}
-              placeholder="What key insights did you gain? What patterns did you notice? What would you do differently?"
-              className="min-h-[200px] resize-none"
+              onChange={setInsights}
+              placeholder="What key insights did you gain? What patterns did you notice? Use @name to mention family members"
+              className="min-h-[200px]"
             />
           </div>
         );

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useFamily } from "@/hooks/useFamilies";
@@ -360,11 +360,11 @@ export function AnnualReview() {
             <p className="text-muted-foreground text-center text-sm">
               Reflect on your key lessons from this year
             </p>
-            <Textarea
+            <MentionInput
               value={lessonsLearned}
-              onChange={(e) => setLessonsLearned(e.target.value)}
-              placeholder="What lessons did you learn? What would you do differently? What wisdom will you carry forward?"
-              className="min-h-[200px] resize-none"
+              onChange={setLessonsLearned}
+              placeholder="What lessons did you learn? What would you do differently? Use @name to mention family members"
+              className="min-h-[200px]"
             />
           </div>
         );
@@ -632,9 +632,10 @@ export function AnnualReview() {
         </p>
         <div className="flex justify-center">
           <div className="w-full max-w-md">
-            <Input
+            <MentionInput
+              multiline={false}
               value={nextYearTheme}
-              onChange={(e) => setNextYearTheme(e.target.value)}
+              onChange={setNextYearTheme}
               placeholder="e.g., Growth, Balance, Adventure, Connection..."
               className="text-center text-lg font-medium"
             />

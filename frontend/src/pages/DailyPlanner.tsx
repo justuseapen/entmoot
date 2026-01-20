@@ -2,8 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
@@ -438,12 +437,11 @@ export function DailyPlanner() {
                     <span className="text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
                       {index + 1}
                     </span>
-                    <Input
+                    <MentionInput
+                      multiline={false}
                       placeholder={`Outcome ${index + 1}`}
                       value={priority.title}
-                      onChange={(e) =>
-                        handlePriorityChange(index, e.target.value)
-                      }
+                      onChange={(val) => handlePriorityChange(index, val)}
                       onBlur={handlePriorityBlur}
                       className="flex-1"
                     />
@@ -573,24 +571,24 @@ export function DailyPlanner() {
               <label className="text-sm font-medium text-gray-700">
                 What shipped today?
               </label>
-              <Textarea
-                placeholder="What did you accomplish? What got done?"
+              <MentionInput
+                placeholder="What did you accomplish? What got done? Use @name to mention family members"
                 value={shutdownShipped}
-                onChange={(e) => handleShutdownShippedChange(e.target.value)}
+                onChange={handleShutdownShippedChange}
                 onBlur={handleShutdownShippedBlur}
-                className="mt-1.5 min-h-[80px] resize-none"
+                className="mt-1.5 min-h-[80px]"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
                 What blocked me?
               </label>
-              <Textarea
-                placeholder="What obstacles or blockers did you encounter?"
+              <MentionInput
+                placeholder="What obstacles or blockers did you encounter? Use @name to mention family members"
                 value={shutdownBlocked}
-                onChange={(e) => handleShutdownBlockedChange(e.target.value)}
+                onChange={handleShutdownBlockedChange}
                 onBlur={handleShutdownBlockedBlur}
-                className="mt-1.5 min-h-[80px] resize-none"
+                className="mt-1.5 min-h-[80px]"
               />
             </div>
           </CardContent>

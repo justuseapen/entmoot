@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useFamily } from "@/hooks/useFamilies";
@@ -915,13 +916,13 @@ export function WeeklyReview() {
               <Trophy className="h-4 w-4 text-yellow-500" />
               Wins (things that shipped or moved forward)
             </Label>
-            <Textarea
+            <MentionInput
               id="wins-shipped"
               value={winsShipped}
-              onChange={(e) => setWinsShipped(e.target.value)}
+              onChange={setWinsShipped}
               onBlur={() => handleSection1Blur("wins_shipped", winsShipped)}
-              placeholder="What did you ship? What moved forward? What are you proud of this week?"
-              className="min-h-[120px] resize-none"
+              placeholder="What did you ship? What moved forward? Use @name to mention family members"
+              className="min-h-[120px]"
             />
           </div>
 
@@ -933,15 +934,15 @@ export function WeeklyReview() {
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               Losses / Friction
             </Label>
-            <Textarea
+            <MentionInput
               id="losses-friction"
               value={lossesFriction}
-              onChange={(e) => setLossesFriction(e.target.value)}
+              onChange={setLossesFriction}
               onBlur={() =>
                 handleSection1Blur("losses_friction", lossesFriction)
               }
-              placeholder="What didn't work? What created friction? What do you wish had gone differently?"
-              className="min-h-[120px] resize-none"
+              placeholder="What didn't work? What created friction? Use @name to mention family members"
+              className="min-h-[120px]"
             />
           </div>
         </CardContent>
@@ -1182,13 +1183,13 @@ export function WeeklyReview() {
             >
               Notes (only if something broke)
             </Label>
-            <Textarea
+            <MentionInput
               id="metrics-notes"
               value={metricsNotes}
-              onChange={(e) => setMetricsNotes(e.target.value)}
+              onChange={setMetricsNotes}
               onBlur={handleMetricsNotesBlur}
-              placeholder="What caused issues this week? Leave blank if everything went smoothly."
-              className="min-h-[80px] resize-none"
+              placeholder="What caused issues this week? Use @name to mention family members"
+              className="min-h-[80px]"
             />
           </div>
         </CardContent>
@@ -1295,13 +1296,13 @@ export function WeeklyReview() {
               >
                 If any No, name the system to adjust:
               </Label>
-              <Textarea
+              <MentionInput
                 id="system-to-adjust"
                 value={systemToAdjust}
-                onChange={(e) => setSystemToAdjust(e.target.value)}
+                onChange={setSystemToAdjust}
                 onBlur={handleSystemToAdjustBlur}
-                placeholder="Which system needs adjustment? What's one small change you could make?"
-                className="min-h-[80px] resize-none border-orange-200 focus:border-orange-400"
+                placeholder="Which system needs adjustment? Use @name to mention family members"
+                className="min-h-[80px] border-orange-200 focus:border-orange-400"
               />
             </div>
           )}
@@ -1338,9 +1339,10 @@ export function WeeklyReview() {
             </div>
 
             {/* Priority input */}
-            <Input
+            <MentionInput
+              multiline={false}
               value={item.text}
-              onChange={(e) => handlePriorityItemChange(index, e.target.value)}
+              onChange={(val) => handlePriorityItemChange(index, val)}
               onBlur={handleWeeklyPrioritiesBlur}
               placeholder={`Priority ${index + 1}`}
               className="flex-1"
@@ -1422,12 +1424,12 @@ export function WeeklyReview() {
             focus.
           </p>
 
-          <Textarea
+          <MentionInput
             value={killList}
-            onChange={(e) => setKillList(e.target.value)}
+            onChange={setKillList}
             onBlur={handleKillListBlur}
-            placeholder="What are you NOT doing this week? What are you saying no to? What can wait?"
-            className="min-h-[120px] resize-none"
+            placeholder="What are you NOT doing this week? Use @name to mention family members"
+            className="min-h-[120px]"
           />
         </CardContent>
       </Card>

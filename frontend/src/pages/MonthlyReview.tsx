@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useFamily } from "@/hooks/useFamilies";
@@ -335,11 +335,11 @@ export function MonthlyReview() {
             <p className="text-muted-foreground text-center text-sm">
               Reflect on what you learned this month
             </p>
-            <Textarea
+            <MentionInput
               value={lessonsLearned}
-              onChange={(e) => setLessonsLearned(e.target.value)}
-              placeholder="What did you learn? What insights did you gain? What would you do differently?"
-              className="min-h-[200px] resize-none"
+              onChange={setLessonsLearned}
+              placeholder="What did you learn? What insights did you gain? Use @name to mention family members"
+              className="min-h-[200px]"
             />
           </div>
         );
