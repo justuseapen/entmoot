@@ -14,9 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.entmoot.mobile",
+      "bundleIdentifier": "com.entmoot.mobile",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification"],
+        "MinimumOSVersion": "14.0"
       }
     },
     "android": {
@@ -39,7 +40,6 @@
       }
     },
     "plugins": [
-      "expo-constants",
       [
         "expo-notifications",
         {
