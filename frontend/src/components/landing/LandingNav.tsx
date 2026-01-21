@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { TreePine, Menu } from "lucide-react";
+import { TreePine, Menu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -114,10 +114,13 @@ export function LandingNav() {
           </Link>
           <Button
             asChild
-            className="rounded-lg px-6 py-2 font-medium text-white transition-all hover:opacity-90"
+            className="gap-2 rounded-lg px-6 py-2 font-medium text-white transition-all hover:opacity-90"
             style={{ backgroundColor: LANDING_COLORS.forestGreen }}
           >
-            <Link to="/register">Get Started</Link>
+            <Link to="/register?plan=lifetime">
+              <Sparkles className="h-4 w-4" />
+              Get Lifetime Access
+            </Link>
           </Button>
         </div>
 
@@ -176,14 +179,15 @@ export function LandingNav() {
                 </Link>
                 <Button
                   asChild
-                  className="mt-2 w-full rounded-lg py-3 font-medium text-white transition-all hover:opacity-90"
+                  className="mt-2 w-full gap-2 rounded-lg py-3 font-medium text-white transition-all hover:opacity-90"
                   style={{ backgroundColor: LANDING_COLORS.forestGreen }}
                 >
                   <Link
-                    to="/register"
+                    to="/register?plan=lifetime"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Get Started
+                    <Sparkles className="h-4 w-4" />
+                    Get Lifetime Access - $149
                   </Link>
                 </Button>
               </div>

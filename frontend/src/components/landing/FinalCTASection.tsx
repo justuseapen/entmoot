@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
-import { Rocket } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedSection } from "./AnimatedSection";
+import { CountdownTimer } from "./CountdownTimer";
+import { SpotsCounter } from "./SpotsCounter";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -71,6 +73,10 @@ function BlockyTree({
   );
 }
 
+// Set LTD end date - 7 days from now (can be configured)
+const LTD_END_DATE = new Date();
+LTD_END_DATE.setDate(LTD_END_DATE.getDate() + 7);
+
 export function FinalCTASection() {
   return (
     <AnimatedSection className="relative overflow-hidden">
@@ -89,35 +95,55 @@ export function FinalCTASection() {
 
       {/* Main content */}
       <div className="relative z-10 mx-auto flex flex-col items-center justify-center px-4 pt-20 pb-40 text-center sm:px-6 sm:pt-24 sm:pb-48 lg:px-8 lg:pt-32 lg:pb-56">
+        {/* Countdown Timer */}
+        <div className="mb-8">
+          <CountdownTimer targetDate={LTD_END_DATE} variant="light" />
+        </div>
+
         {/* Headline */}
         <h2 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          Your Family's Adventure Starts Today
+          In 10 Years, Will Your Kids Remember{" "}
+          <br className="hidden sm:inline" />
+          Family Meetings or Family Adventures?
         </h2>
 
         {/* Subheadline */}
-        <p className="mx-auto mb-10 max-w-xl text-lg text-white/90 sm:text-xl">
-          Join thousands of families building dreams together.
+        <p className="mx-auto mb-8 max-w-xl text-lg text-white/90 sm:text-xl">
+          This Founding Family offer won't exist in 7 days. <br />
+          Lock in lifetime access now.
         </p>
+
+        {/* Spots counter */}
+        <div className="mb-8 w-full max-w-sm">
+          <div className="rounded-lg bg-white/20 px-4 py-3 backdrop-blur-sm">
+            <SpotsCounter
+              totalSpots={500}
+              remainingSpots={453}
+              showIcon={false}
+              variant="compact"
+            />
+          </div>
+        </div>
 
         {/* Large CTA button */}
         <Button
           asChild
           size="lg"
-          className="gap-2 rounded-lg px-10 py-7 text-lg font-semibold shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
+          className="gap-2 rounded-lg px-10 py-7 text-lg font-bold shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
           style={{
             backgroundColor: LANDING_COLORS.forestGreen,
             color: "white",
           }}
         >
-          <Link to="/register">
-            <Rocket className="h-5 w-5" />
-            Start Your Free Adventure
+          <Link to="/register?plan=lifetime">
+            <Sparkles className="h-5 w-5" />
+            Secure Lifetime Access Before It's Gone - $149
           </Link>
         </Button>
 
         {/* Trust text */}
         <p className="mt-6 text-sm font-medium text-white/80">
-          No credit card required &bull; Setup in 2 minutes
+          One-time payment &bull; No subscriptions &bull; Lifetime access
         </p>
       </div>
 

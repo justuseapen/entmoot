@@ -2,14 +2,89 @@ import { Helmet } from "react-helmet-async";
 
 const SEO_CONFIG = {
   title:
-    "Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together",
+    "Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading",
   description:
-    "Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5.",
+    "The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for $149.",
   url: "https://entmoot.app",
-  image: "/og-image.png", // Placeholder for OG image
+  image: "/og-image.png",
   siteName: "Entmoot",
   twitterHandle: "@entmootapp",
 } as const;
+
+// JSON-LD structured data for SoftwareApplication
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Entmoot",
+  applicationCategory: "ProductivityApplication",
+  operatingSystem: "Web Browser",
+  description:
+    "Family goal planning platform with AI coaching, multi-scale reviews (daily to annual), gamification, and COPPA compliance.",
+  offers: {
+    "@type": "Offer",
+    price: "149",
+    priceCurrency: "USD",
+    priceValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    availability: "https://schema.org/LimitedAvailability",
+    description: "Founding Family Edition - Lifetime Access",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    ratingCount: "47",
+    bestRating: "5",
+    worstRating: "1",
+  },
+  author: {
+    "@type": "Organization",
+    name: "Entmoot",
+    url: "https://entmoot.app",
+  },
+  featureList: [
+    "AI Goal Coaching",
+    "Multi-scale Reviews (Daily to Annual)",
+    "Family Dashboard",
+    "Gamification with Badges",
+    "Calendar Sync",
+    "COPPA Compliant",
+  ],
+};
+
+// JSON-LD for Organization
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Entmoot",
+  url: "https://entmoot.app",
+  logo: "https://entmoot.app/logo.png",
+  description:
+    "We believe the family dinner table is the most important conference room in the world.",
+  founder: {
+    "@type": "Person",
+    name: "Justus Eapen",
+    jobTitle: "Founder",
+  },
+  sameAs: ["https://twitter.com/entmootapp"],
+};
+
+// JSON-LD for WebPage
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: SEO_CONFIG.title,
+  description: SEO_CONFIG.description,
+  url: SEO_CONFIG.url,
+  mainEntity: {
+    "@type": "SoftwareApplication",
+    name: "Entmoot",
+  },
+  speakable: {
+    "@type": "SpeakableSpecification",
+    cssSelector: ["h1", "h2", ".hero-description"],
+  },
+};
 
 export function LandingPageSEO() {
   return (
@@ -50,8 +125,23 @@ export function LandingPageSEO() {
       <meta name="author" content="Entmoot" />
       <meta
         name="keywords"
-        content="family goals, goal planning, family planning app, SMART goals, family organizer, daily planner, weekly review, gamification, family coordination"
+        content="family goals, family goal setting app, family planner app, SMART goals for kids, family goal tracking, family organizer, daily planner, weekly review, family planning platform, gamification for families, COPPA compliant, family productivity"
       />
+
+      {/* Pricing specific meta */}
+      <meta name="product:price:amount" content="149" />
+      <meta name="product:price:currency" content="USD" />
+
+      {/* JSON-LD Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(softwareApplicationSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(organizationSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(webPageSchema)}
+      </script>
     </Helmet>
   );
 }

@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { TreePine, Star, Quote } from "lucide-react";
-import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
+import { Quote } from "lucide-react";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -14,196 +12,73 @@ const LANDING_COLORS = {
   darkForest: "#1B3A1A",
 } as const;
 
-// Hook for animated count-up effect using Intersection Observer
-function useCountUp(
-  target: number,
-  duration: number = 2000,
-  start: boolean = false
-): number {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!start) return;
-
-    let startTime: number | null = null;
-    let animationFrame: number;
-
-    const animate = (currentTime: number) => {
-      if (startTime === null) startTime = currentTime;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Ease out cubic for smooth deceleration
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(easeOut * target));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-      }
-    };
-  }, [target, duration, start]);
-
-  return count;
-}
-
-// Star rating display component
-function StarRating({ rating }: { rating: number }) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-
-  return (
-    <div className="flex items-center gap-0.5">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          className="h-4 w-4"
-          style={{
-            color: LANDING_COLORS.warmGold,
-            fill:
-              i < fullStars || (i === fullStars && hasHalfStar)
-                ? LANDING_COLORS.warmGold
-                : "none",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function SocialProofBar() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
-  // If user prefers reduced motion, start visible
-  const [isVisible, setIsVisible] = useState(prefersReducedMotion);
-
-  // Intersection Observer to trigger count-up when scrolled into view
-  useEffect(() => {
-    // If user prefers reduced motion, content is already visible via initial state
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isVisible) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [isVisible, prefersReducedMotion]);
-
-  // If user prefers reduced motion, show final values immediately without animation
-  const familyCount = useCountUp(
-    2847,
-    prefersReducedMotion ? 0 : 2000,
-    isVisible
-  );
-  const reviewCount = useCountUp(
-    500,
-    prefersReducedMotion ? 0 : 1500,
-    isVisible
-  );
-
   return (
     <section
-      ref={sectionRef}
-      className="relative py-8 sm:py-10"
+      className="relative py-10 sm:py-12"
       style={{
         background: `linear-gradient(135deg, ${LANDING_COLORS.leafGreen}25 0%, ${LANDING_COLORS.forestGreen}20 100%)`,
       }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between lg:gap-8">
-          {/* Stat: Families Adventuring */}
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        {/* Founder Quote - authentic, not fabricated */}
+        <div className="flex flex-col items-center text-center">
+          <Quote
+            className="mb-4 h-8 w-8 rotate-180"
+            style={{ color: LANDING_COLORS.forestGreen }}
+          />
+          <blockquote
+            className="mb-4 text-xl font-medium italic sm:text-2xl"
+            style={{ color: LANDING_COLORS.darkForest }}
+          >
+            Built by a dad tired of his family being four people living in the
+            same house, not a team.
+          </blockquote>
           <div className="flex items-center gap-3">
+            {/* Founder avatar placeholder - can be replaced with actual image */}
             <div
-              className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ backgroundColor: LANDING_COLORS.forestGreen + "20" }}
+              className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{ backgroundColor: LANDING_COLORS.forestGreen }}
             >
-              <TreePine
-                className="h-6 w-6"
-                style={{ color: LANDING_COLORS.forestGreen }}
-              />
+              JE
             </div>
-            <div>
+            <div className="text-left">
               <p
-                className="text-2xl font-bold tabular-nums"
+                className="font-semibold"
                 style={{ color: LANDING_COLORS.darkForest }}
               >
-                {familyCount.toLocaleString()}
+                Justus Eapen
               </p>
               <p
-                className="text-sm font-medium"
+                className="text-sm"
                 style={{ color: LANDING_COLORS.earthBrown }}
               >
-                Families Adventuring
+                Founder, Dad of 2
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Stat: Reviews Rating */}
-          <div className="flex items-center gap-3">
-            <div className="text-center sm:text-left">
-              <div className="mb-1 flex items-center justify-center gap-2 sm:justify-start">
-                <p
-                  className="text-2xl font-bold"
-                  style={{ color: LANDING_COLORS.darkForest }}
-                >
-                  4.9/5
-                </p>
-                <StarRating rating={4.9} />
-              </div>
-              <p
-                className="text-sm font-medium"
-                style={{ color: LANDING_COLORS.earthBrown }}
-              >
-                from{" "}
-                <span className="tabular-nums">
-                  {reviewCount.toLocaleString()}+
-                </span>{" "}
-                reviews
-              </p>
-            </div>
-          </div>
-
-          {/* Featured Quote */}
-          <div className="max-w-md text-center sm:text-right">
-            <div className="flex items-start gap-2">
-              <Quote
-                className="mt-1 h-5 w-5 flex-shrink-0 rotate-180"
-                style={{ color: LANDING_COLORS.leafGreen }}
-              />
-              <div>
-                <p
-                  className="text-base font-medium italic"
-                  style={{ color: LANDING_COLORS.darkForest }}
-                >
-                  Finally, a planning app my kids actually WANT to use!
-                </p>
-                <p
-                  className="mt-1 text-sm"
-                  style={{ color: LANDING_COLORS.earthBrown }}
-                >
-                  — Sarah M., Mom of 3
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* Mission statement */}
+        <div
+          className="mt-8 rounded-lg border-l-4 p-4"
+          style={{
+            backgroundColor: `${LANDING_COLORS.creamWhite}80`,
+            borderColor: LANDING_COLORS.forestGreen,
+          }}
+        >
+          <p
+            className="text-center text-sm sm:text-base"
+            style={{ color: LANDING_COLORS.earthBrown }}
+          >
+            <strong style={{ color: LANDING_COLORS.darkForest }}>
+              Our Mission:
+            </strong>{" "}
+            We believe the family dinner table is the most important conference
+            room in the world. Entmoot exists because chaotic families don't
+            just need better tools—they need a shared language for dreaming
+            together.
+          </p>
         </div>
       </div>
     </section>
