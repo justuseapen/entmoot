@@ -69,6 +69,14 @@ Rails.application.routes.draw do
         end
       end
 
+      # Onboarding routes
+      scope :onboarding do
+        get "status", to: "onboarding#status"
+        post "step/:step_name", to: "onboarding#update_step"
+        post "skip/:step_name", to: "onboarding#skip_step"
+      end
+      post "calendar_waitlist", to: "onboarding#calendar_waitlist"
+
       # User preferences (scoped to current user via /users/me)
       scope "users/me" do
         resource :notification_preferences, only: %i[show update]

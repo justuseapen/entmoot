@@ -14,7 +14,10 @@ export type CelebrationType =
   | "first_goal"
   | "first_reflection"
   | "first_daily_plan"
-  | "first_invitation_accepted";
+  | "first_invitation_accepted"
+  | "onboarding_family_created"
+  | "onboarding_goal_created"
+  | "onboarding_complete";
 
 interface CelebrationData {
   type: CelebrationType;

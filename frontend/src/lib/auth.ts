@@ -7,6 +7,8 @@ export interface User {
   avatar_url: string | null;
   created_at: string;
   updated_at?: string;
+  onboarding_wizard_completed_at?: string | null;
+  onboarding_wizard_last_step?: number | null;
 }
 
 export interface AuthResponse {

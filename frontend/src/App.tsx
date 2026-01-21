@@ -34,6 +34,7 @@ import { NotFound } from "./pages/NotFound";
 import { ServerError } from "./pages/ServerError";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { MainLayout } from "./components/MainLayout";
+import { OnboardingWizard } from "./components/onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { GlobalLoadingIndicator } from "./components/LoadingIndicator";
 import { OfflineIndicator } from "./components/OfflineIndicator";
@@ -104,6 +105,14 @@ function App() {
                   <AuthenticatedRedirect>
                     <Register />
                   </AuthenticatedRedirect>
+                }
+              />
+              <Route
+                path="/onboarding"
+                element={
+                  <ProtectedRoute>
+                    <OnboardingWizard />
+                  </ProtectedRoute>
                 }
               />
               <Route
