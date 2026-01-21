@@ -4,6 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { queryClient } from "./lib/api";
 import { LandingPage } from "./pages/LandingPage";
+import { About } from "./pages/About";
+import { Contact } from "./pages/Contact";
+import { Privacy } from "./pages/Privacy";
+import { Terms } from "./pages/Terms";
+import { Roadmap } from "./pages/Roadmap";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
@@ -80,6 +85,11 @@ function App() {
             <HeyDevInitializer />
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/roadmap" element={<Roadmap />} />
               <Route
                 path="/login"
                 element={

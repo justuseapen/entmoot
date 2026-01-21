@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
-import { SpotsCounter } from "./SpotsCounter";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -164,7 +163,7 @@ export function HeroSection() {
           }}
         >
           <Sparkles className="h-4 w-4" />
-          Founding Family Launch - Limited to 500 Families
+          Founding Family Launch
         </div>
 
         {/* Headline */}
@@ -187,16 +186,10 @@ export function HeroSection() {
           vacation.
         </p>
 
-        {/* Price anchor */}
+        {/* Price */}
         <div className="mb-6">
           <span
-            className="text-lg line-through opacity-50"
-            style={{ color: LANDING_COLORS.earthBrown }}
-          >
-            Usually $499
-          </span>
-          <span
-            className="ml-3 text-3xl font-bold sm:text-4xl"
+            className="text-3xl font-bold sm:text-4xl"
             style={{ color: LANDING_COLORS.forestGreen }}
           >
             $149 Lifetime
@@ -231,16 +224,6 @@ export function HeroSection() {
             <Play className="h-5 w-5" />
             Watch Demo
           </Button>
-        </div>
-
-        {/* Spots counter */}
-        <div className="w-full max-w-sm">
-          <SpotsCounter
-            totalSpots={500}
-            remainingSpots={453}
-            showIcon={false}
-            variant="compact"
-          />
         </div>
       </div>
 

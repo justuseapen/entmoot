@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedSection } from "./AnimatedSection";
-import { CountdownTimer } from "./CountdownTimer";
-import { SpotsCounter } from "./SpotsCounter";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -73,10 +71,6 @@ function BlockyTree({
   );
 }
 
-// Set LTD end date - 7 days from now (can be configured)
-const LTD_END_DATE = new Date();
-LTD_END_DATE.setDate(LTD_END_DATE.getDate() + 7);
-
 export function FinalCTASection() {
   return (
     <AnimatedSection className="relative overflow-hidden">
@@ -95,11 +89,6 @@ export function FinalCTASection() {
 
       {/* Main content */}
       <div className="relative z-10 mx-auto flex flex-col items-center justify-center px-4 pt-20 pb-40 text-center sm:px-6 sm:pt-24 sm:pb-48 lg:px-8 lg:pt-32 lg:pb-56">
-        {/* Countdown Timer */}
-        <div className="mb-8">
-          <CountdownTimer targetDate={LTD_END_DATE} variant="light" />
-        </div>
-
         {/* Headline */}
         <h2 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
           In 10 Years, Will Your Kids Remember{" "}
@@ -109,21 +98,8 @@ export function FinalCTASection() {
 
         {/* Subheadline */}
         <p className="mx-auto mb-8 max-w-xl text-lg text-white/90 sm:text-xl">
-          This Founding Family offer won't exist in 7 days. <br />
-          Lock in lifetime access now.
+          Start building lasting family memories today.
         </p>
-
-        {/* Spots counter */}
-        <div className="mb-8 w-full max-w-sm">
-          <div className="rounded-lg bg-white/20 px-4 py-3 backdrop-blur-sm">
-            <SpotsCounter
-              totalSpots={500}
-              remainingSpots={453}
-              showIcon={false}
-              variant="compact"
-            />
-          </div>
-        </div>
 
         {/* Large CTA button */}
         <Button
@@ -137,7 +113,7 @@ export function FinalCTASection() {
         >
           <Link to="/register?plan=lifetime">
             <Sparkles className="h-5 w-5" />
-            Secure Lifetime Access Before It's Gone - $149
+            Get Lifetime Access - $149
           </Link>
         </Button>
 

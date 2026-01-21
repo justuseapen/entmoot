@@ -1,7 +1,6 @@
 import { Check, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimatedSection } from "./AnimatedSection";
-import { SpotsCounter } from "./SpotsCounter";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -94,13 +93,7 @@ export function PricingSection() {
             {/* Price */}
             <div className="mb-2 text-center">
               <span
-                className="text-2xl line-through opacity-50"
-                style={{ color: LANDING_COLORS.earthBrown }}
-              >
-                $499
-              </span>
-              <span
-                className="ml-3 text-5xl font-bold sm:text-6xl"
+                className="text-5xl font-bold sm:text-6xl"
                 style={{ color: LANDING_COLORS.forestGreen }}
               >
                 $149
@@ -110,13 +103,8 @@ export function PricingSection() {
               className="mb-6 text-center text-sm font-medium"
               style={{ color: LANDING_COLORS.earthBrown }}
             >
-              one-time payment • 70% off launch price
+              one-time payment
             </p>
-
-            {/* Spots counter */}
-            <div className="mb-6">
-              <SpotsCounter totalSpots={500} remainingSpots={453} />
-            </div>
 
             {/* Features list */}
             <ul className="mb-8 space-y-3">
@@ -144,7 +132,6 @@ export function PricingSection() {
             >
               Claim Your Founding Family Spot
             </Link>
-
           </div>
         </div>
 
