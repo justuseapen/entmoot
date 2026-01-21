@@ -1,1 +1,21 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# Entmoot Robots.txt
+# See https://www.robotstxt.org/robotstxt.html for documentation
+
+# Allow all crawlers
+User-agent: *
+
+# Allow all public pages
+Allow: /
+Allow: /login
+Allow: /register
+
+# Disallow authenticated/private routes
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /admin
+
+# Sitemap location
+Sitemap: https://entmoot.app/sitemap.xml
+
+# Crawl-delay for polite crawling (optional)
+Crawl-delay: 1

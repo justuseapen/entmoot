@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/ui/mention-input";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -421,11 +422,11 @@ export function GoalModal({
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea
+        <MentionInput
           id="description"
-          placeholder="Describe your goal in more detail..."
-          {...register("description")}
-          rows={3}
+          placeholder="Describe your goal in more detail... Use @name to mention family members"
+          value={watch("description") || ""}
+          onChange={(val) => setValue("description", val)}
           aria-invalid={
             !!errors.description || !!serverError?.fieldErrors.description
           }
@@ -714,11 +715,11 @@ export function GoalModal({
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
+              <MentionInput
                 id="description"
-                placeholder="Describe your goal..."
-                {...register("description")}
-                rows={3}
+                placeholder="Describe your goal... Use @name to mention family members"
+                value={watch("description") || ""}
+                onChange={(val) => setValue("description", val)}
               />
             </div>
             <div className="space-y-2">

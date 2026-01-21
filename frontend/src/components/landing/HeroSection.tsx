@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { Star, Play } from "lucide-react";
+import { Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
+import { SpotsCounter } from "./SpotsCounter";
 
 // Landing page design system colors
 const LANDING_COLORS = {
@@ -154,26 +155,56 @@ export function HeroSection() {
 
       {/* Main content */}
       <div className="relative z-10 mx-auto flex flex-1 flex-col items-center justify-center px-4 pb-32 text-center sm:px-6 lg:px-8">
+        {/* Launch badge */}
+        <div
+          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+          style={{
+            backgroundColor: `${LANDING_COLORS.forestGreen}15`,
+            color: LANDING_COLORS.forestGreen,
+          }}
+        >
+          <Sparkles className="h-4 w-4" />
+          Founding Family Launch - Limited to 500 Families
+        </div>
+
         {/* Headline */}
         <h1
           className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           style={{ color: LANDING_COLORS.darkForest }}
         >
-          Build Your Family's Adventure, <br className="hidden sm:inline" />
-          One Goal at a Time
+          Stop Managing Your Family. <br className="hidden sm:inline" />
+          Start Leading Them.
         </h1>
 
         {/* Subheadline */}
         <p
-          className="mx-auto mb-10 max-w-2xl text-lg sm:text-xl"
+          className="mx-auto mb-8 max-w-2xl text-lg sm:text-xl"
           style={{ color: LANDING_COLORS.darkForest, opacity: 0.85 }}
         >
-          Transform chaotic days into epic quests. Entmoot helps families plan
-          together, celebrate wins, and grow as a team.
+          Most families plan day-to-day. Yours will plan
+          generation-to-generation. The only goal platform built for families
+          first—connecting your child's "clean room" task to your family's dream
+          vacation.
         </p>
 
+        {/* Price anchor */}
+        <div className="mb-6">
+          <span
+            className="text-lg line-through opacity-50"
+            style={{ color: LANDING_COLORS.earthBrown }}
+          >
+            Usually $499
+          </span>
+          <span
+            className="ml-3 text-3xl font-bold sm:text-4xl"
+            style={{ color: LANDING_COLORS.forestGreen }}
+          >
+            $149 Lifetime
+          </span>
+        </div>
+
         {/* CTA buttons */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
           {/* Primary CTA */}
           <Button
             asChild
@@ -181,9 +212,9 @@ export function HeroSection() {
             className="gap-2 rounded-lg px-8 py-6 text-base font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
             style={{ backgroundColor: LANDING_COLORS.forestGreen }}
           >
-            <Link to="/register">
-              <Star className="h-5 w-5" />
-              Start Your Free Adventure
+            <Link to="/register?plan=lifetime">
+              <Sparkles className="h-5 w-5" />
+              Claim Your Founding Family Spot - $149 Lifetime
             </Link>
           </Button>
 
@@ -202,13 +233,15 @@ export function HeroSection() {
           </Button>
         </div>
 
-        {/* Trust badges */}
-        <p
-          className="text-sm font-medium"
-          style={{ color: LANDING_COLORS.darkForest, opacity: 0.7 }}
-        >
-          No credit card required • Free for families up to 5
-        </p>
+        {/* Spots counter */}
+        <div className="w-full max-w-sm">
+          <SpotsCounter
+            totalSpots={500}
+            remainingSpots={453}
+            showIcon={false}
+            variant="compact"
+          />
+        </div>
       </div>
 
       {/* Blocky forest silhouette at bottom - decorative */}

@@ -96,6 +96,7 @@ module Api
           .by_status(params[:status])
           .by_visibility(params[:visibility])
           .by_assignee(params[:assignee_id])
+          .mentioned_by(params[:mentioned_by])
           .order(created_at: :desc)
           .includes(:creator, :assignees)
       end

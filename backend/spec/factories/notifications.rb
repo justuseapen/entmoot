@@ -51,5 +51,11 @@ FactoryBot.define do
       title { "Streak Milestone!" }
       body { "Amazing! You've maintained a 7-day daily planning streak!" }
     end
+
+    trait :mention do
+      notification_type { :mention }
+      title { "Someone mentioned you" }
+      body { "Someone mentioned you in their post" }
+    end
   end
 end

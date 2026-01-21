@@ -138,6 +138,32 @@ RSpec.describe "Api::V1::Goals" do
 
         expect(json_response["goals"].pluck("id")).to contain_exactly(daily_in_progress.id)
       end
+
+      it "filters by mentioned_by" do
+        mentioned_user = create(:user)
+        create(:family_membership, :adult, family: family, user: mentioned_user)
+
+        mentioned_goal = create(:goal, :family_visible, family: family, creator: user)
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_goal, text_field: "title")
+        not_mentioned_goal = create(:goal, :family_visible, family: family, creator: user)
+
+        get "/api/v1/families/#{family.id}/goals",
+            params: { mentioned_by: mentioned_user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["goals"].pluck("id")).to contain_exactly(mentioned_goal.id)
+        expect(json_response["goals"].pluck("id")).not_to include(not_mentioned_goal.id)
+      end
+
+      it "returns empty array when no mentions match" do
+        create(:goal, :family_visible, family: family, creator: user)
+
+        get "/api/v1/families/#{family.id}/goals",
+            params: { mentioned_by: user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["goals"]).to eq([])
+      end
     end
 
     context "when user is not a family member" do

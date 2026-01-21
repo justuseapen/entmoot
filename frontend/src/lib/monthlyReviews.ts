@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type Mention } from "@/lib/api";
 
 // Types
 export interface TaskCompletionMetrics {
@@ -37,8 +37,14 @@ export interface MonthlyReview {
   next_month_focus: string[];
   completed: boolean;
   metrics?: MonthlyReviewMetrics;
+  mentions?: Mention[];
   created_at: string;
   updated_at: string;
+}
+
+// Filter params for listing monthly reviews
+export interface MonthlyReviewFilters {
+  mentioned_by?: number;
 }
 
 export interface MonthlyReviewsResponse {
@@ -68,11 +74,17 @@ export async function getCurrentMonthlyReview(
 }
 
 export async function getMonthlyReviews(
-  familyId: number
+  familyId: number,
+  filters?: MonthlyReviewFilters
 ): Promise<MonthlyReviewsResponse> {
-  return apiFetch<MonthlyReviewsResponse>(
-    `/families/${familyId}/monthly_reviews`
-  );
+  const params = new URLSearchParams();
+  if (filters?.mentioned_by)
+    params.append("mentioned_by", filters.mentioned_by.toString());
+
+  const queryString = params.toString();
+  const url = `/families/${familyId}/monthly_reviews${queryString ? `?${queryString}` : ""}`;
+
+  return apiFetch<MonthlyReviewsResponse>(url);
 }
 
 export async function getMonthlyReview(

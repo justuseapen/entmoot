@@ -99,6 +99,77 @@ class NotificationService
     )
   end
 
+  def self.notify_mention(mention:)
+    create_and_broadcast(
+      user: mention.mentioned_user,
+      title: "#{mention.user.name} mentioned you",
+      body: "#{mention.user.name} mentioned you #{mentionable_context(mention.mentionable)}",
+      link: mention_notification_link(mention.mentionable),
+      notification_type: :mention
+    )
+  end
+
+  def self.mentionable_context(mentionable)
+    return goal_context(mentionable) if mentionable.is_a?(Goal)
+    return daily_plan_context(mentionable) if mentionable.is_a?(DailyPlan)
+
+    STATIC_MENTIONABLE_CONTEXTS.fetch(mentionable.class.name, "in a post")
+  end
+  private_class_method :mentionable_context
+
+  STATIC_MENTIONABLE_CONTEXTS = {
+    "TopPriority" => "in a top priority",
+    "WeeklyReview" => "in their weekly review",
+    "MonthlyReview" => "in their monthly review",
+    "QuarterlyReview" => "in their quarterly review",
+    "AnnualReview" => "in their annual review"
+  }.freeze
+
+  def self.goal_context(goal)
+    "in goal: #{goal.title}"
+  end
+  private_class_method :goal_context
+
+  def self.daily_plan_context(daily_plan)
+    "in their daily plan for #{daily_plan.date.strftime("%B %-d")}"
+  end
+  private_class_method :daily_plan_context
+
+  def self.mention_notification_link(mentionable)
+    family_id = mentionable_family_id(mentionable)
+    return nil unless family_id
+
+    mentionable_link_path(mentionable, family_id)
+  end
+  private_class_method :mention_notification_link
+
+  def self.mentionable_link_path(mentionable, family_id)
+    case mentionable
+    when Goal then "/families/#{family_id}/goals/#{mentionable.id}"
+    when DailyPlan then "/planner?date=#{mentionable.date}"
+    when TopPriority then "/planner?date=#{mentionable.daily_plan.date}"
+    else review_link_path(mentionable)
+    end
+  end
+  private_class_method :mentionable_link_path
+
+  def self.review_link_path(review)
+    case review
+    when WeeklyReview then "/weekly-review?date=#{review.week_start_date}"
+    when MonthlyReview then "/monthly-review?date=#{review.month}"
+    when QuarterlyReview then "/quarterly-review?date=#{review.quarter_start_date}"
+    when AnnualReview then "/annual-review?year=#{review.year}"
+    end
+  end
+  private_class_method :review_link_path
+
+  def self.mentionable_family_id(mentionable)
+    return mentionable.daily_plan&.family_id if mentionable.is_a?(TopPriority)
+
+    mentionable.family_id if mentionable.respond_to?(:family_id)
+  end
+  private_class_method :mentionable_family_id
+
   def self.reminder_content(reminder_type)
     REMINDER_CONTENT.fetch(reminder_type.to_sym, DEFAULT_REMINDER_CONTENT)
   end

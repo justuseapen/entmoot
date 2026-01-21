@@ -7,13 +7,15 @@ import {
   updateWeeklyReview,
   getWeeklyReviewMetrics,
   type UpdateWeeklyReviewData,
+  type WeeklyReviewFilters,
 } from "@/lib/weeklyReviews";
 
 // Query keys
 export const weeklyReviewKeys = {
   all: ["weeklyReviews"] as const,
   lists: () => [...weeklyReviewKeys.all, "list"] as const,
-  list: (familyId: number) => [...weeklyReviewKeys.lists(), familyId] as const,
+  list: (familyId: number, filters?: WeeklyReviewFilters) =>
+    [...weeklyReviewKeys.lists(), familyId, filters] as const,
   current: (familyId: number) =>
     [...weeklyReviewKeys.all, "current", familyId] as const,
   details: () => [...weeklyReviewKeys.all, "detail"] as const,
@@ -34,11 +36,14 @@ export function useCurrentWeeklyReview(familyId: number) {
 }
 
 // Get all weekly reviews for the user
-export function useWeeklyReviews(familyId: number) {
+export function useWeeklyReviews(
+  familyId: number,
+  filters?: WeeklyReviewFilters
+) {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: weeklyReviewKeys.list(familyId),
-    queryFn: () => getWeeklyReviews(familyId),
+    queryKey: weeklyReviewKeys.list(familyId, filters),
+    queryFn: () => getWeeklyReviews(familyId, filters),
     enabled: isAuthenticated && !!familyId,
   });
 }

@@ -6,6 +6,17 @@ module Api
       before_action :set_family
       before_action :set_daily_plan, only: %i[show update]
 
+      def index
+        authorize @family, policy_class: DailyPlanPolicy
+
+        @daily_plans = policy_scope(DailyPlan)
+                       .where(family: @family, user: current_user)
+                       .mentioned_by(params[:mentioned_by])
+                       .order(date: :desc)
+
+        render json: { daily_plans: @daily_plans.map { |plan| plan_summary(plan) } }
+      end
+
       def today
         authorize @family, policy_class: DailyPlanPolicy
 
@@ -60,6 +71,15 @@ module Api
 
       def daily_plan_response(plan)
         plan_attributes(plan).merge(plan_associations(plan))
+      end
+
+      def plan_summary(plan)
+        {
+          id: plan.id, date: plan.date, intention: plan.intention,
+          user_id: plan.user_id, family_id: plan.family_id,
+          completion_stats: plan.completion_stats,
+          created_at: plan.created_at, updated_at: plan.updated_at
+        }
       end
 
       def plan_attributes(plan)

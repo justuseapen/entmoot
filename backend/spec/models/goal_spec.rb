@@ -10,6 +10,38 @@ RSpec.describe Goal do
     it { is_expected.to have_many(:children).class_name("Goal").with_foreign_key(:parent_id).dependent(:nullify) }
     it { is_expected.to have_many(:goal_assignments).dependent(:destroy) }
     it { is_expected.to have_many(:assignees).through(:goal_assignments).source(:user) }
+    it { is_expected.to have_many(:mentions).dependent(:destroy) }
+  end
+
+  describe "Mentionable concern" do
+    let(:family) { create(:family) }
+    let(:creator) { create(:user, name: "Alice Smith") }
+    let(:bob) { create(:user, name: "Bob Jones") }
+
+    before do
+      create(:family_membership, family: family, user: creator, role: :admin)
+      create(:family_membership, family: family, user: bob, role: :adult)
+    end
+
+    it "defines mentionable_fields as :title and :description" do
+      expect(described_class.mentionable_text_fields).to eq(%i[title description])
+    end
+
+    it "creates mentions when saving with @mentions in title" do
+      goal = create(:goal, family: family, creator: creator, title: "Help @bob with planning")
+
+      expect(goal.mentions.count).to eq(1)
+      expect(goal.mentions.first.mentioned_user).to eq(bob)
+      expect(goal.mentions.first.user).to eq(creator)
+      expect(goal.mentions.first.text_field).to eq("title")
+    end
+
+    it "creates mentions when saving with @mentions in description" do
+      goal = create(:goal, family: family, creator: creator, description: "Work with @bob")
+
+      expect(goal.mentions.count).to eq(1)
+      expect(goal.mentions.first.text_field).to eq("description")
+    end
   end
 
   describe "validations" do

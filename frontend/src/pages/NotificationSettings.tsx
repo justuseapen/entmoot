@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { GoogleCalendarConnect } from "@/components/GoogleCalendarConnect";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -42,6 +43,17 @@ export function NotificationSettings() {
   const updatePreferences = useUpdateNotificationPreferences();
   const [success, setSuccess] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const location = useLocation();
+
+  // Show success message when calendar was just connected
+  useEffect(() => {
+    if (location.state?.calendarConnected) {
+      setSuccess("Google Calendar connected successfully!");
+      setTimeout(() => setSuccess(null), 3000);
+      // Clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const prefs = data?.notification_preferences;
 
@@ -185,6 +197,9 @@ export function NotificationSettings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Google Calendar Integration */}
+          <GoogleCalendarConnect />
 
           {/* Check-in Frequency */}
           <Card>

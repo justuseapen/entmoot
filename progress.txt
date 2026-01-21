@@ -1,174 +1,419 @@
 # Ralph Progress Log
-Started: Thu Jan 15 09:15:55 EST 2026
----
+Started: Tue Jan 20 16:20:13 EST 2026
 
 ## Codebase Patterns
-- All model files must start with `# frozen_string_literal: true`
-- Use double quotes for strings in Ruby
-- Run migrations from `/Users/justuseapen/Dropbox/code/entmoot/backend` directory
-- Use `bundle exec rails db:migrate` and `bundle exec rspec` from backend directory
-- Frontend types in `frontend/src/lib/*.ts`, hooks in `frontend/src/hooks/*.ts`
-- TanStack Query hooks use query keys pattern: `const xxxKeys = { all: ["xxx"], list: (id) => [...] }`
-- Run frontend typecheck with `npm run build` from frontend directory
+- SelectTrigger components need explicit width/height when used as icon-only buttons - default styles assume text content
+- Use `w-11` (44px) minimum for touch targets on mobile to meet iOS accessibility guidelines
+- Use `aria-label` for icon-only interactive elements
+- Migrations are excluded from rubocop via `.rubocop.yml` - no need to worry about method length for migrations
+- When adding nullable boolean fields intentionally (e.g., for "unanswered" state), rubocop will warn but can be ignored in migrations
+- Polymorphic associations: use `belongs_to :X, polymorphic: true` and `has_many :Y, as: :X, dependent: :destroy`
+- When using `t.references` with custom foreign key, Rails auto-creates index - don't duplicate with `add_index`
+- ActiveSupport::Concern structure: `extend ActiveSupport::Concern`, `included do...end`, `class_methods do...end`
+- Use `saved_change_to_attribute?(field)` in after_save callbacks to check if specific field changed
+
 ---
 
-## 2026-01-15 09:18 - US-001
-- **What was implemented:** Created Habit and HabitCompletion models with migrations
-- **Files changed:**
-  - `backend/db/migrate/20260115141634_create_habits.rb` - habits table with name, position, is_active, user_id, family_id
-  - `backend/db/migrate/20260115141642_create_habit_completions.rb` - habit_completions table with habit_id, daily_plan_id, completed
-  - `backend/app/models/habit.rb` - Habit model with associations and validations
-  - `backend/app/models/habit_completion.rb` - HabitCompletion model with associations
-  - `backend/app/models/daily_plan.rb` - Added has_many :habit_completions
-  - `backend/db/schema.rb` - Updated schema
+## 2026-01-20 - US-001: Fix goal link button clickability in Daily Planner
+- What was implemented: Fixed SelectTrigger clickability by adjusting size and padding
+- Files changed: frontend/src/pages/DailyPlanner.tsx
 - **Learnings for future iterations:**
-  - Unique indexes were added to prevent duplicate habits per user/family/position and duplicate completions per habit/daily_plan
-  - The DailyPlan model is the central model for daily planning features
-  - All 1613 backend tests pass after changes
+  - The shadcn SelectTrigger with `size="sm"` reduces height to h-8, which combined with narrow width can make buttons hard to click
+  - When using Select components as icon-only buttons, remove size prop and explicitly set dimensions
+  - w-10 (40px) with px-3 padding leaves only ~16px for content, not enough for two icons (Link2 + chevron)
+  - Touch target minimum: 44x44px for iOS, achieved with `h-10 w-11`
 ---
 
-## 2026-01-15 09:25 - US-002
-- **What was implemented:** Created HabitInitializerService to seed default habits for users
-- **Files changed:**
-  - `backend/app/services/habit_initializer_service.rb` - Service to create 9 default habits with sequential positions (1-9)
-  - `backend/app/models/daily_plan.rb` - Integrated HabitInitializerService.initialize_habits_for in find_or_create_for_today
-  - `backend/app/models/user.rb` - Added has_many :habits association
+## 2026-01-20 - US-002: Add new fields to WeeklyReview model for template sections
+- What was implemented: Created migration to add 21 new fields to weekly_reviews table
+- Files changed:
+  - backend/db/migrate/20260120212323_add_template_fields_to_weekly_reviews.rb (new)
+  - backend/db/schema.rb (auto-updated)
 - **Learnings for future iterations:**
-  - Service classes use class methods (class << self pattern) for stateless operations
-  - The HabitInitializerService is idempotent - checks user.habits.exists?(family: family) before creating
-  - Use `exists?(family: family)` instead of `where(family: family).exists?` (Rails/WhereExists rubocop rule)
-  - All 1613 backend tests continue to pass
+  - The weekly_reviews table now has both old jsonb columns (wins, challenges, next_week_priorities, lessons_learned) AND new text columns (wins_shipped, losses_friction, weekly_priorities, kill_list) - these coexist for backward compatibility
+  - System health check booleans (daily_focus_used_every_day, weekly_priorities_clear, cleaning_system_held, training_volume_sustainable) are intentionally nullable - nil means "not answered yet"
+  - Forward setup booleans (workouts_blocked, monday_top_3_decided, monday_focus_card_prepped) default to false with NOT NULL
+  - walks_planned and house_resets_planned default to 7 (days in a week)
 ---
 
-## 2026-01-15 09:45 - US-003
-- **What was implemented:** Added habits API endpoints and updated daily_plans to support habit_completions
-- **Files changed:**
-  - `backend/app/controllers/api/v1/habits_controller.rb` - New controller with index action
-  - `backend/app/policies/habit_policy.rb` - New policy with index? allowing family members
-  - `backend/config/routes.rb` - Added habits route under families namespace
-  - `backend/app/controllers/api/v1/daily_plans_controller.rb` - Added habit_completions_attributes to permitted params and response
-  - `backend/app/models/daily_plan.rb` - Added accepts_nested_attributes_for :habit_completions
-  - `backend/spec/factories/habits.rb` - New factory for Habit
-  - `backend/spec/factories/habit_completions.rb` - New factory for HabitCompletion
-  - `backend/spec/requests/api/v1/habits_spec.rb` - New request specs (8 tests)
+## 2026-01-20 - US-003: Update WeeklyReview API to support new fields
+- What was implemented: Updated controller to permit and serialize all 21 new template fields
+- Files changed:
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb
+  - backend/spec/requests/api/v1/weekly_reviews_spec.rb
 - **Learnings for future iterations:**
-  - HabitPolicy uses `user.member_of?(record)` where record is the Family passed to authorize
-  - The daily_plans_controller includes habit_completions with nested habit data in responses
-  - Use `includes(:habit)` when mapping habit_completions to avoid N+1 queries
-  - All 1621 backend tests pass (8 new tests added)
+  - Rails `permit()` requires array params (e.g., `wins: []`) to come AFTER scalar params, otherwise syntax error
+  - Refactored controller into PERMITTED_SCALAR_PARAMS/PERMITTED_ARRAY_PARAMS constants and helper methods to stay under rubocop line limits
+  - API response organized into helper methods: base_attributes, legacy_attributes, template_attributes (with sub-methods for each section)
+  - Use `include()` matcher with hash args for concise multi-field assertions in specs
+  - Use `:aggregate_failures` tag on specs with many expectations to satisfy RSpec/MultipleExpectations cop
 ---
 
-## 2026-01-15 09:52 - US-004
-- **What was implemented:** Added shutdown_shipped and shutdown_blocked columns to daily_plans for end-of-day reflection notes
-- **Files changed:**
-  - `backend/db/migrate/20260115142619_add_shutdown_notes_to_daily_plans.rb` - Migration adding shutdown_shipped and shutdown_blocked text columns
-  - `backend/app/controllers/api/v1/daily_plans_controller.rb` - Updated daily_plan_params to permit new params, updated plan_attributes to include them in response
-  - `backend/db/schema.rb` - Updated schema
+## 2026-01-20 - US-004: Update frontend WeeklyReview type
+- What was implemented: Updated TypeScript types for WeeklyReview and UpdateWeeklyReviewData to include all 21 new template fields
+- Files changed:
+  - frontend/src/lib/weeklyReviews.ts
 - **Learnings for future iterations:**
-  - The daily_plan_params method centralizes permitted params - add new fields there
-  - The plan_attributes method builds the response hash - add new fields there for API response
-  - Simple column additions just need: migration + permit params + include in response
-  - All 1621 backend tests continue to pass
+  - WeeklyReview type fields match backend snake_case naming (API returns snake_case)
+  - Use `| null` for nullable fields from database (e.g., `boolean | null` for system health check booleans that can be unanswered)
+  - Forward setup booleans (workouts_blocked, monday_top_3_decided, monday_focus_card_prepped) are non-nullable since they have NOT NULL default false in DB
+  - UpdateWeeklyReviewData uses optional properties (`?`) since not all fields need to be sent on every update
+  - useWeeklyReview hook didn't need changes - it already properly uses the types from weeklyReviews.ts
 ---
 
-## 2026-01-15 10:05 - US-005
-- **What was implemented:** Updated frontend TypeScript types for habits and shutdown notes
-- **Files changed:**
-  - `frontend/src/lib/dailyPlans.ts` - Added Habit, HabitCompletion, HabitCompletionAttributes types; added shutdown_shipped, shutdown_blocked, habit_completions to DailyPlan type; added getHabits API function
-  - `frontend/src/hooks/useHabits.ts` - New hook with TanStack Query for fetching user's habits
+## 2026-01-20 - US-005: Create new WeeklyReview UI - Section 0: Source Review
+- What was implemented: Added Section 0 card with source review reminder and daily plan links
+- Files changed:
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (added daily_plans to API response)
+  - frontend/src/lib/weeklyReviews.ts (added DailyPlanSummary type)
+  - frontend/src/pages/WeeklyReview.tsx (added Section 0 component)
 - **Learnings for future iterations:**
-  - Frontend types mirror backend API responses - include all fields returned by the controller
-  - TanStack Query hooks follow the pattern: query keys object + useQuery with enabled condition
-  - Use `@/lib/` for API functions and `@/hooks/` for query hooks
-  - The useAuthStore provides `isAuthenticated` for gating queries
-  - Typecheck with `npm run build` from frontend directory
+  - The WeeklyReview model already has a `daily_plans` method that queries DailyPlan for the week's date range
+  - When displaying calendar grids, use `grid-cols-2 sm:grid-cols-4 lg:grid-cols-7` for responsive 7-day layouts
+  - Use `toISOString().split("T")[0]` to compare dates in YYYY-MM-DD format
+  - The Checkbox component from shadcn accepts `onCheckedChange` (not `onChange`) and passes a `CheckedState` type
+  - Section 0 uses amber color scheme (border-amber-200, bg-amber-50/50) to distinguish it from other sections
 ---
 
-## 2026-01-15 10:40 - US-006
-- **What was implemented:** Redesigned Top 3 Outcomes section with goal linking capability
-- **Files changed:**
-  - `frontend/src/pages/DailyPlanner.tsx` - Renamed section, added subtitle, added goal selector dropdown with filtering, added badge display for linked goals
+## 2026-01-20 - US-006: Create Section 1: Review (Evidence-based)
+- What was implemented: Added Section 1 card with wins_shipped and losses_friction textareas with auto-save on blur
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
 - **Learnings for future iterations:**
-  - Use shadcn Select component for dropdowns, imports: Select, SelectContent, SelectItem, SelectTrigger
-  - Filter goals by time_scale with `goals?.filter((g) => g.time_scale !== "daily")`
-  - TopPriority type already has goal_id and goal fields for linking to goals
-  - Badge component from `@/components/ui/badge` for displaying tags
-  - getTimeScaleLabel from `@/lib/goals` converts time_scale enum to human-readable label
-  - Radix Select uses portals for dropdowns - won't appear in accessibility snapshots during browser testing
-- Backend habits API must return wrapped format `{ habits: [...] }` for frontend useHabits hook
-- When creating new nested records with accepts_nested_attributes_for, omit `id` field (don't send id: 0)
+  - Section 1 follows the same pattern as Section 0 but without the amber styling (uses default card styling)
+  - The ClipboardList icon from lucide-react is used for the section header
+  - Auto-save pattern uses `onBlur` callback with `useCallback` that calls `updateReview.mutateAsync`
+  - Textarea components accept standard `onChange` (not `onCheckedChange` like Checkbox)
+  - State variables follow naming pattern: camelCase for React state (winsShipped), snake_case for API fields (wins_shipped)
 ---
 
-## 2026-01-15 11:30 - US-007
-- **What was implemented:** Built Non-Negotiables habit tracker UI with checkboxes in responsive grid
-- **Files changed:**
-  - `frontend/src/pages/DailyPlanner.tsx` - Added Non-Negotiables Card section with habit checkboxes, completion counter, toggle handler, and strikethrough styling
-  - `backend/app/controllers/api/v1/habits_controller.rb` - Fixed API to return wrapped `{ habits: [...] }` format
-  - `backend/spec/requests/api/v1/habits_spec.rb` - Updated specs to expect wrapped format
+## 2026-01-20 - US-007: Create Section 2: Metrics Snapshot
+- What was implemented: Added Section 2 card with metrics input pairs, percentage display, meals prepped toggle, and notes textarea
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
 - **Learnings for future iterations:**
-  - Use shadcn Checkbox component from `@/components/ui/checkbox` with `onCheckedChange` prop
-  - Radix Checkbox uses `checked === true` comparison (returns boolean | "indeterminate")
-  - For responsive grid: `grid grid-cols-2 gap-3 md:grid-cols-3`
-  - Strikethrough styling: `className={isCompleted ? "text-muted-foreground line-through" : ""}`
-  - When creating new habit_completions, conditionally include id: `...(hc.id > 0 ? { id: hc.id } : {})`
-  - The saveChanges function signature extended to accept 4th parameter for habitCompletions
-  - All 1621 backend tests pass
+  - Used inline MetricRow component for cleaner code - each row has completed/planned inputs and percentage display
+  - parseNumberInput helper converts empty string to null for proper API handling
+  - calcPercentage helper returns null if either completed or planned is null (so percentage is only shown when both values exist)
+  - For Y/N toggles, use paired Buttons with conditional styling instead of Checkbox
+  - Color-coded percentages: green ≥80%, yellow ≥50%, red <50%
+  - The Activity icon from lucide-react fits the metrics/tracking theme
+  - Type MetricsNumberField was defined inline using union type for type safety on blur handlers
 ---
 
-## 2026-01-15 12:15 - US-008
-- **What was implemented:** Built Shutdown Notes UI section with structured end-of-day reflection prompts
-- **Files changed:**
-  - `frontend/src/pages/DailyPlanner.tsx` - Removed Daily Intention card, added Shutdown Notes card with Sunset icon, two textareas with auto-save on blur
+## 2026-01-20 - US-008: Create Section 3: System Health Check
+- What was implemented: Added Section 3 card with Y/N toggle buttons for 4 health check questions and conditional textarea
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
 - **Learnings for future iterations:**
-  - Use Sunset icon from lucide-react for end-of-day/shutdown themed sections
-  - The saveChanges function can be extended with additional optional parameters for new fields
-  - For text areas with auto-save on blur: create a local state setter, onChange handler to update local state, and onBlur handler to call saveChanges
-  - When removing a card, also remove its related handlers (e.g., handleIntentionChange, handleIntentionBlur were removed with the Daily Intention card)
-  - State variables can be kept even if UI is removed (intention still persists in saveChanges for backwards compatibility)
-  - Typecheck passes
-  - Browser verification confirmed auto-save works with the "Saved" status indicator
+  - HeartPulse icon from lucide-react fits the health check theme well
+  - Reused Y/N toggle pattern from Section 2 (meals_prepped_held) but created HealthCheckQuestion inline component for cleaner code
+  - Conditional rendering with `hasAnyNo` check: textarea only appears when at least one answer is false (not null)
+  - SystemHealthField type union ensures type safety for the 4 boolean fields
+  - Auto-save happens immediately on button click (onChange), not on blur, since buttons don't have blur events
+  - The system_to_adjust textarea uses onBlur for auto-save (same pattern as other textareas)
+  - Rose color scheme (text-rose-600) for the section header to distinguish from other sections
 ---
 
-## 2026-01-15 13:00 - US-009
-- **What was implemented:** Removed Daily Tasks section from UI for a cleaner daily focus card
-- **Files changed:**
-  - `frontend/src/pages/DailyPlanner.tsx` - Major cleanup removing task-related UI and state
-- **What was removed:**
-  - Today's Tasks Card component with task checklist
-  - Yesterday's Unfinished Tasks Card component
-  - Progress Card showing completion percentage
-  - `newTaskTitle` state and `setNewTaskTitle` setter
-  - Task handlers: `handleAddTask`, `handleToggleTask`, `handleRemoveTask`, `handleLinkTaskToGoal`, `handleCarryOverTask`, `handleDragEnd`
-  - `localTasks`, `initialTasks`, `tasks`, `visibleTasks`, `completionPercentage`, `yesterdayIncompleteTasks` variables
-  - DndContext and SortableContext imports from @dnd-kit
-  - `DailyTask`, `DailyTaskAttributes` type imports
-  - `Progress`, `SortableTaskItem`, `InlineEmptyState` component imports
-  - `Plus`, `CheckCircle2`, `AlertCircle`, `ArrowRight` icon imports
+## 2026-01-20 - US-009: Create Section 4: This Week's Priorities
+- What was implemented: Added Section 4 card with 5 numbered priority inputs and optional quarterly goal linking
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
 - **Learnings for future iterations:**
-  - When removing major UI sections, also clean up: state variables, handlers, imports, and computed values
-  - The saveChanges function signature was simplified to remove the tasks parameter
-  - Keep the DailyTask model and API unchanged for backwards compatibility
-  - The Daily Focus Card now shows only: Top 3 Outcomes, Non-Negotiables, and Shutdown Notes
-  - Removed 301 lines of code, significantly simplifying the component
-  - Typecheck passes
-  - Browser verification confirmed the cleaner UI works correctly
+  - Priorities stored in `weekly_priorities` field as newline-separated "text|goalId" format (e.g., "Write blog post|42\nReview code")
+  - Used native HTML select element (not shadcn Select) for goal dropdown - simpler and avoids SelectTrigger sizing issues
+  - useGoals hook with `time_scale: "quarterly"` filter to fetch only quarterly goals
+  - Goal type must be imported with `import type { Goal }` due to `verbatimModuleSyntax` in tsconfig
+  - Target icon and indigo color theme for priorities section
+  - PriorityRow inline component for cleaner code - each row has number badge, input, dropdown, and optional badge
+  - Goal link changes save immediately (unlike text blur) since dropdown change is a discrete action
+  - Link2 icon from lucide-react used for the linked goal badge
 ---
 
-## 2026-01-15 13:45 - US-010
-- **What was implemented:** Updated daily planner header and styling
-- **Files changed:**
-  - `frontend/src/pages/DailyPlanner.tsx` - Changed header subtitle from 'Start your day with intention' to 'Daily Focus Card'
-- **Verified:**
-  - Desktop view: Cards use mb-6 spacing, header displays correctly
-  - Mobile view: Cards stack vertically, Non-Negotiables grid switches from 3 columns to 2 columns
-  - Save status bar functionality preserved
-  - Navigation buttons remain at bottom and wrap nicely on mobile
-  - Typecheck passes
-  - Browser verification confirmed on both desktop and mobile viewports
+## 2026-01-20 - US-010: Create Section 5: Kill List
+- What was implemented: Added Section 5 card for explicitly deprioritizing items (kill list)
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
 - **Learnings for future iterations:**
-  - The Daily Planner page is now fully redesigned as a "Daily Focus Card" with 3 main sections:
-    1. Top 3 Outcomes Today (with goal linking)
-    2. Non-Negotiables (habit tracker with responsive grid)
-    3. Shutdown Notes (structured end-of-day reflection)
-  - Responsive grid classes: `grid grid-cols-2 gap-3 md:grid-cols-3` for 2-col mobile, 3-col desktop
+  - Followed the same pattern as previous sections: state variable, useEffect initialization, blur handler, render function
+  - Skull icon from lucide-react fits the "kill" theme well
+  - Slate color scheme (border-slate-200, bg-slate-50/50, text-slate-600) provides neutral/gray appearance distinct from other sections
+  - The kill_list field is a simple text field (not jsonb array), so no parsing needed like weekly_priorities
+---
+
+## 2026-01-20 - US-011: Create Section 6: Forward Setup
+- What was implemented: Added Section 6 card with three checkboxes for forward planning
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Followed established pattern: state variables, useEffect initialization, checkbox change handler, render function
+  - FastForward icon from lucide-react fits the "forward setup" theme
+  - Emerald color scheme (border-emerald-200, bg-emerald-50/50) provides fresh/forward-looking appearance
+  - ForwardSetupField type union ensures type safety for the 3 boolean fields
+  - Checkbox changes auto-save immediately via handleForwardSetupChange callback (same pattern as system health checks)
+  - These fields default to false with NOT NULL in DB, so use ?? false in initialization (not || false since false is a valid value)
+---
+
+## 2026-01-20 - US-012: Add weekly review completion logic
+- What was implemented: Added completion criteria checker and completion status UI to weekly review page
+- Files changed:
+  - frontend/src/pages/WeeklyReview.tsx
+- **Learnings for future iterations:**
+  - Created CompletionCriteria type to track all 7 criteria states plus overall completion status
+  - checkCompletionCriteria function calculates criteria on every render (no memoization needed since state changes trigger re-renders anyway)
+  - Completion status card placed between StandaloneTip and Section 0 to be visible at top
+  - Three states: in-progress (blue card with checklist), ready-to-complete (green button enabled), completed (celebration card with PartyPopper icon)
+  - Progress bar shows percentage via (completedCount / totalCount) * 100
+  - Criteria checklist uses 2-column grid on sm+ breakpoints for compact display
+  - Circle and CheckCircle icons from lucide-react used for unchecked/checked states
+  - handleMarkAsComplete callback sets completed: true on the review, similar to handleComplete but without legacy field handling
+---
+
+## 2026-01-20 - US-013: Auto-populate metrics from daily plans
+- What was implemented: Added habit_tally method to backend and auto-populate logic to frontend
+- Files changed:
+  - backend/app/models/weekly_review.rb (added habit_tally method)
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (include habit_tally in response)
+  - frontend/src/lib/weeklyReviews.ts (added HabitTally type)
+  - frontend/src/pages/WeeklyReview.tsx (added auto-populate and refresh button)
+- **Learnings for future iterations:**
+  - Habit names are user-defined, so use case-insensitive substring matching to map habits to metric categories
+  - Pattern: "workout"/"exercise"/"gym"/"training" -> workouts_completed
+  - Pattern: "walk"/"steps"/"cardio" -> walks_completed
+  - Pattern: "writ"/"journal"/"blog" -> writing_sessions_completed
+  - Pattern: "house"/"clean"/"tidy"/"reset" -> house_resets_completed
+  - Use find_each instead of each when iterating over ActiveRecord collections (rubocop Rails/FindEach)
+  - Auto-populate only when DB value is null (don't override user's manual input)
+  - RefreshCw icon from lucide-react is good for refresh/recalculate buttons
+  - HabitTally uses TypeScript index signature: `{ [habitName: string]: number }`
+---
+
+## 2026-01-20 - US-014: Create Mention model and migration
+- What was implemented: Created mentions table and Mention model with polymorphic association, added has_many :mentions to all mentionable models
+- Files changed:
+  - backend/db/migrate/20260120170348_create_mentions.rb (new)
+  - backend/app/models/mention.rb (new)
+  - backend/app/models/user.rb (added mentions and mentions_created associations)
+  - backend/app/models/goal.rb (added has_many :mentions)
+  - backend/app/models/daily_plan.rb (added has_many :mentions)
+  - backend/app/models/top_priority.rb (added has_many :mentions)
+  - backend/app/models/weekly_review.rb (added has_many :mentions)
+  - backend/app/models/monthly_review.rb (added has_many :mentions)
+  - backend/app/models/quarterly_review.rb (added has_many :mentions)
+  - backend/app/models/annual_review.rb (added has_many :mentions)
+  - backend/db/schema.rb (auto-updated)
+- **Learnings for future iterations:**
+  - Polymorphic associations: `belongs_to :mentionable, polymorphic: true` and `has_many :mentions, as: :mentionable`
+  - When using `t.references` with `foreign_key: { to_table: :users }`, Rails auto-creates an index on that column - don't add a duplicate index
+  - User has two mention associations: `mentions_created` (where user_id is the author) and `mentions` (where mentioned_user_id is the recipient)
+  - Rubocop complains about redundant `foreign_key: :user_id` when the foreign key name matches the association name - just omit it
+  - Unique index on [mentionable_type, mentionable_id, user_id, mentioned_user_id, text_field] prevents duplicate mentions in the same field
+  - Pre-existing test failures (Goal model) are due to calendar sync feature referencing missing `notes` column - unrelated to mentions work
+---
+
+## 2026-01-20 - US-015: Create MentionParserService to extract @mentions from text
+- What was implemented: Created MentionParserService to parse text for @firstname mentions and return matching User objects
+- Files changed:
+  - backend/app/services/mention_parser_service.rb (new)
+  - backend/spec/services/mention_parser_service_spec.rb (new)
+- **Learnings for future iterations:**
+  - Use `/@(\w+)/i` regex pattern to match @mentions - \w+ captures word characters (letters, numbers, underscore)
+  - To match user first name: split full name and take first word, compare case-insensitively with downcased mention text
+  - Family.members returns users through family_memberships association - use .select to filter in Ruby rather than complex SQL joins
+  - RSpec `contain_exactly` matcher is ideal for testing arrays where order doesn't matter
+  - Handle edge cases: nil/blank text, invalid family_id, non-existent usernames all return empty array
+  - Service uses class << self pattern with class methods, matching other services in codebase
+---
+
+## 2026-01-20 - US-016: Add concern for mention processing
+- What was implemented: Created Mentionable concern with DRY code for processing @mentions across multiple models
+- Files changed:
+  - backend/app/models/concerns/mentionable.rb (new)
+  - backend/spec/models/concerns/mentionable_spec.rb (new)
+- **Learnings for future iterations:**
+  - ActiveSupport::Concern pattern: use `extend ActiveSupport::Concern`, `included do ... end`, and `class_methods do ... end`
+  - Use `unless reflect_on_association(:mentions)` to avoid re-declaring association if model already has it
+  - Use `saved_change_to_attribute?(field)` to check if a specific field changed after save (not `changed?` which is pre-save)
+  - For rubocop, rename `get_X` accessor methods to just `X` or use verb form like `mentionable_text_fields`
+  - Models access family differently: some have `belongs_to :family`, others get family via `daily_plan.family`
+  - Models access user differently: some have `belongs_to :user`, Goal uses `belongs_to :creator`
+  - Split complex methods into smaller helper methods to satisfy rubocop ABC size limits
+  - Testing concerns: use `before(:all)` with `include(described_class)` and `mentionable_fields` to configure real models for testing
+  - Use `rubocop:disable RSpec/BeforeAfterAll` inline comments to acknowledge intentional use of before(:all)/after(:all)
+  - Pre-existing Goal model failures (saved_change_to_notes?) are from calendar sync feature - unrelated to this work
+---
+
+## 2026-01-20 - US-017: Include Mentionable concern in all relevant models
+- What was implemented: Added Mentionable concern with mentionable_fields to 7 models, created/updated RSpec tests
+- Files changed:
+  - backend/app/models/goal.rb (added include Mentionable, mentionable_fields :title, :description)
+  - backend/app/models/top_priority.rb (added include Mentionable, mentionable_fields :title)
+  - backend/app/models/daily_plan.rb (added include Mentionable, mentionable_fields :shutdown_shipped, :shutdown_blocked)
+  - backend/app/models/weekly_review.rb (added include Mentionable, mentionable_fields for 6 template fields)
+  - backend/app/models/monthly_review.rb (added include Mentionable, mentionable_fields :lessons_learned)
+  - backend/app/models/quarterly_review.rb (added include Mentionable, mentionable_fields :insights)
+  - backend/app/models/annual_review.rb (added include Mentionable, mentionable_fields :lessons_learned, :next_year_theme)
+  - backend/spec/models/goal_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/top_priority_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/daily_plan_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/weekly_review_spec.rb (added Mentionable concern tests)
+  - backend/spec/models/monthly_review_spec.rb (new file)
+  - backend/spec/models/quarterly_review_spec.rb (new file)
+  - backend/spec/models/annual_review_spec.rb (new file)
+- **Learnings for future iterations:**
+  - When including Mentionable, remove the `has_many :mentions` declaration since the concern provides it
+  - Use comment without "Note:" prefix to avoid rubocop Style/CommentAnnotation warning (use "# Mentions association is provided..." not "# Note: Mentions association...")
+  - Goal model uses `creator` not `user` - Mentionable concern handles this via find_creator helper
+  - TopPriority accesses family through daily_plan - Mentionable concern handles this via find_user_via_daily_plan
+  - Pre-existing rubocop offenses in Goal (callback order) and DailyPlan (ABC size) are unrelated to Mentionable changes
+  - Pre-existing Goal model spec failures (assigned_to?, visible_to?) are from goal assignment feature - unrelated to mentions work
+---
+
+## 2026-01-20 - US-018: Send notifications when users are mentioned
+- What was implemented: Added notification delivery for @mentions with context-aware body and links
+- Files changed:
+  - backend/app/models/mention.rb (added after_create callback)
+  - backend/app/models/notification.rb (added :mention to enum)
+  - backend/app/services/notification_service.rb (added notify_mention method and helpers)
+  - backend/spec/models/mention_spec.rb (new - 16 test examples)
+  - backend/spec/factories/mentions.rb (new)
+  - backend/spec/factories/notifications.rb (added :mention trait)
+  - backend/spec/models/notification_spec.rb (updated enum test)
+- **Learnings for future iterations:**
+  - Skip self-notifications: check `user_id == mentioned_user_id` in callback before sending
+  - Use hash lookup (STATIC_MENTIONABLE_CONTEXTS) for static context strings to reduce cyclomatic complexity
+  - Split `mention_notification_link` into smaller helpers (`mentionable_link_path`, `review_link_path`) to satisfy rubocop
+  - DailyPlan uses `date` field, not `plan_date` - be careful when building links
+  - MonthlyReview uses `month` field, AnnualReview uses `year` (integer), QuarterlyReview uses `quarter_start_date`
+  - NotificationService class was close to 150 line limit - refactoring required to add new methods
+  - Factory for mentions requires association stubs; use `association :mentionable, factory: :goal`
+---
+
+## 2026-01-20 - US-019: Add mentioned_by filter to all content APIs
+- What was implemented: Added mentioned_by query parameter filter to all content APIs
+- Files changed:
+  - backend/app/models/goal.rb (added mentioned_by scope)
+  - backend/app/models/daily_plan.rb (added mentioned_by scope)
+  - backend/app/models/weekly_review.rb (added mentioned_by scope)
+  - backend/app/models/monthly_review.rb (added mentioned_by scope)
+  - backend/app/models/quarterly_review.rb (added mentioned_by scope)
+  - backend/app/models/annual_review.rb (added mentioned_by scope)
+  - backend/app/controllers/api/v1/goals_controller.rb (added mentioned_by to filtered_goals)
+  - backend/app/controllers/api/v1/daily_plans_controller.rb (added index action with mentioned_by)
+  - backend/app/controllers/api/v1/weekly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/monthly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/quarterly_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/controllers/api/v1/annual_reviews_controller.rb (added mentioned_by to index)
+  - backend/app/policies/daily_plan_policy.rb (added index? method)
+  - backend/config/routes.rb (added :index to daily_plans)
+  - backend/spec/requests/api/v1/goals_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/daily_plans_spec.rb (added index endpoint tests)
+  - backend/spec/requests/api/v1/weekly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/monthly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/quarterly_reviews_spec.rb (added mentioned_by filter tests)
+  - backend/spec/requests/api/v1/annual_reviews_spec.rb (added mentioned_by filter tests)
+- **Learnings for future iterations:**
+  - Use `.mentioned_by(params[:mentioned_by])` scope pattern - scope handles nil by returning all records if user_id is nil
+  - DailyPlans controller previously had no index action - added it along with route and policy method
+  - Scope uses `.joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct` - distinct prevents duplicates when multiple mentions exist
+  - Pre-existing rubocop offenses (callback order, ABC size) and goal spec failures (calendar sync) are unrelated to this work
+---
+
+## 2026-01-20 - US-020: Update frontend types for mentions
+- What was implemented: Added TypeScript types and hooks support for mentions and mentionedBy filtering
+- Files changed:
+  - frontend/src/lib/api.ts (added Mention interface)
+  - frontend/src/lib/goals.ts (added mentions to Goal, mentioned_by to GoalFilters, updated getGoals)
+  - frontend/src/lib/dailyPlans.ts (added mentions to DailyPlan, DailyPlanFilters, getDailyPlans function)
+  - frontend/src/lib/weeklyReviews.ts (added mentions to WeeklyReview, WeeklyReviewFilters, updated getWeeklyReviews)
+  - frontend/src/lib/monthlyReviews.ts (added mentions to MonthlyReview, MonthlyReviewFilters, updated getMonthlyReviews)
+  - frontend/src/lib/quarterlyReviews.ts (added mentions to QuarterlyReview, QuarterlyReviewFilters, updated getQuarterlyReviews)
+  - frontend/src/lib/annualReviews.ts (added mentions to AnnualReview, AnnualReviewFilters, updated getAnnualReviews)
+  - frontend/src/hooks/useDailyPlans.ts (added useDailyPlans hook with filters, updated query keys)
+  - frontend/src/hooks/useWeeklyReviews.ts (added filters param to useWeeklyReviews, updated query keys)
+  - frontend/src/hooks/useMonthlyReviews.ts (added filters param to useMonthlyReviews, updated query keys)
+  - frontend/src/hooks/useQuarterlyReviews.ts (added filters param to useQuarterlyReviews, updated query keys)
+  - frontend/src/hooks/useAnnualReviews.ts (added filters param to useAnnualReviews, updated query keys)
+- **Learnings for future iterations:**
+  - Mention type uses snake_case field names to match API response (mentionable_type, mentioned_user_id, etc.)
+  - mentions array is optional (`mentions?: Mention[]`) since it may not be included in all API responses
+  - Filter types (XxxFilters) follow the pattern: `{ mentioned_by?: number }`
+  - Query key factories need to include filters in the key array for proper cache invalidation: `list: (familyId, filters?) => [..., filters]`
+  - useGoals already accepted GoalFilters, so no hook changes needed there - just added mentioned_by to GoalFilters type
+  - Pre-existing ESLint errors (react-hooks/set-state-in-effect, react-hooks/incompatible-library) are unrelated to this work
+---
+
+## 2026-01-20 - US-021: Create MentionInput component with autocomplete
+- What was implemented: Created MentionInput component with @ detection, autocomplete dropdown, keyboard navigation, and MentionDisplay for read-only highlighting
+- Files changed:
+  - frontend/src/components/ui/mention-input.tsx (new)
+  - frontend/src/hooks/useFamilyMembers.ts (new)
+- **Learnings for future iterations:**
+  - Can't export hooks from component files due to react-refresh/only-export-components rule - put hooks in separate files
+  - Avoid accessing refs during render - use CSS classes for positioning instead of reading ref.current
+  - Use `/@(\w*)$/` regex to detect @ mentions at cursor position
+  - FamilyMember type has `user_id` (not `id`) and `name` fields - use `name.split(" ")[0]` for first name
+  - Dropdown positioning: use `absolute top-full left-0 right-0 z-50 mt-1` classes instead of inline styles with ref access
+  - itemRefs pattern with Map allows scrolling selected item into view via `itemRefs.current.get(index)?.scrollIntoView()`
+  - handleBlur needs setTimeout delay (150ms) to allow click events on dropdown items before closing
+  - useFamilyMembers wraps useMembers from useFamilies.ts, getting currentFamily from useFamilyStore
+---
+
+## 2026-01-20 - US-022: Replace textareas with MentionInput across app
+- What was implemented: Replaced all mentionable text fields with MentionInput component to enable @mentions
+- Files changed:
+  - frontend/src/components/GoalModal.tsx (replaced description Textarea with MentionInput)
+  - frontend/src/pages/DailyPlanner.tsx (replaced top priority Input and shutdown textareas with MentionInput)
+  - frontend/src/pages/WeeklyReview.tsx (replaced 6 fields: wins_shipped, losses_friction, metrics_notes, system_to_adjust, weekly_priorities, kill_list)
+  - frontend/src/pages/MonthlyReview.tsx (replaced lessons_learned Textarea)
+  - frontend/src/pages/QuarterlyReview.tsx (replaced insights Textarea)
+  - frontend/src/pages/AnnualReview.tsx (replaced lessons_learned Textarea and next_year_theme Input)
+- **Learnings for future iterations:**
+  - MentionInput supports both multiline (default) and single-line modes via `multiline={false}` prop
+  - When replacing Textarea: use MentionInput without multiline prop, pass value and onChange directly (not e.target.value)
+  - When replacing Input: use MentionInput with `multiline={false}`, pass value and onChange directly
+  - For react-hook-form integration, use `watch("field")` and `setValue("field", value)` instead of `{...register("field")}`
+  - After removing Textarea imports, check if unused - TypeScript will error with TS6133 if declared but never read
+  - Updated placeholder text to include "@name to mention family members" hint
+  - Some files needed Textarea import kept for non-mentionable fields (e.g., WeeklyReview legacy lessonsLearned)
+  - Input import was only needed in DailyPlanner for the priority inputs, which are now MentionInput with multiline=false
+---
+
+## 2026-01-20 - US-023: Add mention filters to all content pages
+- What was implemented: Added "Mentioned Me" filter toggle buttons to Goals page and all Review past reviews sections
+- Files changed:
+  - frontend/src/pages/Goals.tsx (added handleMentionedMeToggle, AtSign icon import, filter button in filter card)
+  - frontend/src/pages/WeeklyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section, conditional empty state messages)
+  - frontend/src/pages/MonthlyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+  - frontend/src/pages/QuarterlyReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+  - frontend/src/pages/AnnualReview.tsx (added reviewFilters state, handleMentionedMeToggle, filter button in past reviews section)
+- **Learnings for future iterations:**
+  - Goals page already had filter state and card, so added mentioned_by alongside existing time_scale, status, assignee_id filters
+  - Review pages didn't have filter state, so added reviewFilters state with respective Filter types (WeeklyReviewFilters, etc.)
+  - Toggle pattern: when filter.mentioned_by exists, clear it; otherwise set to user?.id
+  - Button styling: when active use bg-blue-600 hover:bg-blue-700; when inactive use outline variant
+  - AtSign icon from lucide-react fits the mention theme
+  - Empty state messages adjust based on hasActiveFilter: "No reviews with mentions" vs "No past reviews yet"
+  - useAuthStore import needed in Review pages to get user.id for the filter
+  - Import XxxFilters type from respective lib file (e.g., import type { WeeklyReviewFilters } from "@/lib/weeklyReviews")
+---
+
+## 2026-01-20 - US-024: Add recent mentions endpoint and UI indicator
+- What was implemented: Added recent mentions API endpoint and MentionIndicator UI component with dropdown
+- Files changed:
+  - backend/app/controllers/api/v1/mentions_controller.rb (new)
+  - backend/config/routes.rb (added mentions resource with recent route)
+  - backend/spec/requests/api/v1/mentions_spec.rb (new - 6 test examples)
+  - frontend/src/lib/mentions.ts (new - RecentMention type, getRecentMentions API, helpers)
+  - frontend/src/hooks/useMentions.ts (new - useRecentMentions hook)
+  - frontend/src/components/MentionIndicator.tsx (new - popover with mention list)
+  - frontend/src/components/MainLayout.tsx (added MentionIndicator to header)
+- **Learnings for future iterations:**
+  - Mentions endpoint filters by mentioned_user_id for current user, uses 7.days.ago.. range syntax for rubocop compliance
+  - Mentionable title/link helpers need to handle different model fields: Goal.title, DailyPlan.date, WeeklyReview.week_start_date, etc.
+  - Split large case statements into multiple smaller methods to satisfy rubocop cyclomatic complexity limits
+  - Use hash lookup (STATIC_TITLES) for simple cases, delegate complex formatting to helper methods
+  - MentionIndicator follows NotificationBell pattern: Popover with list of items, count badge, navigation on click
+  - Query key pattern for mentions: `["mentions", "recent", familyId]`
+  - RecentMention type includes mentioner object with id/name, not just user_id
 ---

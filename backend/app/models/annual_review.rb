@@ -1,13 +1,21 @@
 # frozen_string_literal: true
 
 class AnnualReview < ApplicationRecord
+  include Mentionable
+
   belongs_to :user
   belongs_to :family
+
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :lessons_learned, :next_year_theme
 
   validates :year, presence: true
   validates :year, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_year }
 
   scope :for_year, ->(year) { where(year: year) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   # Find or create the annual review for the current year
   def self.find_or_create_for_current_year(user:, family:)

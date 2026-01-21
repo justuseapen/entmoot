@@ -7,13 +7,15 @@ import {
   updateMonthlyReview,
   getMonthlyReviewMetrics,
   type UpdateMonthlyReviewData,
+  type MonthlyReviewFilters,
 } from "@/lib/monthlyReviews";
 
 // Query keys
 export const monthlyReviewKeys = {
   all: ["monthlyReviews"] as const,
   lists: () => [...monthlyReviewKeys.all, "list"] as const,
-  list: (familyId: number) => [...monthlyReviewKeys.lists(), familyId] as const,
+  list: (familyId: number, filters?: MonthlyReviewFilters) =>
+    [...monthlyReviewKeys.lists(), familyId, filters] as const,
   current: (familyId: number) =>
     [...monthlyReviewKeys.all, "current", familyId] as const,
   details: () => [...monthlyReviewKeys.all, "detail"] as const,
@@ -34,11 +36,14 @@ export function useCurrentMonthlyReview(familyId: number) {
 }
 
 // Get all monthly reviews for the user
-export function useMonthlyReviews(familyId: number) {
+export function useMonthlyReviews(
+  familyId: number,
+  filters?: MonthlyReviewFilters
+) {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: monthlyReviewKeys.list(familyId),
-    queryFn: () => getMonthlyReviews(familyId),
+    queryKey: monthlyReviewKeys.list(familyId, filters),
+    queryFn: () => getMonthlyReviews(familyId, filters),
     enabled: isAuthenticated && !!familyId,
   });
 }

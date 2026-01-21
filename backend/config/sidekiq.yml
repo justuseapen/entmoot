@@ -85,3 +85,9 @@
       class: SendAnnualReviewRemindersJob
       queue: default
       description: "Send annual review reminders December 20-31"
+
+    calendar_periodic_sync:
+      cron: '0 * * * *'
+      class: CalendarPeriodicSyncJob
+      queue: low
+      description: "Sync Google Calendar events for all active credentials hourly"

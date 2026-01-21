@@ -12,6 +12,8 @@ import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { FinalCTASection } from "@/components/landing/FinalCTASection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { StickyCtaBar } from "@/components/landing/StickyCtaBar";
+import { ExitIntentPopup } from "@/components/landing/ExitIntentPopup";
 
 // Landing page design system colors from PRD
 const LANDING_COLORS = {
@@ -33,6 +35,12 @@ export function LandingPage() {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Handle email submission from exit intent popup
+  const handleEmailSubmit = (email: string) => {
+    // TODO: Integrate with email service (ConvertKit, Mailchimp, etc.)
+    console.log("Email captured:", email);
+  };
+
   return (
     <div
       className="min-h-screen scroll-smooth"
@@ -44,7 +52,7 @@ export function LandingPage() {
         {/* Hero Section */}
         <HeroSection />
 
-        {/* Social Proof Bar - immediately below hero */}
+        {/* Social Proof Bar - Founder quote and mission */}
         <SocialProofBar />
 
         {/* Problem/Solution Section */}
@@ -59,18 +67,28 @@ export function LandingPage() {
         {/* Testimonials Section */}
         <TestimonialsSection />
 
-        {/* Pricing Section */}
+        {/* Pricing Section - Single LTD Card */}
         <PricingSection />
 
         {/* FAQ Section */}
         <FAQSection />
 
-        {/* Final CTA Section */}
+        {/* Final CTA Section with Countdown */}
         <FinalCTASection />
       </main>
 
       {/* Footer */}
       <LandingFooter />
+
+      {/* Sticky CTA Bar - appears after scroll */}
+      <StickyCtaBar remainingSpots={453} totalSpots={500} />
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup
+        discountCode="FOUNDING20"
+        discountAmount={20}
+        onEmailSubmit={handleEmailSubmit}
+      />
     </div>
   );
 }

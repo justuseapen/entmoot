@@ -1,13 +1,21 @@
 # frozen_string_literal: true
 
 class WeeklyReview < ApplicationRecord
+  include Mentionable
+
   belongs_to :user
   belongs_to :family
+
+  # Mentions association is provided by the Mentionable concern
+  mentionable_fields :wins_shipped, :losses_friction, :metrics_notes, :system_to_adjust, :weekly_priorities, :kill_list
 
   validates :week_start_date, presence: true
   validates :week_start_date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_week }
 
   scope :for_week, ->(date) { where(week_start_date: date) }
+  scope :mentioned_by, lambda { |user_id|
+    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
+  }
 
   # Find or create the weekly review for the current week
   def self.find_or_create_for_current_week(user:, family:)
@@ -28,10 +36,14 @@ class WeeklyReview < ApplicationRecord
     today - days_since_start.days
   end
 
+  # Calculate the end of the week (6 days after start)
+  def week_end_date
+    week_start_date + 6.days
+  end
+
   # Get daily plans for this week
   def daily_plans
-    week_end = week_start_date + 6.days
-    DailyPlan.where(user: user, family: family, date: week_start_date..week_end).order(:date)
+    DailyPlan.where(user: user, family: family, date: week_start_date..week_end_date).order(:date)
   end
 
   # Calculate aggregate metrics for the week
@@ -48,6 +60,22 @@ class WeeklyReview < ApplicationRecord
     return default_task_metrics if plans.empty?
 
     aggregate_task_stats(plans)
+  end
+
+  # Tally habit completions by habit name across the week
+  # Returns a hash like { "Workout" => 3, "Walk" => 5, "Writing" => 2, "House Reset" => 7 }
+  def habit_tally
+    plans = daily_plans.includes(habit_completions: :habit)
+    tally = Hash.new(0)
+
+    plans.each do |plan|
+      plan.habit_completions.where(completed: true).find_each do |completion|
+        habit_name = completion.habit.name
+        tally[habit_name] += 1
+      end
+    end
+
+    tally
   end
 
   # Aggregate goals progress changes for the week

@@ -7,14 +7,15 @@ import {
   updateQuarterlyReview,
   getQuarterlyReviewMetrics,
   type UpdateQuarterlyReviewData,
+  type QuarterlyReviewFilters,
 } from "@/lib/quarterlyReviews";
 
 // Query keys
 export const quarterlyReviewKeys = {
   all: ["quarterlyReviews"] as const,
   lists: () => [...quarterlyReviewKeys.all, "list"] as const,
-  list: (familyId: number) =>
-    [...quarterlyReviewKeys.lists(), familyId] as const,
+  list: (familyId: number, filters?: QuarterlyReviewFilters) =>
+    [...quarterlyReviewKeys.lists(), familyId, filters] as const,
   current: (familyId: number) =>
     [...quarterlyReviewKeys.all, "current", familyId] as const,
   details: () => [...quarterlyReviewKeys.all, "detail"] as const,
@@ -35,11 +36,14 @@ export function useCurrentQuarterlyReview(familyId: number) {
 }
 
 // Get all quarterly reviews for the user
-export function useQuarterlyReviews(familyId: number) {
+export function useQuarterlyReviews(
+  familyId: number,
+  filters?: QuarterlyReviewFilters
+) {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
-    queryKey: quarterlyReviewKeys.list(familyId),
-    queryFn: () => getQuarterlyReviews(familyId),
+    queryKey: quarterlyReviewKeys.list(familyId, filters),
+    queryFn: () => getQuarterlyReviews(familyId, filters),
     enabled: isAuthenticated && !!familyId,
   });
 }

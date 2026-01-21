@@ -52,6 +52,32 @@ RSpec.describe "Api::V1::MonthlyReviews" do
 
         expect(json_response["monthly_reviews"].first).not_to have_key("metrics")
       end
+
+      it "filters by mentioned_by" do
+        mentioned_user = create(:user)
+        create(:family_membership, :adult, family: family, user: mentioned_user)
+
+        mentioned_review = create(:monthly_review, user: user, family: family, month: Date.current.beginning_of_month)
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "lessons_learned")
+        create(:monthly_review, :last_month, user: user, family: family)
+
+        get "/api/v1/families/#{family.id}/monthly_reviews",
+            params: { mentioned_by: mentioned_user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["monthly_reviews"].length).to eq(1)
+        expect(json_response["monthly_reviews"].first["id"]).to eq(mentioned_review.id)
+      end
+
+      it "returns empty array when no mentions match" do
+        create(:monthly_review, user: user, family: family)
+
+        get "/api/v1/families/#{family.id}/monthly_reviews",
+            params: { mentioned_by: user.id },
+            headers: auth_headers(user)
+
+        expect(json_response["monthly_reviews"]).to eq([])
+      end
     end
 
     context "when user is not a family member" do
