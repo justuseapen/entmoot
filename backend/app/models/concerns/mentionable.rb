@@ -12,6 +12,8 @@ module Mentionable
   extend ActiveSupport::Concern
 
   included do
+    class_attribute :mentionable_text_fields, instance_writer: false, default: [].freeze
+
     # Only add the mentions association if it doesn't already exist
     has_many :mentions, as: :mentionable, dependent: :destroy unless reflect_on_association(:mentions)
 
@@ -22,13 +24,7 @@ module Mentionable
     # Define which fields on this model should be scanned for @mentions
     # @param fields [Array<Symbol>] List of field names to scan
     def mentionable_fields(*fields)
-      @mentionable_fields = fields
-    end
-
-    # Get the list of mentionable fields for this model
-    # @return [Array<Symbol>] List of field names
-    def mentionable_text_fields
-      @mentionable_fields || []
+      self.mentionable_text_fields = fields.freeze
     end
   end
 

@@ -36,10 +36,14 @@ class WeeklyReview < ApplicationRecord
     today - days_since_start.days
   end
 
+  # Calculate the end of the week (6 days after start)
+  def week_end_date
+    week_start_date + 6.days
+  end
+
   # Get daily plans for this week
   def daily_plans
-    week_end = week_start_date + 6.days
-    DailyPlan.where(user: user, family: family, date: week_start_date..week_end).order(:date)
+    DailyPlan.where(user: user, family: family, date: week_start_date..week_end_date).order(:date)
   end
 
   # Calculate aggregate metrics for the week

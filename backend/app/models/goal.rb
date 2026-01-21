@@ -65,7 +65,7 @@ class Goal < ApplicationRecord
   end
 
   def assigned_to?(user)
-    assignees.include?(user)
+    goal_assignments.exists?(user: user)
   end
 
   def visible_to?(user)
@@ -86,9 +86,9 @@ class Goal < ApplicationRecord
     assignees.pluck(:id)
   end
 
+  after_destroy :remove_from_calendars
   # Calendar sync callbacks
   after_commit :schedule_calendar_sync, on: %i[create update], if: :should_sync_to_calendar?
-  after_destroy :remove_from_calendars
 
   private
 
@@ -97,8 +97,7 @@ class Goal < ApplicationRecord
     saved_change_to_title? ||
       saved_change_to_due_date? ||
       saved_change_to_status? ||
-      saved_change_to_description? ||
-      saved_change_to_notes?
+      saved_change_to_description?
   end
 
   def schedule_calendar_sync

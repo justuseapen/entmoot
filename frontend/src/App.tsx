@@ -20,6 +20,7 @@ import { AnnualReview } from "./pages/AnnualReview";
 import { Leaderboard } from "./pages/Leaderboard";
 import { NotificationSettings } from "./pages/NotificationSettings";
 import { NotificationsPage } from "./pages/Notifications";
+import CalendarSelect from "./pages/CalendarSelect";
 import { PointsHistory } from "./pages/PointsHistory";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { UserProfile } from "./pages/UserProfile";
@@ -221,6 +222,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <NotificationSettings />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings/calendar/select"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CalendarSelect />
                     </MainLayout>
                   </ProtectedRoute>
                 }
