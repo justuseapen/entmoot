@@ -57,8 +57,10 @@ RSpec.describe "Api::V1::WeeklyReviews" do
         mentioned_user = create(:user)
         create(:family_membership, :adult, family: family, user: mentioned_user)
 
-        mentioned_review = create(:weekly_review, user: user, family: family, week_start_date: Date.current.beginning_of_week)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "wins_shipped")
+        mentioned_review = create(:weekly_review, user: user, family: family,
+                                                  week_start_date: Date.current.beginning_of_week)
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review,
+                         text_field: "wins_shipped")
         create(:weekly_review, :last_week, user: user, family: family)
 
         get "/api/v1/families/#{family.id}/weekly_reviews",

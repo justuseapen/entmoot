@@ -125,7 +125,7 @@ export function InviteMemberModal({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="rounded-lg border bg-muted/50 p-4">
+            <div className="bg-muted/50 rounded-lg border p-4">
               <div className="flex items-start gap-3">
                 <Mail className="text-muted-foreground mt-0.5 h-5 w-5" />
                 <div className="space-y-1">

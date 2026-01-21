@@ -109,9 +109,9 @@ RSpec.describe "Api::V1::Habits" do
 
     context "when authenticated member" do
       it "creates a new habit for current user" do
-        expect {
+        expect do
           post "/api/v1/families/#{family.id}/habits", params: valid_params, headers: auth_headers(user)
-        }.to change(Habit, :count).by(1)
+        end.to change(Habit, :count).by(1)
 
         expect(response).to have_http_status(:created)
         expect(json_response["message"]).to eq("Habit created successfully.")
@@ -221,9 +221,9 @@ RSpec.describe "Api::V1::Habits" do
     let!(:habit) { create(:habit, user: user, family: family, position: 1) }
 
     it "deletes the habit" do
-      expect {
+      expect do
         delete "/api/v1/families/#{family.id}/habits/#{habit.id}", headers: auth_headers(user)
-      }.to change(Habit, :count).by(-1)
+      end.to change(Habit, :count).by(-1)
 
       expect(response).to have_http_status(:ok)
       expect(json_response["message"]).to eq("Habit deleted successfully.")

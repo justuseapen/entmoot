@@ -58,7 +58,8 @@ RSpec.describe "Api::V1::MonthlyReviews" do
         create(:family_membership, :adult, family: family, user: mentioned_user)
 
         mentioned_review = create(:monthly_review, user: user, family: family, month: Date.current.beginning_of_month)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "lessons_learned")
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review,
+                         text_field: "lessons_learned")
         create(:monthly_review, :last_month, user: user, family: family)
 
         get "/api/v1/families/#{family.id}/monthly_reviews",

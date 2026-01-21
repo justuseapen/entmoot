@@ -39,7 +39,9 @@ describe("InviteMemberModal", () => {
     expect(screen.getByText("Invite Family Member")).toBeInTheDocument();
     expect(screen.getByLabelText("Email Address")).toBeInTheDocument();
     expect(screen.getByLabelText("Role")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Send Invitation" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Send Invitation" })
+    ).toBeInTheDocument();
   });
 
   it("does not render when closed", () => {
@@ -82,7 +84,10 @@ describe("InviteMemberModal", () => {
     render(<InviteMemberModal {...defaultProps} />);
 
     // Fill in the form
-    await user.type(screen.getByLabelText("Email Address"), "newmember@example.com");
+    await user.type(
+      screen.getByLabelText("Email Address"),
+      "newmember@example.com"
+    );
     await user.click(screen.getByRole("button", { name: "Send Invitation" }));
 
     // Wait for success state
@@ -94,7 +99,9 @@ describe("InviteMemberModal", () => {
     expect(screen.getByText("newmember@example.com")).toBeInTheDocument();
     expect(screen.getByText("Adult")).toBeInTheDocument();
     expect(screen.getByText("Pending")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Send Another" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Send Another" })
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument();
 
     // Verify onSuccess was called
@@ -120,7 +127,10 @@ describe("InviteMemberModal", () => {
     render(<InviteMemberModal {...defaultProps} />);
 
     // Submit an invitation
-    await user.type(screen.getByLabelText("Email Address"), "newmember@example.com");
+    await user.type(
+      screen.getByLabelText("Email Address"),
+      "newmember@example.com"
+    );
     await user.click(screen.getByRole("button", { name: "Send Invitation" }));
 
     // Wait for success state
@@ -158,7 +168,10 @@ describe("InviteMemberModal", () => {
     render(<InviteMemberModal {...defaultProps} />);
 
     // Submit an invitation
-    await user.type(screen.getByLabelText("Email Address"), "newmember@example.com");
+    await user.type(
+      screen.getByLabelText("Email Address"),
+      "newmember@example.com"
+    );
     await user.click(screen.getByRole("button", { name: "Send Invitation" }));
 
     // Wait for success state
@@ -179,7 +192,10 @@ describe("InviteMemberModal", () => {
 
     render(<InviteMemberModal {...defaultProps} />);
 
-    await user.type(screen.getByLabelText("Email Address"), "existing@example.com");
+    await user.type(
+      screen.getByLabelText("Email Address"),
+      "existing@example.com"
+    );
     await user.click(screen.getByRole("button", { name: "Send Invitation" }));
 
     await waitFor(() => {

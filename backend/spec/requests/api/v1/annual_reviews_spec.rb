@@ -57,7 +57,8 @@ RSpec.describe "Api::V1::AnnualReviews" do
         create(:family_membership, :adult, family: family, user: mentioned_user)
 
         mentioned_review = create(:annual_review, user: user, family: family)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "lessons_learned")
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review,
+                         text_field: "lessons_learned")
         create(:annual_review, :last_year, user: user, family: family)
 
         get "/api/v1/families/#{family.id}/annual_reviews",

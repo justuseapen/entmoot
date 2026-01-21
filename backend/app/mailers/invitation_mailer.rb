@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Rails/I18nLocaleTexts
 class InvitationMailer < ApplicationMailer
   default from: "Entmoot <hello@entmoot.app>"
 
@@ -26,4 +25,3 @@ class InvitationMailer < ApplicationMailer
     "#{protocol}://#{host}#{port_string}/accept-invitation/#{token}"
   end
 end
-# rubocop:enable Rails/I18nLocaleTexts

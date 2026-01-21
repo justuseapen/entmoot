@@ -57,7 +57,8 @@ RSpec.describe "Api::V1::QuarterlyReviews" do
         create(:family_membership, :adult, family: family, user: mentioned_user)
 
         mentioned_review = create(:quarterly_review, user: user, family: family)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review, text_field: "insights")
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_review,
+                         text_field: "insights")
         create(:quarterly_review, :last_quarter, user: user, family: family)
 
         get "/api/v1/families/#{family.id}/quarterly_reviews",

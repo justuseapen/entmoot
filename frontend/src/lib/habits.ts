@@ -22,7 +22,9 @@ export interface PositionUpdate {
 }
 
 // Habit endpoints
-export async function getHabits(familyId: number): Promise<{ habits: Habit[] }> {
+export async function getHabits(
+  familyId: number
+): Promise<{ habits: Habit[] }> {
   return apiFetch<{ habits: Habit[] }>(`/families/${familyId}/habits`);
 }
 

@@ -37,7 +37,8 @@ RSpec.describe "Api::V1::DailyPlans" do
         create(:family_membership, :adult, family: family, user: mentioned_user)
 
         mentioned_plan = create(:daily_plan, user: user, family: family, date: Date.current)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_plan, text_field: "intention")
+        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_plan,
+                         text_field: "intention")
         create(:daily_plan, user: user, family: family, date: Date.current - 1.day)
 
         get "/api/v1/families/#{family.id}/daily_plans",

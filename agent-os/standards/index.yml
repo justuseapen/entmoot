@@ -1,0 +1,23 @@
+# Agent OS Standards Index
+
+api:
+  error-response:
+    description: Structured API error format with error, errors[], and suggestion
+  response-builders:
+    description: Private *_response methods for JSON serialization in controllers
+
+backend:
+  pundit-authorization:
+    description: Family-based multi-tenant authorization using Pundit policies
+  service-classes:
+    description: Business logic services with class vs instance method patterns
+
+frontend:
+  api-client:
+    description: apiFetch wrapper with ApiError handling for typed API calls
+  hooks-lib-separation:
+    description: API functions in lib/, TanStack Query hooks in hooks/
+  query-key-factory:
+    description: Hierarchical query keys for targeted cache invalidation
+  zustand-stores:
+    description: Client state with persist middleware for session persistence

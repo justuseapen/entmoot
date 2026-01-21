@@ -522,7 +522,9 @@ export function Dashboard() {
                   <Card>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">My Assignments</CardTitle>
+                        <CardTitle className="text-lg">
+                          My Assignments
+                        </CardTitle>
                         <Button asChild variant="ghost" size="sm">
                           <Link to={`/families/${currentFamily.id}/goals`}>
                             View All Goals
@@ -555,7 +557,9 @@ export function Dashboard() {
                                     className="flex items-center justify-between rounded-lg border p-3"
                                   >
                                     <div>
-                                      <p className="font-medium">{goal.title}</p>
+                                      <p className="font-medium">
+                                        {goal.title}
+                                      </p>
                                       <p
                                         className={`text-xs ${
                                           goal.due_date &&
@@ -564,7 +568,8 @@ export function Dashboard() {
                                             : "text-muted-foreground"
                                         }`}
                                       >
-                                        {goal.due_date && isOverdue(goal.due_date)
+                                        {goal.due_date &&
+                                        isOverdue(goal.due_date)
                                           ? "Overdue"
                                           : `Due ${formatDueDate(goal.due_date)}`}
                                       </p>
@@ -590,7 +595,10 @@ export function Dashboard() {
                                     key={task.id}
                                     className="flex items-center gap-2 text-sm"
                                   >
-                                    <Checkbox checked={task.completed} disabled />
+                                    <Checkbox
+                                      checked={task.completed}
+                                      disabled
+                                    />
                                     <span>{task.title}</span>
                                     <span className="text-muted-foreground text-xs">
                                       (from {task.owner_name}&apos;s plan)
