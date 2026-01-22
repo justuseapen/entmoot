@@ -25,6 +25,11 @@ import {
 } from "@/components/FirstGoalPrompt";
 import { AddPriorityModal } from "@/components/AddPriorityModal";
 import {
+  EveningReflectionBanner,
+  isEveningTime,
+  needsEveningReflection,
+} from "@/components/EveningReflectionBanner";
+import {
   useTodayPlan,
   useUpdateDailyPlan,
   TopPriority,
@@ -942,6 +947,10 @@ export default function TodayScreen() {
   // Add Priority modal state (will be implemented in US-021)
   const [showAddPriorityModal, setShowAddPriorityModal] = useState(false);
 
+  // Evening reflection banner state
+  const [reflectionBannerDismissed, setReflectionBannerDismissed] =
+    useState(false);
+
   // Daily plan data
   const { data: dailyPlan, isLoading, isFetching, refetch } = useTodayPlan();
 
@@ -969,6 +978,17 @@ export default function TodayScreen() {
   const handleCloseAddPriorityModal = () => {
     setShowAddPriorityModal(false);
   };
+
+  const handleDismissReflectionBanner = () => {
+    setReflectionBannerDismissed(true);
+  };
+
+  // Determine if evening reflection banner should be visible
+  const showReflectionBanner =
+    !reflectionBannerDismissed &&
+    isEveningTime() &&
+    needsEveningReflection(dailyPlan) &&
+    !isLoading;
 
   // Handle pull-to-refresh
   const onRefresh = useCallback(() => {
@@ -1027,6 +1047,13 @@ export default function TodayScreen() {
               )}
             </View>
           )}
+
+          {/* Evening Reflection Banner */}
+          <EveningReflectionBanner
+            dailyPlan={dailyPlan}
+            visible={showReflectionBanner}
+            onDismiss={handleDismissReflectionBanner}
+          />
 
           {/* Today's Intention Section */}
           <IntentionSection
