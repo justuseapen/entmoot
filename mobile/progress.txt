@@ -334,3 +334,17 @@
   - Top priorities max 3: disable Add button with visual feedback when limit reached
   - Loading skeleton: render 3 placeholder items for visual consistency
 ---
+
+## 2026-01-21 - US-019
+- What was implemented: Built Today Screen Non-Negotiables (Habits) Section
+- Files changed:
+  - app/(tabs)/today.tsx (added HabitsSection, HabitItem components, new styles)
+- **Learnings for future iterations:**
+  - Habits data comes from habit_completions in daily plan response (not separate habits endpoint)
+  - Backend habits API doesn't include streak data per-habit yet - streak badge UI is ready but not populated
+  - Sort habits by habit.position to maintain user's preferred order
+  - Reuse existing checkbox styles from priorities for visual consistency
+  - habit_completions_attributes uses completion id (not habit_id) for updates
+  - Empty state should guide users to Settings to add habits
+  - Completion count shows X/Y completed in section header (same pattern as priorities)
+---
