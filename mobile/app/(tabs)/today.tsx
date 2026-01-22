@@ -28,6 +28,7 @@ import {
   useUpdateDailyPlan,
   TopPriority,
   HabitCompletion,
+  DailyTask,
 } from "@/hooks/useDailyPlan";
 import { useAuthStore } from "@/stores/auth";
 
@@ -452,7 +453,11 @@ interface HabitItemProps {
   streak?: number; // Future: will be populated when backend supports it
 }
 
-function HabitItem({ habitCompletion, onToggleComplete, streak }: HabitItemProps) {
+function HabitItem({
+  habitCompletion,
+  onToggleComplete,
+  streak,
+}: HabitItemProps) {
   const handleToggle = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onToggleComplete(habitCompletion.id, !habitCompletion.completed);
@@ -614,6 +619,283 @@ function HabitsSection({
 }
 
 // ============================================================================
+// Task Item Component
+// ============================================================================
+
+interface TaskItemProps {
+  task: DailyTask;
+  onToggleComplete: (id: number, completed: boolean) => void;
+  onDelete: (id: number) => void;
+}
+
+function TaskItem({ task, onToggleComplete, onDelete }: TaskItemProps) {
+  const swipeableRef = useRef<Swipeable>(null);
+
+  const handleToggle = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onToggleComplete(task.id, !task.completed);
+  };
+
+  const handleDelete = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    swipeableRef.current?.close();
+    onDelete(task.id);
+  };
+
+  const renderRightActions = (
+    _progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={handleDelete}
+        activeOpacity={0.8}
+      >
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <Ionicons
+            name="trash-outline"
+            size={22}
+            color={COLORS.textOnPrimary}
+          />
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      rightThreshold={40}
+      overshootRight={false}
+    >
+      <View style={styles.taskItem}>
+        {/* Checkbox */}
+        <TouchableOpacity
+          style={[styles.checkbox, task.completed && styles.checkboxCompleted]}
+          onPress={handleToggle}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          {task.completed && (
+            <Ionicons name="checkmark" size={16} color={COLORS.textOnPrimary} />
+          )}
+        </TouchableOpacity>
+
+        {/* Task content */}
+        <View style={styles.taskContent}>
+          <Text
+            style={[
+              styles.taskTitle,
+              task.completed && styles.taskTitleCompleted,
+            ]}
+            numberOfLines={2}
+          >
+            {task.title}
+          </Text>
+        </View>
+
+        {/* Assignee avatar (if assigned) */}
+        {task.assignee && (
+          <View style={styles.assigneeAvatar}>
+            {task.assignee.avatar_url ? (
+              <View style={styles.avatarImage}>
+                <Text style={styles.avatarInitial}>
+                  {task.assignee.name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.avatarImage}>
+                <Text style={styles.avatarInitial}>
+                  {task.assignee.name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+    </Swipeable>
+  );
+}
+
+// ============================================================================
+// Tasks Section Component
+// ============================================================================
+
+interface TasksSectionProps {
+  tasks: DailyTask[];
+  dailyPlanId: number;
+  isLoading?: boolean;
+}
+
+function TasksSection({
+  tasks,
+  dailyPlanId,
+  isLoading = false,
+}: TasksSectionProps) {
+  const updateDailyPlan = useUpdateDailyPlan();
+  const [isSaving, setIsSaving] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const newTaskInputRef = useRef<TextInput>(null);
+
+  // Sort tasks by position
+  const sortedTasks = [...tasks].sort((a, b) => a.position - b.position);
+
+  const handleToggleComplete = async (id: number, completed: boolean) => {
+    setIsSaving(true);
+    try {
+      await updateDailyPlan.mutateAsync({
+        planId: dailyPlanId,
+        payload: {
+          daily_plan: {
+            daily_tasks_attributes: [{ id, completed }],
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    setIsSaving(true);
+    try {
+      await updateDailyPlan.mutateAsync({
+        planId: dailyPlanId,
+        payload: {
+          daily_plan: {
+            daily_tasks_attributes: [{ id, _destroy: true }],
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAddTask = async () => {
+    const trimmedTitle = newTaskTitle.trim();
+    if (!trimmedTitle) return;
+
+    setIsSaving(true);
+    try {
+      await updateDailyPlan.mutateAsync({
+        planId: dailyPlanId,
+        payload: {
+          daily_plan: {
+            daily_tasks_attributes: [
+              {
+                title: trimmedTitle,
+                completed: false,
+                position: sortedTasks.length,
+              },
+            ],
+          },
+        },
+      });
+      setNewTaskTitle("");
+    } catch (error) {
+      console.error("Failed to add task:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Count completed tasks
+  const completedCount = sortedTasks.filter((t) => t.completed).length;
+  const totalCount = sortedTasks.length;
+
+  // Loading skeleton state
+  if (isLoading) {
+    return (
+      <View style={styles.tasksSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Tasks</Text>
+        </View>
+        <View style={styles.skeletonTaskList}>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={styles.skeletonTaskItem}>
+              <View style={styles.skeletonCheckbox} />
+              <View style={styles.skeletonTaskText} />
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.tasksSection}>
+      {/* Section header */}
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Tasks</Text>
+          {isSaving && (
+            <View style={styles.savingIndicator}>
+              <ActivityIndicator size="small" color={COLORS.textSecondary} />
+            </View>
+          )}
+        </View>
+        {totalCount > 0 && (
+          <Text style={styles.sectionSubtitle}>
+            {completedCount}/{totalCount} completed
+          </Text>
+        )}
+      </View>
+
+      {/* Task list */}
+      {sortedTasks.length > 0 && (
+        <View style={styles.taskList}>
+          {sortedTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggleComplete={handleToggleComplete}
+              onDelete={handleDelete}
+            />
+          ))}
+        </View>
+      )}
+
+      {/* Add task inline input */}
+      <View style={styles.addTaskContainer}>
+        <TextInput
+          ref={newTaskInputRef}
+          style={styles.addTaskInput}
+          value={newTaskTitle}
+          onChangeText={setNewTaskTitle}
+          placeholder="Add a task..."
+          placeholderTextColor={COLORS.textSecondary}
+          returnKeyType="done"
+          onSubmitEditing={handleAddTask}
+          blurOnSubmit={false}
+        />
+        {newTaskTitle.trim().length > 0 && (
+          <TouchableOpacity
+            style={styles.addTaskButton}
+            onPress={handleAddTask}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add-circle" size={24} color={COLORS.primary} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// ============================================================================
 // Completion Badge Component
 // ============================================================================
 
@@ -765,12 +1047,12 @@ export default function TodayScreen() {
             isLoading={isLoading}
           />
 
-          {/* Placeholder for future sections (Tasks, etc.) */}
-          <View style={styles.placeholderSection}>
-            <Text style={styles.placeholderText}>
-              More sections coming soon...
-            </Text>
-          </View>
+          {/* Tasks Section */}
+          <TasksSection
+            tasks={dailyPlan?.daily_tasks ?? []}
+            dailyPlanId={dailyPlan?.id ?? 0}
+            isLoading={isLoading}
+          />
         </ScrollView>
 
         {/* First Goal Prompt Modal */}
@@ -910,19 +1192,6 @@ const styles = StyleSheet.create({
   skeletonIntention: {
     width: "80%",
     height: 24,
-  },
-
-  // Placeholder section
-  placeholderSection: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 80,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    textAlign: "center",
   },
 
   // Gesture handler root
@@ -1153,6 +1422,90 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skeletonHabitText: {
+    flex: 1,
+    height: 18,
+    backgroundColor: COLORS.surface,
+    borderRadius: 4,
+  },
+
+  // Tasks section
+  tasksSection: {
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surface,
+  },
+  taskList: {
+    gap: 4,
+  },
+  taskItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    backgroundColor: COLORS.background,
+  },
+  taskContent: {
+    flex: 1,
+  },
+  taskTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  taskTitleCompleted: {
+    color: COLORS.textSecondary,
+    textDecorationLine: "line-through",
+  },
+
+  // Assignee avatar
+  assigneeAvatar: {
+    marginLeft: 12,
+  },
+  avatarImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary + "20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarInitial: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+
+  // Add task input
+  addTaskContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+  },
+  addTaskInput: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.text,
+    paddingVertical: 4,
+  },
+  addTaskButton: {
+    marginLeft: 8,
+  },
+
+  // Skeleton for tasks
+  skeletonTaskList: {
+    gap: 12,
+  },
+  skeletonTaskItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  skeletonTaskText: {
     flex: 1,
     height: 18,
     backgroundColor: COLORS.surface,
