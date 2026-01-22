@@ -20,7 +20,7 @@ export function CompleteStep({ onComplete }: CompleteStepProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const hasPlayedConfetti = useRef(false);
 
-  const firstName = user?.name.split(" ")[0] || "there";
+  const firstName = user?.name?.split(" ")[0] || "there";
   const familyId = currentFamily?.id;
 
   // Fire confetti on mount

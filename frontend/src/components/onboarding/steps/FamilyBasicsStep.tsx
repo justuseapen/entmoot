@@ -64,7 +64,7 @@ export function FamilyBasicsStep({ onNext, onBack }: FamilyBasicsStepProps) {
 
   // Auto-fill family name from user's last name
   const defaultFamilyName = user?.name
-    ? `The ${user.name.split(" ").pop()} Family`
+    ? `The ${user.name?.split(" ").pop() || ""} Family`
     : "";
 
   const {

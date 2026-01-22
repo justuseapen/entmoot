@@ -21,7 +21,7 @@ interface WelcomeStepProps {
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
   const { user } = useAuthStore();
   const [selectedChallenge, setSelectedChallenge] = useState<string>("");
-  const firstName = user?.name.split(" ")[0] || "there";
+  const firstName = user?.name?.split(" ")[0] || "there";
 
   return (
     <OnboardingStep>
