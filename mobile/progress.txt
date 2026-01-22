@@ -1054,3 +1054,21 @@
   - App Store description max is 4000 characters
   - Privacy questionnaire requires documenting data collection, linking to identity, and tracking purposes
 ---
+
+## 2026-01-22 - US-057
+- What was implemented: Configured EAS Build for iOS App Store submission
+- Files changed:
+  - eas.json (new - complete EAS build configuration with 3 profiles)
+  - BUILD.md (new - comprehensive iOS provisioning and build documentation)
+- **Learnings for future iterations:**
+  - EAS CLI doesn't have a --dry-run flag for builds; use `node -e "require('./eas.json')"` to validate JSON
+  - eas.json cli.appVersionSource: "remote" enables auto version management from EAS servers
+  - Development profile: developmentClient=true enables dev tools, simulator=true for iOS Simulator builds
+  - Preview profile: distribution="internal" for TestFlight, channel="preview" for OTA updates to testers
+  - Production profile: distribution="store" for App Store, autoIncrement=true for build number automation
+  - resourceClass: "m-medium" is default iOS build machine, use "m-large" for faster builds
+  - Environment variables per profile: set API_URL and other env vars in profile's env section
+  - Submit section in eas.json: configure appleId, ascAppId, appleTeamId for automated submission
+  - Placeholder project ID ("your-project-id") causes GraphQL errors until eas init is run with valid Expo account
+  - BUILD.md should document: prerequisites, credential setup, build commands, troubleshooting, and CI/CD examples
+---
