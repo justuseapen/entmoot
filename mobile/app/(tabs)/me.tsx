@@ -19,26 +19,10 @@ import { useQuery } from "@tanstack/react-query";
 import { COLORS } from "@/theme/colors";
 import { useAuthStore } from "@/stores";
 import { api } from "@/lib/api";
-import { useStreaks, type Streak } from "@/hooks";
-import { StreakCardsRow } from "@/components";
+import { useStreaks, usePoints, type Streak, type PointsResponse } from "@/hooks";
+import { StreakCardsRow, PointsCard } from "@/components";
 
 // Types for API responses
-interface PointsResponse {
-  points: {
-    total: number;
-    this_week: number;
-    breakdown: Record<string, number>;
-  };
-  recent_activity: Array<{
-    id: number;
-    activity_type: string;
-    activity_label: string;
-    points: number;
-    created_at: string;
-    metadata: Record<string, unknown>;
-  }>;
-}
-
 interface Badge {
   id: number;
   name: string;
@@ -60,17 +44,6 @@ interface BadgesResponse {
 }
 
 // Custom hooks for data fetching
-function usePoints() {
-  return useQuery({
-    queryKey: ["points"],
-    queryFn: async () => {
-      const response = await api.get<PointsResponse>("/users/me/points");
-      return response;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-}
-
 function useBadges() {
   return useQuery({
     queryKey: ["badges", "me"],
@@ -166,30 +139,10 @@ function PointsSection({
   points: PointsResponse | undefined;
   isLoading: boolean;
 }) {
-  if (isLoading) {
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Points</Text>
-        <View style={[styles.pointsCard, styles.skeleton]} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Points</Text>
-      <View style={styles.pointsCard}>
-        <View style={styles.pointsMain}>
-          <Text style={styles.pointsTotal}>{points?.points.total ?? 0}</Text>
-          <Text style={styles.pointsLabel}>Total Points</Text>
-        </View>
-        <View style={styles.pointsWeek}>
-          <Text style={styles.pointsWeekValue}>
-            +{points?.points.this_week ?? 0}
-          </Text>
-          <Text style={styles.pointsWeekLabel}>This Week</Text>
-        </View>
-      </View>
+      <PointsCard points={points} isLoading={isLoading} />
     </View>
   );
 }
@@ -465,50 +418,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
     marginBottom: 12,
-  },
-
-  // Points
-  pointsCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-    minHeight: 80,
-  },
-  pointsMain: {
-    alignItems: "flex-start",
-  },
-  pointsTotal: {
-    fontSize: 36,
-    fontWeight: "700",
-    color: COLORS.primary,
-  },
-  pointsLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  pointsWeek: {
-    alignItems: "flex-end",
-    backgroundColor: COLORS.success + "15",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  pointsWeekValue: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.success,
-  },
-  pointsWeekLabel: {
-    fontSize: 12,
-    color: COLORS.success,
   },
 
   // Badges

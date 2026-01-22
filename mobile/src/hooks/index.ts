@@ -153,3 +153,15 @@ export {
   type StreakType,
   type StreaksResponse,
 } from "./useStreaks";
+export {
+  usePoints,
+  useRecentActivity,
+  pointsKeys,
+  getActivityIcon,
+  formatRelativeTime,
+  ACTIVITY_ICONS,
+  type PointsBreakdown,
+  type PointsTotal,
+  type RecentActivity,
+  type PointsResponse,
+} from "./usePoints";

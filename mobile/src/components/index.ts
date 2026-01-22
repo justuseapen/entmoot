@@ -15,4 +15,5 @@ export {
 } from "./InAppNotificationBanner";
 export { OfflineBanner } from "./OfflineBanner";
 export { StreakCard, StreakCardsRow } from "./StreakCard";
+export { PointsDisplay, PointsCard } from "./PointsDisplay";
 export * from "./ui";
