@@ -13,4 +13,5 @@ export {
   type NotificationPayload,
   type NotificationType,
 } from "./InAppNotificationBanner";
+export { OfflineBanner } from "./OfflineBanner";
 export * from "./ui";

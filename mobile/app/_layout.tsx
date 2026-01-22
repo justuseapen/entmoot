@@ -13,6 +13,7 @@ import {
   InAppNotificationBanner,
   parseNotificationPayload,
   getNotificationRoute,
+  OfflineBanner,
   type NotificationPayload,
 } from "@/components";
 
@@ -279,6 +280,7 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      <OfflineBanner />
       <InAppNotificationBanner
         notification={currentNotification}
         onPress={handleBannerPress}
