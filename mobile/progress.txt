@@ -55,6 +55,8 @@
 - Bottom sheet modals: Use @gorhom/bottom-sheet with react-native-reanimated; configure reanimated plugin last in babel.config.js
 - Goals hook: Import useGoals, Goal from @/hooks; filter by status with useGoals({ status: "in_progress" })
 - Components barrel export: Import from @/components (FirstGoalPrompt, AddPriorityModal) for shared components
+- Offline storage: Import from @/services (setCache, getCache, clearCache, CACHE_KEYS) for MMKV caching
+- Network status: Import useNetworkStatus, useIsOnline, checkIsOnline from @/hooks for connectivity monitoring
 
 ## Learnings
 (Ralph will append learnings here as iterations progress)
@@ -724,4 +726,25 @@
   - SchedulingPreferences interface matches useNotificationPreferences hook's reminders/quiet_hours structure
   - cancelAllScheduledNotificationsAsync() clears all scheduled notifications (for reschedule/logout)
   - Import scheduleLocalNotifications, rescheduleAllNotifications, cancelAllScheduled from @/services
+---
+
+## 2026-01-22 - US-041
+- What was implemented: Set up offline storage infrastructure with MMKV and network status monitoring
+- Files changed:
+  - package.json (added react-native-mmkv, @react-native-community/netinfo)
+  - src/services/offlineStorage.ts (created - MMKV instance, cache functions)
+  - src/hooks/useNetworkStatus.ts (created - network status hook)
+  - src/services/index.ts (export offlineStorage)
+  - src/hooks/index.ts (export useNetworkStatus, useIsOnline, checkIsOnline)
+- **Learnings for future iterations:**
+  - react-native-mmkv v4 uses `createMMKV()` function, not `new MMKV()` class constructor
+  - MMKV methods: `set()`, `getString()`, `getNumber()`, `getBoolean()`, `remove()`, `contains()`, `clearAll()`
+  - Note: MMKV uses `remove()` not `delete()` for removing keys
+  - Import MMKV type separately: `import { createMMKV, type MMKV } from "react-native-mmkv"`
+  - @react-native-community/netinfo provides NetInfoState with isConnected, type, isInternetReachable
+  - NetInfoStateType enum: unknown, none, wifi, cellular, bluetooth, ethernet, etc.
+  - Use --legacy-peer-deps when installing packages due to React 19 peer dependency conflicts
+  - CACHE_KEYS constants help prevent typos and enable TypeScript autocomplete
+  - Import offlineStorage functions from @/services (setCache, getCache, clearCache, CACHE_KEYS)
+  - Import network hooks from @/hooks (useNetworkStatus, useIsOnline, checkIsOnline)
 ---
