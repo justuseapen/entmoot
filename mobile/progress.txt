@@ -1012,3 +1012,27 @@
   - ErrorBoundary should wrap the outermost app content (outside PaperProvider, SafeAreaProvider) for maximum coverage
   - Import ErrorBoundary from @/components, ErrorMessage/getErrorMessage from @/components/ui
 ---
+
+## 2026-01-22 - US-055
+- What was implemented: Added professional app icons and splash screen for Entmoot mobile app
+- Files changed:
+  - assets/icon.png (replaced - new 1024x1024 Entmoot tree logo)
+  - assets/icon.svg (new - SVG source for icon)
+  - assets/adaptive-icon.png (replaced - new Android adaptive icon)
+  - assets/adaptive-icon.svg (new - SVG source for adaptive icon)
+  - assets/splash.png (new - splash screen with centered logo)
+  - assets/splash.svg (new - SVG source for splash screen)
+  - assets/notification-icon.png (new - push notification icon)
+  - assets/notification-icon.svg (new - SVG source for notification icon)
+  - assets/splash-icon.png (deleted - replaced by splash.png)
+  - app.json (updated - icon, ios.icon, splash configuration)
+  - scripts/generate-icons.js (new - icon generation script)
+- **Learnings for future iterations:**
+  - Use svgexport (npx svgexport src.svg dest.png WxH) to convert SVG to PNG
+  - Expo splash.image should be a PNG file (not splash-icon)
+  - ios.icon field in app.json is optional but explicit for iOS-specific icon
+  - Entmoot brand colors: primary=#4F46E5 (indigo), background=#FFF8E7 (cream)
+  - Android adaptive icons need safe zone consideration (66.67% of total size)
+  - scripts/generate-icons.js can regenerate all icons if brand changes
+  - SVG sources kept for future edits without needing original design tools
+---
