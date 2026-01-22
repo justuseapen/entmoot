@@ -748,3 +748,23 @@
   - Import offlineStorage functions from @/services (setCache, getCache, clearCache, CACHE_KEYS)
   - Import network hooks from @/hooks (useNetworkStatus, useIsOnline, checkIsOnline)
 ---
+
+## 2026-01-22 - US-042
+- What was implemented: Created offline sync queue service for processing pending API calls when online
+- Files changed:
+  - src/services/syncQueue.ts (created - complete sync queue implementation)
+  - src/services/index.ts (added syncQueue export)
+- **Learnings for future iterations:**
+  - SyncQueueItem type: id, action (description), endpoint, method, payload, timestamp, retryCount
+  - Sync queue persisted in MMKV with key "sync:queue" as JSON string array
+  - generateId() creates unique IDs with timestamp + random string: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+  - addToQueue() auto-generates id, timestamp, and retryCount (starts at 0)
+  - processQueue() processes items sequentially, re-checks network before each item
+  - 409 Conflict handling: check error message for "409" or "conflict" (case-insensitive), remove from queue
+  - Exponential backoff: BASE_DELAY_MS * Math.pow(2, retryCount) gives 1s, 2s, 4s for retries
+  - Use isProcessing flag to prevent concurrent queue processing
+  - Network listener pattern: store wasOffline state, trigger processQueue when transitioning from offline to online
+  - startNetworkListener/stopNetworkListener for app lifecycle management
+  - addSyncQueueListener for UI components to react to sync events (start, complete, error)
+  - Import sync queue functions from @/services (addToQueue, getQueue, processQueue, startNetworkListener, etc.)
+---
