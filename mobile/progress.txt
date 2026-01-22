@@ -886,3 +886,22 @@
   - StreakCardsRow handles loading state and empty state internally
   - Import useStreaks, Streak from @/hooks; StreakCard, StreakCardsRow from @/components
 ---
+
+## 2026-01-22 - US-049
+- What was implemented: Created reusable points data layer and display components with animated counter
+- Files changed:
+  - src/hooks/usePoints.ts (new - usePoints, useRecentActivity hooks, types, utilities)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/PointsDisplay.tsx (new - AnimatedCounter, PointsDisplay, PointsCard components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared PointsCard component)
+- **Learnings for future iterations:**
+  - Me tab already had inline usePoints hook - extracted to reusable module
+  - AnimatedCounter uses setInterval with frame rate (60fps) and ease-out cubic easing for smooth animation
+  - Use Animated.sequence for scale effect on value increase (1 → 1.15 → 1) for emphasis
+  - previousValueRef pattern to detect value changes and animate from old to new value
+  - ACTIVITY_ICONS maps activity_type to Ionicons icon names with default fallback
+  - formatRelativeTime utility for "Just now", "5m ago", "2h ago", "Yesterday", "3d ago" format
+  - PointsCard is compact version (no activity list), PointsDisplay is full version with Recent Activity section
+  - Import usePoints, PointsResponse from @/hooks; PointsCard, PointsDisplay from @/components
+---
