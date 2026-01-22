@@ -5,4 +5,5 @@ export {
   isEveningTime,
   needsEveningReflection,
 } from "./EveningReflectionBanner";
+export { AIRefinementModal } from "./AIRefinementModal";
 export * from "./ui";

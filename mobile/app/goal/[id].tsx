@@ -20,10 +20,14 @@ import {
   useGoal,
   useUpdateGoal,
   useDeleteGoal,
+  useRefineGoal,
   Goal,
   GoalStatus,
   GoalUser,
+  SmartSuggestions,
+  GoalRefinementResponse,
 } from "@/hooks/useGoals";
+import { AIRefinementModal } from "@/components";
 
 // ============================================================================
 // Constants
@@ -448,9 +452,17 @@ export default function GoalDetailScreen() {
   const { data: goal, isLoading, isFetching, refetch } = useGoal(goalId);
   const updateGoal = useUpdateGoal();
   const deleteGoal = useDeleteGoal();
+  const refineGoal = useRefineGoal();
 
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
+
+  // AI Refinement state
+  const [showRefinementModal, setShowRefinementModal] = useState(false);
+  const [refinementSuggestions, setRefinementSuggestions] = useState<
+    GoalRefinementResponse["suggestions"] | null
+  >(null);
+  const [refinementError, setRefinementError] = useState<string | null>(null);
 
   const handleBack = useCallback(() => {
     router.back();
@@ -529,6 +541,67 @@ export default function GoalDetailScreen() {
       router.push(`/goal/${childGoalId}`);
     },
     [router]
+  );
+
+  // AI Refinement handlers
+  const handleRefineWithAI = useCallback(async () => {
+    setShowRefinementModal(true);
+    setRefinementSuggestions(null);
+    setRefinementError(null);
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const response = await refineGoal.mutateAsync(goalId);
+      setRefinementSuggestions(response.suggestions);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to get AI suggestions. Please try again.";
+      setRefinementError(message);
+    }
+  }, [goalId, refineGoal]);
+
+  const handleCloseRefinementModal = useCallback(() => {
+    setShowRefinementModal(false);
+    setRefinementSuggestions(null);
+    setRefinementError(null);
+  }, []);
+
+  const handleApplySuggestions = useCallback(
+    async (suggestions: Partial<SmartSuggestions>) => {
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        // Convert null values to undefined for the payload
+        const payload: {
+          specific?: string;
+          measurable?: string;
+          achievable?: string;
+          relevant?: string;
+          time_bound?: string;
+        } = {};
+
+        if (suggestions.specific) payload.specific = suggestions.specific;
+        if (suggestions.measurable) payload.measurable = suggestions.measurable;
+        if (suggestions.achievable) payload.achievable = suggestions.achievable;
+        if (suggestions.relevant) payload.relevant = suggestions.relevant;
+        if (suggestions.time_bound) payload.time_bound = suggestions.time_bound;
+
+        await updateGoal.mutateAsync({
+          goalId,
+          payload,
+        });
+        // Refresh the goal data to show updated SMART fields
+        refetch();
+      } catch {
+        Alert.alert(
+          "Error",
+          "Failed to apply suggestions. Please try again."
+        );
+      }
+    },
+    [goalId, updateGoal, refetch]
   );
 
   // Format due date
@@ -639,6 +712,23 @@ export default function GoalDetailScreen() {
           {/* SMART breakdown */}
           <SmartBreakdown goal={goal} />
 
+          {/* Refine with AI button */}
+          <TouchableOpacity
+            style={styles.refineButton}
+            onPress={handleRefineWithAI}
+            activeOpacity={0.7}
+            disabled={refineGoal.isPending}
+          >
+            {refineGoal.isPending ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <>
+                <Ionicons name="sparkles" size={20} color={COLORS.primary} />
+                <Text style={styles.refineButtonText}>Refine with AI</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
           {/* Assignees */}
           {goal.assignees && <AssigneesSection assignees={goal.assignees} />}
 
@@ -673,6 +763,25 @@ export default function GoalDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* AI Refinement Modal */}
+      <AIRefinementModal
+        visible={showRefinementModal}
+        isLoading={refineGoal.isPending}
+        suggestions={refinementSuggestions}
+        currentValues={{
+          title: goal?.title || "",
+          description: goal?.description || "",
+          specific: goal?.specific || null,
+          measurable: goal?.measurable || null,
+          achievable: goal?.achievable || null,
+          relevant: goal?.relevant || null,
+          time_bound: goal?.time_bound || null,
+        }}
+        onApplySuggestions={handleApplySuggestions}
+        onClose={handleCloseRefinementModal}
+        error={refinementError}
+      />
     </SafeAreaView>
   );
 }
@@ -1023,5 +1132,25 @@ const styles = StyleSheet.create({
   skeletonText: {
     backgroundColor: COLORS.border,
     borderRadius: 4,
+  },
+
+  // Refine button
+  refineButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderStyle: "dashed",
+    paddingVertical: 14,
+    marginBottom: 24,
+  },
+  refineButtonText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.primary,
   },
 });
