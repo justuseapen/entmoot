@@ -14,6 +14,8 @@ import {
   parseNotificationPayload,
   getNotificationRoute,
   OfflineBanner,
+  AchievementModal,
+  useAchievementCelebration,
   type NotificationPayload,
 } from "@/components";
 
@@ -154,6 +156,13 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
+  // Achievement celebration state
+  const {
+    visible: achievementVisible,
+    achievement,
+    handleDismiss: handleAchievementDismiss,
+  } = useAchievementCelebration();
+
   // State for in-app notification banner
   const [currentNotification, setCurrentNotification] = useState<{
     title: string;
@@ -285,6 +294,11 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
         notification={currentNotification}
         onPress={handleBannerPress}
         onDismiss={handleBannerDismiss}
+      />
+      <AchievementModal
+        visible={achievementVisible}
+        achievement={achievement}
+        onDismiss={handleAchievementDismiss}
       />
     </>
   );

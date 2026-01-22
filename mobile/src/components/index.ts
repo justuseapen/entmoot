@@ -17,4 +17,14 @@ export { OfflineBanner } from "./OfflineBanner";
 export { StreakCard, StreakCardsRow } from "./StreakCard";
 export { PointsDisplay, PointsCard } from "./PointsDisplay";
 export { BadgeGrid, BadgeRow } from "./BadgeGrid";
+export {
+  AchievementModal,
+  useAchievementCelebration,
+  triggerAchievementCelebration,
+  createBadgeAchievement,
+  createStreakMilestoneAchievement,
+  createGoalCompletedAchievement,
+  type Achievement,
+  type AchievementType,
+} from "./AchievementModal";
 export * from "./ui";
