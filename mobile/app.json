@@ -9,17 +9,16 @@
     "newArchEnabled": true,
     "scheme": "entmoot",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFF8E7"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.entmoot.mobile",
+      "icon": "./assets/icon.png",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "remote-notification"
-        ],
+        "UIBackgroundModes": ["remote-notification"],
         "MinimumOSVersion": "14.0"
       }
     },

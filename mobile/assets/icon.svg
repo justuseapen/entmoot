@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#4F46E5" rx="153.6"/>
+
+  <!-- Circle base (family/unity) -->
+  <circle cx="512" cy="512" r="389.12" fill="#FFFFFF" opacity="0.15"/>
+
+  <!-- Tree trunk -->
+  <rect x="450.56" y="614.4" width="122.88" height="256" rx="20.48" fill="#FFFFFF"/>
+
+  <!-- Main tree crown (three layers representing planning scales) -->
+  <!-- Bottom layer (largest) -->
+  <ellipse cx="512" cy="563.2" rx="286.72" ry="122.88" fill="#FFFFFF"/>
+
+  <!-- Middle layer -->
+  <ellipse cx="512" cy="430.08" rx="225.28" ry="102.4" fill="#FFFFFF"/>
+
+  <!-- Top layer (smallest) -->
+  <ellipse cx="512" cy="327.68" rx="153.6" ry="81.92" fill="#FFFFFF"/>
+
+  <!-- Star accent at top (achievement/goals) -->
+  <polygon points="512,184.32 542.72,245.76 593.92,245.76 552.96,286.72 573.44,358.4 512,317.44 450.56,358.4 471.04,286.72 430.08,245.76 481.28,245.76" fill="#FFFFFF"/>
+</svg>
