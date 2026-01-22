@@ -44,6 +44,10 @@
 - UI components: Import from @/components/ui (Typography, Button, Card, Input, LoadingSpinner)
 - Theme colors: Import COLORS from @/theme/colors for consistent styling
 - Use @expo/vector-icons Ionicons for icons (already installed)
+- API client: Use `api.get<T>`, `api.post<T>`, `api.patch<T>`, `api.del<T>` for typed requests with auto-auth
+- QueryClient: Import from @/lib/queryClient for TanStack Query setup
+- Auth store: Import useAuthStore or useAuth from @/stores; use currentFamilyId for family-scoped API calls
+- Family ID persistence: setCurrentFamily(id) persists to SecureStore and updates zustand state
 
 ## Learnings
 (Ralph will append learnings here as iterations progress)
@@ -128,4 +132,51 @@
   - STORAGE_KEYS constants help prevent typos and enable TypeScript autocomplete
   - clearAuthData() helper is useful for logout - clears all auth-related keys at once
   - Services directory is at src/services/ for platform-specific services
+---
+
+## 2026-01-21 - US-006
+- What was implemented: Created API client with typed convenience methods and TanStack Query setup
+- Files changed:
+  - package.json (added @tanstack/react-query)
+  - src/lib/api.ts (added typed get<T>, post<T>, patch<T>, del<T> methods)
+  - src/lib/queryClient.ts (created with mobile-optimized defaults)
+  - src/lib/index.ts (added queryClient export)
+- **Learnings for future iterations:**
+  - API client was already mostly implemented at src/lib/api.ts with auth token handling
+  - apiClient.setOnAuthError() callback handles 401 redirects (already connected in authStore)
+  - Use `api.get<T>('/endpoint')` for typed GET requests with auto-auth
+  - QueryClient defaults: 5min staleTime, 30min gcTime, refetchOnWindowFocus=false (better mobile UX)
+  - Config uses expo-constants to detect environment (development/staging/production)
+  - API base URL comes from src/lib/config.ts, not @env module
+---
+
+## 2026-01-21 - US-007
+- What was implemented: Enhanced auth store with currentFamilyId state and setCurrentFamily action
+- Files changed:
+  - src/stores/auth.ts (added currentFamilyId state, setCurrentFamily action, useAuth hook alias)
+  - src/stores/index.ts (added useAuth export)
+- **Learnings for future iterations:**
+  - Auth store already existed with zustand, login/logout/register actions, and JWT token handling
+  - zustand was already installed in package.json (v5.0.2)
+  - The store uses custom JWT implementation with token refresh, not Rails session-based auth
+  - Import useAuthStore or useAuth from @/stores - both work identically
+  - currentFamilyId is persisted to SecureStore as FAMILY_ID_KEY ("entmoot_family_id")
+  - setCurrentFamily action both persists to storage AND updates zustand state
+  - The store already has apiClient callbacks for token refresh and auth errors
+---
+
+## 2026-01-21 - US-008
+- What was implemented: Built full login screen with complete UI and functionality
+- Files changed:
+  - app/(auth)/login.tsx (complete rewrite with form, validation, navigation)
+- **Learnings for future iterations:**
+  - Use KeyboardAvoidingView with ScrollView pattern for forms with keyboard
+  - Input component from @/components/ui supports error prop for validation messages
+  - Button component supports loading prop which shows ActivityIndicator
+  - authStore.login() is async and throws error on failure - catch and show Alert
+  - Use router.replace for navigation after successful login (not push)
+  - router.push for navigating to other auth screens (forgot-password, register)
+  - Password show/hide toggle: position absolute TouchableOpacity with Ionicons eye icon
+  - Form validation should clear errors when user starts typing in that field
+  - Use hitSlop on touch targets for better accessibility
 ---

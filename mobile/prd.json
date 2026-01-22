@@ -110,8 +110,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - @tanstack/react-query installed, api.ts enhanced with typed get/post/patch/del methods, queryClient.ts created with mobile-optimized defaults"
     },
     {
       "id": "US-007",
@@ -129,8 +129,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Added currentFamilyId state, setCurrentFamily action, useAuth hook alias. Store persists familyId to secure storage."
     },
     {
       "id": "US-008",
@@ -149,8 +149,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Full login UI with email/password inputs, show/hide password toggle, form validation, loading state, error handling, and navigation to forgot-password and register screens"
     },
     {
       "id": "US-009",
