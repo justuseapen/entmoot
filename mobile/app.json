@@ -3,6 +3,9 @@
     "name": "Entmoot",
     "slug": "entmoot",
     "version": "1.0.0",
+    "description": "Family planning and goal tracking app. Plan your day, build habits, set SMART goals with AI coaching, and celebrate achievements together.",
+    "privacy": "public",
+    "githubUrl": "https://github.com/entmoot/entmoot-mobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,6 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.entmoot.mobile",
+      "buildNumber": "1",
       "icon": "./assets/icon.png",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"],
