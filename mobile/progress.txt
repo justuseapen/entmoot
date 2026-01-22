@@ -50,6 +50,8 @@
 - Family ID persistence: setCurrentFamily(id) persists to SecureStore and updates zustand state
 - Services: Import from @/services (secureStorage, biometrics) for platform services
 - Biometric auth: Use shouldPromptBiometric() before authenticate(); respects user preference + device capability
+- Data hooks: Import useTodayPlan, useUpdateDailyPlan from @/hooks for daily plan data; uses TanStack Query with optimistic updates
+- Query keys pattern: Use exported keys objects (e.g., dailyPlanKeys) for consistent cache management
 
 ## Learnings
 (Ralph will append learnings here as iterations progress)
@@ -271,4 +273,20 @@
   - Default suggestions as fallback when API doesn't return suggestions or errors
   - isCustomMode state pattern for toggling between selection and input modes
   - API endpoints: GET /users/me/first_goal_prompt (eligibility), POST /users/me/first_goal_prompt/dismiss (dismiss)
+---
+
+## 2026-01-21 - US-015
+- What was implemented: Created daily plan data layer with hooks for fetching and updating daily plans
+- Files changed:
+  - src/hooks/useDailyPlan.ts (created - all types and hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Daily plan API uses nested attributes pattern: daily_tasks_attributes, top_priorities_attributes, habit_completions_attributes
+  - TanStack Query optimistic updates: use onMutate to snapshot and update cache, onError to rollback, onSuccess to sync with server
+  - Query keys pattern: dailyPlanKeys.today(familyId) enables easy invalidation and cache management
+  - HabitCompletion has nested habit info (habit.name, habit.position, habit.is_active)
+  - CompletionStats provides task/priority/habit completion counts for progress display
+  - _destroy: true in nested attributes tells Rails to delete the record
+  - Use Date.now() as temporary ID for optimistic new items (server will replace with real ID)
+  - useAuthStore((state) => state.currentFamilyId) for accessing family ID in hooks
 ---
