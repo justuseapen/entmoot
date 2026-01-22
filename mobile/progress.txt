@@ -348,3 +348,18 @@
   - Empty state should guide users to Settings to add habits
   - Completion count shows X/Y completed in section header (same pattern as priorities)
 ---
+
+## 2026-01-21 - US-020
+- What was implemented: Built Today Screen Tasks Section with full CRUD functionality
+- Files changed:
+  - app/(tabs)/today.tsx (added TaskItem, TasksSection components, new task styles)
+- **Learnings for future iterations:**
+  - Tasks use same pattern as priorities: TaskItem component with swipe-to-delete and checkbox
+  - DailyTask type already exists in useDailyPlan.ts with all needed fields (title, completed, position, assignee, goal)
+  - daily_tasks_attributes supports _destroy: true for deleting tasks
+  - New tasks need position property set to current length for proper ordering
+  - Assignee avatar shows initials on colored background when avatar_url is null
+  - Inline TextInput with onSubmitEditing pattern for quick task entry
+  - Show add button only when input has content (cleaner UX)
+  - Reuse checkbox, deleteAction styles from priorities for visual consistency
+---
