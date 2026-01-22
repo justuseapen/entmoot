@@ -27,5 +27,6 @@ export {
   type Achievement,
   type AchievementType,
 } from "./AchievementModal";
+export { ErrorBoundary } from "./ErrorBoundary";
 export * from "./ui";
 export * from "./skeletons";

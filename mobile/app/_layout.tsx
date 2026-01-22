@@ -16,6 +16,7 @@ import {
   OfflineBanner,
   AchievementModal,
   useAchievementCelebration,
+  ErrorBoundary,
   type NotificationPayload,
 } from "@/components";
 
@@ -306,11 +307,12 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   return (
-    <PaperProvider theme={paperTheme}>
-      <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <AuthGuard>
-          <NotificationHandler>
+    <ErrorBoundary>
+      <PaperProvider theme={paperTheme}>
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          <AuthGuard>
+            <NotificationHandler>
             <Stack
               screenOptions={{
                 headerStyle: {
@@ -372,10 +374,11 @@ export default function RootLayout() {
                 options={{ title: "Calendar" }}
               />
             </Stack>
-          </NotificationHandler>
-        </AuthGuard>
-      </SafeAreaProvider>
-    </PaperProvider>
+            </NotificationHandler>
+          </AuthGuard>
+        </SafeAreaProvider>
+      </PaperProvider>
+    </ErrorBoundary>
   );
 }
 
