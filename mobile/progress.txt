@@ -650,3 +650,21 @@
   - BottomSheet with BottomSheetView (not BottomSheetScrollView) for simple forms without scrolling
   - Role picker: custom dropdown with TouchableOpacity toggle and conditional list rendering
 ---
+
+## 2026-01-22 - US-037
+- What was implemented: Set up push notification infrastructure with notifications service
+- Files changed:
+  - package.json (updated expo-notifications to ~0.32.16)
+  - src/services/notifications.ts (created - complete notification service)
+  - src/services/index.ts (added notifications export)
+  - src/lib/pushNotifications.ts (fixed deprecated removeNotificationSubscription API)
+- **Learnings for future iterations:**
+  - expo-notifications 0.32+ changed API: use subscription.remove() instead of Notifications.removeNotificationSubscription()
+  - There was already an existing pushNotifications.ts in src/lib/ with similar functionality - new notifications.ts in services follows acceptance criteria more closely
+  - Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId for getting project ID
+  - Device token API: POST /device_tokens with { device_token: { token, platform } } returns { device_token: { id, token, platform, created_at } }
+  - Store device_token.id for later unregistration (DELETE /device_tokens/:id)
+  - PUSH_TOKEN_KEY and DEVICE_TOKEN_ID_KEY stored in secure storage for persistence
+  - setNotificationHandler configures foreground notification behavior (shouldShowAlert, shouldPlaySound, etc.)
+  - Import notifications from @/services for push notification functionality
+---
