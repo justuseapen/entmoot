@@ -809,3 +809,21 @@
   - forceUpdate pattern with `const [, forceUpdate] = useState({})` to trigger re-render when pending items change
   - Return optimistic response from mutationFn when offline: `{ message: "Queued for sync", daily_plan: updatedPlan, is_first_action: false }`
 ---
+
+## 2026-01-22 - US-045
+- What was implemented: Calendar permission flow for device calendar access
+- Files changed:
+  - package.json (added expo-calendar)
+  - src/services/calendar.ts (created - complete calendar permission service)
+  - src/services/index.ts (export calendar service)
+- **Learnings for future iterations:**
+  - expo-calendar uses Calendar.PermissionStatus enum (GRANTED, DENIED, UNDETERMINED)
+  - getCalendarPermissionsAsync() returns { status } object for current permission state
+  - requestCalendarPermissionsAsync() prompts user for permission
+  - Cache permission status in MMKV for synchronous access in UI (CALENDAR_PERMISSION_KEY = "calendar:permission_status")
+  - Permission flow: check current status first, show explanation alert, then request
+  - When denied, use Alert with "Open Settings" button to redirect user
+  - Linking.openURL("app-settings:") opens iOS Settings for permission management
+  - Linking.openSettings() is cross-platform alternative for Android
+  - Import calendar functions from @/services (requestCalendarPermissions, getCalendarPermissionStatus, hasCalendarPermission)
+---
