@@ -962,3 +962,34 @@
   - Import from @/utils (barrel export) or @/utils/haptics for haptic functions
   - Existing code already follows correct patterns: Light for taps, Medium for swipe/delete, Success for completion, Warning for destructive confirmation, Heavy for achievements
 ---
+
+## 2026-01-22 - US-053
+- What was implemented: Added animated loading skeletons with shimmer effect for Today, Goals, and Me screens
+- Files changed:
+  - src/components/ui/Skeleton.tsx (new - Skeleton, SkeletonCircle, SkeletonText, SkeletonParagraph, SkeletonCard, SkeletonListItem, SkeletonSectionHeader)
+  - src/components/ui/CrossFadeView.tsx (new - CrossFadeView, SimpleFadeView for smooth transitions)
+  - src/components/ui/index.ts (export new components)
+  - src/components/skeletons/TodaySkeleton.tsx (new - full Today screen skeleton)
+  - src/components/skeletons/GoalsListSkeleton.tsx (new - goals list skeleton)
+  - src/components/skeletons/MeTabSkeleton.tsx (new - Me tab skeleton)
+  - src/components/skeletons/index.ts (new - barrel export)
+  - src/components/index.ts (export skeletons)
+  - app/(tabs)/today.tsx (replaced static skeletons with animated ones)
+  - app/(tabs)/goals.tsx (replaced static skeletons with animated ones)
+  - src/components/StreakCard.tsx (updated StreakCardsRow skeleton to use animated Skeleton)
+  - src/components/PointsDisplay.tsx (updated PointsDisplay and PointsCard skeletons to use animated Skeleton)
+  - src/components/BadgeGrid.tsx (updated BadgeGrid and BadgeRow skeletons to use animated Skeleton)
+- **Learnings for future iterations:**
+  - Skeleton shimmer animation: Animated.loop with Animated.timing, translateX interpolation from -SCREEN_WIDTH to SCREEN_WIDTH
+  - SHIMMER_DURATION = 1500ms provides smooth, visible shimmer effect
+  - Use DimensionValue type from react-native for width/height props instead of string | number
+  - Skeleton component accepts width, height, borderRadius, animated, style props
+  - SkeletonCard provides consistent card styling (shadow, borderRadius, padding)
+  - SkeletonListItem renders checkbox circle + text skeleton for list items
+  - CrossFadeView overlays skeleton and content layers with animated opacity
+  - SimpleFadeView is simpler - just fades in content when isLoading becomes false
+  - Import Skeleton components from @/components/ui or @/components
+  - Import screen skeletons (TodaySkeleton, GoalsListSkeleton, MeTabSkeleton) from @/components/skeletons or @/components
+  - Existing screens already have inline skeleton components - update them to use the animated Skeleton component
+  - StreakCardsRow, PointsCard, BadgeRow already handle isLoading prop internally - just update their skeleton rendering
+---
