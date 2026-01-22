@@ -28,8 +28,7 @@ export async function isAvailable(): Promise<boolean> {
     }
 
     // Check security level - ensure we have biometric-capable hardware
-    const securityLevel =
-      await LocalAuthentication.getEnrolledLevelAsync();
+    const securityLevel = await LocalAuthentication.getEnrolledLevelAsync();
     return (
       securityLevel === LocalAuthentication.SecurityLevel.BIOMETRIC_STRONG ||
       securityLevel === LocalAuthentication.SecurityLevel.BIOMETRIC_WEAK

@@ -54,7 +54,9 @@ export default function LoginScreen() {
       router.replace("/(tabs)/today");
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Login failed. Please try again.";
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again.";
       Alert.alert("Login Failed", message);
     }
   };

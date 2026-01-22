@@ -91,9 +91,7 @@ export default function RegisterScreen() {
           const errors = JSON.parse(errorMessage);
           if (errors.email) {
             setEmailError(
-              Array.isArray(errors.email)
-                ? errors.email[0]
-                : errors.email
+              Array.isArray(errors.email) ? errors.email[0] : errors.email
             );
           }
           if (errors.password) {

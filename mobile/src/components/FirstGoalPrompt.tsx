@@ -136,7 +136,10 @@ export function FirstGoalPrompt({
 
   const handleCreateGoal = async () => {
     if (!currentFamilyId) {
-      Alert.alert("Error", "No family selected. Please set up your family first.");
+      Alert.alert(
+        "Error",
+        "No family selected. Please set up your family first."
+      );
       return;
     }
 
@@ -231,11 +234,7 @@ export function FirstGoalPrompt({
                 style={styles.dismissButton}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color={COLORS.textSecondary}
-                />
+                <Ionicons name="close" size={24} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
             <View style={styles.headerCenter}>
@@ -344,7 +343,11 @@ export function FirstGoalPrompt({
                   style={styles.customOption}
                   onPress={handleCustomMode}
                 >
-                  <Ionicons name="create-outline" size={20} color={COLORS.primary} />
+                  <Ionicons
+                    name="create-outline"
+                    size={20}
+                    color={COLORS.primary}
+                  />
                   <Text style={styles.customOptionText}>
                     Write your own goal
                   </Text>

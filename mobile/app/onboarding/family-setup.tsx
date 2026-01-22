@@ -14,7 +14,15 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Localization from "expo-localization";
 import { COLORS } from "@/theme/colors";
-import { H1, H2, Body, Button, Input, Card, PressableCard } from "@/components/ui";
+import {
+  H1,
+  H2,
+  Body,
+  Button,
+  Input,
+  Card,
+  PressableCard,
+} from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores";
 
@@ -76,7 +84,8 @@ export default function FamilySetupScreen() {
       // Navigate to main app
       router.replace("/(tabs)/today");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create family";
+      const message =
+        err instanceof Error ? err.message : "Failed to create family";
       setError(message);
       Alert.alert("Error", message);
     } finally {
@@ -104,7 +113,8 @@ export default function FamilySetupScreen() {
       // Navigate to main app
       router.replace("/(tabs)/today");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to join family";
+      const message =
+        err instanceof Error ? err.message : "Failed to join family";
       setError(message);
       Alert.alert("Error", message);
     } finally {
@@ -130,7 +140,8 @@ export default function FamilySetupScreen() {
             </View>
             <H1 style={styles.title}>Set Up Your Family</H1>
             <Body style={styles.subtitle}>
-              Create a new family or join an existing one with an invitation code.
+              Create a new family or join an existing one with an invitation
+              code.
             </Body>
           </View>
 
@@ -143,7 +154,11 @@ export default function FamilySetupScreen() {
             >
               <View style={styles.optionContent}>
                 <View style={styles.optionIconContainer}>
-                  <Ionicons name="add-circle" size={40} color={COLORS.primary} />
+                  <Ionicons
+                    name="add-circle"
+                    size={40}
+                    color={COLORS.primary}
+                  />
                 </View>
                 <H2 style={styles.optionTitle}>Create a Family</H2>
                 <Body style={styles.optionDescription}>
@@ -201,7 +216,8 @@ export default function FamilySetupScreen() {
               </View>
               <H1 style={styles.title}>Create Your Family</H1>
               <Body style={styles.subtitle}>
-                Give your family a name. You can invite members once it's created.
+                Give your family a name. You can invite members once it's
+                created.
               </Body>
             </View>
 
@@ -222,7 +238,11 @@ export default function FamilySetupScreen() {
               />
 
               <Text style={styles.timezoneInfo}>
-                <Ionicons name="time-outline" size={14} color={COLORS.textSecondary} />
+                <Ionicons
+                  name="time-outline"
+                  size={14}
+                  color={COLORS.textSecondary}
+                />
                 {"  "}Your timezone will be automatically detected
               </Text>
             </Card>

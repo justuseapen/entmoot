@@ -137,11 +137,7 @@ export default function OnboardingScreen() {
               activeOpacity={0.7}
             >
               <Text style={styles.nextText}>Next</Text>
-              <Ionicons
-                name="arrow-forward"
-                size={20}
-                color={COLORS.primary}
-              />
+              <Ionicons name="arrow-forward" size={20} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
         )}
