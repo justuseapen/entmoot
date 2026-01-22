@@ -419,3 +419,20 @@
   - habitsKeys pattern follows same structure as dailyPlanKeys and goalsKeys
   - Import hooks from @/hooks (barrel export)
 ---
+
+## 2026-01-21 - US-024
+- What was implemented: Built habits management screen with full CRUD functionality
+- Files changed:
+  - package.json (added react-native-draggable-flatlist)
+  - app/settings/habits.tsx (created - full habits management UI)
+  - app/_layout.tsx (added settings/habits route)
+- **Learnings for future iterations:**
+  - react-native-draggable-flatlist uses ScaleDecorator for scale effect during drag
+  - Use onLongPress with delayLongPress={150} for drag activation (better UX than immediate drag)
+  - RenderItemParams<T> provides item, drag, isActive for render item callback
+  - Swipeable from react-native-gesture-handler: use ref for programmatic close after delete
+  - GestureHandlerRootView must wrap the entire draggable list content
+  - React Compiler requires state setters in useCallback dependency arrays (setEditingHabitId, setEditValue, etc.)
+  - Settings sub-screens need Stack.Screen entry in root layout (_layout.tsx)
+  - MAX_HABITS constant (10) enforced on both add button and handleAddHabit
+---
