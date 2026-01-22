@@ -1,6 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import {
+  setCache,
+  getCache,
+  setCacheWithTimestamp,
+  getCacheWithTimestamp,
+  CACHE_KEYS,
+} from "@/services/offlineStorage";
+import { addToQueue, getQueue } from "@/services/syncQueue";
+import { checkIsOnline } from "@/hooks/useNetworkStatus";
+import { Alert } from "react-native";
 
 // ============================================================================
 // Types
@@ -145,10 +155,91 @@ export interface UpdateDailyPlanResponse {
 
 export const dailyPlanKeys = {
   all: ["dailyPlans"] as const,
-  today: (familyId: number) => [...dailyPlanKeys.all, "today", familyId] as const,
+  today: (familyId: number) =>
+    [...dailyPlanKeys.all, "today", familyId] as const,
   detail: (familyId: number, planId: number) =>
     [...dailyPlanKeys.all, "detail", familyId, planId] as const,
 };
+
+// ============================================================================
+// Offline Cache Keys
+// ============================================================================
+
+/**
+ * Get the cache key for a family's daily plan
+ */
+function getDailyPlanCacheKey(familyId: number): string {
+  return `${CACHE_KEYS.DAILY_PLAN}:${familyId}`;
+}
+
+/**
+ * Get the cache key for pending sync items
+ */
+const PENDING_SYNC_KEY = "pending_sync:daily_plan";
+
+/**
+ * Tracks items pending sync for visual indicator
+ */
+export interface PendingSyncItem {
+  /** Unique ID (task id, priority id, habit completion id, or 'intention') */
+  itemId: string | number;
+  /** Type of item */
+  itemType: "task" | "priority" | "habit" | "intention" | "shutdown";
+  /** When the change was made */
+  timestamp: number;
+}
+
+/**
+ * Get pending sync items from storage
+ */
+export function getPendingSyncItems(): PendingSyncItem[] {
+  return getCache<PendingSyncItem[]>(PENDING_SYNC_KEY) ?? [];
+}
+
+/**
+ * Add a pending sync item
+ */
+function addPendingSyncItem(item: Omit<PendingSyncItem, "timestamp">): void {
+  const items = getPendingSyncItems();
+  // Remove any existing item with same id and type
+  const filtered = items.filter(
+    (i) => !(i.itemId === item.itemId && i.itemType === item.itemType)
+  );
+  filtered.push({ ...item, timestamp: Date.now() });
+  setCache(PENDING_SYNC_KEY, filtered);
+}
+
+/**
+ * Remove a pending sync item
+ */
+function removePendingSyncItem(
+  itemId: string | number,
+  itemType: PendingSyncItem["itemType"]
+): void {
+  const items = getPendingSyncItems();
+  const filtered = items.filter(
+    (i) => !(i.itemId === itemId && i.itemType === itemType)
+  );
+  setCache(PENDING_SYNC_KEY, filtered);
+}
+
+/**
+ * Clear all pending sync items for a daily plan
+ */
+export function clearPendingSyncItems(): void {
+  setCache(PENDING_SYNC_KEY, []);
+}
+
+/**
+ * Check if a specific item is pending sync
+ */
+export function isPendingSync(
+  itemId: string | number,
+  itemType: PendingSyncItem["itemType"]
+): boolean {
+  const items = getPendingSyncItems();
+  return items.some((i) => i.itemId === itemId && i.itemType === itemType);
+}
 
 // ============================================================================
 // Hooks
@@ -157,6 +248,7 @@ export const dailyPlanKeys = {
 /**
  * Hook to fetch today's daily plan for the current family.
  * Creates the plan if it doesn't exist.
+ * Supports offline mode with MMKV caching.
  */
 export function useTodayPlan() {
   const currentFamilyId = useAuthStore((state) => state.currentFamilyId);
@@ -167,15 +259,59 @@ export function useTodayPlan() {
       if (!currentFamilyId) {
         throw new Error("No family selected");
       }
-      return api.get<DailyPlan>(`/families/${currentFamilyId}/daily_plans/today`);
+
+      // Check if we're online
+      const isOnline = await checkIsOnline();
+
+      if (isOnline) {
+        try {
+          const data = await api.get<DailyPlan>(
+            `/families/${currentFamilyId}/daily_plans/today`
+          );
+          // Cache the response for offline use
+          setCacheWithTimestamp(getDailyPlanCacheKey(currentFamilyId), data);
+          return data;
+        } catch (error) {
+          // On network error, try to return cached data
+          const cached = getCacheWithTimestamp<DailyPlan>(
+            getDailyPlanCacheKey(currentFamilyId)
+          );
+          if (cached) {
+            console.log("[useTodayPlan] Network error, using cached data");
+            return cached.data;
+          }
+          throw error;
+        }
+      } else {
+        // Offline - return cached data
+        const cached = getCacheWithTimestamp<DailyPlan>(
+          getDailyPlanCacheKey(currentFamilyId)
+        );
+        if (cached) {
+          console.log("[useTodayPlan] Offline, using cached data");
+          return cached.data;
+        }
+        throw new Error("No cached data available while offline");
+      }
     },
     enabled: !!currentFamilyId,
+    // Use initialData from cache for instant display
+    initialData: () => {
+      if (!currentFamilyId) return undefined;
+      const cached = getCacheWithTimestamp<DailyPlan>(
+        getDailyPlanCacheKey(currentFamilyId)
+      );
+      return cached?.data;
+    },
+    // Consider cached data stale after 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 /**
  * Hook to update a daily plan with nested attributes support.
  * Supports optimistic updates for task/habit completion toggles.
+ * When offline, queues changes for sync when back online.
  */
 export function useUpdateDailyPlan() {
   const queryClient = useQueryClient();
@@ -192,10 +328,54 @@ export function useUpdateDailyPlan() {
       if (!currentFamilyId) {
         throw new Error("No family selected");
       }
-      return api.patch<UpdateDailyPlanResponse>(
-        `/families/${currentFamilyId}/daily_plans/${planId}`,
-        payload
-      );
+
+      // Check if we're online
+      const isOnline = await checkIsOnline();
+
+      if (isOnline) {
+        // Online - make the API call directly
+        return api.patch<UpdateDailyPlanResponse>(
+          `/families/${currentFamilyId}/daily_plans/${planId}`,
+          payload
+        );
+      } else {
+        // Offline - add to sync queue and return optimistic response
+        const endpoint = `/families/${currentFamilyId}/daily_plans/${planId}`;
+        const actionDescription = getActionDescription(payload);
+
+        addToQueue({
+          action: `Update daily plan: ${actionDescription}`,
+          endpoint,
+          method: "PATCH",
+          payload,
+        });
+
+        // Track pending items for UI indicator
+        trackPendingSyncItems(payload);
+
+        // Get current cached plan for building optimistic response
+        const currentPlan = queryClient.getQueryData<DailyPlan>(
+          dailyPlanKeys.today(currentFamilyId)
+        );
+
+        if (currentPlan) {
+          // Update the offline cache as well
+          const updatedPlan = applyOptimisticUpdate(currentPlan, payload);
+          setCacheWithTimestamp(
+            getDailyPlanCacheKey(currentFamilyId),
+            updatedPlan
+          );
+
+          // Return optimistic response
+          return {
+            message: "Queued for sync",
+            daily_plan: updatedPlan,
+            is_first_action: false,
+          } as UpdateDailyPlanResponse;
+        }
+
+        throw new Error("No cached data available for offline update");
+      }
     },
     onMutate: async ({ planId, payload }) => {
       if (!currentFamilyId) return;
@@ -230,24 +410,103 @@ export function useUpdateDailyPlan() {
         );
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Update the cache with the server response
       if (currentFamilyId) {
         queryClient.setQueryData(
           dailyPlanKeys.today(currentFamilyId),
           data.daily_plan
         );
+
+        // Update offline cache too
+        setCacheWithTimestamp(
+          getDailyPlanCacheKey(currentFamilyId),
+          data.daily_plan
+        );
+
+        // If we got a real server response (not queued), clear related pending sync items
+        if (data.message !== "Queued for sync") {
+          clearPendingSyncItems();
+        }
       }
     },
-    onSettled: () => {
-      // Invalidate to ensure we have the latest data
+    onSettled: async () => {
+      // Only invalidate if online
       if (currentFamilyId) {
-        queryClient.invalidateQueries({
-          queryKey: dailyPlanKeys.today(currentFamilyId),
-        });
+        const isOnline = await checkIsOnline();
+        if (isOnline) {
+          queryClient.invalidateQueries({
+            queryKey: dailyPlanKeys.today(currentFamilyId),
+          });
+        }
       }
     },
   });
+}
+
+/**
+ * Get a human-readable description of the update action
+ */
+function getActionDescription(payload: UpdateDailyPlanPayload): string {
+  const parts: string[] = [];
+  const updates = payload.daily_plan;
+
+  if (updates.intention !== undefined) {
+    parts.push("intention");
+  }
+  if (updates.shutdown_shipped !== undefined || updates.shutdown_blocked !== undefined) {
+    parts.push("reflection");
+  }
+  if (updates.daily_tasks_attributes?.length) {
+    parts.push(`${updates.daily_tasks_attributes.length} task(s)`);
+  }
+  if (updates.top_priorities_attributes?.length) {
+    parts.push(`${updates.top_priorities_attributes.length} priority(ies)`);
+  }
+  if (updates.habit_completions_attributes?.length) {
+    parts.push(`${updates.habit_completions_attributes.length} habit(s)`);
+  }
+
+  return parts.join(", ") || "unknown";
+}
+
+/**
+ * Track items that need syncing for UI indicators
+ */
+function trackPendingSyncItems(payload: UpdateDailyPlanPayload): void {
+  const updates = payload.daily_plan;
+
+  if (updates.intention !== undefined) {
+    addPendingSyncItem({ itemId: "intention", itemType: "intention" });
+  }
+
+  if (updates.shutdown_shipped !== undefined || updates.shutdown_blocked !== undefined) {
+    addPendingSyncItem({ itemId: "shutdown", itemType: "shutdown" });
+  }
+
+  if (updates.daily_tasks_attributes) {
+    for (const task of updates.daily_tasks_attributes) {
+      if (task.id) {
+        addPendingSyncItem({ itemId: task.id, itemType: "task" });
+      }
+    }
+  }
+
+  if (updates.top_priorities_attributes) {
+    for (const priority of updates.top_priorities_attributes) {
+      if (priority.id) {
+        addPendingSyncItem({ itemId: priority.id, itemType: "priority" });
+      }
+    }
+  }
+
+  if (updates.habit_completions_attributes) {
+    for (const habit of updates.habit_completions_attributes) {
+      if (habit.id) {
+        addPendingSyncItem({ itemId: habit.id, itemType: "habit" });
+      }
+    }
+  }
 }
 
 // ============================================================================
@@ -286,7 +545,8 @@ function applyOptimisticUpdate(
     updatedPlan.completion_stats = {
       ...plan.completion_stats,
       tasks_total: updatedPlan.daily_tasks.length,
-      tasks_completed: updatedPlan.daily_tasks.filter((t) => t.completed).length,
+      tasks_completed: updatedPlan.daily_tasks.filter((t) => t.completed)
+        .length,
     };
   }
 
@@ -300,8 +560,9 @@ function applyOptimisticUpdate(
     updatedPlan.completion_stats = {
       ...updatedPlan.completion_stats,
       priorities_total: updatedPlan.top_priorities.length,
-      priorities_completed: updatedPlan.top_priorities.filter((p) => p.completed)
-        .length,
+      priorities_completed: updatedPlan.top_priorities.filter(
+        (p) => p.completed
+      ).length,
     };
   }
 
@@ -345,7 +606,8 @@ function applyTasksUpdate(
               title: update.title ?? t.title,
               completed: update.completed ?? t.completed,
               position: update.position ?? t.position,
-              goal_id: update.goal_id !== undefined ? update.goal_id : t.goal_id,
+              goal_id:
+                update.goal_id !== undefined ? update.goal_id : t.goal_id,
               assignee_id:
                 update.assignee_id !== undefined
                   ? update.assignee_id
@@ -394,7 +656,8 @@ function applyPrioritiesUpdate(
               title: update.title ?? p.title,
               completed: update.completed ?? p.completed,
               priority_order: update.priority_order ?? p.priority_order,
-              goal_id: update.goal_id !== undefined ? update.goal_id : p.goal_id,
+              goal_id:
+                update.goal_id !== undefined ? update.goal_id : p.goal_id,
             }
           : p
       );
@@ -439,4 +702,87 @@ function applyHabitCompletionsUpdate(
   }
 
   return result;
+}
+
+// ============================================================================
+// Sync Conflict Handling
+// ============================================================================
+
+/**
+ * Check if server data is newer than cached data and handle the conflict.
+ * Called after sync queue processing to detect and notify user of conflicts.
+ * @param serverPlan The plan data from the server
+ * @param cachedPlan The locally cached plan data
+ * @returns True if conflict was detected (server was newer)
+ */
+export function checkForConflict(
+  serverPlan: DailyPlan,
+  cachedPlan: DailyPlan | null
+): boolean {
+  if (!cachedPlan) return false;
+
+  // Compare updated_at timestamps
+  const serverTime = new Date(serverPlan.updated_at).getTime();
+  const cachedTime = new Date(cachedPlan.updated_at).getTime();
+
+  // If server is newer by more than 1 second, consider it a conflict
+  if (serverTime > cachedTime + 1000) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Hook to refetch and handle conflicts after coming back online.
+ * Should be called when network status changes from offline to online.
+ */
+export function useRefetchOnReconnect() {
+  const queryClient = useQueryClient();
+  const currentFamilyId = useAuthStore((state) => state.currentFamilyId);
+
+  const refetchAndCheckConflict = async () => {
+    if (!currentFamilyId) return;
+
+    try {
+      // Get cached data before refetch
+      const cachedPlan = queryClient.getQueryData<DailyPlan>(
+        dailyPlanKeys.today(currentFamilyId)
+      );
+
+      // Refetch from server
+      const serverData = await api.get<DailyPlan>(
+        `/families/${currentFamilyId}/daily_plans/today`
+      );
+
+      // Check for conflict
+      const hasConflict = checkForConflict(serverData, cachedPlan ?? null);
+
+      if (hasConflict) {
+        // Show toast/alert about server update
+        Alert.alert(
+          "Plan Updated",
+          "Your daily plan was updated from the server with newer changes.",
+          [{ text: "OK" }]
+        );
+      }
+
+      // Update cache with server data
+      queryClient.setQueryData(
+        dailyPlanKeys.today(currentFamilyId),
+        serverData
+      );
+      setCacheWithTimestamp(getDailyPlanCacheKey(currentFamilyId), serverData);
+
+      // Clear any pending sync items since we've synced
+      clearPendingSyncItems();
+
+      return serverData;
+    } catch (error) {
+      console.error("[useRefetchOnReconnect] Error refetching:", error);
+      throw error;
+    }
+  };
+
+  return { refetchAndCheckConflict };
 }

@@ -32,11 +32,16 @@ import {
 import {
   useTodayPlan,
   useUpdateDailyPlan,
+  useRefetchOnReconnect,
   TopPriority,
   HabitCompletion,
   DailyTask,
+  isPendingSync,
+  clearPendingSyncItems,
 } from "@/hooks/useDailyPlan";
 import { useAuthStore } from "@/stores/auth";
+import { useIsOnline } from "@/hooks/useNetworkStatus";
+import { addSyncQueueListener } from "@/services/syncQueue";
 
 // ============================================================================
 // Helper Functions
@@ -199,6 +204,23 @@ function IntentionSection({
 }
 
 // ============================================================================
+// Pending Sync Indicator Component
+// ============================================================================
+
+interface PendingSyncIndicatorProps {
+  itemId: number;
+  itemType: "task" | "priority" | "habit";
+}
+
+function PendingSyncIndicator({ itemId, itemType }: PendingSyncIndicatorProps) {
+  const isPending = isPendingSync(itemId, itemType);
+
+  if (!isPending) return null;
+
+  return <View style={styles.pendingSyncDot} />;
+}
+
+// ============================================================================
 // Top Priority Item Component
 // ============================================================================
 
@@ -278,15 +300,18 @@ function TopPriorityItem({
 
         {/* Priority content */}
         <View style={styles.priorityContent}>
-          <Text
-            style={[
-              styles.priorityTitle,
-              priority.completed && styles.priorityTitleCompleted,
-            ]}
-            numberOfLines={2}
-          >
-            {priority.title}
-          </Text>
+          <View style={styles.itemTitleRow}>
+            <Text
+              style={[
+                styles.priorityTitle,
+                priority.completed && styles.priorityTitleCompleted,
+              ]}
+              numberOfLines={2}
+            >
+              {priority.title}
+            </Text>
+            <PendingSyncIndicator itemId={priority.id} itemType="priority" />
+          </View>
 
           {/* Goal badge */}
           {priority.goal && (
@@ -488,15 +513,18 @@ function HabitItem({
 
       {/* Habit content */}
       <View style={styles.habitContent}>
-        <Text
-          style={[
-            styles.habitName,
-            habitCompletion.completed && styles.habitNameCompleted,
-          ]}
-          numberOfLines={2}
-        >
-          {habitCompletion.habit.name}
-        </Text>
+        <View style={styles.itemTitleRow}>
+          <Text
+            style={[
+              styles.habitName,
+              habitCompletion.completed && styles.habitNameCompleted,
+            ]}
+            numberOfLines={2}
+          >
+            {habitCompletion.habit.name}
+          </Text>
+          <PendingSyncIndicator itemId={habitCompletion.id} itemType="habit" />
+        </View>
       </View>
 
       {/* Streak badge (only shown if streak > 0) */}
@@ -697,15 +725,18 @@ function TaskItem({ task, onToggleComplete, onDelete }: TaskItemProps) {
 
         {/* Task content */}
         <View style={styles.taskContent}>
-          <Text
-            style={[
-              styles.taskTitle,
-              task.completed && styles.taskTitleCompleted,
-            ]}
-            numberOfLines={2}
-          >
-            {task.title}
-          </Text>
+          <View style={styles.itemTitleRow}>
+            <Text
+              style={[
+                styles.taskTitle,
+                task.completed && styles.taskTitleCompleted,
+              ]}
+              numberOfLines={2}
+            >
+              {task.title}
+            </Text>
+            <PendingSyncIndicator itemId={task.id} itemType="task" />
+          </View>
         </View>
 
         {/* Assignee avatar (if assigned) */}
@@ -940,6 +971,13 @@ export default function TodayScreen() {
   // Auth state
   const user = useAuthStore((state) => state.user);
 
+  // Network status for offline sync
+  const isOnline = useIsOnline();
+  const wasOfflineRef = useRef(!isOnline);
+
+  // Refetch on reconnect hook
+  const { refetchAndCheckConflict } = useRefetchOnReconnect();
+
   // First goal prompt
   const { isEligible, isChecking, dismiss } = useFirstGoalPrompt();
   const [showPrompt, setShowPrompt] = useState(false);
@@ -951,8 +989,38 @@ export default function TodayScreen() {
   const [reflectionBannerDismissed, setReflectionBannerDismissed] =
     useState(false);
 
+  // Track pending items - force re-render when they change
+  const [, forceUpdate] = useState({});
+
   // Daily plan data
   const { data: dailyPlan, isLoading, isFetching, refetch } = useTodayPlan();
+
+  // Listen for sync queue events to update pending indicators
+  useEffect(() => {
+    const unsubscribe = addSyncQueueListener((event) => {
+      if (event === "complete") {
+        // Clear pending sync items and force re-render
+        clearPendingSyncItems();
+        forceUpdate({});
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Handle coming back online - refetch and check for conflicts
+  useEffect(() => {
+    if (isOnline && wasOfflineRef.current) {
+      // Just came back online
+      console.log("[TodayScreen] Back online, checking for conflicts");
+      refetchAndCheckConflict().catch((err) => {
+        console.error("[TodayScreen] Error refetching on reconnect:", err);
+      });
+    }
+    wasOfflineRef.current = !isOnline;
+  }, [isOnline, refetchAndCheckConflict]);
 
   // Show prompt when eligibility check completes and user is eligible
   useEffect(() => {
@@ -1548,5 +1616,21 @@ const styles = StyleSheet.create({
     height: 18,
     backgroundColor: COLORS.surface,
     borderRadius: 4,
+  },
+
+  // Pending sync indicator
+  pendingSyncDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.warning,
+    marginLeft: 8,
+  },
+
+  // Item title row (for pending indicator alignment)
+  itemTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
   },
 });

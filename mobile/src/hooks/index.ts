@@ -2,7 +2,12 @@ export { usePushNotifications } from "./usePushNotifications";
 export {
   useTodayPlan,
   useUpdateDailyPlan,
+  useRefetchOnReconnect,
   dailyPlanKeys,
+  getPendingSyncItems,
+  clearPendingSyncItems,
+  isPendingSync,
+  checkForConflict,
   type DailyPlan,
   type DailyTask,
   type TopPriority,
@@ -16,6 +21,7 @@ export {
   type HabitCompletionAttributes,
   type UpdateDailyPlanPayload,
   type UpdateDailyPlanResponse,
+  type PendingSyncItem,
 } from "./useDailyPlan";
 export {
   useGoals,
