@@ -522,3 +522,20 @@
   - GoalRefinementResponse.suggestions includes: smart_suggestions, alternative_titles, alternative_descriptions, potential_obstacles, milestones, overall_feedback
   - Import Ionicons icons carefully - "bullseye-outline" may not exist, check @expo/vector-icons docs
 ---
+
+## 2026-01-22 - US-030
+- What was implemented: Created reflections data layer with hooks for fetching and managing reflections
+- Files changed:
+  - src/hooks/useReflections.ts (new - all types and hooks for reflections)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Reflection API response wraps data in { reflections: [] } object for list endpoint
+  - ReflectionType enum: evening, weekly, monthly, quarterly, annual, quick (matches backend)
+  - ReflectionMood enum: great, good, okay, difficult, rough (matches backend enum)
+  - ReflectionFilters supports: type (enum), user_id (number), from (ISO date), to (ISO date)
+  - Backend uses reflection_responses_attributes for nested prompt/response pairs
+  - Backend reflections endpoint: GET/POST/PATCH /families/:id/reflections
+  - Quick reflections are special - they have user_id and family_id directly (not via daily_plan)
+  - reflectionsKeys pattern follows same structure as goalsKeys and habitsKeys
+  - Import hooks from @/hooks (barrel export)
+---
