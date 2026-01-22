@@ -28,3 +28,4 @@ export {
   type AchievementType,
 } from "./AchievementModal";
 export * from "./ui";
+export * from "./skeletons";

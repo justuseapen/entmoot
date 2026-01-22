@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { COLORS } from "@/theme/colors";
+import { Skeleton, SkeletonCard, SkeletonCircle } from "@/components/ui/Skeleton";
 import {
   type Badge,
   type BadgeStats,
@@ -280,12 +281,15 @@ function BadgeDetailModal({ badge, visible, onClose }: BadgeDetailModalProps) {
   );
 }
 
-// Loading skeleton
+// Loading skeleton with animated shimmer
 function BadgeGridSkeleton() {
   return (
     <View style={styles.gridContainer}>
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <View key={i} style={[styles.badgeItem, styles.skeleton]} />
+        <SkeletonCard key={i} style={styles.badgeItemSkeleton}>
+          <SkeletonCircle size={56} style={styles.badgeSkeletonIcon} />
+          <Skeleton width={60} height={12} />
+        </SkeletonCard>
       ))}
     </View>
   );
@@ -440,7 +444,10 @@ export function BadgeRow({
     return (
       <View style={styles.rowContainer}>
         {[1, 2, 3].map((i) => (
-          <View key={i} style={[styles.rowBadgeItem, styles.skeleton]} />
+          <SkeletonCard key={i} style={styles.rowBadgeItemSkeleton}>
+            <SkeletonCircle size={48} style={styles.rowBadgeSkeletonIcon} />
+            <Skeleton width={50} height={12} />
+          </SkeletonCard>
         ))}
       </View>
     );
@@ -759,11 +766,29 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Skeleton
+  // Skeleton (legacy, kept for compatibility)
   skeleton: {
     backgroundColor: COLORS.surface,
     opacity: 0.6,
     height: 100,
+  },
+  // Animated skeleton styles
+  badgeItemSkeleton: {
+    width: BADGE_SIZE,
+    alignItems: "center",
+    padding: 12,
+    height: 100,
+  },
+  badgeSkeletonIcon: {
+    marginBottom: 8,
+  },
+  rowBadgeItemSkeleton: {
+    alignItems: "center",
+    padding: 12,
+    width: 80,
+  },
+  rowBadgeSkeletonIcon: {
+    marginBottom: 8,
   },
 
   // Row styles (for compact Me tab view)

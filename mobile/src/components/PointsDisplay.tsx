@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/theme/colors";
+import { Skeleton, SkeletonCard } from "@/components/ui/Skeleton";
 import {
   usePoints,
   type PointsResponse,
@@ -153,16 +154,32 @@ export function PointsDisplay({
   if (isLoading) {
     return (
       <View style={styles.container}>
-        {/* Skeleton for main points card */}
-        <View style={[styles.mainCard, styles.skeleton]} />
+        {/* Skeleton for main points card with shimmer */}
+        <SkeletonCard style={styles.mainCardSkeleton}>
+          <View style={styles.mainPointsSection}>
+            <Skeleton width={100} height={40} style={styles.totalPointsSkeleton} />
+            <Skeleton width={80} height={14} />
+          </View>
+          <View style={styles.weekPointsSkeletonSection}>
+            <Skeleton width={50} height={24} style={styles.weekPointsSkeleton} />
+            <Skeleton width={60} height={12} />
+          </View>
+        </SkeletonCard>
         {/* Skeleton for activity list */}
         {showRecentActivity && (
-          <View style={styles.activitySection}>
-            <View style={[styles.activityHeader, styles.skeleton]} />
+          <SkeletonCard style={styles.activitySection}>
+            <Skeleton width={120} height={18} style={styles.activityTitleSkeleton} />
             {[1, 2, 3].map((i) => (
-              <View key={i} style={[styles.activityItemSkeleton, styles.skeleton]} />
+              <View key={i} style={styles.activityItemSkeletonRow}>
+                <Skeleton width={36} height={36} borderRadius={8} />
+                <View style={styles.activitySkeletonContent}>
+                  <Skeleton width="70%" height={14} style={styles.activitySkeletonLabel} />
+                  <Skeleton width={60} height={12} />
+                </View>
+                <Skeleton width={40} height={24} borderRadius={4} />
+              </View>
             ))}
-          </View>
+          </SkeletonCard>
         )}
       </View>
     );
@@ -224,7 +241,18 @@ export function PointsCard({
   isLoading?: boolean;
 }) {
   if (isLoading) {
-    return <View style={[styles.mainCard, styles.skeleton]} />;
+    return (
+      <SkeletonCard style={styles.mainCardSkeleton}>
+        <View style={styles.mainPointsSection}>
+          <Skeleton width={100} height={40} style={styles.totalPointsSkeleton} />
+          <Skeleton width={80} height={14} />
+        </View>
+        <View style={styles.weekPointsSkeletonSection}>
+          <Skeleton width={50} height={24} style={styles.weekPointsSkeleton} />
+          <Skeleton width={60} height={12} />
+        </View>
+      </SkeletonCard>
+    );
   }
 
   return (
@@ -384,5 +412,41 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 8,
     marginBottom: 8,
+  },
+  // Animated skeleton styles
+  mainCardSkeleton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    minHeight: 80,
+  },
+  totalPointsSkeleton: {
+    marginBottom: 4,
+  },
+  weekPointsSkeletonSection: {
+    alignItems: "flex-end",
+    padding: 8,
+    borderRadius: 8,
+  },
+  weekPointsSkeleton: {
+    marginBottom: 4,
+  },
+  activityTitleSkeleton: {
+    marginBottom: 12,
+  },
+  activityItemSkeletonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.border,
+  },
+  activitySkeletonContent: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  activitySkeletonLabel: {
+    marginBottom: 4,
   },
 });

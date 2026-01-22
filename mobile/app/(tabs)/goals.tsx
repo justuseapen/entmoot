@@ -21,6 +21,7 @@ import {
   GoalTimeScale,
   GoalStatus,
 } from "@/hooks/useGoals";
+import { GoalsListSkeleton as AnimatedGoalsListSkeleton } from "@/components/skeletons";
 
 // ============================================================================
 // Constants
@@ -51,35 +52,11 @@ const STATUS_LABELS: Record<GoalStatus, string> = {
 };
 
 // ============================================================================
-// Skeleton Components
+// Skeleton Components (using animated Skeleton from components library)
 // ============================================================================
 
-function GoalCardSkeleton() {
-  return (
-    <View style={styles.goalCard}>
-      <View style={[styles.skeletonText, { width: "70%", height: 20 }]} />
-      <View style={styles.progressContainer}>
-        <View style={[styles.progressBarBackground, { width: "100%" }]}>
-          <View style={[styles.skeletonText, { width: "45%", height: 8, borderRadius: 4 }]} />
-        </View>
-      </View>
-      <View style={styles.cardFooter}>
-        <View style={[styles.skeletonText, { width: 80, height: 16 }]} />
-        <View style={[styles.skeletonText, { width: 60, height: 24, borderRadius: 12 }]} />
-      </View>
-    </View>
-  );
-}
-
-function GoalsListSkeleton() {
-  return (
-    <View style={styles.listContent}>
-      <GoalCardSkeleton />
-      <GoalCardSkeleton />
-      <GoalCardSkeleton />
-    </View>
-  );
-}
+// Use the animated GoalsListSkeleton imported from @/components/skeletons
+const GoalsListSkeleton = AnimatedGoalsListSkeleton;
 
 // ============================================================================
 // Empty State Component

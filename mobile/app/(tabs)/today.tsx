@@ -25,6 +25,7 @@ import {
   FirstGoalPrompt,
   useFirstGoalPrompt,
 } from "@/components/FirstGoalPrompt";
+import { TodayHeaderSkeleton } from "@/components/skeletons";
 import { AddPriorityModal } from "@/components/AddPriorityModal";
 import {
   EveningReflectionBanner,
@@ -78,21 +79,16 @@ function getFirstName(fullName: string | undefined | null): string {
 }
 
 // ============================================================================
-// Skeleton Component
+// Skeleton Component (using animated Skeleton from ui library)
 // ============================================================================
 
-function TodayHeaderSkeleton() {
-  return (
-    <View style={styles.header}>
-      {/* Date skeleton */}
-      <View style={[styles.skeletonText, styles.skeletonDate]} />
-      {/* Greeting skeleton */}
-      <View style={[styles.skeletonText, styles.skeletonGreeting]} />
-      {/* Completion badge skeleton */}
-      <View style={[styles.skeletonBadge]} />
-    </View>
-  );
-}
+// TodayHeaderSkeleton is now imported from @/components/skeletons
+// Import the animated Skeleton components for inline use
+import {
+  Skeleton,
+  SkeletonCircle,
+  SkeletonListItem,
+} from "@/components/ui/Skeleton";
 
 // ============================================================================
 // Intention Section Component
@@ -157,14 +153,14 @@ function IntentionSection({
     }
   };
 
-  // Loading skeleton state
+  // Loading skeleton state - use animated Skeleton component
   if (isLoading) {
     return (
       <View style={styles.intentionSection}>
         <View style={styles.intentionHeader}>
           <Text style={styles.sectionTitle}>Today's Intention</Text>
         </View>
-        <View style={[styles.skeletonText, styles.skeletonIntention]} />
+        <Skeleton width="80%" height={24} />
       </View>
     );
   }
@@ -400,19 +396,17 @@ function TopPrioritiesSection({
 
   const canAddMore = sortedPriorities.length < 3;
 
-  // Loading skeleton state
+  // Loading skeleton state - use animated Skeleton components
   if (isLoading) {
     return (
       <View style={styles.prioritiesSection}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Top Priorities</Text>
+          <Skeleton width={110} height={18} />
+          <Skeleton width={80} height={14} />
         </View>
         <View style={styles.skeletonPriorityList}>
           {[1, 2, 3].map((i) => (
-            <View key={i} style={styles.skeletonPriorityItem}>
-              <View style={styles.skeletonCheckbox} />
-              <View style={styles.skeletonPriorityText} />
-            </View>
+            <SkeletonListItem key={i} hasCheckbox />
           ))}
         </View>
       </View>
@@ -592,19 +586,17 @@ function HabitsSection({
   const completedCount = sortedHabits.filter((h) => h.completed).length;
   const totalCount = sortedHabits.length;
 
-  // Loading skeleton state
+  // Loading skeleton state - use animated Skeleton components
   if (isLoading) {
     return (
       <View style={styles.habitsSection}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Non-Negotiables</Text>
+          <Skeleton width={130} height={18} />
+          <Skeleton width={90} height={14} />
         </View>
         <View style={styles.skeletonHabitList}>
           {[1, 2, 3].map((i) => (
-            <View key={i} style={styles.skeletonHabitItem}>
-              <View style={styles.skeletonCheckbox} />
-              <View style={styles.skeletonHabitText} />
-            </View>
+            <SkeletonListItem key={i} hasCheckbox />
           ))}
         </View>
       </View>
@@ -861,20 +853,22 @@ function TasksSection({
   const completedCount = sortedTasks.filter((t) => t.completed).length;
   const totalCount = sortedTasks.length;
 
-  // Loading skeleton state
+  // Loading skeleton state - use animated Skeleton components
   if (isLoading) {
     return (
       <View style={styles.tasksSection}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Tasks</Text>
+          <Skeleton width={50} height={18} />
+          <Skeleton width={90} height={14} />
         </View>
         <View style={styles.skeletonTaskList}>
           {[1, 2, 3].map((i) => (
-            <View key={i} style={styles.skeletonTaskItem}>
-              <View style={styles.skeletonCheckbox} />
-              <View style={styles.skeletonTaskText} />
-            </View>
+            <SkeletonListItem key={i} hasCheckbox />
           ))}
+        </View>
+        {/* Add task input skeleton */}
+        <View style={styles.addTaskContainer}>
+          <Skeleton width="100%" height={24} borderRadius={0} />
         </View>
       </View>
     );
@@ -1051,7 +1045,7 @@ function ScheduleSection({
   const allDayEvents = events.filter((e) => e.allDay);
   const timedEvents = events.filter((e) => !e.allDay);
 
-  // Loading skeleton state
+  // Loading skeleton state - use animated Skeleton components
   if (isLoading) {
     return (
       <View style={styles.scheduleSection}>
@@ -1070,10 +1064,10 @@ function ScheduleSection({
         <View style={styles.skeletonEventList}>
           {[1, 2].map((i) => (
             <View key={i} style={styles.skeletonEventItem}>
-              <View style={styles.skeletonEventDot} />
+              <SkeletonCircle size={10} style={styles.skeletonEventDot} />
               <View style={styles.skeletonEventContent}>
-                <View style={styles.skeletonEventTime} />
-                <View style={styles.skeletonEventTitle} />
+                <Skeleton width={60} height={12} style={styles.skeletonEventTime} />
+                <Skeleton width="70%" height={16} />
               </View>
             </View>
           ))}

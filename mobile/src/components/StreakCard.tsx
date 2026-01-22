@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { COLORS } from "@/theme/colors";
+import { SkeletonCard, Skeleton, SkeletonCircle } from "@/components/ui/Skeleton";
 import {
   Streak,
   STREAK_CONFIG,
@@ -78,7 +79,12 @@ export function StreakCardsRow({ streaks, isLoading }: StreakCardsRowProps) {
     return (
       <View style={styles.row}>
         {[1, 2, 3].map((i) => (
-          <View key={i} style={[styles.card, styles.skeleton]} />
+          <SkeletonCard key={i} style={styles.skeletonCard}>
+            <SkeletonCircle size={24} style={styles.skeletonIcon} />
+            <Skeleton width={40} height={12} style={styles.skeletonLabel} />
+            <Skeleton width={30} height={28} style={styles.skeletonCount} />
+            <Skeleton width={60} height={10} />
+          </SkeletonCard>
         ))}
       </View>
     );
@@ -203,5 +209,20 @@ const styles = StyleSheet.create({
   skeleton: {
     backgroundColor: COLORS.surface,
     opacity: 0.6,
+  },
+  skeletonCard: {
+    flex: 1,
+    alignItems: "center",
+    padding: 12,
+    minHeight: 100,
+  },
+  skeletonIcon: {
+    marginBottom: 8,
+  },
+  skeletonLabel: {
+    marginBottom: 4,
+  },
+  skeletonCount: {
+    marginBottom: 4,
   },
 });
