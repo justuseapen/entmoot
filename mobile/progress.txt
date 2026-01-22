@@ -304,3 +304,17 @@
   - CompletionStats from daily plan has tasks_total, tasks_completed, priorities_total, priorities_completed, habits_total, habits_completed
   - User name available via useAuthStore((state) => state.user?.name)
 ---
+
+## 2026-01-21 - US-017
+- What was implemented: Built Today's Intention section with inline editing and save functionality
+- Files changed:
+  - app/(tabs)/today.tsx (added IntentionSection component with edit mode)
+- **Learnings for future iterations:**
+  - useRef<TextInput> with setTimeout focus pattern for delayed focus after state update
+  - Inline edit pattern: isEditing state, TouchableOpacity for display, TextInput for edit
+  - Compare trimmed values before saving to avoid unnecessary API calls
+  - Show saving indicator using ActivityIndicator with "Saving..." text next to section title
+  - useUpdateDailyPlan from @/hooks/useDailyPlan handles intention updates with optimistic UI
+  - Sync local state from props using useEffect when not editing (for server sync)
+  - blurOnSubmit + returnKeyType="done" makes TextInput behave like single-line with done key
+---
