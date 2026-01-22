@@ -165,3 +165,20 @@ export {
   type RecentActivity,
   type PointsResponse,
 } from "./usePoints";
+export {
+  useUserBadges,
+  useAllBadges,
+  badgesKeys,
+  getBadgeCategoryConfig,
+  isNewlyEarned,
+  formatEarnedDate,
+  getEarnedBadges,
+  getLockedBadges,
+  groupBadgesByCategory,
+  BADGE_CATEGORIES,
+  type Badge,
+  type BadgeStats,
+  type UserBadgesResponse,
+  type AllBadgesResponse,
+  type BadgeCategory,
+} from "./useBadges";

@@ -14,46 +14,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { useQuery } from "@tanstack/react-query";
 
 import { COLORS } from "@/theme/colors";
 import { useAuthStore } from "@/stores";
-import { api } from "@/lib/api";
-import { useStreaks, usePoints, type Streak, type PointsResponse } from "@/hooks";
-import { StreakCardsRow, PointsCard } from "@/components";
-
-// Types for API responses
-interface Badge {
-  id: number;
-  name: string;
-  description: string;
-  icon: string;
-  category: string;
-  criteria: string;
-  earned: boolean;
-  earned_at: string | null;
-}
-
-interface BadgesResponse {
-  badges: Badge[];
-  stats: {
-    total_badges: number;
-    earned_badges: number;
-    completion_percentage: number;
-  };
-}
-
-// Custom hooks for data fetching
-function useBadges() {
-  return useQuery({
-    queryKey: ["badges", "me"],
-    queryFn: async () => {
-      const response = await api.get<BadgesResponse>("/users/me/badges");
-      return response;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-}
+import {
+  useStreaks,
+  usePoints,
+  useUserBadges,
+  type Streak,
+  type PointsResponse,
+  type UserBadgesResponse,
+} from "@/hooks";
+import { StreakCardsRow, PointsCard, BadgeRow } from "@/components";
 
 // Quick link items
 const QUICK_LINKS = [
@@ -147,69 +119,21 @@ function PointsSection({
   );
 }
 
-function BadgeItem({ badge }: { badge: Badge }) {
-  return (
-    <View style={styles.badgeItem}>
-      <View style={styles.badgeIcon}>
-        <Text style={styles.badgeEmoji}>{badge.icon}</Text>
-      </View>
-      <Text style={styles.badgeName} numberOfLines={1}>
-        {badge.name.replace(/_/g, " ")}
-      </Text>
-    </View>
-  );
-}
-
 function BadgesSection({
   badges,
   isLoading,
 }: {
-  badges: BadgesResponse | undefined;
+  badges: UserBadgesResponse | undefined;
   isLoading: boolean;
 }) {
-  const earnedBadges =
-    badges?.badges.filter((b) => b.earned).slice(0, 3) ?? [];
-
-  if (isLoading) {
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Badges</Text>
-        <View style={styles.badgesRow}>
-          {[1, 2, 3].map((i) => (
-            <View key={i} style={[styles.badgeItem, styles.skeleton]} />
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  if (earnedBadges.length === 0) {
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Badges</Text>
-        <View style={styles.emptyBadges}>
-          <Ionicons name="ribbon-outline" size={32} color={COLORS.textTertiary} />
-          <Text style={styles.emptyBadgesText}>
-            Complete activities to earn badges!
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent Badges</Text>
-        <Text style={styles.badgeStats}>
-          {badges?.stats.earned_badges ?? 0}/{badges?.stats.total_badges ?? 0}
-        </Text>
-      </View>
-      <View style={styles.badgesRow}>
-        {earnedBadges.map((badge) => (
-          <BadgeItem key={badge.id} badge={badge} />
-        ))}
-      </View>
+      <Text style={styles.sectionTitle}>Recent Badges</Text>
+      <BadgeRow
+        badges={badges?.badges ?? []}
+        stats={badges?.stats}
+        isLoading={isLoading}
+      />
     </View>
   );
 }
@@ -274,7 +198,7 @@ export default function MeScreen() {
     data: badges,
     isLoading: badgesLoading,
     refetch: refetchBadges,
-  } = useBadges();
+  } = useUserBadges();
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -407,70 +331,11 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: COLORS.text,
     marginBottom: 12,
-  },
-
-  // Badges
-  badgeStats: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  badgesRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  badgeItem: {
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 12,
-    width: 80,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  badgeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary + "15",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  badgeEmoji: {
-    fontSize: 24,
-  },
-  badgeName: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    textTransform: "capitalize",
-  },
-  emptyBadges: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyBadgesText: {
-    fontSize: 14,
-    color: COLORS.textTertiary,
-    marginTop: 8,
-    textAlign: "center",
   },
 
   // Quick Links
@@ -520,11 +385,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: COLORS.error,
-  },
-
-  // Skeleton
-  skeleton: {
-    backgroundColor: COLORS.surface,
-    opacity: 0.6,
   },
 });

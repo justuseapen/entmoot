@@ -16,4 +16,5 @@ export {
 export { OfflineBanner } from "./OfflineBanner";
 export { StreakCard, StreakCardsRow } from "./StreakCard";
 export { PointsDisplay, PointsCard } from "./PointsDisplay";
+export { BadgeGrid, BadgeRow } from "./BadgeGrid";
 export * from "./ui";
