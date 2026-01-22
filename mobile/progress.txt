@@ -405,3 +405,17 @@
   - DailyPlan already has shutdown_shipped and shutdown_blocked fields - no type changes needed
   - Haptics.notificationAsync for success feedback on save
 ---
+
+## 2026-01-21 - US-023
+- What was implemented: Created habits data layer with CRUD hooks
+- Files changed:
+  - src/hooks/useHabits.ts (created - all types and hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Habit type matches backend: id, name, position, is_active
+  - Backend habits API response wraps habits in { habits: [] } object
+  - useReorderHabits uses positions array: [{ id: number, position: number }]
+  - All mutation hooks include optimistic updates with rollback on error
+  - habitsKeys pattern follows same structure as dailyPlanKeys and goalsKeys
+  - Import hooks from @/hooks (barrel export)
+---
