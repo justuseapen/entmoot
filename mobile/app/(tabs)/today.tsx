@@ -1,10 +1,13 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { format } from "date-fns";
@@ -13,7 +16,7 @@ import {
   FirstGoalPrompt,
   useFirstGoalPrompt,
 } from "@/components/FirstGoalPrompt";
-import { useTodayPlan } from "@/hooks/useDailyPlan";
+import { useTodayPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlan";
 import { useAuthStore } from "@/stores/auth";
 
 // ============================================================================
@@ -55,6 +58,123 @@ function TodayHeaderSkeleton() {
       <View style={[styles.skeletonText, styles.skeletonGreeting]} />
       {/* Completion badge skeleton */}
       <View style={[styles.skeletonBadge]} />
+    </View>
+  );
+}
+
+// ============================================================================
+// Intention Section Component
+// ============================================================================
+
+interface IntentionSectionProps {
+  intention: string | null;
+  dailyPlanId: number;
+  isLoading?: boolean;
+}
+
+function IntentionSection({
+  intention,
+  dailyPlanId,
+  isLoading = false,
+}: IntentionSectionProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localIntention, setLocalIntention] = useState(intention ?? "");
+  const [isSaving, setIsSaving] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  const updateDailyPlan = useUpdateDailyPlan();
+
+  // Sync local state when prop changes (e.g., from server response)
+  useEffect(() => {
+    if (!isEditing) {
+      setLocalIntention(intention ?? "");
+    }
+  }, [intention, isEditing]);
+
+  const handlePress = () => {
+    setIsEditing(true);
+    // Focus the input after state update
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
+
+  const handleBlur = async () => {
+    setIsEditing(false);
+
+    // Only save if the value has changed
+    const trimmedIntention = localIntention.trim();
+    const currentIntention = intention ?? "";
+
+    if (trimmedIntention !== currentIntention) {
+      setIsSaving(true);
+      try {
+        await updateDailyPlan.mutateAsync({
+          planId: dailyPlanId,
+          payload: {
+            daily_plan: {
+              intention: trimmedIntention || null,
+            },
+          },
+        });
+      } catch (error) {
+        // Revert to previous value on error
+        setLocalIntention(intention ?? "");
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  // Loading skeleton state
+  if (isLoading) {
+    return (
+      <View style={styles.intentionSection}>
+        <View style={styles.intentionHeader}>
+          <Text style={styles.sectionTitle}>Today's Intention</Text>
+        </View>
+        <View style={[styles.skeletonText, styles.skeletonIntention]} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.intentionSection}>
+      <View style={styles.intentionHeader}>
+        <Text style={styles.sectionTitle}>Today's Intention</Text>
+        {isSaving && (
+          <View style={styles.savingIndicator}>
+            <ActivityIndicator size="small" color={COLORS.textSecondary} />
+            <Text style={styles.savingText}>Saving...</Text>
+          </View>
+        )}
+      </View>
+
+      {isEditing ? (
+        <TextInput
+          ref={inputRef}
+          style={styles.intentionInput}
+          value={localIntention}
+          onChangeText={setLocalIntention}
+          onBlur={handleBlur}
+          placeholder="What's your focus for today?"
+          placeholderTextColor={COLORS.textSecondary}
+          multiline
+          autoFocus
+          returnKeyType="done"
+          blurOnSubmit
+        />
+      ) : (
+        <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
+          <Text
+            style={[
+              styles.intentionText,
+              !intention && styles.intentionPlaceholder,
+            ]}
+          >
+            {intention || "What's your focus for today?"}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -181,6 +301,13 @@ export default function TodayScreen() {
           </View>
         )}
 
+        {/* Today's Intention Section */}
+        <IntentionSection
+          intention={dailyPlan?.intention ?? null}
+          dailyPlanId={dailyPlan?.id ?? 0}
+          isLoading={isLoading}
+        />
+
         {/* Placeholder for future sections */}
         <View style={styles.placeholderSection}>
           <Text style={styles.placeholderText}>
@@ -276,6 +403,55 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 16,
     backgroundColor: COLORS.surface,
+  },
+
+  // Intention section
+  intentionSection: {
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surface,
+  },
+  intentionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  intentionText: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: COLORS.text,
+    lineHeight: 26,
+  },
+  intentionPlaceholder: {
+    color: COLORS.textSecondary,
+    fontStyle: "italic",
+  },
+  intentionInput: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: COLORS.text,
+    lineHeight: 26,
+    padding: 0,
+    minHeight: 26,
+  },
+  savingIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  savingText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  skeletonIntention: {
+    width: "80%",
+    height: 24,
   },
 
   // Placeholder section
