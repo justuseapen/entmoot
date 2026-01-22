@@ -3,12 +3,17 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { useAuthStore } from "@/stores";
+import { COLORS, paperThemeColors } from "@/theme/colors";
 
-// Design system colors
-const COLORS = {
-  forestGreen: "#2D5A27",
-  creamWhite: "#FFF8E7",
+// Configure React Native Paper theme
+const paperTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    ...paperThemeColors,
+  },
 };
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -40,7 +45,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!isInitialized || isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.forestGreen} />
+        <ActivityIndicator size="large" color={COLORS.secondary} />
       </View>
     );
   }
@@ -50,34 +55,42 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <AuthGuard>
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: COLORS.creamWhite,
-            },
-            headerTintColor: COLORS.forestGreen,
-            headerTitleStyle: {
-              fontWeight: "600",
-            },
-            contentStyle: {
-              backgroundColor: COLORS.creamWhite,
-            },
-          }}
-        >
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="onboarding/index"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="settings/index" options={{ title: "Settings" }} />
-          <Stack.Screen name="goal/[id]" options={{ title: "Goal Details" }} />
-        </Stack>
-      </AuthGuard>
-    </SafeAreaProvider>
+    <PaperProvider theme={paperTheme}>
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <AuthGuard>
+          <Stack
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: COLORS.background,
+              },
+              headerTintColor: COLORS.secondary,
+              headerTitleStyle: {
+                fontWeight: "600",
+              },
+              contentStyle: {
+                backgroundColor: COLORS.background,
+              },
+            }}
+          >
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="onboarding/index"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="settings/index"
+              options={{ title: "Settings" }}
+            />
+            <Stack.Screen
+              name="goal/[id]"
+              options={{ title: "Goal Details" }}
+            />
+          </Stack>
+        </AuthGuard>
+      </SafeAreaProvider>
+    </PaperProvider>
   );
 }
 
@@ -86,6 +99,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: COLORS.creamWhite,
+    backgroundColor: COLORS.background,
   },
 });
