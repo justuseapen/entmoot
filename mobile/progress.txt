@@ -40,7 +40,9 @@
 - Jest configured with jest-expo preset; use `npm test` or `npm run test:watch`
 - @env mock in __mocks__/@env.js for tests
 - expo-router: File-based routing in /app directory, main entry point is "expo-router/entry" in package.json
-- Design colors: forestGreen=#2D5A27, creamWhite=#FFF8E7, earthBrown=#795548
+- Design colors: primary=#4F46E5, secondary=#2D5A27, background=#FFF8E7, earthBrown=#795548
+- UI components: Import from @/components/ui (Typography, Button, Card, Input, LoadingSpinner)
+- Theme colors: Import COLORS from @/theme/colors for consistent styling
 - Use @expo/vector-icons Ionicons for icons (already installed)
 
 ## Learnings
@@ -91,4 +93,39 @@
   - The existing src/navigation/ React Navigation code still exists but is not used by expo-router
   - useSegments() returns the current route segments for auth guard logic
   - Tab bar icons use @expo/vector-icons/Ionicons - import with { Ionicons } from "@expo/vector-icons"
+---
+
+## 2026-01-21 - US-004
+- What was implemented: Created design system foundation with reusable UI components
+- Files changed:
+  - package.json (added react-native-paper)
+  - app/_layout.tsx (configured PaperProvider with custom theme)
+  - src/theme/colors.ts (created with brand colors and paper theme colors)
+  - src/components/ui/Typography.tsx (H1, H2, H3, Body, Caption variants)
+  - src/components/ui/Button.tsx (primary, secondary, outline, ghost variants)
+  - src/components/ui/Card.tsx (default, outlined, elevated variants + PressableCard)
+  - src/components/ui/Input.tsx (with label, error state, helper text)
+  - src/components/ui/LoadingSpinner.tsx (with optional message and fullScreen mode)
+  - src/components/ui/index.ts (barrel export file)
+- **Learnings for future iterations:**
+  - react-native-paper uses MD3LightTheme as base theme, extend colors with spread operator
+  - PaperProvider must wrap the entire app tree (wrap SafeAreaProvider inside)
+  - Custom UI components don't need to wrap Paper components - plain React Native works well
+  - Use COLORS from @/theme/colors for consistent styling across the app
+  - Button/Card variants are implemented as StyleSheet combinations, not separate components
+  - Import components from @/components/ui (barrel export pattern)
+---
+
+## 2026-01-21 - US-005
+- What was implemented: Created secure storage service for auth tokens and sensitive data
+- Files changed:
+  - package.json (expo-secure-store version updated)
+  - src/services/secureStorage.ts (created with all secure storage functions)
+- **Learnings for future iterations:**
+  - expo-secure-store was already in package.json but at an older version - npm install updated it
+  - Use `--legacy-peer-deps` when installing packages due to React 19 peer dependency conflicts
+  - Import from expo-secure-store: setItemAsync, getItemAsync, deleteItemAsync (not set/get/delete)
+  - STORAGE_KEYS constants help prevent typos and enable TypeScript autocomplete
+  - clearAuthData() helper is useful for logout - clears all auth-related keys at once
+  - Services directory is at src/services/ for platform-specific services
 ---
