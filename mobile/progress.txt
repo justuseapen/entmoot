@@ -905,3 +905,24 @@
   - PointsCard is compact version (no activity list), PointsDisplay is full version with Recent Activity section
   - Import usePoints, PointsResponse from @/hooks; PointsCard, PointsDisplay from @/components
 ---
+
+## 2026-01-22 - US-050
+- What was implemented: Created reusable badges data layer and display components with shine animation
+- Files changed:
+  - src/hooks/useBadges.ts (new - useUserBadges, useAllBadges hooks, Badge types, utility functions)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/BadgeGrid.tsx (new - BadgeGrid, BadgeRow, BadgeDetailModal components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared BadgeRow component, removed inline useBadges hook)
+- **Learnings for future iterations:**
+  - Me tab already had inline useBadges hook - extracted to reusable src/hooks/useBadges.ts module
+  - Two API endpoints: GET /users/me/badges (user's badges with stats), GET /badges (all badges catalog)
+  - UserBadgesResponse includes { badges: Badge[], stats: { total_badges, earned_badges, completion_percentage } }
+  - Badge type: id, name, description, icon, category, criteria, earned, earned_at, points_awarded
+  - BadgeGrid shows full earned/locked sections, BadgeRow shows compact 3-badge view for Me tab
+  - Shine animation: Animated loop with translateX for skewed highlight effect, 2s duration + 3s delay
+  - isNewlyEarned() checks if badge earned_at < 24 hours ago for shine animation trigger
+  - Locked badges: grayscale via 40% opacity on emoji, lock overlay with semi-transparent white background
+  - BadgeDetailModal: spring animation for scale entrance, category badge with color from BADGE_CATEGORIES config
+  - Import useUserBadges, Badge, UserBadgesResponse from @/hooks; BadgeGrid, BadgeRow from @/components
+---
