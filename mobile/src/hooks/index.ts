@@ -69,3 +69,18 @@ export {
   type UpdateReflectionPayload,
   type ReflectionMutationResponse,
 } from "./useReflections";
+export {
+  useCurrentWeeklyReview,
+  useWeeklyReviews,
+  useWeeklyReview,
+  useUpdateWeeklyReview,
+  weeklyReviewsKeys,
+  type WeeklyReview,
+  type WeeklyReviewMetrics,
+  type TaskCompletionMetrics,
+  type GoalProgressMetrics,
+  type HabitTally,
+  type DailyPlanSummary,
+  type UpdateWeeklyReviewPayload,
+  type UpdateWeeklyReviewResponse,
+} from "./useWeeklyReviews";

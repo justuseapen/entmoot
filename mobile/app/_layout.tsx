@@ -184,6 +184,10 @@ export default function RootLayout() {
               name="reflection/quick"
               options={{ title: "Quick Reflection" }}
             />
+            <Stack.Screen
+              name="reflection/weekly"
+              options={{ title: "Weekly Review" }}
+            />
           </Stack>
         </AuthGuard>
       </SafeAreaProvider>
