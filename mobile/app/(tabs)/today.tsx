@@ -23,6 +23,7 @@ import {
   FirstGoalPrompt,
   useFirstGoalPrompt,
 } from "@/components/FirstGoalPrompt";
+import { AddPriorityModal } from "@/components/AddPriorityModal";
 import {
   useTodayPlan,
   useUpdateDailyPlan,
@@ -963,8 +964,10 @@ export default function TodayScreen() {
 
   const handleAddPriorityPress = () => {
     setShowAddPriorityModal(true);
-    // TODO: Implement AddPriorityModal in US-021
-    console.log("Add Priority pressed - modal to be implemented in US-021");
+  };
+
+  const handleCloseAddPriorityModal = () => {
+    setShowAddPriorityModal(false);
   };
 
   // Handle pull-to-refresh
@@ -1060,6 +1063,14 @@ export default function TodayScreen() {
           visible={showPrompt}
           onClose={handleClosePrompt}
           onGoalCreated={handleGoalCreated}
+        />
+
+        {/* Add Priority Modal */}
+        <AddPriorityModal
+          visible={showAddPriorityModal}
+          onClose={handleCloseAddPriorityModal}
+          dailyPlanId={dailyPlan?.id ?? 0}
+          currentPrioritiesCount={dailyPlan?.top_priorities?.length ?? 0}
         />
       </SafeAreaView>
     </GestureHandlerRootView>

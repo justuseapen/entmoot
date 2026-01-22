@@ -17,3 +17,13 @@ export {
   type UpdateDailyPlanPayload,
   type UpdateDailyPlanResponse,
 } from "./useDailyPlan";
+export {
+  useGoals,
+  useGoal,
+  goalsKeys,
+  type Goal,
+  type GoalStatus,
+  type GoalTimeScale,
+  type GoalVisibility,
+  type GoalFilters,
+} from "./useGoals";
