@@ -827,3 +827,21 @@
   - Linking.openSettings() is cross-platform alternative for Android
   - Import calendar functions from @/services (requestCalendarPermissions, getCalendarPermissionStatus, hasCalendarPermission)
 ---
+
+## 2026-01-22 - US-046
+- What was implemented: Display calendar events in Today view with collapsible Schedule section
+- Files changed:
+  - src/services/calendar.ts (added CalendarEvent type, getDeviceCalendars(), getTodayEvents())
+  - app/(tabs)/today.tsx (added ScheduleSection component, CalendarEventItem component, calendar state and handlers)
+- **Learnings for future iterations:**
+  - CalendarEvent interface: id, title, startDate, endDate, allDay, calendarColor, calendarTitle, location, notes
+  - expo-calendar getEventsAsync() takes array of calendar IDs and date range (startDate, endDate)
+  - Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT) gets all event calendars
+  - Sort events: all-day first, then by start time: `sort((a, b) => { if (a.allDay && !b.allDay) return -1; ... }`
+  - Open iOS Calendar app with timestamp: `calshow:${Math.floor(date.getTime() / 1000)}`
+  - Collapsible section pattern: isCollapsed state + chevron toggle icon
+  - ScheduleSection shows permission prompt when hasCalendarPermission is false
+  - Pull-to-refresh should also refresh calendar events: add refreshCalendarEvents() to onRefresh callback
+  - format(date, "h:mm a") from date-fns gives "9:00 AM" format
+  - Import CalendarEvent, getTodayEvents, hasCalendarPermission, requestCalendarPermissions from @/services/calendar
+---

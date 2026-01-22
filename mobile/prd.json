@@ -850,8 +850,8 @@
         "Typecheck passes"
       ],
       "priority": 46,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - getTodayEvents() added to calendar.ts, ScheduleSection component added to Today screen with collapsible UI, calendar color dots, all-day events at top, empty state, permission prompt, refresh on pull-to-refresh, tap to open native calendar"
     },
     {
       "id": "US-047",
