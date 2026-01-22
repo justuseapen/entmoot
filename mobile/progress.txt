@@ -947,3 +947,18 @@
   - Heavy haptic feedback on celebration (Haptics.notificationAsync Success), heavy impact on dismiss
   - Import AchievementModal, useAchievementCelebration, triggerAchievementCelebration, create*Achievement from @/components
 ---
+
+## 2026-01-22 - US-052
+- What was implemented: Created centralized haptic feedback utility at src/utils/haptics.ts
+- Files changed:
+  - src/utils/haptics.ts (new - all haptic feedback functions)
+  - src/utils/index.ts (new - barrel export for utils)
+- **Learnings for future iterations:**
+  - expo-haptics was already installed and being used across 18+ files in the codebase
+  - Haptic utility provides standardized functions: lightImpact, mediumImpact, heavyImpact, successNotification, warningNotification, errorNotification, selectionFeedback
+  - Use Platform.OS check to ensure haptics are only called on iOS/Android
+  - try/catch blocks handle unsupported devices gracefully without crashing
+  - Haptics.selectionAsync() is for selection changes (pickers, segment controls) vs impactAsync for taps
+  - Import from @/utils (barrel export) or @/utils/haptics for haptic functions
+  - Existing code already follows correct patterns: Light for taps, Medium for swipe/delete, Success for completion, Warning for destructive confirmation, Heavy for achievements
+---
