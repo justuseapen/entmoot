@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOnboardingStore, ONBOARDING_STEPS } from "@/stores/onboarding";
 import {
@@ -26,7 +26,7 @@ export function OnboardingWizard() {
     setShowTransition,
   } = useOnboardingStore();
 
-  const { data: status, isLoading: isStatusLoading } = useOnboardingStatus();
+  const { data: status, isLoading: isStatusLoading, isError, error } = useOnboardingStatus();
   const updateStepMutation = useUpdateOnboardingStep();
   const skipStepMutation = useSkipOnboardingStep();
 
@@ -46,10 +46,10 @@ export function OnboardingWizard() {
     }
   }, [user, status, showTransition, setShowTransition]);
 
-  // Handle transition completion
-  const handleTransitionComplete = () => {
+  // Handle transition completion - memoized to prevent unnecessary re-renders
+  const handleTransitionComplete = useCallback(() => {
     setShowTransition(false);
-  };
+  }, [setShowTransition]);
 
   // If already completed, redirect to dashboard
   useEffect(() => {
@@ -191,6 +191,29 @@ export function OnboardingWizard() {
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-pulse rounded-full bg-green-100" />
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-50 to-white">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <span className="text-xl">⚠️</span>
+          </div>
+          <p className="text-gray-900 font-medium">Failed to load onboarding</p>
+          <p className="text-gray-600 text-sm mt-1">
+            {error instanceof Error ? error.message : "Please try again"}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
