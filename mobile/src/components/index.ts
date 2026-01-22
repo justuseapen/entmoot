@@ -14,4 +14,5 @@ export {
   type NotificationType,
 } from "./InAppNotificationBanner";
 export { OfflineBanner } from "./OfflineBanner";
+export { StreakCard, StreakCardsRow } from "./StreakCard";
 export * from "./ui";

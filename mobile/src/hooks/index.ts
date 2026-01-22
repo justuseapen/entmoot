@@ -141,3 +141,15 @@ export {
   type GoogleCalendar,
   type GoogleCalendarAuthUrl,
 } from "./useGoogleCalendar";
+export {
+  useStreaks,
+  useStreak,
+  streaksKeys,
+  isStreakMilestone,
+  getNextMilestone,
+  STREAK_MILESTONES,
+  STREAK_CONFIG,
+  type Streak,
+  type StreakType,
+  type StreaksResponse,
+} from "./useStreaks";

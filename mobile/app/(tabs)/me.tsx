@@ -19,22 +19,10 @@ import { useQuery } from "@tanstack/react-query";
 import { COLORS } from "@/theme/colors";
 import { useAuthStore } from "@/stores";
 import { api } from "@/lib/api";
+import { useStreaks, type Streak } from "@/hooks";
+import { StreakCardsRow } from "@/components";
 
 // Types for API responses
-interface Streak {
-  id: number;
-  streak_type: "daily_planning" | "evening_reflection" | "weekly_review";
-  current_count: number;
-  longest_count: number;
-  last_activity_date: string | null;
-  at_risk: boolean;
-  next_milestone: number;
-}
-
-interface StreaksResponse {
-  streaks: Streak[];
-}
-
 interface PointsResponse {
   points: {
     total: number;
@@ -72,17 +60,6 @@ interface BadgesResponse {
 }
 
 // Custom hooks for data fetching
-function useStreaks() {
-  return useQuery({
-    queryKey: ["streaks"],
-    queryFn: async () => {
-      const response = await api.get<StreaksResponse>("/users/me/streaks");
-      return response.streaks;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-}
-
 function usePoints() {
   return useQuery({
     queryKey: ["points"],
@@ -104,16 +81,6 @@ function useBadges() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
-
-// Streak type labels and icons
-const STREAK_CONFIG: Record<
-  string,
-  { label: string; icon: keyof typeof Ionicons.glyphMap }
-> = {
-  daily_planning: { label: "Daily Planning", icon: "sunny-outline" },
-  evening_reflection: { label: "Reflection", icon: "moon-outline" },
-  weekly_review: { label: "Weekly Review", icon: "calendar-outline" },
-};
 
 // Quick link items
 const QUICK_LINKS = [
@@ -177,44 +144,6 @@ function ProfileHeader({
   );
 }
 
-function StreakCard({ streak }: { streak: Streak }) {
-  const config = STREAK_CONFIG[streak.streak_type];
-  if (!config) return null;
-
-  const isMilestone = [7, 14, 30, 60, 90, 180, 365].includes(
-    streak.current_count
-  );
-
-  return (
-    <View
-      style={[
-        styles.streakCard,
-        streak.at_risk && styles.streakCardAtRisk,
-        isMilestone && styles.streakCardMilestone,
-      ]}
-    >
-      <Ionicons
-        name={config.icon}
-        size={24}
-        color={streak.at_risk ? COLORS.warning : COLORS.primary}
-      />
-      <View style={styles.streakContent}>
-        <Text style={styles.streakLabel}>{config.label}</Text>
-        <View style={styles.streakCountRow}>
-          <Text style={styles.streakCount}>{streak.current_count}</Text>
-          <Text style={styles.fireEmoji}>🔥</Text>
-        </View>
-        <Text style={styles.streakBest}>Best: {streak.longest_count} days</Text>
-      </View>
-      {streak.at_risk && streak.current_count > 0 && (
-        <View style={styles.atRiskBadge}>
-          <Ionicons name="warning-outline" size={14} color={COLORS.warning} />
-        </View>
-      )}
-    </View>
-  );
-}
-
 function StreaksSection({
   streaks,
   isLoading,
@@ -222,27 +151,10 @@ function StreaksSection({
   streaks: Streak[] | undefined;
   isLoading: boolean;
 }) {
-  if (isLoading) {
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Streaks</Text>
-        <View style={styles.streaksRow}>
-          {[1, 2, 3].map((i) => (
-            <View key={i} style={[styles.streakCard, styles.skeleton]} />
-          ))}
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Streaks</Text>
-      <View style={styles.streaksRow}>
-        {streaks?.map((streak) => (
-          <StreakCard key={streak.id} streak={streak} />
-        ))}
-      </View>
+      <StreakCardsRow streaks={streaks} isLoading={isLoading} />
     </View>
   );
 }
@@ -553,67 +465,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
     marginBottom: 12,
-  },
-
-  // Streaks
-  streaksRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  streakCard: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-    minHeight: 100,
-  },
-  streakCardAtRisk: {
-    borderWidth: 1,
-    borderColor: COLORS.warning,
-  },
-  streakCardMilestone: {
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + "08",
-  },
-  streakContent: {
-    alignItems: "center",
-    marginTop: 8,
-  },
-  streakLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginBottom: 4,
-  },
-  streakCountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  streakCount: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  fireEmoji: {
-    fontSize: 18,
-  },
-  streakBest: {
-    fontSize: 10,
-    color: COLORS.textTertiary,
-    marginTop: 2,
-  },
-  atRiskBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
   },
 
   // Points
