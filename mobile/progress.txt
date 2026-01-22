@@ -1,0 +1,94 @@
+# Ralph Progress Log - Entmoot Mobile App
+
+## Project Context
+- Building React Native iOS app with Expo managed workflow
+- Backend API already exists at /backend (100+ endpoints ready)
+- Web frontend exists at /frontend (can reference for patterns)
+- Mobile app location: /mobile
+
+## Technical Decisions
+- Using Expo SDK 52+ managed workflow
+- expo-router for navigation (file-based routing)
+- react-native-paper for UI components
+- zustand for client state
+- @tanstack/react-query for server state
+- expo-secure-store for auth token storage
+- MMKV for offline caching
+- Session-based auth (not JWT)
+
+## API Base URL
+- Development: http://localhost:3000/api/v1
+- All endpoints documented in backend/app/controllers/api/v1/
+
+## Key Backend Endpoints
+- Auth: POST /auth/login, /auth/register, /auth/logout, GET /auth/me
+- Families: GET/POST /families, GET /families/:id/members
+- Daily Plans: GET /families/:id/daily_plans/today, PATCH /families/:id/daily_plans/:id
+- Habits: GET/POST/PATCH/DELETE /families/:id/habits
+- Goals: GET/POST/PATCH/DELETE /families/:id/goals, POST /goals/:id/refine
+- Reflections: GET/POST/PATCH /families/:id/reflections
+- Reviews: GET /families/:id/weekly_reviews/current
+- Notifications: GET /notifications, POST /device_tokens
+- User: GET /users/me/points, /users/me/streaks, /users/me/badges
+
+## Codebase Patterns
+- Use /bin/bash -c '...' for commands requiring asdf node (v23+) since Expo 54 requires Node 20+
+- Path aliases: @/ maps to src/, @shared maps to ../shared (configured in tsconfig.json and babel.config.js)
+- Run `npx tsc --noEmit` for typecheck before committing
+- iOS bundle identifier: com.entmoot.mobile
+- Environment variables via react-native-dotenv: import { API_URL } from "@env"; (TypeScript types in src/types/env.d.ts)
+- Jest configured with jest-expo preset; use `npm test` or `npm run test:watch`
+- @env mock in __mocks__/@env.js for tests
+- expo-router: File-based routing in /app directory, main entry point is "expo-router/entry" in package.json
+- Design colors: forestGreen=#2D5A27, creamWhite=#FFF8E7, earthBrown=#795548
+- Use @expo/vector-icons Ionicons for icons (already installed)
+
+## Learnings
+(Ralph will append learnings here as iterations progress)
+
+---
+
+## 2026-01-21 - US-001
+- What was implemented: Completed Expo project initialization requirements
+- Files changed: babel.config.js (created), app.json (updated bundle ID, iOS min version), package.json (babel-plugin-module-resolver added)
+- **Learnings for future iterations:**
+  - Expo 54 requires Node.js 20+; use asdf shims for correct version
+  - expo-constants should NOT be in plugins array (it's not a config plugin)
+  - The project already had React Navigation setup (not expo-router) - existing structure should be preserved
+  - Use `/bin/bash -c '/Users/justuseapen/.asdf/shims/npx ...'` pattern for expo commands
+---
+
+## 2026-01-21 - US-002
+- What was implemented: Configured development environment with testing and env variable support
+- Files changed:
+  - .prettierrc (extended with additional rules)
+  - .env.example (created with API_URL)
+  - package.json (added test scripts, jest, jest-expo, @testing-library/react-native, react-native-dotenv)
+  - babel.config.js (added react-native-dotenv plugin)
+  - jest.config.js (created with jest-expo preset and path aliases)
+  - jest.setup.js (created for @testing-library/react-native setup)
+  - src/types/env.d.ts (created TypeScript declaration for @env module)
+  - __mocks__/@env.js (created mock for tests)
+- **Learnings for future iterations:**
+  - ESLint was already configured with TypeScript and React plugins (not @react-native/eslint-config but works)
+  - Use `--legacy-peer-deps` when installing @testing-library/react-native due to React 19 peer conflicts
+  - Jest setup file path must be `<rootDir>/jest.setup.js` not the package path directly
+  - git root is /washington, not /washington/mobile - use relative paths when staging files
+---
+
+## 2026-01-21 - US-003
+- What was implemented: Set up navigation structure with expo-router file-based routing
+- Files changed:
+  - app.json (added scheme, web bundler, expo-router plugin)
+  - package.json (changed main to expo-router/entry, added expo-router and dependencies)
+  - app/_layout.tsx (root layout with auth guard)
+  - app/(auth)/_layout.tsx, login.tsx, register.tsx, forgot-password.tsx (auth screens)
+  - app/(tabs)/_layout.tsx, today.tsx, goals.tsx, me.tsx (main tabs with icons)
+  - app/onboarding/index.tsx, app/settings/index.tsx, app/goal/[id].tsx (stack screens)
+- **Learnings for future iterations:**
+  - expo-router uses app/ directory for file-based routing (not src/)
+  - Use `--legacy-peer-deps` when installing packages with React 19 peer dependency conflicts
+  - The existing src/navigation/ React Navigation code still exists but is not used by expo-router
+  - useSegments() returns the current route segments for auth guard logic
+  - Tab bar icons use @expo/vector-icons/Ionicons - import with { Ionicons } from "@expo/vector-icons"
+---
