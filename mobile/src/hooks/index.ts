@@ -27,3 +27,16 @@ export {
   type GoalVisibility,
   type GoalFilters,
 } from "./useGoals";
+export {
+  useHabits,
+  useCreateHabit,
+  useUpdateHabit,
+  useDeleteHabit,
+  useReorderHabits,
+  habitsKeys,
+  type Habit,
+  type CreateHabitPayload,
+  type UpdateHabitPayload,
+  type HabitPositionUpdate,
+  type ReorderHabitsPayload,
+} from "./useHabits";
