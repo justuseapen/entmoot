@@ -50,11 +50,11 @@ export function OnboardingStep({
         }
 
         .animate-step-enter {
-          animation: step-enter 0.3s ease-out;
+          animation: step-enter 0.3s ease-out forwards;
         }
 
         .animate-step-enter-back {
-          animation: step-enter-back 0.3s ease-out;
+          animation: step-enter-back 0.3s ease-out forwards;
         }
 
         @media (prefers-reduced-motion: reduce) {

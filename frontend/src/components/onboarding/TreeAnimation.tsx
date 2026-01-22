@@ -411,27 +411,27 @@ export function TreeAnimation({
         }
 
         .animate-seed-appear {
-          animation: seed-appear 0.5s ease-out;
+          animation: seed-appear 0.5s ease-out forwards;
         }
 
         .animate-sprout-grow {
-          animation: sprout-grow 0.5s ease-out;
+          animation: sprout-grow 0.5s ease-out forwards;
         }
 
         .animate-tree-grow {
-          animation: tree-grow 0.5s ease-out;
+          animation: tree-grow 0.5s ease-out forwards;
         }
 
         .animate-birds-appear {
-          animation: birds-appear 0.5s ease-out;
+          animation: birds-appear 0.5s ease-out forwards;
         }
 
         .animate-sun-rise {
-          animation: sun-rise 0.8s ease-out;
+          animation: sun-rise 0.8s ease-out forwards;
         }
 
         .animate-full-tree {
-          animation: full-tree 0.6s ease-out;
+          animation: full-tree 0.6s ease-out forwards;
         }
 
         .animate-bird-fly {
