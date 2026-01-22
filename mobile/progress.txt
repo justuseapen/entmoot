@@ -845,3 +845,27 @@
   - format(date, "h:mm a") from date-fns gives "9:00 AM" format
   - Import CalendarEvent, getTodayEvents, hasCalendarPermission, requestCalendarPermissions from @/services/calendar
 ---
+
+## 2026-01-22 - US-047
+- What was implemented: Built Google Calendar connection screen with OAuth flow
+- Files changed:
+  - package.json (added expo-web-browser)
+  - src/hooks/useGoogleCalendar.ts (created - complete data layer with connection status, auth URL, connect/disconnect hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/calendar.tsx (created - full Google Calendar connection UI)
+  - app/settings/index.tsx (added Google Calendar link in Calendars section)
+  - app/_layout.tsx (added settings/calendar route)
+- **Learnings for future iterations:**
+  - expo-web-browser: use openAuthSessionAsync(authUrl, redirectUrl) for OAuth flow - handles opening and closing browser
+  - Deep link pattern: scheme://path format, e.g., "entmoot://google-callback"
+  - Scheme is already configured in app.json as "entmoot"
+  - Linking.addEventListener("url", handler) for listening to deep links when app is already open
+  - Linking.getInitialURL() for handling deep link when app opened from link (cold start)
+  - Parse OAuth code from URL: new URLSearchParams(url.split("?")[1]).get("code")
+  - Google Calendar API endpoints: GET /users/me/google_calendar (status), GET /users/me/google_calendar/auth_url (OAuth URL), POST /users/me/google_calendar (connect with code), DELETE /users/me/google_calendar (disconnect)
+  - GoogleCalendarConnection type: connected (boolean), email, calendars, connected_at
+  - GoogleCalendar type: id, name, primary (boolean), color
+  - Handle 404/not found errors gracefully in connection query by returning { connected: false }
+  - useMutation for connect/disconnect operations with cache invalidation on success
+  - Import useGoogleCalendarConnection, useFetchAuthUrl, useDisconnectGoogleCalendar, useConnectGoogleCalendar from @/hooks
+---

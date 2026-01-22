@@ -869,8 +869,8 @@
         "Typecheck passes"
       ],
       "priority": 47,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - useGoogleCalendar.ts hook created with connection status, auth URL, connect/disconnect mutations. Calendar settings screen with OAuth flow using expo-web-browser, deep link handling for entmoot://google-callback, synced calendars list display."
     },
     {
       "id": "US-048",
