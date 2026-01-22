@@ -436,3 +436,19 @@
   - Settings sub-screens need Stack.Screen entry in root layout (_layout.tsx)
   - MAX_HABITS constant (10) enforced on both add button and handleAddHabit
 ---
+
+## 2026-01-21 - US-025
+- What was implemented: Created goals data layer with complete CRUD and AI refinement hooks
+- Files changed:
+  - src/hooks/useGoals.ts (enhanced - added types and mutation hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Goal API response wraps data in objects: { goals: [] } for list, { goal: {} } for detail
+  - GoalUser type for creator/assignees includes: id, name, email, avatar_url
+  - SMART fields (specific, measurable, achievable, relevant, time_bound) only included in detail response
+  - useRefineGoal mutation returns GoalRefinementResponse with smart_suggestions, alternative_titles, potential_obstacles, milestones
+  - Create/update payloads use assignee_ids (array of user IDs) for assigning users to goals
+  - GoalResponse includes is_first_goal and is_first_action flags for gamification
+  - Cache invalidation: invalidateQueries({ queryKey: goalsKeys.all }) refreshes all goal lists
+  - setQueryData for direct cache updates on single goal detail after update
+---
