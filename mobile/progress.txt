@@ -668,3 +668,23 @@
   - setNotificationHandler configures foreground notification behavior (shouldShowAlert, shouldPlaySound, etc.)
   - Import notifications from @/services for push notification functionality
 ---
+
+## 2026-01-22 - US-038
+- What was implemented: Set up incoming push notification handling with in-app banner and navigation
+- Files changed:
+  - app/_layout.tsx (added NotificationHandler component, notification listeners)
+  - src/components/InAppNotificationBanner.tsx (new - animated banner for foreground notifications)
+  - src/components/index.ts (export new component and helper functions)
+- **Learnings for future iterations:**
+  - Notifications.addNotificationReceivedListener() for foreground notifications
+  - Notifications.addNotificationResponseReceivedListener() for when user taps notification
+  - subscription.remove() is the correct way to remove listeners (not deprecated removeNotificationSubscription)
+  - Notifications.getLastNotificationResponseAsync() handles cold start from notification
+  - NotificationHandler wraps main app content, placed inside AuthGuard but outside Stack
+  - Use useRef to store pending notification payload when user is not yet authenticated
+  - Animated spring for banner entrance, Animated timing for exit (smoother UX)
+  - NotificationPayload type: type (NotificationType), targetId, title, body, link, data
+  - Navigation mapping: use router.push(path as never) to bypass strict typing for dynamic routes
+  - Replace [id] in route string with actual id for dynamic routes: /goal/[id] -> /goal/123
+  - Import InAppNotificationBanner and helpers from @/components (barrel export)
+---
