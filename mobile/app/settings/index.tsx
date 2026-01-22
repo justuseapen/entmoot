@@ -227,6 +227,10 @@ export default function SettingsScreen() {
     router.push("/settings/notifications");
   }, [router]);
 
+  const handleCalendar = useCallback(() => {
+    router.push("/settings/calendar");
+  }, [router]);
+
   // External links
   const handleOpenTerms = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -358,6 +362,15 @@ export default function SettingsScreen() {
             icon="notifications-outline"
             label="Notification Settings"
             onPress={handleNotifications}
+          />
+        </Section>
+
+        {/* Calendars Section */}
+        <Section title="Calendars">
+          <SettingRow
+            icon="calendar-outline"
+            label="Google Calendar"
+            onPress={handleCalendar}
           />
         </Section>
 

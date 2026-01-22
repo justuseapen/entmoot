@@ -353,6 +353,10 @@ export default function RootLayout() {
                 name="settings/notifications"
                 options={{ title: "Notifications" }}
               />
+              <Stack.Screen
+                name="settings/calendar"
+                options={{ title: "Calendar" }}
+              />
             </Stack>
           </NotificationHandler>
         </AuthGuard>
