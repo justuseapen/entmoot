@@ -31,7 +31,15 @@ module Api
         private
 
         def user_response(user)
-          { id: user.id, email: user.email, name: user.name, avatar_url: user.avatar_url, created_at: user.created_at }
+          {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            avatar_url: user.avatar_url,
+            created_at: user.created_at,
+            onboarding_required: user.onboarding_required?,
+            onboarding_wizard_completed_at: user.onboarding_wizard_completed_at
+          }
         end
 
         def render_user_not_found

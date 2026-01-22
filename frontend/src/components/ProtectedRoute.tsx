@@ -22,12 +22,15 @@ export function ProtectedRoute({
   const isOnboardingPage = location.pathname.startsWith("/onboarding");
   const isInvitationPage = location.pathname.startsWith("/invitations");
 
+  // Trust backend-computed flag - it accounts for legacy users
+  const needsOnboarding = user?.onboarding_required === true;
+
   if (
     !skipOnboardingCheck &&
     !isOnboardingPage &&
     !isInvitationPage &&
     user &&
-    !user.onboarding_wizard_completed_at
+    needsOnboarding
   ) {
     return <Navigate to="/onboarding" replace />;
   }

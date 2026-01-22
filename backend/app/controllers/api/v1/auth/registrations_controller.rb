@@ -73,7 +73,9 @@ module Api
             email: user.email,
             name: user.name,
             avatar_url: user.avatar_url,
-            created_at: user.created_at
+            created_at: user.created_at,
+            onboarding_required: user.onboarding_required?,
+            onboarding_wizard_completed_at: user.onboarding_wizard_completed_at
           }
         end
       end

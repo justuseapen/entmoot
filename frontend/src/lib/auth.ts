@@ -9,6 +9,7 @@ export interface User {
   updated_at?: string;
   onboarding_wizard_completed_at?: string | null;
   onboarding_wizard_last_step?: number | null;
+  onboarding_required?: boolean;
 }
 
 export interface AuthResponse {

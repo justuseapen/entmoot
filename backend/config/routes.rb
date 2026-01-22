@@ -74,6 +74,7 @@ Rails.application.routes.draw do
         get "status", to: "onboarding#status"
         post "step/:step_name", to: "onboarding#update_step"
         post "skip/:step_name", to: "onboarding#skip_step"
+        post "auto_complete", to: "onboarding#auto_complete"
       end
       post "calendar_waitlist", to: "onboarding#calendar_waitlist"
 

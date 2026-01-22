@@ -38,7 +38,7 @@ export function useUpdateOnboardingStep() {
       stepName: string;
       data?: Record<string, unknown>;
     }) => {
-      return apiFetch<{ message: string; next_step: number }>(
+      return apiFetch<{ message: string; next_step: number; completed_at?: string }>(
         `/onboarding/step/${stepName}`,
         {
           method: "POST",
@@ -86,6 +86,25 @@ export function useCalendarWaitlist() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["onboarding", "status"] });
+    },
+  });
+}
+
+export function useAutoCompleteOnboarding() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      return apiFetch<{
+        message: string;
+        completed_at: string;
+      }>("/onboarding/auto_complete", {
+        method: "POST",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "status"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 }

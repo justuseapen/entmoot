@@ -5,6 +5,7 @@ import {
   useOnboardingStatus,
   useUpdateOnboardingStep,
   useSkipOnboardingStep,
+  useAutoCompleteOnboarding,
 } from "@/hooks/useOnboarding";
 import { useAuthStore } from "@/stores/auth";
 import { SeedTransition } from "./TreeAnimation";
@@ -17,7 +18,7 @@ import { CompleteStep } from "./steps/CompleteStep";
 
 export function OnboardingWizard() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const {
     currentStep,
     setCurrentStep,
@@ -29,6 +30,7 @@ export function OnboardingWizard() {
   const { data: status, isLoading: isStatusLoading, isError, error } = useOnboardingStatus();
   const updateStepMutation = useUpdateOnboardingStep();
   const skipStepMutation = useSkipOnboardingStep();
+  const autoCompleteMutation = useAutoCompleteOnboarding();
 
   // Trigger transition for new users (only once when data loads)
   // The Zustand store tracks showTransition state, so we only call setShowTransition
@@ -50,6 +52,30 @@ export function OnboardingWizard() {
   const handleTransitionComplete = useCallback(() => {
     setShowTransition(false);
   }, [setShowTransition]);
+
+  // Auto-complete for existing users who already have families and goals
+  useEffect(() => {
+    if (
+      status &&
+      !status.completed &&
+      status.has_family &&
+      status.has_goal &&
+      !autoCompleteMutation.isPending
+    ) {
+      autoCompleteMutation.mutate(undefined, {
+        onSuccess: (data) => {
+          if (user) {
+            setUser({
+              ...user,
+              onboarding_required: false,
+              onboarding_wizard_completed_at: data.completed_at,
+            });
+          }
+          navigate("/dashboard", { replace: true });
+        },
+      });
+    }
+  }, [status, autoCompleteMutation, navigate, user, setUser]);
 
   // If already completed, redirect to dashboard
   useEffect(() => {
@@ -170,10 +196,18 @@ export function OnboardingWizard() {
 
   const handleComplete = async () => {
     try {
-      await updateStepMutation.mutateAsync({
+      const result = await updateStepMutation.mutateAsync({
         stepName: "complete",
       });
-      // Navigation happens in CompleteStep
+      if (user) {
+        setUser({
+          ...user,
+          onboarding_required: false,
+          onboarding_wizard_completed_at:
+            result.completed_at || new Date().toISOString(),
+        });
+      }
+      navigate("/dashboard", { replace: true });
     } catch {
       // Error handled by mutation
     }

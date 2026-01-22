@@ -180,6 +180,49 @@ RSpec.describe "Api::V1::Onboarding" do
     end
   end
 
+  describe "POST /api/v1/onboarding/auto_complete" do
+    context "when not authenticated" do
+      it "returns unauthorized" do
+        post "/api/v1/onboarding/auto_complete"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when authenticated" do
+      it "returns error when user has no family" do
+        post "/api/v1/onboarding/auto_complete", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to include("missing family or goals")
+      end
+
+      it "returns error when user has family but no goals" do
+        family = create(:family)
+        create(:family_membership, user: user, family: family)
+
+        post "/api/v1/onboarding/auto_complete", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to include("missing family or goals")
+      end
+
+      it "auto-completes onboarding when user has both family and goals" do
+        family = create(:family)
+        create(:family_membership, user: user, family: family)
+        create(:goal, creator: user, family: family)
+
+        freeze_time do
+          post "/api/v1/onboarding/auto_complete", headers: auth_headers(user)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["message"]).to eq("Onboarding auto-completed")
+          expect(user.reload.onboarding_wizard_completed_at).to be_within(1.second).of(Time.current)
+          expect(user.onboarding_wizard_last_step).to eq(6)
+        end
+      end
+    end
+  end
+
   describe "POST /api/v1/calendar_waitlist" do
     context "when not authenticated" do
       it "returns unauthorized" do

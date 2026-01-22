@@ -39,6 +39,49 @@ RSpec.describe User do
     end
   end
 
+  describe "#onboarding_required?" do
+    let(:user) { create(:user) }
+
+    it "returns true for new user with no data" do
+      expect(user.onboarding_required?).to be true
+    end
+
+    it "returns false when onboarding is already completed" do
+      user.update!(onboarding_wizard_completed_at: Time.current)
+      expect(user.onboarding_required?).to be false
+    end
+
+    it "returns true when user has family but no goals" do
+      family = create(:family)
+      create(:family_membership, user: user, family: family)
+
+      expect(user.onboarding_required?).to be true
+    end
+
+    it "returns true when user has goals but no family" do
+      # Create a goal without family context (edge case)
+      another_user = create(:user)
+      family = create(:family)
+      create(:family_membership, user: another_user, family: family)
+      create(:goal, creator: user, family: family)
+
+      expect(user.onboarding_required?).to be true
+    end
+
+    it "returns false when user has both family and goals" do
+      family = create(:family)
+      create(:family_membership, user: user, family: family)
+      create(:goal, creator: user, family: family)
+
+      expect(user.onboarding_required?).to be false
+    end
+
+    it "returns false when onboarding is completed even without family or goals" do
+      user.update!(onboarding_wizard_completed_at: Time.current)
+      expect(user.onboarding_required?).to be false
+    end
+  end
+
   describe "first actions" do
     let(:user) { create(:user, first_actions: {}) }
 

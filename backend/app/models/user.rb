@@ -76,4 +76,13 @@ class User < ApplicationRecord
   def calendar_sync_enabled?
     google_calendar_credential&.active?
   end
+
+  # Determines if user needs to complete onboarding wizard
+  # Returns false if already completed, or if user has existing data (families and goals)
+  def onboarding_required?
+    return false if onboarding_wizard_completed_at.present?
+    return false if families.any? && created_goals.any?
+
+    true
+  end
 end

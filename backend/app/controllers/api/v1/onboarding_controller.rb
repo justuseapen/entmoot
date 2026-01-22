@@ -76,6 +76,24 @@ module Api
         }
       end
 
+      # POST /api/v1/onboarding/auto_complete
+      # Auto-completes onboarding for existing users who already have families and goals
+      def auto_complete
+        unless current_user.families.any? && current_user.created_goals.any?
+          return render json: { error: "Cannot auto-complete: missing family or goals" }, status: :unprocessable_content
+        end
+
+        current_user.update!(
+          onboarding_wizard_completed_at: Time.current,
+          onboarding_wizard_last_step: 6
+        )
+
+        render json: {
+          message: "Onboarding auto-completed",
+          completed_at: current_user.onboarding_wizard_completed_at
+        }
+      end
+
       # POST /api/v1/calendar_waitlist
       def calendar_waitlist
         provider = params[:provider]
