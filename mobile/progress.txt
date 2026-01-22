@@ -768,3 +768,21 @@
   - addSyncQueueListener for UI components to react to sync events (start, complete, error)
   - Import sync queue functions from @/services (addToQueue, getQueue, processQueue, startNetworkListener, etc.)
 ---
+
+## 2026-01-22 - US-043
+- What was implemented: Created OfflineBanner component for displaying network/sync status
+- Files changed:
+  - src/components/OfflineBanner.tsx (created - complete offline indicator UI)
+  - src/components/index.ts (export OfflineBanner)
+  - app/_layout.tsx (added OfflineBanner to NotificationHandler)
+- **Learnings for future iterations:**
+  - SyncStatus type: "online" | "offline" | "syncing" | "synced" covers all network/sync states
+  - Use addSyncQueueListener from @/services/syncQueue to react to queue processing events (start, complete, error)
+  - Animated API pattern: use spring for enter animation (responsive), timing for exit animation (predictable)
+  - Animated.Value with translateY for slide in/out from top: -100 hidden, 0 visible
+  - Use useSafeAreaInsets to add proper paddingTop for banner beneath notch
+  - Timer cleanup pattern: store timeout ref, clear in useEffect cleanup
+  - SYNCED_DISPLAY_DURATION = 2000ms (2 seconds) for "Synced ✓" message visibility
+  - Status colors: warning (amber) for offline, info (blue) for syncing, success (green) for synced
+  - Import OfflineBanner from @/components (barrel export)
+---
