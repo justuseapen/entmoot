@@ -592,3 +592,20 @@
   - Quick links pattern: array of { id, label, icon, route } with TouchableOpacity + router.push
   - Logout flow: Alert.alert confirmation → Haptics.impactAsync → logout() → router.replace("/(auth)/login")
 ---
+
+## 2026-01-22 - US-034
+- What was implemented: Built complete Settings Screen with all sections and functionality
+- Files changed:
+  - app/settings/index.tsx (complete rewrite with Account, Notifications, Security, About sections, Delete Account)
+- **Learnings for future iterations:**
+  - Settings screen pattern: Use Section component to wrap related settings with title and card container
+  - SettingRow component: TouchableOpacity with icon, label, optional value, and optional chevron for navigation
+  - SwitchRow component: Similar to SettingRow but with Switch instead of chevron, plus optional sublabel
+  - Biometric service imports: isAvailable (renamed to isBiometricAvailable), isBiometricEnabled, setBiometricEnabled, getBiometricType
+  - Biometric state loading: Use useEffect on mount to check availability, load enabled preference, and get biometric type
+  - External links: Use Linking.canOpenURL() before Linking.openURL() for proper error handling
+  - Delete account flow: Use two-step Alert.alert confirmation (first warning, then "Yes, Delete My Account")
+  - Delete account API: api.del("/users/me") → logout() → router.replace("/(auth)/login")
+  - App version: Hardcode from app.json or use Constants.manifest?.version from expo-constants
+  - Header pattern: View with back button, centered title, and spacer for balance
+---
