@@ -993,3 +993,22 @@
   - Existing screens already have inline skeleton components - update them to use the animated Skeleton component
   - StreakCardsRow, PointsCard, BadgeRow already handle isLoading prop internally - just update their skeleton rendering
 ---
+
+## 2026-01-22 - US-054
+- What was implemented: Created error handling UI components for crash recovery and API errors
+- Files changed:
+  - src/components/ErrorBoundary.tsx (new - class component with error boundary for crash recovery)
+  - src/components/ui/ErrorMessage.tsx (new - reusable error message component with 3 variants)
+  - src/components/index.ts (export ErrorBoundary)
+  - src/components/ui/index.ts (export ErrorMessage and utility functions)
+  - app/_layout.tsx (wrapped app in ErrorBoundary)
+- **Learnings for future iterations:**
+  - ErrorBoundary must be a class component (getDerivedStateFromError and componentDidCatch are class-only methods)
+  - Use __DEV__ global to conditionally show error details in development mode
+  - HTTP_ERROR_MESSAGES mapping provides consistent user-friendly messages for common HTTP status codes
+  - ErrorMessage has 3 variants: default (centered), inline (minimal), card (contained)
+  - getErrorMessage utility handles: Error objects, network errors, timeout errors, abort errors, API response objects with message/error/errors properties
+  - getErrorIcon chooses appropriate icon based on error type (network, timeout, permission, not found, server)
+  - ErrorBoundary should wrap the outermost app content (outside PaperProvider, SafeAreaProvider) for maximum coverage
+  - Import ErrorBoundary from @/components, ErrorMessage/getErrorMessage from @/components/ui
+---
