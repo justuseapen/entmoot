@@ -786,3 +786,26 @@
   - Status colors: warning (amber) for offline, info (blue) for syncing, success (green) for synced
   - Import OfflineBanner from @/components (barrel export)
 ---
+
+## 2026-01-22 - US-044
+- What was implemented: Enabled offline daily planning with MMKV caching and sync queue integration
+- Files changed:
+  - src/hooks/useDailyPlan.ts (added offline caching, sync queue integration, conflict detection)
+  - src/hooks/index.ts (exported new functions: useRefetchOnReconnect, isPendingSync, getPendingSyncItems, etc.)
+  - app/(tabs)/today.tsx (added PendingSyncIndicator component, reconnect handling)
+- **Learnings for future iterations:**
+  - useTodayPlan caches responses using setCacheWithTimestamp() for staleness checking
+  - Use initialData callback in useQuery to provide cached data instantly: `initialData: () => getCacheWithTimestamp<T>(key)?.data`
+  - checkIsOnline() from useNetworkStatus is async - must await before deciding online/offline path
+  - useUpdateDailyPlan checks network status in mutationFn, adds to sync queue if offline
+  - Track pending sync items separately from sync queue for UI indicators (PENDING_SYNC_KEY = "pending_sync:daily_plan")
+  - PendingSyncItem type: itemId (string | number), itemType ("task" | "priority" | "habit" | "intention" | "shutdown"), timestamp
+  - isPendingSync(itemId, itemType) for checking if specific item needs sync indicator
+  - PendingSyncIndicator component shows small warning-colored dot next to item title
+  - useRefetchOnReconnect hook handles reconnection: refetch data, check conflicts, show alert if server newer
+  - Conflict detection: compare updated_at timestamps, server newer by >1 second = conflict
+  - addSyncQueueListener("complete") to clear pending sync items after queue processes
+  - Use wasOfflineRef pattern to detect online->offline transition: `wasOfflineRef.current = !isOnline`
+  - forceUpdate pattern with `const [, forceUpdate] = useState({})` to trigger re-render when pending items change
+  - Return optimistic response from mutationFn when offline: `{ message: "Queued for sync", daily_plan: updatedPlan, is_first_action: false }`
+---
