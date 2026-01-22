@@ -8,12 +8,6 @@
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../shared/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "../shared/**/*.ts"],
+  "exclude": ["node_modules"]
 }

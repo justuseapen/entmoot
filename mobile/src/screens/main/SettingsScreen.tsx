@@ -524,12 +524,14 @@ export function SettingsScreen(_props: Props) {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>
-                  {CHECK_IN_FREQUENCIES.find((f) => f.value === prefs.check_in_frequency)
-                    ?.label || "Daily"}
+                  {CHECK_IN_FREQUENCIES.find(
+                    (f) => f.value === prefs.check_in_frequency
+                  )?.label || "Daily"}
                 </Text>
                 <Text style={styles.settingDescription}>
-                  {CHECK_IN_FREQUENCIES.find((f) => f.value === prefs.check_in_frequency)
-                    ?.description || "Choose how often you want reminders"}
+                  {CHECK_IN_FREQUENCIES.find(
+                    (f) => f.value === prefs.check_in_frequency
+                  )?.description || "Choose how often you want reminders"}
                 </Text>
               </View>
               <Text style={styles.chevron}>▶</Text>
@@ -597,7 +599,9 @@ export function SettingsScreen(_props: Props) {
 
                 <View style={styles.settingRow}>
                   <View style={styles.settingInfo}>
-                    <Text style={styles.settingLabel}>Inactivity Reminders</Text>
+                    <Text style={styles.settingLabel}>
+                      Inactivity Reminders
+                    </Text>
                     <Text style={styles.settingDescription}>
                       Remind me after a period of inactivity
                     </Text>
@@ -636,7 +640,8 @@ export function SettingsScreen(_props: Props) {
                           {INACTIVITY_THRESHOLD_OPTIONS.find(
                             (opt) =>
                               opt.value ===
-                              (prefs.reengagement?.inactivity_threshold_days ?? 7)
+                              (prefs.reengagement?.inactivity_threshold_days ??
+                                7)
                           )?.label ?? "7 days"}
                         </Text>
                         <Text style={styles.chevron}>▶</Text>
@@ -769,10 +774,13 @@ export function SettingsScreen(_props: Props) {
                 key={freq.value}
                 style={[
                   styles.dayOption,
-                  prefs?.check_in_frequency === freq.value && styles.dayOptionSelected,
+                  prefs?.check_in_frequency === freq.value &&
+                    styles.dayOptionSelected,
                 ]}
                 onPress={() => {
-                  handleUpdate({ check_in_frequency: freq.value as CheckInFrequency });
+                  handleUpdate({
+                    check_in_frequency: freq.value as CheckInFrequency,
+                  });
                   setShowFrequencyPicker(false);
                 }}
               >
@@ -786,7 +794,9 @@ export function SettingsScreen(_props: Props) {
                   >
                     {freq.label}
                   </Text>
-                  <Text style={styles.frequencyDescription}>{freq.description}</Text>
+                  <Text style={styles.frequencyDescription}>
+                    {freq.description}
+                  </Text>
                 </View>
                 {prefs?.check_in_frequency === freq.value && (
                   <Text style={styles.checkmark}>✓</Text>

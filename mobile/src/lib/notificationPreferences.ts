@@ -20,13 +20,41 @@ export type CheckInFrequency =
   | "annual"
   | "as_needed";
 
-export const CHECK_IN_FREQUENCIES: { value: CheckInFrequency; label: string; description: string }[] = [
-  { value: "daily", label: "Daily", description: "Morning planning and evening reflection every day" },
-  { value: "weekly", label: "Weekly", description: "Weekly review reminders only" },
-  { value: "monthly", label: "Monthly", description: "Monthly review reminders only" },
-  { value: "quarterly", label: "Quarterly", description: "Quarterly review reminders only" },
-  { value: "annual", label: "Annual", description: "Annual review reminders only" },
-  { value: "as_needed", label: "As Needed", description: "No automatic reminders" },
+export const CHECK_IN_FREQUENCIES: {
+  value: CheckInFrequency;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "daily",
+    label: "Daily",
+    description: "Morning planning and evening reflection every day",
+  },
+  {
+    value: "weekly",
+    label: "Weekly",
+    description: "Weekly review reminders only",
+  },
+  {
+    value: "monthly",
+    label: "Monthly",
+    description: "Monthly review reminders only",
+  },
+  {
+    value: "quarterly",
+    label: "Quarterly",
+    description: "Quarterly review reminders only",
+  },
+  {
+    value: "annual",
+    label: "Annual",
+    description: "Annual review reminders only",
+  },
+  {
+    value: "as_needed",
+    label: "As Needed",
+    description: "No automatic reminders",
+  },
 ];
 
 // Helper functions for check-in frequency
