@@ -318,3 +318,19 @@
   - Sync local state from props using useEffect when not editing (for server sync)
   - blurOnSubmit + returnKeyType="done" makes TextInput behave like single-line with done key
 ---
+
+## 2026-01-21 - US-018
+- What was implemented: Built Today Screen Top Priorities section with full functionality
+- Files changed:
+  - package.json (added expo-haptics, react-native-gesture-handler)
+  - app/(tabs)/today.tsx (added TopPrioritiesSection, TopPriorityItem components)
+- **Learnings for future iterations:**
+  - Use GestureHandlerRootView wrapper for swipe gestures - wrap entire screen content
+  - expo-haptics: Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) for checkbox, Medium for delete
+  - Swipeable from react-native-gesture-handler: use ref for programmatic close after delete
+  - renderRightActions receives dragX for animation interpolation
+  - Goal badge: use COLORS.primary + "15" for 15% opacity background
+  - Animated.AnimatedInterpolation<number> for proper TypeScript typing with interpolate()
+  - Top priorities max 3: disable Add button with visual feedback when limit reached
+  - Loading skeleton: render 3 placeholder items for visual consistency
+---
