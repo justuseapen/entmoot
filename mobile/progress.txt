@@ -52,6 +52,9 @@
 - Biometric auth: Use shouldPromptBiometric() before authenticate(); respects user preference + device capability
 - Data hooks: Import useTodayPlan, useUpdateDailyPlan from @/hooks for daily plan data; uses TanStack Query with optimistic updates
 - Query keys pattern: Use exported keys objects (e.g., dailyPlanKeys) for consistent cache management
+- Bottom sheet modals: Use @gorhom/bottom-sheet with react-native-reanimated; configure reanimated plugin last in babel.config.js
+- Goals hook: Import useGoals, Goal from @/hooks; filter by status with useGoals({ status: "in_progress" })
+- Components barrel export: Import from @/components (FirstGoalPrompt, AddPriorityModal) for shared components
 
 ## Learnings
 (Ralph will append learnings here as iterations progress)
@@ -362,4 +365,26 @@
   - Inline TextInput with onSubmitEditing pattern for quick task entry
   - Show add button only when input has content (cleaner UX)
   - Reuse checkbox, deleteAction styles from priorities for visual consistency
+---
+
+## 2026-01-21 - US-021
+- What was implemented: Built Add Priority Modal with bottom sheet and goal picker
+- Files changed:
+  - package.json (added @gorhom/bottom-sheet, react-native-reanimated)
+  - babel.config.js (added react-native-reanimated/plugin)
+  - src/hooks/useGoals.ts (new - useGoals hook with Goal types)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/AddPriorityModal.tsx (new - bottom sheet modal component)
+  - src/components/index.ts (new - components barrel export)
+  - app/(tabs)/today.tsx (integrated AddPriorityModal)
+- **Learnings for future iterations:**
+  - @gorhom/bottom-sheet requires react-native-reanimated as peer dependency
+  - react-native-reanimated/plugin MUST be listed last in babel plugins array
+  - Use --legacy-peer-deps when installing packages due to React 19 peer dependency conflicts
+  - BottomSheet uses index={-1} to start closed, expand() to open
+  - BottomSheetBackdrop: disappearsOnIndex={-1}, appearsOnIndex={0} for proper backdrop behavior
+  - Goal picker implemented as custom dropdown with selectable list (not Picker component)
+  - Use keyboardBehavior="interactive" for smooth keyboard handling in bottom sheet
+  - Goals can be filtered by status: useGoals({ status: "in_progress" })
+  - useGoals returns Goal[] (not paginated) from /families/:id/goals endpoint
 ---
