@@ -148,3 +148,42 @@ export async function authFetch<T>(
 ): Promise<T> {
   return apiClient.fetch<T>(endpoint, options);
 }
+
+/**
+ * Typed convenience methods for API requests
+ */
+export const api = {
+  /**
+   * GET request with automatic token handling
+   */
+  get: <T>(endpoint: string): Promise<T> => {
+    return apiClient.fetch<T>(endpoint, { method: "GET" });
+  },
+
+  /**
+   * POST request with automatic token handling
+   */
+  post: <T>(endpoint: string, data?: unknown): Promise<T> => {
+    return apiClient.fetch<T>(endpoint, {
+      method: "POST",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  },
+
+  /**
+   * PATCH request with automatic token handling
+   */
+  patch: <T>(endpoint: string, data?: unknown): Promise<T> => {
+    return apiClient.fetch<T>(endpoint, {
+      method: "PATCH",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  },
+
+  /**
+   * DELETE request with automatic token handling
+   */
+  del: <T>(endpoint: string): Promise<T> => {
+    return apiClient.fetch<T>(endpoint, { method: "DELETE" });
+  },
+};

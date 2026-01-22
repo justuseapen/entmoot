@@ -8,4 +8,5 @@ export * from "./goals";
 export * from "./notifications";
 export * from "./notificationPreferences";
 export * from "./pushNotifications";
+export * from "./queryClient";
 export * from "./streaks";
