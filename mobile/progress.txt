@@ -575,3 +575,20 @@
   - Format date range using date-fns: parseISO for week_start_date, add 6 days for end date
   - Keep saving indicator per-field with savingField state, show ActivityIndicator next to section title
 ---
+
+## 2026-01-22 - US-033
+- What was implemented: Built complete Me Tab Screen with all sections
+- Files changed:
+  - app/(tabs)/me.tsx (complete rewrite with profile, streaks, points, badges, quick links, logout)
+- **Learnings for future iterations:**
+  - API endpoints for gamification: GET /users/me/streaks, GET /users/me/points, GET /users/me/badges
+  - Streaks response: { streaks: [{ id, streak_type, current_count, longest_count, last_activity_date, at_risk, next_milestone }] }
+  - Points response: { points: { total, this_week, breakdown }, recent_activity: [...] }
+  - Badges response: { badges: [...], stats: { total_badges, earned_badges, completion_percentage } }
+  - Badge earned field is boolean, use badges.filter(b => b.earned) to get earned badges
+  - Streak milestone highlighting: check if current_count is in [7, 14, 30, 60, 90, 180, 365] array
+  - User avatar_url may be null - use initials fallback (split name, take first char of each word, uppercase)
+  - useAuthStore((state) => state.user?.avatar_url) for accessing user avatar
+  - Quick links pattern: array of { id, label, icon, route } with TouchableOpacity + router.push
+  - Logout flow: Alert.alert confirmation → Haptics.impactAsync → logout() → router.replace("/(auth)/login")
+---
