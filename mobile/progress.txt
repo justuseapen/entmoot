@@ -48,6 +48,8 @@
 - QueryClient: Import from @/lib/queryClient for TanStack Query setup
 - Auth store: Import useAuthStore or useAuth from @/stores; use currentFamilyId for family-scoped API calls
 - Family ID persistence: setCurrentFamily(id) persists to SecureStore and updates zustand state
+- Services: Import from @/services (secureStorage, biometrics) for platform services
+- Biometric auth: Use shouldPromptBiometric() before authenticate(); respects user preference + device capability
 
 ## Learnings
 (Ralph will append learnings here as iterations progress)
@@ -179,4 +181,62 @@
   - Password show/hide toggle: position absolute TouchableOpacity with Ionicons eye icon
   - Form validation should clear errors when user starts typing in that field
   - Use hitSlop on touch targets for better accessibility
+---
+
+## 2026-01-21 - US-009
+- What was implemented: Built full registration screen with complete form and error handling
+- Files changed:
+  - app/(auth)/register.tsx (complete rewrite with registration form UI)
+- **Learnings for future iterations:**
+  - Registration uses authStore.register() which handles saving tokens and user state automatically
+  - RegisterData type from @shared/types requires: name, email, password, password_confirmation
+  - API validation errors may come as JSON with field-level errors (email, password, name, password_confirmation arrays)
+  - Use router.back() for "Log In" link since register is pushed from login screen
+  - Both password fields have show/hide toggles - use separate state (showPassword, showConfirmPassword)
+  - autoComplete="new-password" for registration password fields (vs "password" for login)
+  - helperText prop on Input component shows text below input (used for password requirements)
+---
+
+## 2026-01-21 - US-010
+- What was implemented: Built forgot password screen with email reset functionality
+- Files changed:
+  - app/(auth)/forgot-password.tsx (complete rewrite with forgot password form)
+- **Learnings for future iterations:**
+  - Use apiFetch for unauthenticated API calls (password reset doesn't require auth)
+  - Success alert uses array of buttons to navigate user back to login
+  - COLORS.text is the correct color for primary text (not textPrimary which doesn't exist)
+  - Generic success message avoids revealing whether email exists in system (security best practice)
+  - Back button with Ionicons arrow-back provides clear navigation affordance
+---
+
+## 2026-01-21 - US-011
+- What was implemented: Biometric authentication with Face ID/Touch ID support
+- Files changed:
+  - package.json (added expo-local-authentication)
+  - src/services/biometrics.ts (created with all biometric functions)
+  - src/services/index.ts (created barrel export for services)
+  - app/_layout.tsx (updated AuthGuard for biometric prompt on foreground)
+- **Learnings for future iterations:**
+  - expo-local-authentication uses SecurityLevel enum (BIOMETRIC_STRONG, BIOMETRIC_WEAK) for capability check
+  - Use AuthenticationType enum (FACIAL_RECOGNITION, FINGERPRINT) to determine biometric type
+  - AppState API with addEventListener "change" detects foreground/background transitions
+  - Use useRef for appState and biometricPromptShown to avoid unnecessary re-renders
+  - shouldPromptBiometric helper combines availability check + preference check + session check
+  - biometricLocked state prevents navigation while biometric prompt is active
+  - Services barrel export at src/services/index.ts enables cleaner imports
+---
+
+## 2026-01-21 - US-012
+- What was implemented: Built onboarding welcome flow with 4 swipeable pages
+- Files changed:
+  - package.json (added react-native-pager-view)
+  - app/onboarding/index.tsx (complete rewrite with PagerView for swiping)
+- **Learnings for future iterations:**
+  - react-native-pager-view requires --legacy-peer-deps due to React 19 peer dependency conflicts
+  - PagerView uses onPageSelected callback with e.nativeEvent.position for page tracking
+  - Use useRef<PagerView> with pagerRef.current.setPage(n) for programmatic navigation
+  - Page indicators: active indicator can be wider (24px vs 8px) for visual emphasis
+  - Ionicons provides good icons for onboarding: leaf, sunny, checkmark-circle, trophy
+  - router.push is correct for onboarding → family-setup navigation (not replace)
+  - SafeAreaView needed for proper spacing on devices with notch
 ---

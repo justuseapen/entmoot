@@ -170,8 +170,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Full registration UI with name/email/password/confirm password fields, client-side and API error handling, show/hide password toggles, navigation to onboarding on success"
     },
     {
       "id": "US-010",
@@ -187,8 +187,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Full forgot password UI with email validation, loading state, success/error alerts, back navigation with arrow button and footer link"
     },
     {
       "id": "US-011",
@@ -205,8 +205,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - expo-local-authentication installed, biometrics.ts created with all required functions, app/_layout.tsx updated to prompt biometric on foreground"
     },
     {
       "id": "US-012",
@@ -225,8 +225,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - 4 swipeable pages with PagerView, Ionicons for illustrations, page indicators, Get Started and Skip buttons"
     },
     {
       "id": "US-013",
