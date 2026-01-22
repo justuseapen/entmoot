@@ -688,3 +688,40 @@
   - Replace [id] in route string with actual id for dynamic routes: /goal/[id] -> /goal/123
   - Import InAppNotificationBanner and helpers from @/components (barrel export)
 ---
+
+## 2026-01-22 - US-039
+- What was implemented: Built complete Notification Preferences Screen with data layer and UI
+- Files changed:
+  - src/hooks/useNotificationPreferences.ts (created - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/notifications.tsx (created - full notification settings UI)
+  - app/_layout.tsx (added settings/notifications route)
+- **Learnings for future iterations:**
+  - Notification preferences API: GET/PATCH /users/me/notification_preferences (singular resource, not collection)
+  - API response wraps data: { notification_preferences: { channels, reminders, quiet_hours, tips, reengagement, check_in_frequency } }
+  - Update payload uses flat structure: { morning_planning: boolean, morning_planning_time: string, ... }
+  - Time values stored as HH:MM strings - use parseTimeString/formatTimeToString helpers for conversion to/from Date
+  - Conditional time pickers: show time picker row only when corresponding toggle is enabled
+  - Day picker: custom dropdown with DAY_LABELS array (Sunday=0 to Saturday=6)
+  - DateTimePicker: use display="spinner" on iOS, mode="time" for time pickers
+  - Section pattern: Use Section component with sectionDescription for explanatory text in quiet hours
+  - Loading/error states: Show skeleton or error UI when data not available
+  - Import hooks from @/hooks barrel export: useNotificationPreferences, useUpdateNotificationPreferences
+---
+
+## 2026-01-22 - US-040
+- What was implemented: Local notification scheduling for morning planning, evening reflection, and weekly review reminders
+- Files changed:
+  - src/services/notifications.ts (added local notification scheduling functions)
+- **Learnings for future iterations:**
+  - expo-notifications uses SchedulableTriggerInputTypes.DAILY for daily notifications and WEEKLY for weekly
+  - DAILY trigger requires { type, hour, minute }; WEEKLY requires { type, weekday, hour, minute }
+  - Weekday for WEEKLY trigger: 1-7 (1 = Sunday), not 0-6 like our API - add 1 when converting
+  - Quiet hours handling: check if notification time falls within quiet period before scheduling
+  - Quiet hours spanning midnight (e.g., 22:00 to 07:00): need special logic comparing minutes-since-midnight
+  - Use notification identifiers (MORNING_PLANNING, etc.) for targeted notification management
+  - scheduleNotificationAsync returns identifier, cancelScheduledNotificationAsync takes identifier
+  - SchedulingPreferences interface matches useNotificationPreferences hook's reminders/quiet_hours structure
+  - cancelAllScheduledNotificationsAsync() clears all scheduled notifications (for reschedule/logout)
+  - Import scheduleLocalNotifications, rescheduleAllNotifications, cancelAllScheduled from @/services
+---
