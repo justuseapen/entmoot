@@ -1036,3 +1036,21 @@
   - scripts/generate-icons.js can regenerate all icons if brand changes
   - SVG sources kept for future edits without needing original design tools
 ---
+
+## 2026-01-22 - US-056
+- What was implemented: Configured App Store metadata in app.json and created comprehensive APP_STORE.md documentation
+- Files changed:
+  - app.json (added description, privacy, githubUrl, ios.buildNumber)
+  - APP_STORE.md (new - complete App Store submission documentation)
+  - assets/screenshots/README.md (new - screenshot size requirements and guidelines)
+  - assets/screenshots/*.placeholder (new - placeholder files for required iOS screenshot sizes)
+- **Learnings for future iterations:**
+  - Expo app.json supports `description`, `privacy` (public/unlisted), `githubUrl` fields for App Store metadata
+  - ios.buildNumber is required for App Store submission (separate from version)
+  - Required iOS screenshot sizes: 6.9" (1320x2868), 6.7" (1290x2796), 6.5" (1242x2688), 5.5" (1242x2208)
+  - iPad Pro 12.9" screenshots: 2048x2732 pixels
+  - APP_STORE.md centralizes all App Store Connect fields (description, keywords, privacy, etc.)
+  - Keywords are comma-separated, max 100 characters total
+  - App Store description max is 4000 characters
+  - Privacy questionnaire requires documenting data collection, linking to identity, and tracking purposes
+---
