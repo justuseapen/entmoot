@@ -197,3 +197,127 @@ export function openAppSettings(): void {
     Linking.openSettings();
   }
 }
+
+/**
+ * Calendar event type returned from getTodayEvents
+ */
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  startDate: Date;
+  endDate: Date;
+  allDay: boolean;
+  calendarColor: string | null;
+  calendarTitle: string;
+  location?: string;
+  notes?: string;
+}
+
+/**
+ * Get all device calendars
+ * @returns List of calendars available on the device
+ */
+async function getDeviceCalendars(): Promise<Calendar.Calendar[]> {
+  try {
+    const calendars = await Calendar.getCalendarsAsync(
+      Calendar.EntityTypes.EVENT
+    );
+    return calendars;
+  } catch (error) {
+    console.error("[calendar] Error getting calendars:", error);
+    return [];
+  }
+}
+
+/**
+ * Get all events for today from device calendars
+ * @returns Array of calendar events sorted by start time
+ */
+export async function getTodayEvents(): Promise<CalendarEvent[]> {
+  try {
+    // Check permission first
+    const hasPermission = await hasCalendarPermission();
+    if (!hasPermission) {
+      console.log("[calendar] No calendar permission, returning empty array");
+      return [];
+    }
+
+    // Get all calendars
+    const calendars = await getDeviceCalendars();
+    if (calendars.length === 0) {
+      return [];
+    }
+
+    // Get calendar IDs
+    const calendarIds = calendars.map((cal) => cal.id);
+
+    // Create a map of calendar ID to calendar info for quick lookup
+    const calendarMap = new Map<
+      string,
+      { color: string | null; title: string }
+    >();
+    calendars.forEach((cal) => {
+      calendarMap.set(cal.id, {
+        color: cal.color ?? null,
+        title: cal.title,
+      });
+    });
+
+    // Define today's date range
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0
+    );
+    const endOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59
+    );
+
+    // Fetch events for today
+    const events = await Calendar.getEventsAsync(
+      calendarIds,
+      startOfToday,
+      endOfToday
+    );
+
+    // Transform and sort events
+    const calendarEvents: CalendarEvent[] = events.map((event) => {
+      const calendarInfo = calendarMap.get(event.calendarId);
+      return {
+        id: event.id,
+        title: event.title || "Untitled Event",
+        startDate: new Date(event.startDate),
+        endDate: new Date(event.endDate),
+        allDay: event.allDay ?? false,
+        calendarColor: calendarInfo?.color ?? null,
+        calendarTitle: calendarInfo?.title ?? "Calendar",
+        location: event.location ?? undefined,
+        notes: event.notes ?? undefined,
+      };
+    });
+
+    // Sort events: all-day events first, then by start time
+    calendarEvents.sort((a, b) => {
+      // All-day events come first
+      if (a.allDay && !b.allDay) return -1;
+      if (!a.allDay && b.allDay) return 1;
+
+      // Then sort by start time
+      return a.startDate.getTime() - b.startDate.getTime();
+    });
+
+    return calendarEvents;
+  } catch (error) {
+    console.error("[calendar] Error getting today's events:", error);
+    return [];
+  }
+}

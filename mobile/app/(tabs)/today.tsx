@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Animated,
+  Linking,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { format } from "date-fns";
@@ -42,6 +44,12 @@ import {
 import { useAuthStore } from "@/stores/auth";
 import { useIsOnline } from "@/hooks/useNetworkStatus";
 import { addSyncQueueListener } from "@/services/syncQueue";
+import {
+  getTodayEvents,
+  hasCalendarPermission,
+  requestCalendarPermissions,
+  CalendarEvent,
+} from "@/services/calendar";
 
 // ============================================================================
 // Helper Functions
@@ -933,6 +941,266 @@ function TasksSection({
 }
 
 // ============================================================================
+// Schedule Section Component (Calendar Events)
+// ============================================================================
+
+interface ScheduleSectionProps {
+  events: CalendarEvent[];
+  isLoading: boolean;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+  onRefresh: () => void;
+  hasPermission: boolean;
+  onRequestPermission: () => void;
+}
+
+/**
+ * Format time for display (e.g., "9:00 AM")
+ */
+function formatEventTime(date: Date): string {
+  return format(date, "h:mm a");
+}
+
+/**
+ * Open calendar event in native calendar app
+ */
+async function openCalendarApp(event: CalendarEvent): Promise<void> {
+  try {
+    // Try to open the event in the native calendar
+    // iOS uses calshow: URL scheme, Android uses content:// URI
+    if (Platform.OS === "ios") {
+      // Open iOS Calendar app to the event date
+      const timestamp = Math.floor(event.startDate.getTime() / 1000);
+      const url = `calshow:${timestamp}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      }
+    } else {
+      // For Android, open the calendar app
+      await Linking.openURL("content://com.android.calendar/time/");
+    }
+  } catch (error) {
+    console.error("[ScheduleSection] Error opening calendar:", error);
+  }
+}
+
+interface CalendarEventItemProps {
+  event: CalendarEvent;
+  onPress: () => void;
+}
+
+function CalendarEventItem({ event, onPress }: CalendarEventItemProps) {
+  return (
+    <TouchableOpacity
+      style={styles.eventItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      {/* Calendar color indicator */}
+      <View
+        style={[
+          styles.eventColorDot,
+          { backgroundColor: event.calendarColor || COLORS.primary },
+        ]}
+      />
+
+      {/* Event content */}
+      <View style={styles.eventContent}>
+        {/* Time display */}
+        <Text style={styles.eventTime}>
+          {event.allDay ? "All day" : formatEventTime(event.startDate)}
+        </Text>
+
+        {/* Title */}
+        <Text style={styles.eventTitle} numberOfLines={2}>
+          {event.title}
+        </Text>
+
+        {/* Location (if present) */}
+        {event.location && (
+          <View style={styles.eventLocationRow}>
+            <Ionicons
+              name="location-outline"
+              size={12}
+              color={COLORS.textTertiary}
+            />
+            <Text style={styles.eventLocation} numberOfLines={1}>
+              {event.location}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Chevron indicator */}
+      <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
+    </TouchableOpacity>
+  );
+}
+
+function ScheduleSection({
+  events,
+  isLoading,
+  isCollapsed,
+  onToggleCollapse,
+  onRefresh,
+  hasPermission,
+  onRequestPermission,
+}: ScheduleSectionProps) {
+  // Separate all-day events from timed events
+  const allDayEvents = events.filter((e) => e.allDay);
+  const timedEvents = events.filter((e) => !e.allDay);
+
+  // Loading skeleton state
+  if (isLoading) {
+    return (
+      <View style={styles.scheduleSection}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color={COLORS.text}
+              style={styles.sectionIcon}
+            />
+            <Text style={styles.sectionTitle}>Schedule</Text>
+          </View>
+          <ActivityIndicator size="small" color={COLORS.textSecondary} />
+        </View>
+        <View style={styles.skeletonEventList}>
+          {[1, 2].map((i) => (
+            <View key={i} style={styles.skeletonEventItem}>
+              <View style={styles.skeletonEventDot} />
+              <View style={styles.skeletonEventContent}>
+                <View style={styles.skeletonEventTime} />
+                <View style={styles.skeletonEventTitle} />
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // Permission not granted state
+  if (!hasPermission) {
+    return (
+      <View style={styles.scheduleSection}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color={COLORS.text}
+              style={styles.sectionIcon}
+            />
+            <Text style={styles.sectionTitle}>Schedule</Text>
+          </View>
+        </View>
+        <View style={styles.permissionPrompt}>
+          <Ionicons
+            name="calendar-outline"
+            size={32}
+            color={COLORS.textTertiary}
+          />
+          <Text style={styles.permissionText}>
+            See your calendar events here
+          </Text>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={onRequestPermission}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.permissionButtonText}>
+              Connect Calendar
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.scheduleSection}>
+      {/* Section header with collapse toggle */}
+      <TouchableOpacity
+        style={styles.sectionHeader}
+        onPress={onToggleCollapse}
+        activeOpacity={0.7}
+      >
+        <View style={styles.sectionTitleRow}>
+          <Ionicons
+            name="calendar-outline"
+            size={18}
+            color={COLORS.text}
+            style={styles.sectionIcon}
+          />
+          <Text style={styles.sectionTitle}>Schedule</Text>
+          <Ionicons
+            name={isCollapsed ? "chevron-down" : "chevron-up"}
+            size={18}
+            color={COLORS.textSecondary}
+            style={styles.collapseIcon}
+          />
+        </View>
+        <Text style={styles.sectionSubtitle}>
+          {events.length} {events.length === 1 ? "event" : "events"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Collapsible content */}
+      {!isCollapsed && (
+        <View style={styles.scheduleContent}>
+          {events.length === 0 ? (
+            <View style={styles.emptySchedule}>
+              <Text style={styles.emptyText}>No events today</Text>
+            </View>
+          ) : (
+            <>
+              {/* All-day events */}
+              {allDayEvents.length > 0 && (
+                <View style={styles.allDaySection}>
+                  {allDayEvents.map((event) => (
+                    <CalendarEventItem
+                      key={event.id}
+                      event={event}
+                      onPress={() => openCalendarApp(event)}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Timed events */}
+              {timedEvents.map((event) => (
+                <CalendarEventItem
+                  key={event.id}
+                  event={event}
+                  onPress={() => openCalendarApp(event)}
+                />
+              ))}
+            </>
+          )}
+
+          {/* Refresh button */}
+          <TouchableOpacity
+            style={styles.refreshScheduleButton}
+            onPress={onRefresh}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="refresh-outline"
+              size={16}
+              color={COLORS.textSecondary}
+            />
+            <Text style={styles.refreshScheduleText}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ============================================================================
 // Completion Badge Component
 // ============================================================================
 
@@ -989,6 +1257,12 @@ export default function TodayScreen() {
   const [reflectionBannerDismissed, setReflectionBannerDismissed] =
     useState(false);
 
+  // Calendar events state
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [isLoadingCalendar, setIsLoadingCalendar] = useState(true);
+  const [hasCalendarPerm, setHasCalendarPerm] = useState(false);
+  const [scheduleCollapsed, setScheduleCollapsed] = useState(false);
+
   // Track pending items - force re-render when they change
   const [, forceUpdate] = useState({});
 
@@ -1008,6 +1282,55 @@ export default function TodayScreen() {
     return () => {
       unsubscribe();
     };
+  }, []);
+
+  // Load calendar events on mount and check permission
+  useEffect(() => {
+    async function loadCalendarData() {
+      try {
+        setIsLoadingCalendar(true);
+        const hasPerm = await hasCalendarPermission();
+        setHasCalendarPerm(hasPerm);
+
+        if (hasPerm) {
+          const events = await getTodayEvents();
+          setCalendarEvents(events);
+        }
+      } catch (error) {
+        console.error("[TodayScreen] Error loading calendar:", error);
+      } finally {
+        setIsLoadingCalendar(false);
+      }
+    }
+
+    loadCalendarData();
+  }, []);
+
+  // Refresh calendar events
+  const refreshCalendarEvents = useCallback(async () => {
+    try {
+      if (hasCalendarPerm) {
+        const events = await getTodayEvents();
+        setCalendarEvents(events);
+      }
+    } catch (error) {
+      console.error("[TodayScreen] Error refreshing calendar:", error);
+    }
+  }, [hasCalendarPerm]);
+
+  // Handle calendar permission request
+  const handleRequestCalendarPermission = useCallback(async () => {
+    const granted = await requestCalendarPermissions();
+    setHasCalendarPerm(granted);
+    if (granted) {
+      const events = await getTodayEvents();
+      setCalendarEvents(events);
+    }
+  }, []);
+
+  // Toggle schedule collapse
+  const handleToggleScheduleCollapse = useCallback(() => {
+    setScheduleCollapsed((prev) => !prev);
   }, []);
 
   // Handle coming back online - refetch and check for conflicts
@@ -1061,7 +1384,9 @@ export default function TodayScreen() {
   // Handle pull-to-refresh
   const onRefresh = useCallback(() => {
     refetch();
-  }, [refetch]);
+    // Also refresh calendar events
+    refreshCalendarEvents();
+  }, [refetch, refreshCalendarEvents]);
 
   // Calculate total completion stats
   const completionStats = dailyPlan?.completion_stats;
@@ -1128,6 +1453,17 @@ export default function TodayScreen() {
             intention={dailyPlan?.intention ?? null}
             dailyPlanId={dailyPlan?.id ?? 0}
             isLoading={isLoading}
+          />
+
+          {/* Schedule (Calendar Events) Section */}
+          <ScheduleSection
+            events={calendarEvents}
+            isLoading={isLoadingCalendar}
+            isCollapsed={scheduleCollapsed}
+            onToggleCollapse={handleToggleScheduleCollapse}
+            onRefresh={refreshCalendarEvents}
+            hasPermission={hasCalendarPerm}
+            onRequestPermission={handleRequestCalendarPermission}
           />
 
           {/* Top Priorities Section */}
@@ -1632,5 +1968,150 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+  },
+
+  // Schedule (Calendar) section
+  scheduleSection: {
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surface,
+  },
+  sectionIcon: {
+    marginRight: 8,
+  },
+  collapseIcon: {
+    marginLeft: 8,
+  },
+  scheduleContent: {
+    marginTop: 4,
+  },
+
+  // Calendar event item
+  eventItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+  eventColorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 12,
+    marginTop: 4,
+  },
+  eventContent: {
+    flex: 1,
+  },
+  eventTime: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+  },
+  eventTitle: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.text,
+    lineHeight: 20,
+  },
+  eventLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  eventLocation: {
+    fontSize: 12,
+    color: COLORS.textTertiary,
+    flex: 1,
+  },
+
+  // All-day events section
+  allDaySection: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surface,
+    marginBottom: 8,
+    paddingBottom: 8,
+  },
+
+  // Empty schedule state
+  emptySchedule: {
+    paddingVertical: 24,
+    alignItems: "center",
+  },
+
+  // Permission prompt
+  permissionPrompt: {
+    paddingVertical: 24,
+    alignItems: "center",
+    gap: 12,
+  },
+  permissionText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+  },
+  permissionButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  permissionButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.textOnPrimary,
+  },
+
+  // Refresh schedule button
+  refreshScheduleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    marginTop: 8,
+  },
+  refreshScheduleText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+  },
+
+  // Skeleton for schedule
+  skeletonEventList: {
+    gap: 12,
+    marginTop: 12,
+  },
+  skeletonEventItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 8,
+  },
+  skeletonEventDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.surface,
+    marginRight: 12,
+    marginTop: 4,
+  },
+  skeletonEventContent: {
+    flex: 1,
+    gap: 6,
+  },
+  skeletonEventTime: {
+    width: 60,
+    height: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 4,
+  },
+  skeletonEventTitle: {
+    width: "70%",
+    height: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 4,
   },
 });
