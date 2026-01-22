@@ -629,3 +629,24 @@
   - Avatar placeholder: use user initials when avatar_url is null (same pattern as Me tab)
   - Read-only email display with disabled opacity (0.7) and hint text for UX clarity
 ---
+
+## 2026-01-22 - US-036
+- What was implemented: Built complete Family Management Screen with family switching and invite functionality
+- Files changed:
+  - src/hooks/useFamilies.ts (created - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/family.tsx (created - full family management UI)
+  - app/_layout.tsx (added settings/family route)
+- **Learnings for future iterations:**
+  - Families API: GET /families returns { families: [] }, GET /families/:id returns { family: {} } with members included
+  - Family members API: GET /families/:id/members returns { members: [] } with role, user_id, joined_at
+  - FamilyMember type: id is membership id, use user_id when comparing with current user
+  - Invitations API: POST /families/:id/invitations with { invitation: { email, role } }
+  - INVITABLE_ROLES: admin cannot be invited directly (only adult, teen, child, observer)
+  - canInvite permission check: filter members to find current user, check role is admin or adult
+  - Family switching: call setCurrentFamily(id) then refetch family-scoped data (members)
+  - FamilyCard component: show checkmark indicator for selected family, subtle border highlight
+  - Role badges: use ROLE_COLORS map with 20% opacity background for subtle styling
+  - BottomSheet with BottomSheetView (not BottomSheetScrollView) for simple forms without scrolling
+  - Role picker: custom dropdown with TouchableOpacity toggle and conditional list rendering
+---

@@ -666,8 +666,8 @@
         "Typecheck passes"
       ],
       "priority": 36,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - useFamilies.ts created with useFamilies, useFamilyMembers, useFamilyInvitations, useCreateInvitation hooks. Family management screen with family switching, member list with role badges, invite modal with email and role picker"
     },
     {
       "id": "US-037",

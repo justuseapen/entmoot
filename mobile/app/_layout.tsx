@@ -192,6 +192,10 @@ export default function RootLayout() {
               name="settings/profile"
               options={{ title: "Edit Profile" }}
             />
+            <Stack.Screen
+              name="settings/family"
+              options={{ title: "Family" }}
+            />
           </Stack>
         </AuthGuard>
       </SafeAreaProvider>
