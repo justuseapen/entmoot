@@ -44,7 +44,6 @@ import {
 } from "./components/CelebrationToast";
 import { useAuthStore } from "./stores/auth";
 import { useNotificationWebSocket } from "./hooks/useNotificationWebSocket";
-import { initHeyDev } from "./lib/heydev";
 
 function AuthenticatedRedirect({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -61,18 +60,6 @@ function NotificationWebSocketInitializer() {
   return null;
 }
 
-// Component that initializes HeyDev with user context for feedback tracking
-function HeyDevInitializer() {
-  const { user, isAuthenticated } = useAuthStore();
-
-  // Initialize HeyDev whenever auth state changes
-  React.useEffect(() => {
-    initHeyDev(isAuthenticated && user ? user : null);
-  }, [user, isAuthenticated]);
-
-  return null;
-}
-
 function App() {
   return (
     <ErrorBoundary fallback={<ServerError />}>
@@ -83,7 +70,6 @@ function App() {
             <GlobalLoadingIndicator />
             <OfflineIndicator />
             <NotificationWebSocketInitializer />
-            <HeyDevInitializer />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/about" element={<About />} />

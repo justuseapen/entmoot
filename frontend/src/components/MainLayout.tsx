@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,6 @@ import { FamilySwitcher } from "./FamilySwitcher";
 import { NotificationBell } from "./NotificationBell";
 import { MentionIndicator } from "./MentionIndicator";
 import { GuidedTour } from "./GuidedTour";
-import { FeedbackReporter, FeedbackButton } from "./FeedbackReporter";
-import { useFeedbackShortcut } from "@/hooks/useFeedback";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -106,11 +104,23 @@ export function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
   const { user, logout, setLoading, isLoading } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  // Open HeyDev feedback widget
+  const openFeedback = useCallback(() => {
+    window.HeyDev?.open();
+  }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + Shift + F
-  const handleOpenFeedback = useCallback(() => setFeedbackOpen(true), []);
-  useFeedbackShortcut(handleOpenFeedback);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "f") {
+        e.preventDefault();
+        openFeedback();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [openFeedback]);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -243,7 +253,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setFeedbackOpen(true)}
+                  onClick={openFeedback}
                   className="flex items-center gap-2"
                 >
                   <MessageSquare className="h-4 w-4" />
@@ -273,11 +283,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Guided Tour */}
       <GuidedTour />
 
-      {/* Floating Feedback Button */}
-      <FeedbackButton onClick={() => setFeedbackOpen(true)} />
-
-      {/* Feedback Reporter Modal */}
-      <FeedbackReporter open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      {/* HeyDev feedback widget is loaded via index.html when VITE_HEYDEV_API_KEY is configured */}
     </div>
   );
 }

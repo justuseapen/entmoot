@@ -1,62 +1,45 @@
 /**
- * HeyDev integration for user context and feedback
+ * HeyDev feedback widget helpers
  *
- * This module provides functions to identify users to the HeyDev feedback widget,
- * enabling follow-up on feedback submissions.
+ * The HeyDev widget is loaded via a script tag in index.html when
+ * VITE_HEYDEV_API_KEY is configured. This module provides helper
+ * functions for interacting with the widget programmatically.
  */
 
-// Declare the global HeyDev object that's loaded by the widget script in index.html
-declare global {
-  interface Window {
-    HeyDev?: {
-      identify: (userData: {
-        userId: string | number;
-        email?: string;
-        name?: string;
-        metadata?: Record<string, string | number | boolean>;
-      }) => void;
-      reset: () => void;
-    };
-  }
-}
-
-interface UserContext {
-  id: number;
-  email: string;
-  name?: string;
+/**
+ * Check if the HeyDev widget is available
+ */
+export function isHeyDevAvailable(): boolean {
+  return typeof window !== "undefined" && !!window.HeyDev;
 }
 
 /**
- * Initialize HeyDev with user context when logged in.
- * Call this after authentication state is known.
- *
- * @param user - The authenticated user, or null if not logged in
+ * Open the HeyDev feedback panel
  */
-export function initHeyDev(user: UserContext | null): void {
-  // Check if HeyDev is loaded (widget may not be present if API key is missing)
-  if (!window.HeyDev) {
-    // Widget not loaded - this is expected when VITE_HEYDEV_API_KEY is not configured
-    return;
-  }
+export function openFeedback(): void {
+  window.HeyDev?.open();
+}
 
-  if (user) {
-    // User is logged in - identify them to HeyDev for feedback context
-    const metadata: Record<string, string | number | boolean> = {};
+/**
+ * Close the HeyDev feedback panel
+ */
+export function closeFeedback(): void {
+  window.HeyDev?.close();
+}
 
-    // Include app version if available
-    const appVersion = import.meta.env.VITE_APP_VERSION;
-    if (appVersion) {
-      metadata.appVersion = appVersion;
-    }
+/**
+ * Check if the feedback panel is currently open
+ */
+export function isFeedbackOpen(): boolean {
+  return window.HeyDev?.isOpen() ?? false;
+}
 
-    window.HeyDev.identify({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
-    });
-  } else {
-    // User is logged out - reset HeyDev context
-    window.HeyDev.reset();
-  }
+/**
+ * Manually capture and report an error to HeyDev
+ */
+export function captureError(error: Error): void {
+  window.HeyDev?.captureError({
+    message: error.message,
+    stack: error.stack,
+  });
 }
