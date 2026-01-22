@@ -487,3 +487,20 @@
   - Delete confirmation: Alert.alert with destructive style button + haptic warning feedback
   - Edit navigates to /goal/edit/${goalId} (placeholder route for next story)
 ---
+
+## 2026-01-22 - US-028
+- What was implemented: Built complete Create Goal Screen with all form fields and API integration
+- Files changed:
+  - app/goal/create.tsx (complete rewrite from placeholder to full implementation)
+- **Learnings for future iterations:**
+  - Family members API: GET /families/:id/members returns { members: FamilyMember[] } with user_id, name, email, avatar_url, role
+  - FamilyMember type: use user_id (not id) when assigning to goals - the id is the membership id
+  - Time scale segmented control: horizontal ScrollView with TouchableOpacity buttons works well for 5+ options
+  - DateTimePicker behavior differs by platform: use display="spinner" on iOS for better UX
+  - Visibility radio picker: custom implementation with radio circle (outer + inner filled) looks cleaner than library pickers
+  - Assignee multi-select: wrap-able row of chips with checkmark icon when selected
+  - CreateGoalPayload uses assignee_ids (array of user IDs) for assignment
+  - useCreateGoal hook returns GoalResponse with goal.id for navigation to detail screen
+  - Refine with AI button placeholder: use dashed border style for "coming soon" features
+  - Footer with absolute positioning and paddingBottom: 32 for safe area on iOS
+---
