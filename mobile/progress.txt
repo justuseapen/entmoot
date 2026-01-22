@@ -388,3 +388,20 @@
   - Goals can be filtered by status: useGoals({ status: "in_progress" })
   - useGoals returns Goal[] (not paginated) from /families/:id/goals endpoint
 ---
+
+## 2026-01-21 - US-022
+- What was implemented: Built End-of-Day Reflection Prompt with banner and modal
+- Files changed:
+  - src/components/EveningReflectionBanner.tsx (new - banner and reflection modal)
+  - src/components/index.ts (export new component and helper functions)
+  - app/(tabs)/today.tsx (integrated EveningReflectionBanner)
+- **Learnings for future iterations:**
+  - Use BottomSheetScrollView for modals with forms to ensure content is scrollable
+  - isEveningTime() and needsEveningReflection() helper functions exported for reuse
+  - Mood selector: 5 emoji options (great, good, okay, difficult, rough) stored as mood ID
+  - Mood can be prepended to shutdown_shipped text for visual display
+  - Banner visibility: show after 6 PM (hour >= 18) AND shutdown_shipped is empty
+  - Session-based dismiss: use useState (not persisted) so banner returns next session
+  - DailyPlan already has shutdown_shipped and shutdown_blocked fields - no type changes needed
+  - Haptics.notificationAsync for success feedback on save
+---
