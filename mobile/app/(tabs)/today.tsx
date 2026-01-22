@@ -27,6 +27,7 @@ import {
   useTodayPlan,
   useUpdateDailyPlan,
   TopPriority,
+  HabitCompletion,
 } from "@/hooks/useDailyPlan";
 import { useAuthStore } from "@/stores/auth";
 
@@ -442,6 +443,177 @@ function TopPrioritiesSection({
 }
 
 // ============================================================================
+// Habit Item Component
+// ============================================================================
+
+interface HabitItemProps {
+  habitCompletion: HabitCompletion;
+  onToggleComplete: (id: number, completed: boolean) => void;
+  streak?: number; // Future: will be populated when backend supports it
+}
+
+function HabitItem({ habitCompletion, onToggleComplete, streak }: HabitItemProps) {
+  const handleToggle = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onToggleComplete(habitCompletion.id, !habitCompletion.completed);
+  };
+
+  return (
+    <View style={styles.habitItem}>
+      {/* Checkbox */}
+      <TouchableOpacity
+        style={[
+          styles.checkbox,
+          habitCompletion.completed && styles.checkboxCompleted,
+        ]}
+        onPress={handleToggle}
+        activeOpacity={0.7}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        {habitCompletion.completed && (
+          <Ionicons name="checkmark" size={16} color={COLORS.textOnPrimary} />
+        )}
+      </TouchableOpacity>
+
+      {/* Habit content */}
+      <View style={styles.habitContent}>
+        <Text
+          style={[
+            styles.habitName,
+            habitCompletion.completed && styles.habitNameCompleted,
+          ]}
+          numberOfLines={2}
+        >
+          {habitCompletion.habit.name}
+        </Text>
+      </View>
+
+      {/* Streak badge (only shown if streak > 0) */}
+      {streak !== undefined && streak > 0 && (
+        <View style={styles.streakBadge}>
+          <Ionicons name="flame" size={14} color={COLORS.warning} />
+          <Text style={styles.streakText}>{streak}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ============================================================================
+// Habits Section Component (Non-Negotiables)
+// ============================================================================
+
+interface HabitsSectionProps {
+  habitCompletions: HabitCompletion[];
+  dailyPlanId: number;
+  isLoading?: boolean;
+}
+
+function HabitsSection({
+  habitCompletions,
+  dailyPlanId,
+  isLoading = false,
+}: HabitsSectionProps) {
+  const updateDailyPlan = useUpdateDailyPlan();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sort habits by position
+  const sortedHabits = [...habitCompletions].sort(
+    (a, b) => a.habit.position - b.habit.position
+  );
+
+  const handleToggleComplete = async (id: number, completed: boolean) => {
+    setIsSaving(true);
+    try {
+      await updateDailyPlan.mutateAsync({
+        planId: dailyPlanId,
+        payload: {
+          daily_plan: {
+            habit_completions_attributes: [{ id, completed }],
+          },
+        },
+      });
+    } catch (error) {
+      // Error handling - optimistic update will rollback automatically
+      console.error("Failed to update habit:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Count completed habits
+  const completedCount = sortedHabits.filter((h) => h.completed).length;
+  const totalCount = sortedHabits.length;
+
+  // Loading skeleton state
+  if (isLoading) {
+    return (
+      <View style={styles.habitsSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Non-Negotiables</Text>
+        </View>
+        <View style={styles.skeletonHabitList}>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={styles.skeletonHabitItem}>
+              <View style={styles.skeletonCheckbox} />
+              <View style={styles.skeletonHabitText} />
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  // Don't render if no habits
+  if (sortedHabits.length === 0) {
+    return (
+      <View style={styles.habitsSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Non-Negotiables</Text>
+        </View>
+        <View style={styles.emptyHabits}>
+          <Text style={styles.emptyText}>No habits set up yet</Text>
+          <Text style={styles.emptySubtext}>
+            Add habits in Settings to track your daily non-negotiables
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.habitsSection}>
+      {/* Section header */}
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Non-Negotiables</Text>
+          {isSaving && (
+            <View style={styles.savingIndicator}>
+              <ActivityIndicator size="small" color={COLORS.textSecondary} />
+            </View>
+          )}
+        </View>
+        <Text style={styles.sectionSubtitle}>
+          {completedCount}/{totalCount} completed
+        </Text>
+      </View>
+
+      {/* Habits list */}
+      <View style={styles.habitList}>
+        {sortedHabits.map((habitCompletion) => (
+          <HabitItem
+            key={habitCompletion.id}
+            habitCompletion={habitCompletion}
+            onToggleComplete={handleToggleComplete}
+            // streak will be undefined until backend supports it
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// ============================================================================
 // Completion Badge Component
 // ============================================================================
 
@@ -586,7 +758,14 @@ export default function TodayScreen() {
             onAddPriorityPress={handleAddPriorityPress}
           />
 
-          {/* Placeholder for future sections */}
+          {/* Non-Negotiables (Habits) Section */}
+          <HabitsSection
+            habitCompletions={dailyPlan?.habit_completions ?? []}
+            dailyPlanId={dailyPlan?.id ?? 0}
+            isLoading={isLoading}
+          />
+
+          {/* Placeholder for future sections (Tasks, etc.) */}
           <View style={styles.placeholderSection}>
             <Text style={styles.placeholderText}>
               More sections coming soon...
@@ -900,6 +1079,80 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   skeletonPriorityText: {
+    flex: 1,
+    height: 18,
+    backgroundColor: COLORS.surface,
+    borderRadius: 4,
+  },
+
+  // Habits (Non-Negotiables) section
+  habitsSection: {
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.surface,
+  },
+  habitList: {
+    gap: 4,
+  },
+  habitItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    backgroundColor: COLORS.background,
+  },
+  habitContent: {
+    flex: 1,
+  },
+  habitName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  habitNameCompleted: {
+    color: COLORS.textSecondary,
+    textDecorationLine: "line-through",
+  },
+
+  // Streak badge
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: COLORS.warning + "15",
+    borderRadius: 12,
+  },
+  streakText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.warning,
+  },
+
+  // Empty habits state
+  emptyHabits: {
+    paddingVertical: 24,
+    alignItems: "center",
+  },
+  emptySubtext: {
+    fontSize: 12,
+    color: COLORS.textTertiary,
+    marginTop: 4,
+    textAlign: "center",
+  },
+
+  // Skeleton for habits
+  skeletonHabitList: {
+    gap: 12,
+  },
+  skeletonHabitItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  skeletonHabitText: {
     flex: 1,
     height: 18,
     backgroundColor: COLORS.surface,
