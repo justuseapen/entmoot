@@ -452,3 +452,21 @@
   - Cache invalidation: invalidateQueries({ queryKey: goalsKeys.all }) refreshes all goal lists
   - setQueryData for direct cache updates on single goal detail after update
 ---
+
+## 2026-01-21 - US-026
+- What was implemented: Built Goals List Screen with filter tabs and goal cards
+- Files changed:
+  - app/(tabs)/goals.tsx (complete rewrite with filter tabs, goal cards, FAB)
+  - app/_layout.tsx (added goal/create route)
+  - app/goal/create.tsx (created placeholder screen)
+- **Learnings for future iterations:**
+  - FAB from react-native-paper provides ready-to-use floating action button
+  - Use horizontal ScrollView for filter tabs (not FlatList) for simpler horizontal scrolling
+  - STATUS_COLORS and STATUS_LABELS maps provide clean status-to-color/label mappings
+  - statusColor + "20" appends 20% opacity for subtle background colors on badges
+  - Goal card press state uses Pressable with style function: ({ pressed }) => [styles.card, pressed && styles.pressed]
+  - Empty state should include action button to create first item (better UX than FAB alone)
+  - FlatList with contentContainerStyle paddingBottom: 100 prevents FAB overlap
+  - SafeAreaView edges={["top"]} for screens with custom headers
+  - Create placeholder screen when FAB navigates to unimplemented feature (prevents navigation errors)
+---
