@@ -243,8 +243,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - Family setup screen with select mode (cards), create mode, and join mode. Uses expo-localization getCalendars() for auto timezone detection."
     },
     {
       "id": "US-014",
@@ -261,8 +261,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed - FirstGoalPrompt.tsx modal with useFirstGoalPrompt hook, selectable suggestion cards, custom goal input, create and dismiss functionality"
     },
     {
       "id": "US-015",

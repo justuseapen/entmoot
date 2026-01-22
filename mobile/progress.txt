@@ -240,3 +240,35 @@
   - router.push is correct for onboarding → family-setup navigation (not replace)
   - SafeAreaView needed for proper spacing on devices with notch
 ---
+
+## 2026-01-21 - US-013
+- What was implemented: Built family setup screen with create/join family options
+- Files changed:
+  - package.json (added expo-localization)
+  - app.json (added expo-localization plugin)
+  - app/onboarding/family-setup.tsx (created - full implementation)
+- **Learnings for future iterations:**
+  - expo-localization uses getCalendars()[0].timeZone for timezone detection (not Localization.timezone)
+  - PressableCard from @/components/ui is perfect for selectable option cards
+  - Use mode state pattern ("select" | "create" | "join") for multi-step forms with back navigation
+  - api.post<T> from @/lib/api handles auth automatically and returns typed response
+  - setCurrentFamily(id) from authStore persists to SecureStore and updates zustand state
+  - router.replace('/(tabs)/today') for navigation after family setup (no back option)
+---
+
+## 2026-01-21 - US-014
+- What was implemented: Built First Goal Prompt modal component for new user onboarding
+- Files changed:
+  - src/components/FirstGoalPrompt.tsx (created - modal component with suggestion cards)
+  - app/(tabs)/today.tsx (integrated FirstGoalPrompt with eligibility check)
+- **Learnings for future iterations:**
+  - Use Modal with presentationStyle="pageSheet" for native iOS sheet-style modals
+  - Create companion hook (useFirstGoalPrompt) alongside modal component for eligibility checking
+  - PressableCard variant="elevated" with custom borderColor for selected state looks good
+  - Radio-style selection UI: radioCircle with inner filled circle on selection
+  - Custom goal mode: switch from suggestions to TextInput with back navigation
+  - KeyboardAvoidingView with behavior="padding" on iOS for forms in modals
+  - Default suggestions as fallback when API doesn't return suggestions or errors
+  - isCustomMode state pattern for toggling between selection and input modes
+  - API endpoints: GET /users/me/first_goal_prompt (eligibility), POST /users/me/first_goal_prompt/dismiss (dismiss)
+---
