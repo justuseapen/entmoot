@@ -188,6 +188,10 @@ export default function RootLayout() {
               name="reflection/weekly"
               options={{ title: "Weekly Review" }}
             />
+            <Stack.Screen
+              name="settings/profile"
+              options={{ title: "Edit Profile" }}
+            />
           </Stack>
         </AuthGuard>
       </SafeAreaProvider>
