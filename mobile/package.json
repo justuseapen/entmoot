@@ -28,6 +28,7 @@
     "expo-device": "~7.0.3",
     "expo-linking": "~8.0.11",
     "expo-local-authentication": "~17.0.8",
+    "expo-localization": "~17.0.8",
     "expo-notifications": "~0.31.2",
     "expo-router": "~6.0.22",
     "expo-secure-store": "~15.0.8",

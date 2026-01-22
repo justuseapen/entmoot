@@ -53,7 +53,8 @@
           "defaultChannel": "default"
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-localization"
     ]
   }
 }
