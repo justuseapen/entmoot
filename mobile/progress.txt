@@ -556,3 +556,22 @@
   - Prettier requires JSX text with apostrophes to use {"What's on your mind?"} syntax
   - Stack.Screen route must be added to app/_layout.tsx for new screens outside tabs
 ---
+
+## 2026-01-22 - US-032
+- What was implemented: Built Weekly Review screen with data layer and full UI
+- Files changed:
+  - src/hooks/useWeeklyReviews.ts (new - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new weekly review hooks and types)
+  - app/reflection/weekly.tsx (new - complete Weekly Review screen)
+  - app/_layout.tsx (added reflection/weekly route)
+- **Learnings for future iterations:**
+  - Weekly Review API endpoint: GET /families/:id/weekly_reviews/current returns or creates current week's review
+  - WeeklyReview type has many fields: legacy arrays (wins, challenges), review section (wins_shipped, losses_friction), metrics section, system health fields, forward setup fields
+  - API response includes computed metrics and habit_tally when include_metrics: true
+  - Auto-save pattern: use debounce timers with useRef<Record<string, NodeJS.Timeout>>, save on onChangeText (debounced) AND onBlur (immediate)
+  - Fix cleanup effect ref warning: assign debounceTimers.current to local variable inside effect, use that in cleanup
+  - MetricsCard component displays task_completion, goal_progress, and habit_tally from weekly review
+  - HabitTally is Record<string, number> mapping habit name to completion count
+  - Format date range using date-fns: parseISO for week_start_date, add 6 days for end date
+  - Keep saving indicator per-field with savingField state, show ActivityIndicator next to section title
+---
