@@ -1,0 +1,43 @@
+{$DOMAIN:staging.entmoot.app} {
+    # Enable compression
+    encode gzip zstd
+
+    # API requests -> Rails backend (staging)
+    handle /api/* {
+        reverse_proxy web_staging:3000
+    }
+
+    # ActionCable WebSocket connections
+    handle /cable {
+        reverse_proxy web_staging:3000
+    }
+
+    # Health check endpoint
+    handle /health {
+        reverse_proxy web_staging:3000
+    }
+
+    # Serve frontend static files
+    handle {
+        root * /srv/frontend
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Environment "staging"
+        -Server
+    }
+
+    # Logging (more verbose for staging)
+    log {
+        output stdout
+        format console
+        level DEBUG
+    }
+}
