@@ -290,3 +290,17 @@
   - Use Date.now() as temporary ID for optimistic new items (server will replace with real ID)
   - useAuthStore((state) => state.currentFamilyId) for accessing family ID in hooks
 ---
+
+## 2026-01-21 - US-016
+- What was implemented: Built Today Screen Header with date, greeting, and completion stats
+- Files changed:
+  - package.json (added date-fns)
+  - app/(tabs)/today.tsx (complete rewrite with header section)
+- **Learnings for future iterations:**
+  - date-fns format() with "EEEE, MMMM d" gives "Wednesday, January 22" format
+  - Use SafeAreaView edges={["top"]} for screens with custom headers (not system header)
+  - RefreshControl: use refreshing={isFetching && !isLoading} to avoid showing spinner on initial load
+  - Skeleton components: simple Views with backgroundColor matching COLORS.surface look good
+  - CompletionStats from daily plan has tasks_total, tasks_completed, priorities_total, priorities_completed, habits_total, habits_completed
+  - User name available via useAuthStore((state) => state.user?.name)
+---
