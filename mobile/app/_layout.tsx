@@ -347,6 +347,10 @@ export default function RootLayout() {
                 name="settings/family"
                 options={{ title: "Family" }}
               />
+              <Stack.Screen
+                name="settings/notifications"
+                options={{ title: "Notifications" }}
+              />
             </Stack>
           </NotificationHandler>
         </AuthGuard>
