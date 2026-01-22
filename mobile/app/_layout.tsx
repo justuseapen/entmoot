@@ -176,6 +176,10 @@ export default function RootLayout() {
               name="goal/[id]"
               options={{ title: "Goal Details" }}
             />
+            <Stack.Screen
+              name="goal/create"
+              options={{ title: "Create Goal" }}
+            />
           </Stack>
         </AuthGuard>
       </SafeAreaProvider>
