@@ -180,6 +180,10 @@ export default function RootLayout() {
               name="goal/create"
               options={{ title: "Create Goal" }}
             />
+            <Stack.Screen
+              name="reflection/quick"
+              options={{ title: "Quick Reflection" }}
+            />
           </Stack>
         </AuthGuard>
       </SafeAreaProvider>
