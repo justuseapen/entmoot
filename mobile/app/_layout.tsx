@@ -6,10 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { useAuthStore } from "@/stores";
 import { COLORS, paperThemeColors } from "@/theme/colors";
-import {
-  authenticate,
-  shouldPromptBiometric,
-} from "@/services/biometrics";
+import { authenticate, shouldPromptBiometric } from "@/services/biometrics";
 import { getItem, STORAGE_KEYS } from "@/services/secureStorage";
 
 // Configure React Native Paper theme
@@ -120,7 +117,14 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       // Redirect to main tabs if authenticated and in auth group
       router.replace("/(tabs)/today");
     }
-  }, [isAuthenticated, isInitialized, isLoading, biometricLocked, segments, router]);
+  }, [
+    isAuthenticated,
+    isInitialized,
+    isLoading,
+    biometricLocked,
+    segments,
+    router,
+  ]);
 
   // Show loading screen while initializing auth state or during biometric check
   if (!isInitialized || isLoading || biometricLocked) {
@@ -163,6 +167,10 @@ export default function RootLayout() {
             <Stack.Screen
               name="settings/index"
               options={{ title: "Settings" }}
+            />
+            <Stack.Screen
+              name="settings/habits"
+              options={{ title: "Manage Habits" }}
             />
             <Stack.Screen
               name="goal/[id]"
