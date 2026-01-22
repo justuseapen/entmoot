@@ -504,3 +504,21 @@
   - Refine with AI button placeholder: use dashed border style for "coming soon" features
   - Footer with absolute positioning and paddingBottom: 32 for safe area on iOS
 ---
+
+## 2026-01-22 - US-029
+- What was implemented: Built AI Goal Refinement feature with full modal and integration
+- Files changed:
+  - src/components/AIRefinementModal.tsx (new - modal with loading, error, suggestions display)
+  - src/components/index.ts (export AIRefinementModal)
+  - app/goal/[id].tsx (integrated Refine with AI button and modal)
+  - app/goal/create.tsx (integrated "Create & Refine with AI" flow)
+- **Learnings for future iterations:**
+  - Backend refine endpoint requires an existing goal (POST /families/:id/goals/:id/refine)
+  - For create screen, use "Create & Refine" flow: create goal first, then refine, then navigate to detail
+  - SmartSuggestions type has `string | null` while UpdateGoalPayload expects `string | undefined` - convert null to undefined when applying
+  - BottomSheet with BottomSheetScrollView for scrollable modal content
+  - Accept/reject pattern: use Set<keyof SmartSuggestions> to track which fields are accepted
+  - useEffect with visible + suggestions dependencies to reset acceptedFields when modal opens with new data
+  - GoalRefinementResponse.suggestions includes: smart_suggestions, alternative_titles, alternative_descriptions, potential_obstacles, milestones, overall_feedback
+  - Import Ionicons icons carefully - "bullseye-outline" may not exist, check @expo/vector-icons docs
+---
