@@ -926,3 +926,24 @@
   - BadgeDetailModal: spring animation for scale entrance, category badge with color from BADGE_CATEGORIES config
   - Import useUserBadges, Badge, UserBadgesResponse from @/hooks; BadgeGrid, BadgeRow from @/components
 ---
+
+## 2026-01-22 - US-051
+- What was implemented: Created Achievement Celebration Modal with confetti animation for badges, streaks, and goal completions
+- Files changed:
+  - package.json (added react-native-confetti-cannon)
+  - src/components/AchievementModal.tsx (new - complete modal with confetti, animations, hook)
+  - src/components/index.ts (export new component and helpers)
+  - app/_layout.tsx (integrated AchievementModal into NotificationHandler)
+- **Learnings for future iterations:**
+  - react-native-confetti-cannon: use ref.start() to manually trigger confetti, autoStart={false} for controlled start
+  - ConfettiCannon props: count (number of confetti), origin (start point), fadeOut, explosionSpeed, fallSpeed, colors array
+  - Achievement queue pattern: use queueRef to store pending achievements when one is already showing
+  - Animated.sequence for staged entrance: opacity fade → scale spring → icon bounce → points slide up
+  - AchievementType enum: "badge_earned", "streak_milestone", "goal_completed" for different celebration styles
+  - getCelebrationColor/getCelebrationTitle helpers for type-based styling
+  - useAchievementCelebration hook provides: visible, achievement, handleDismiss, celebrateBadgeEarned, celebrateGoalCompleted, checkStreakMilestone
+  - Global listeners pattern: achievementListeners Set<Function> for triggering celebrations from anywhere via triggerAchievementCelebration()
+  - Helper functions: createBadgeAchievement, createStreakMilestoneAchievement, createGoalCompletedAchievement for creating Achievement objects
+  - Heavy haptic feedback on celebration (Haptics.notificationAsync Success), heavy impact on dismiss
+  - Import AchievementModal, useAchievementCelebration, triggerAchievementCelebration, create*Achievement from @/components
+---
