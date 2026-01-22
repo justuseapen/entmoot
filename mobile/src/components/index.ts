@@ -6,4 +6,11 @@ export {
   needsEveningReflection,
 } from "./EveningReflectionBanner";
 export { AIRefinementModal } from "./AIRefinementModal";
+export {
+  InAppNotificationBanner,
+  parseNotificationPayload,
+  getNotificationRoute,
+  type NotificationPayload,
+  type NotificationType,
+} from "./InAppNotificationBanner";
 export * from "./ui";
