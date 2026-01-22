@@ -609,3 +609,23 @@
   - App version: Hardcode from app.json or use Constants.manifest?.version from expo-constants
   - Header pattern: View with back button, centered title, and spacer for balance
 ---
+
+## 2026-01-22 - US-035
+- What was implemented: Built complete Edit Profile Screen with avatar selection and name editing
+- Files changed:
+  - package.json (added expo-image-picker)
+  - app/settings/profile.tsx (created - full profile editing UI)
+  - app/_layout.tsx (added settings/profile route)
+- **Learnings for future iterations:**
+  - expo-image-picker requires --legacy-peer-deps due to React 19 peer dependency conflicts
+  - ImagePicker.launchCameraAsync and launchImageLibraryAsync use mediaTypes: ["images"] (array, not MediaTypeOptions enum)
+  - Permission handling: requestCameraPermissionsAsync() and requestMediaLibraryPermissionsAsync() return { status } object
+  - ActionSheetIOS.showActionSheetWithOptions for iOS native action sheet (camera/library choice)
+  - Alert.alert for Android equivalent action sheet functionality
+  - Linking.openURL("app-settings:") opens iOS Settings for permission management
+  - Profile API: PATCH /api/v1/users/me/profile accepts { name, avatar_url } - avatar_url must be a URL string (not file://)
+  - useAuthStore.setState({ user: response.user }) for direct state update after profile change
+  - Define pickImage before handleAvatarPress to satisfy React Hook dependency warnings
+  - Avatar placeholder: use user initials when avatar_url is null (same pattern as Me tab)
+  - Read-only email display with disabled opacity (0.7) and hint text for UX clarity
+---
