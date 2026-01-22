@@ -470,3 +470,20 @@
   - SafeAreaView edges={["top"]} for screens with custom headers
   - Create placeholder screen when FAB navigates to unimplemented feature (prevents navigation errors)
 ---
+
+## 2026-01-22 - US-027
+- What was implemented: Built complete Goal Detail Screen with all features
+- Files changed:
+  - app/goal/[id].tsx (complete rewrite with all sections)
+- **Learnings for future iterations:**
+  - @react-native-community/slider already installed - use Slider component for progress control
+  - Progress slider: use onValueChange for local state, onSlidingComplete for API call (avoids excessive requests)
+  - Status picker: custom expandable dropdown (TouchableOpacity + View list) rather than using library picker
+  - SMART breakdown: only show section if any of the 5 SMART fields are populated (check with .some())
+  - Avoid using "children" as a prop name - ESLint error: "Do not pass children as props" - use childGoals instead
+  - Prettier auto-fixes inline style arrays when they exceed line length - no manual formatting needed
+  - useGoal hook fetches single goal detail with full SMART fields, children, and assignees
+  - useUpdateGoal and useDeleteGoal mutations handle optimistic updates and cache invalidation
+  - Delete confirmation: Alert.alert with destructive style button + haptic warning feedback
+  - Edit navigates to /goal/edit/${goalId} (placeholder route for next story)
+---
