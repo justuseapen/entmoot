@@ -869,3 +869,20 @@
   - useMutation for connect/disconnect operations with cache invalidation on success
   - Import useGoogleCalendarConnection, useFetchAuthUrl, useDisconnectGoogleCalendar, useConnectGoogleCalendar from @/hooks
 ---
+
+## 2026-01-22 - US-048
+- What was implemented: Created reusable streaks data layer and components
+- Files changed:
+  - src/hooks/useStreaks.ts (new - useStreaks, useStreak hooks, streak types and utilities)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/StreakCard.tsx (new - StreakCard and StreakCardsRow components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared streak components)
+- **Learnings for future iterations:**
+  - Me tab already had inline implementations of useStreaks, StreakCard, StreaksSection - extracted to reusable modules
+  - STREAK_MILESTONES array exported for reuse: [7, 14, 30, 60, 90, 180, 365]
+  - STREAK_CONFIG provides label, icon, description per streak_type (daily_planning, evening_reflection, weekly_review)
+  - isStreakMilestone(count) utility checks if count is a milestone
+  - StreakCardsRow handles loading state and empty state internally
+  - Import useStreaks, Streak from @/hooks; StreakCard, StreakCardsRow from @/components
+---
