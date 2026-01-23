@@ -33,7 +33,10 @@ Rails.application.routes.draw do
         resources :memberships, only: %i[index update destroy]
         resources :pets, only: %i[index show create update destroy]
         resources :goals, only: %i[index show create update destroy] do
-          post "refine", on: :member
+          member do
+            post "refine"
+            post "regenerate_sub_goals"
+          end
         end
         resource :goal_import, only: [:create] do
           get :status, on: :member

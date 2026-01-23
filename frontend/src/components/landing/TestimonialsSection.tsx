@@ -44,17 +44,52 @@ function BenefitItem({
 // Decorative tree ring element
 function TreeRing({ className = "" }: { className?: string }) {
   return (
-    <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
+    <div
+      className={`pointer-events-none select-none ${className}`}
+      aria-hidden="true"
+    >
       <svg
         viewBox="0 0 100 100"
         fill="none"
         className="h-full w-full"
         style={{ color: HERITAGE_COLORS.antiqueBrass }}
       >
-        <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2" />
-        <circle cx="50" cy="50" r="35" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.15" />
-        <circle cx="50" cy="50" r="25" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.1" />
-        <circle cx="50" cy="50" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.05" />
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          opacity="0.2"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="35"
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          opacity="0.15"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="25"
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          opacity="0.1"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="15"
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          opacity="0.05"
+        />
       </svg>
     </div>
   );
@@ -88,14 +123,14 @@ export function TestimonialsSection() {
       style={{ backgroundColor: HERITAGE_COLORS.cream }}
     >
       {/* Decorative tree rings */}
-      <TreeRing className="absolute -left-12 top-1/4 h-48 w-48 opacity-50" />
+      <TreeRing className="absolute top-1/4 -left-12 h-48 w-48 opacity-50" />
       <TreeRing className="absolute -right-8 bottom-1/4 h-32 w-32 opacity-30" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="mx-auto mb-12 max-w-2xl text-center lg:mb-16">
           <p
-            className="mb-3 text-sm font-medium uppercase tracking-wider"
+            className="mb-3 text-sm font-medium tracking-wider uppercase"
             style={{ color: HERITAGE_COLORS.antiqueGold }}
           >
             Be Part of Something Special
@@ -113,9 +148,9 @@ export function TestimonialsSection() {
             className="text-lg leading-relaxed"
             style={{ color: HERITAGE_COLORS.sepia }}
           >
-            Every great product starts with believers. As a Founding Family, you'll
-            help us build the family planning platform you've always wanted—and
-            your story could inspire thousands of families to come.
+            Every great product starts with believers. As a Founding Family,
+            you'll help us build the family planning platform you've always
+            wanted—and your story could inspire thousands of families to come.
           </p>
         </div>
 
@@ -150,9 +185,9 @@ export function TestimonialsSection() {
             className="mb-6 text-base leading-relaxed"
             style={{ color: HERITAGE_COLORS.sepia }}
           >
-            Join the founding families who are building intentional family cultures.
-            Share your journey, and your testimonial could help another family
-            transform their daily chaos into lasting memories.
+            Join the founding families who are building intentional family
+            cultures. Share your journey, and your testimonial could help
+            another family transform their daily chaos into lasting memories.
           </p>
 
           <Button

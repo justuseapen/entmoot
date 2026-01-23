@@ -15,7 +15,9 @@ export function NewsletterSignup({
   location = "footer",
 }: NewsletterSignupProps) {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +64,7 @@ export function NewsletterSignup({
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-grow">
           <Mail
-            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
+            className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
             style={{ color: HERITAGE_COLORS.sepia }}
           />
           <Input
@@ -122,7 +124,10 @@ export function NewsletterSignup({
           className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
           style={{ backgroundColor: `${HERITAGE_COLORS.antiqueGold}20` }}
         >
-          <Mail className="h-6 w-6" style={{ color: HERITAGE_COLORS.deepForest }} />
+          <Mail
+            className="h-6 w-6"
+            style={{ color: HERITAGE_COLORS.deepForest }}
+          />
         </div>
         <h3
           className="mb-2 text-xl font-semibold"
@@ -134,14 +139,15 @@ export function NewsletterSignup({
           Family Planning Tips & Updates
         </h3>
         <p className="text-sm" style={{ color: HERITAGE_COLORS.sepia }}>
-          Get weekly insights on intentional family living. No spam, unsubscribe anytime.
+          Get weekly insights on intentional family living. No spam, unsubscribe
+          anytime.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <Mail
-            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2"
+            className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
             style={{ color: HERITAGE_COLORS.sepia }}
           />
           <Input

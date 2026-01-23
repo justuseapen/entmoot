@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateGoal, useGoal } from "@/hooks/useGoals";
+import {
+  useUpdateGoal,
+  useGoal,
+  useRegenerateSubGoals,
+} from "@/hooks/useGoals";
 import {
   type Goal,
   type GoalUser,
@@ -98,9 +103,22 @@ export function GoalDetailView({
 }: GoalDetailViewProps) {
   const { data: goal, isLoading, error } = useGoal(familyId, goalId);
   const updateGoal = useUpdateGoal(familyId, goalId);
+  const regenerateSubGoals = useRegenerateSubGoals(familyId, goalId);
   const [localProgress, setLocalProgress] = useState<number | null>(null);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  const canRegenerateSubGoals =
+    goal && ["annual", "quarterly"].includes(goal.time_scale);
+
+  const handleRegenerateSubGoals = async () => {
+    try {
+      const result = await regenerateSubGoals.mutateAsync();
+      toast.success(result.message);
+    } catch {
+      toast.error("Failed to start sub-goal generation. Please try again.");
+    }
+  };
 
   if (!open) return null;
 
@@ -437,6 +455,28 @@ export function GoalDetailView({
             </div>
 
             <DialogFooter className="gap-2">
+              {canManage && canRegenerateSubGoals && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={handleRegenerateSubGoals}
+                  disabled={regenerateSubGoals.isPending}
+                >
+                  {regenerateSubGoals.isPending ? (
+                    <>
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <span>🎯</span>
+                      {goal.children_count > 0
+                        ? "Regenerate Sub-Goals"
+                        : "Generate Sub-Goals"}
+                    </>
+                  )}
+                </Button>
+              )}
               {canManage && onRefineWithAI && (
                 <Button
                   variant="outline"

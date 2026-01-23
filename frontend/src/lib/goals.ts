@@ -31,6 +31,11 @@ export interface Goal {
   achievable?: string | null;
   relevant?: string | null;
   time_bound?: string | null;
+  // Sub-goal related fields
+  is_draft: boolean;
+  children_count: number;
+  draft_children_count: number;
+  aggregated_progress: number;
 }
 
 // Enums
@@ -59,6 +64,7 @@ export interface CreateGoalData {
   due_date?: string;
   parent_id?: number | null;
   assignee_ids?: number[];
+  generate_sub_goals?: boolean; // Set to false to opt out of auto-generation for annual/quarterly goals
 }
 
 export interface UpdateGoalData {
@@ -76,6 +82,7 @@ export interface UpdateGoalData {
   due_date?: string;
   parent_id?: number | null;
   assignee_ids?: number[];
+  is_draft?: boolean; // Set to false to accept a draft goal
 }
 
 // Filter params for listing goals
@@ -301,3 +308,21 @@ export const smartFieldDescriptions: Record<keyof SmartSuggestions, string> = {
   relevant: "Why does this goal matter?",
   time_bound: "When will you achieve this?",
 };
+
+// Sub-goal regeneration API
+export interface RegenerateSubGoalsResponse {
+  message: string;
+  goal: Goal;
+}
+
+export async function regenerateSubGoals(
+  familyId: number,
+  goalId: number
+): Promise<RegenerateSubGoalsResponse> {
+  return apiFetch<RegenerateSubGoalsResponse>(
+    `/families/${familyId}/goals/${goalId}/regenerate_sub_goals`,
+    {
+      method: "POST",
+    }
+  );
+}

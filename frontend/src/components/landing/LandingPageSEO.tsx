@@ -129,7 +129,10 @@ export function LandingPageSEO() {
       />
 
       {/* Pricing specific meta */}
-      <meta name="product:price:amount" content={FOUNDING_FAMILY_PRICE.toString()} />
+      <meta
+        name="product:price:amount"
+        content={FOUNDING_FAMILY_PRICE.toString()}
+      />
       <meta name="product:price:currency" content="USD" />
 
       {/* JSON-LD Structured Data */}

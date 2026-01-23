@@ -15,11 +15,7 @@ export function Terms() {
       >
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/logo-medallion.svg"
-              alt="Entmoot"
-              className="h-8 w-8"
-            />
+            <img src="/logo-medallion.svg" alt="Entmoot" className="h-8 w-8" />
             <span
               className="text-xl font-bold"
               style={{
@@ -49,10 +45,7 @@ export function Terms() {
         >
           Terms of Service
         </h1>
-        <p
-          className="mb-8 text-sm"
-          style={{ color: HERITAGE_COLORS.sepia }}
-        >
+        <p className="mb-8 text-sm" style={{ color: HERITAGE_COLORS.sepia }}>
           Last updated: January 2026
         </p>
 

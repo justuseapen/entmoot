@@ -43,10 +43,7 @@ export function SocialProofBar() {
               >
                 Justus Eapen
               </p>
-              <p
-                className="text-sm"
-                style={{ color: HERITAGE_COLORS.sepia }}
-              >
+              <p className="text-sm" style={{ color: HERITAGE_COLORS.sepia }}>
                 Founder, Dad of 2
               </p>
             </div>

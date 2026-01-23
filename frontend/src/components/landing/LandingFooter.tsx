@@ -11,14 +11,56 @@ function MedallionLogo({ className = "" }: { className?: string }) {
       className={className}
       style={{ color: HERITAGE_COLORS.sageGreen }}
     >
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="1.5" fill="none" />
-      <circle cx="20" cy="20" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
-      <path d="M20 32 L20 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M20 22 Q14 18 10 12" stroke="currentColor" strokeWidth="1" fill="none" />
-      <path d="M20 22 Q26 18 30 12" stroke="currentColor" strokeWidth="1" fill="none" />
+      <circle
+        cx="20"
+        cy="20"
+        r="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <circle
+        cx="20"
+        cy="20"
+        r="15"
+        stroke="currentColor"
+        strokeWidth="0.5"
+        fill="none"
+        opacity="0.5"
+      />
+      <path
+        d="M20 32 L20 22"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M20 22 Q14 18 10 12"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+      />
+      <path
+        d="M20 22 Q26 18 30 12"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+      />
       <path d="M20 22 L20 10" stroke="currentColor" strokeWidth="1" />
-      <path d="M20 32 Q14 34 10 36" stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.6" />
-      <path d="M20 32 Q26 34 30 36" stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.6" />
+      <path
+        d="M20 32 Q14 34 10 36"
+        stroke="currentColor"
+        strokeWidth="0.75"
+        fill="none"
+        opacity="0.6"
+      />
+      <path
+        d="M20 32 Q26 34 30 36"
+        stroke="currentColor"
+        strokeWidth="0.75"
+        fill="none"
+        opacity="0.6"
+      />
     </svg>
   );
 }
@@ -79,7 +121,7 @@ function FooterColumn({ title, links }: FooterColumnProps) {
   return (
     <div>
       <h3
-        className="mb-4 text-sm font-semibold uppercase tracking-wider"
+        className="mb-4 text-sm font-semibold tracking-wider uppercase"
         style={{ color: HERITAGE_COLORS.parchment }}
       >
         {title}
@@ -179,7 +221,7 @@ export function LandingFooter() {
           {/* Social column */}
           <div>
             <h3
-              className="mb-4 text-sm font-semibold uppercase tracking-wider"
+              className="mb-4 text-sm font-semibold tracking-wider uppercase"
               style={{ color: HERITAGE_COLORS.parchment }}
             >
               Connect

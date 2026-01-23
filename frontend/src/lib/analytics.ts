@@ -22,7 +22,9 @@ declare global {
 
 // Check if analytics is enabled
 export function isAnalyticsEnabled(): boolean {
-  return Boolean(GA_MEASUREMENT_ID && typeof window !== "undefined" && window.gtag);
+  return Boolean(
+    GA_MEASUREMENT_ID && typeof window !== "undefined" && window.gtag
+  );
 }
 
 // Track page views (called automatically by router, but can be called manually)
@@ -36,11 +38,7 @@ export function trackPageView(url: string, title?: string): void {
 }
 
 // Event tracking types
-type EventCategory =
-  | "engagement"
-  | "conversion"
-  | "navigation"
-  | "error";
+type EventCategory = "engagement" | "conversion" | "navigation" | "error";
 
 interface TrackEventParams {
   action: string;
@@ -138,7 +136,10 @@ export function trackError(errorType: string, errorMessage: string): void {
 }
 
 // Scroll depth tracking (call at 25%, 50%, 75%, 100%)
-export function trackScrollDepth(depth: 25 | 50 | 75 | 100, page: string): void {
+export function trackScrollDepth(
+  depth: 25 | 50 | 75 | 100,
+  page: string
+): void {
   trackEvent({
     action: "scroll_depth",
     category: "engagement",
@@ -148,7 +149,10 @@ export function trackScrollDepth(depth: 25 | 50 | 75 | 100, page: string): void 
 }
 
 // Feature interaction
-export function trackFeatureInteraction(featureName: string, action: string): void {
+export function trackFeatureInteraction(
+  featureName: string,
+  action: string
+): void {
   trackEvent({
     action: "feature_interaction",
     category: "engagement",

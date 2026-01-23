@@ -9,7 +9,10 @@ import {
 // Tree of Life decorative element - elegant botanical style
 function TreeOfLifeDecoration({ className = "" }: { className?: string }) {
   return (
-    <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
+    <div
+      className={`pointer-events-none select-none ${className}`}
+      aria-hidden="true"
+    >
       <svg
         viewBox="0 0 200 240"
         fill="none"
@@ -106,7 +109,13 @@ function TreeOfLifeDecoration({ className = "" }: { className?: string }) {
 }
 
 // Decorative leaf/branch accent
-function BranchAccent({ className = "", flip = false }: { className?: string; flip?: boolean }) {
+function BranchAccent({
+  className = "",
+  flip = false,
+}: {
+  className?: string;
+  flip?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 120 40"
@@ -123,10 +132,42 @@ function BranchAccent({ className = "", flip = false }: { className?: string; fl
         opacity="0.4"
       />
       {/* Small leaves along the branch */}
-      <ellipse cx="30" cy="15" rx="8" ry="4" fill="currentColor" opacity="0.2" transform="rotate(-20 30 15)" />
-      <ellipse cx="50" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.15" transform="rotate(-10 50 18)" />
-      <ellipse cx="70" cy="22" rx="8" ry="4" fill="currentColor" opacity="0.2" transform="rotate(10 70 22)" />
-      <ellipse cx="90" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.15" transform="rotate(20 90 18)" />
+      <ellipse
+        cx="30"
+        cy="15"
+        rx="8"
+        ry="4"
+        fill="currentColor"
+        opacity="0.2"
+        transform="rotate(-20 30 15)"
+      />
+      <ellipse
+        cx="50"
+        cy="18"
+        rx="6"
+        ry="3"
+        fill="currentColor"
+        opacity="0.15"
+        transform="rotate(-10 50 18)"
+      />
+      <ellipse
+        cx="70"
+        cy="22"
+        rx="8"
+        ry="4"
+        fill="currentColor"
+        opacity="0.2"
+        transform="rotate(10 70 22)"
+      />
+      <ellipse
+        cx="90"
+        cy="18"
+        rx="6"
+        ry="3"
+        fill="currentColor"
+        opacity="0.15"
+        transform="rotate(20 90 18)"
+      />
     </svg>
   );
 }
@@ -149,10 +190,10 @@ export function HeroSection() {
       />
 
       {/* Tree of Life background decoration - left */}
-      <TreeOfLifeDecoration className="absolute -left-20 top-1/4 h-96 w-96 opacity-50 lg:opacity-70" />
+      <TreeOfLifeDecoration className="absolute top-1/4 -left-20 h-96 w-96 opacity-50 lg:opacity-70" />
 
       {/* Tree of Life background decoration - right */}
-      <TreeOfLifeDecoration className="absolute -right-20 top-1/3 h-80 w-80 opacity-30 lg:opacity-50" />
+      <TreeOfLifeDecoration className="absolute top-1/3 -right-20 h-80 w-80 opacity-30 lg:opacity-50" />
 
       {/* Main content */}
       <div className="relative z-10 mx-auto flex flex-1 flex-col items-center justify-center px-4 pb-24 text-center sm:px-6 lg:px-8">
@@ -166,7 +207,7 @@ export function HeroSection() {
           }}
         >
           <span
-            className="h-2 w-2 rounded-full animate-pulse"
+            className="h-2 w-2 animate-pulse rounded-full"
             style={{ backgroundColor: HERITAGE_COLORS.antiqueGold }}
           />
           Founding Family Launch
@@ -183,8 +224,7 @@ export function HeroSection() {
             fontFamily: "'Georgia', serif",
           }}
         >
-          Stop Managing Your Family.{" "}
-          <br className="hidden sm:inline" />
+          Stop Managing Your Family. <br className="hidden sm:inline" />
           <span style={{ color: HERITAGE_COLORS.deepForest }}>
             Start Leading Them.
           </span>
@@ -195,9 +235,10 @@ export function HeroSection() {
           className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:text-xl"
           style={{ color: HERITAGE_COLORS.sepia }}
         >
-          Most families plan day-to-day. Yours will plan generation-to-generation.
-          The only goal platform built for families first—connecting your child's
-          daily tasks to your family's greatest dreams.
+          Most families plan day-to-day. Yours will plan
+          generation-to-generation. The only goal platform built for families
+          first—connecting your child's daily tasks to your family's greatest
+          dreams.
         </p>
 
         {/* Price badge */}
@@ -235,9 +276,7 @@ export function HeroSection() {
           className="gap-2 rounded-lg px-10 py-7 text-lg font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
           style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
         >
-          <a href={STRIPE_PAYMENT_LINK}>
-            Claim Your Founding Family Spot
-          </a>
+          <a href={STRIPE_PAYMENT_LINK}>Claim Your Founding Family Spot</a>
         </Button>
 
         {/* Trust indicators */}

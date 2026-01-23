@@ -27,7 +27,12 @@ export function OnboardingWizard() {
     setShowTransition,
   } = useOnboardingStore();
 
-  const { data: status, isLoading: isStatusLoading, isError, error } = useOnboardingStatus();
+  const {
+    data: status,
+    isLoading: isStatusLoading,
+    isError,
+    error,
+  } = useOnboardingStatus();
   const updateStepMutation = useUpdateOnboardingStep();
   const skipStepMutation = useSkipOnboardingStep();
   const autoCompleteMutation = useAutoCompleteOnboarding();
@@ -238,13 +243,13 @@ export function OnboardingWizard() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <span className="text-xl">⚠️</span>
           </div>
-          <p className="text-gray-900 font-medium">Failed to load onboarding</p>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className="font-medium text-gray-900">Failed to load onboarding</p>
+          <p className="mt-1 text-sm text-gray-600">
             {error instanceof Error ? error.message : "Please try again"}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            className="mt-4 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
           >
             Retry
           </button>

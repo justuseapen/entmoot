@@ -19,21 +19,30 @@ export async function getTourPreferences(): Promise<TourPreferencesResponse> {
 }
 
 export async function completeTour(): Promise<TourPreferencesResponse> {
-  return apiFetch<TourPreferencesResponse>("/users/me/tour_preferences/complete", {
-    method: "POST",
-  });
+  return apiFetch<TourPreferencesResponse>(
+    "/users/me/tour_preferences/complete",
+    {
+      method: "POST",
+    }
+  );
 }
 
 export async function dismissTour(): Promise<TourPreferencesResponse> {
-  return apiFetch<TourPreferencesResponse>("/users/me/tour_preferences/dismiss", {
-    method: "POST",
-  });
+  return apiFetch<TourPreferencesResponse>(
+    "/users/me/tour_preferences/dismiss",
+    {
+      method: "POST",
+    }
+  );
 }
 
 export async function restartTour(): Promise<TourPreferencesResponse> {
-  return apiFetch<TourPreferencesResponse>("/users/me/tour_preferences/restart", {
-    method: "POST",
-  });
+  return apiFetch<TourPreferencesResponse>(
+    "/users/me/tour_preferences/restart",
+    {
+      method: "POST",
+    }
+  );
 }
 
 // Tour step definitions

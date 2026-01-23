@@ -32,12 +32,8 @@ function ComparisonCard({
     <div
       className="relative rounded-xl border p-6 sm:p-8"
       style={{
-        backgroundColor: isProblem
-          ? "#FEF2F2"
-          : HERITAGE_COLORS.cream,
-        borderColor: isProblem
-          ? "#FECACA"
-          : `${HERITAGE_COLORS.sageGreen}50`,
+        backgroundColor: isProblem ? "#FEF2F2" : HERITAGE_COLORS.cream,
+        borderColor: isProblem ? "#FECACA" : `${HERITAGE_COLORS.sageGreen}50`,
       }}
     >
       {children}
@@ -98,10 +94,7 @@ export function ProblemSolutionSection() {
           >
             Sound Familiar?
           </h2>
-          <p
-            className="mt-4 text-lg"
-            style={{ color: HERITAGE_COLORS.sepia }}
-          >
+          <p className="mt-4 text-lg" style={{ color: HERITAGE_COLORS.sepia }}>
             Most families struggle with the same challenges
           </p>
         </div>

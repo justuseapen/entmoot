@@ -253,7 +253,7 @@ export function BlogIndex() {
             {/* Header */}
             <div className="mb-12 text-center">
               <p
-                className="mb-3 text-sm font-medium uppercase tracking-wider"
+                className="mb-3 text-sm font-medium tracking-wider uppercase"
                 style={{ color: HERITAGE_COLORS.antiqueGold }}
               >
                 The Entmoot Blog

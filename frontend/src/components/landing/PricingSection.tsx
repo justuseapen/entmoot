@@ -22,8 +22,18 @@ const ltdFeatures = [
 
 // Comparison data
 const comparisonData = [
-  { name: "Cozi Family", cost: PRICE_COMPARISON.coziFamily.annual, tenYear: PRICE_COMPARISON.coziFamily.tenYear, entmoot: PRICE_DISPLAY },
-  { name: "Notion Family", cost: PRICE_COMPARISON.notionFamily.annual, tenYear: PRICE_COMPARISON.notionFamily.tenYear, entmoot: PRICE_DISPLAY },
+  {
+    name: "Cozi Family",
+    cost: PRICE_COMPARISON.coziFamily.annual,
+    tenYear: PRICE_COMPARISON.coziFamily.tenYear,
+    entmoot: PRICE_DISPLAY,
+  },
+  {
+    name: "Notion Family",
+    cost: PRICE_COMPARISON.notionFamily.annual,
+    tenYear: PRICE_COMPARISON.notionFamily.tenYear,
+    entmoot: PRICE_DISPLAY,
+  },
   {
     name: "Todoist Premium",
     cost: PRICE_COMPARISON.todoistPremium.annual,
@@ -33,7 +43,11 @@ const comparisonData = [
 ];
 
 // Decorative corner element
-function CornerAccent({ position }: { position: "top-left" | "top-right" | "bottom-left" | "bottom-right" }) {
+function CornerAccent({
+  position,
+}: {
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+}) {
   const rotations = {
     "top-left": "",
     "top-right": "rotate-90",
@@ -72,7 +86,7 @@ export function PricingSection() {
         {/* Section headline */}
         <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
           <p
-            className="mb-3 text-sm font-medium uppercase tracking-wider"
+            className="mb-3 text-sm font-medium tracking-wider uppercase"
             style={{ color: HERITAGE_COLORS.antiqueGold }}
           >
             Simple Pricing
@@ -157,7 +171,9 @@ export function PricingSection() {
                 <li key={index} className="flex items-start gap-3">
                   <div
                     className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
-                    style={{ backgroundColor: `${HERITAGE_COLORS.sageGreen}30` }}
+                    style={{
+                      backgroundColor: `${HERITAGE_COLORS.sageGreen}30`,
+                    }}
                   >
                     <Check
                       className="h-3 w-3"
@@ -210,7 +226,9 @@ export function PricingSection() {
           >
             <table className="w-full">
               <thead>
-                <tr style={{ backgroundColor: `${HERITAGE_COLORS.deepForest}08` }}>
+                <tr
+                  style={{ backgroundColor: `${HERITAGE_COLORS.deepForest}08` }}
+                >
                   <th
                     className="px-4 py-3 text-left text-sm font-semibold"
                     style={{ color: HERITAGE_COLORS.charcoal }}

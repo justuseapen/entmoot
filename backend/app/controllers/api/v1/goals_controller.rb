@@ -4,7 +4,7 @@ module Api
   module V1
     class GoalsController < BaseController
       before_action :set_family
-      before_action :set_goal, only: %i[show update destroy refine]
+      before_action :set_goal, only: %i[show update destroy refine regenerate_sub_goals]
 
       def index
         authorize @family, policy_class: GoalPolicy
@@ -66,6 +66,21 @@ module Api
                      status: :service_unavailable)
       end
 
+      def regenerate_sub_goals
+        authorize @goal
+
+        # Delete existing draft sub-goals
+        @goal.children.where(is_draft: true).destroy_all
+
+        # Trigger async sub-goal generation
+        SubGoalGenerationJob.perform_later(goal_id: @goal.id, user_id: current_user.id)
+
+        render json: {
+          message: "Sub-goal generation started. You'll be notified when complete.",
+          goal: goal_response(@goal, include_smart: true)
+        }
+      end
+
       private
 
       def set_family
@@ -85,7 +100,7 @@ module Api
           :title, :description,
           :specific, :measurable, :achievable, :relevant, :time_bound,
           :time_scale, :status, :visibility,
-          :progress, :due_date, :parent_id
+          :progress, :due_date, :parent_id, :is_draft
         )
       end
 
@@ -134,7 +149,9 @@ module Api
           id: goal.id, title: goal.title, description: goal.description,
           time_scale: goal.time_scale, status: goal.status, visibility: goal.visibility,
           progress: goal.progress, due_date: goal.due_date, parent_id: goal.parent_id,
-          family_id: goal.family_id, created_at: goal.created_at, updated_at: goal.updated_at
+          family_id: goal.family_id, created_at: goal.created_at, updated_at: goal.updated_at,
+          is_draft: goal.is_draft, children_count: goal.children_count,
+          draft_children_count: goal.draft_children_count, aggregated_progress: goal.aggregated_progress
         }
       end
 
@@ -162,7 +179,23 @@ module Api
         PointsService.award_goal_creation(user: current_user, goal: @goal)
         track_first_goal
         track_first_action_goal
+        trigger_sub_goal_generation if should_generate_sub_goals?
         render_created_goal
+      end
+
+      def should_generate_sub_goals?
+        return false unless %w[annual quarterly].include?(@goal.time_scale)
+        return false unless @goal.due_date.present?
+
+        # Only skip generation if explicitly set to false
+        generate_param = params.dig(:goal, :generate_sub_goals)
+        return true if generate_param.nil? # Default to true
+
+        ActiveModel::Type::Boolean.new.cast(generate_param)
+      end
+
+      def trigger_sub_goal_generation
+        SubGoalGenerationJob.perform_later(goal_id: @goal.id, user_id: current_user.id)
       end
 
       def track_first_goal
