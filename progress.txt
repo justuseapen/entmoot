@@ -508,3 +508,18 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Use `.pluck("field")` instead of `.map { |r| r["field"] }` for array extraction (Rails/Pluck)
   - Avoid numbered let names like `goal_a1` - use descriptive names like `goal_in_family_a`
 ---
+
+## 2026-01-23 - US-009: Create onboarding flow integration spec
+- What was implemented: Created comprehensive integration tests for complete onboarding flow
+- Files changed:
+  - backend/spec/requests/onboarding_flow_spec.rb (new - 28 test examples)
+- **Learnings for future iterations:**
+  - When testing multi-step flows with different auth contexts, use `reset!` to clear the integration session between steps
+  - `Warden.test_reset!` alone doesn't clear the session in Rails integration tests - `reset!` from ActionDispatch is needed
+  - Use `let(:x) do ... end` for factory creates with many attributes to avoid line length issues
+  - End-to-end integration tests that intentionally test a full flow can use `# rubocop:disable RSpec/ExampleLength`
+  - Store tokens/values before calling `reset!` as the objects may be affected by session clearing
+  - The `/api/v1/auth/register` endpoint returns `onboarding_required` flag for new users
+  - Family creation via POST /api/v1/families automatically creates admin FamilyMembership for creator
+  - Invitation acceptance can create new users inline via `user` params when unauthenticated
+---

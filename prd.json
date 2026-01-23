@@ -165,8 +165,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created 28 test examples covering complete onboarding flow: user registration, family creation (auto-admin), invitations (create/accept), first goal creation, and tour preferences. Includes end-to-end integration test. All specs pass, rubocop clean."
     }
   ]
 }
