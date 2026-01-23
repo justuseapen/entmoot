@@ -57,3 +57,31 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(): Promise<{ user: User }> {
   return apiFetch<{ user: User }>("/auth/me");
 }
+
+export interface PasswordResetResponse {
+  message: string;
+}
+
+export interface ResetPasswordData {
+  reset_password_token: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export async function requestPasswordReset(
+  email: string
+): Promise<PasswordResetResponse> {
+  return apiFetch<PasswordResetResponse>("/auth/password", {
+    method: "POST",
+    body: JSON.stringify({ user: { email } }),
+  });
+}
+
+export async function resetPassword(
+  data: ResetPasswordData
+): Promise<PasswordResetResponse> {
+  return apiFetch<PasswordResetResponse>("/auth/password", {
+    method: "PUT",
+    body: JSON.stringify({ user: data }),
+  });
+}

@@ -11,6 +11,8 @@ import { Terms } from "./pages/Terms";
 import { Roadmap } from "./pages/Roadmap";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { ForgotPassword } from "./pages/ForgotPassword";
+import { ResetPassword } from "./pages/ResetPassword";
 import { Dashboard } from "./pages/Dashboard";
 import { Families } from "./pages/Families";
 import { FamilySettings } from "./pages/FamilySettings";
@@ -93,6 +95,22 @@ function App() {
                 element={
                   <AuthenticatedRedirect>
                     <Register />
+                  </AuthenticatedRedirect>
+                }
+              />
+              <Route
+                path="/forgot-password"
+                element={
+                  <AuthenticatedRedirect>
+                    <ForgotPassword />
+                  </AuthenticatedRedirect>
+                }
+              />
+              <Route
+                path="/reset-password"
+                element={
+                  <AuthenticatedRedirect>
+                    <ResetPassword />
                   </AuthenticatedRedirect>
                 }
               />
