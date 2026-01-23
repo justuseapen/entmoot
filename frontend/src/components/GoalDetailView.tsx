@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -31,8 +31,12 @@ import {
 import {
   useUpdateGoal,
   useGoal,
+  useSubGoals,
   useRegenerateSubGoals,
+  goalKeys,
 } from "@/hooks/useGoals";
+import { useQueryClient } from "@tanstack/react-query";
+import { updateGoal as updateGoalApi, type Goal as GoalType } from "@/lib/goals";
 import {
   type Goal,
   type GoalUser,
@@ -101,12 +105,18 @@ export function GoalDetailView({
   onDelete,
   canManage,
 }: GoalDetailViewProps) {
+  const queryClient = useQueryClient();
   const { data: goal, isLoading, error } = useGoal(familyId, goalId);
+  const { data: subGoals, isLoading: isLoadingSubGoals } = useSubGoals(
+    familyId,
+    goalId
+  );
   const updateGoal = useUpdateGoal(familyId, goalId);
   const regenerateSubGoals = useRegenerateSubGoals(familyId, goalId);
-  const [localProgress, setLocalProgress] = useState<number | null>(null);
-  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [updatingSubGoalId, setUpdatingSubGoalId] = useState<number | null>(
+    null
+  );
 
   const canRegenerateSubGoals =
     goal && ["annual", "quarterly"].includes(goal.time_scale);
@@ -122,21 +132,6 @@ export function GoalDetailView({
 
   if (!open) return null;
 
-  const handleProgressChange = async (value: number[]) => {
-    setLocalProgress(value[0]);
-  };
-
-  const handleProgressSave = async () => {
-    if (localProgress === null || !goal) return;
-    setIsUpdatingProgress(true);
-    try {
-      await updateGoal.mutateAsync({ progress: localProgress });
-      setLocalProgress(null);
-    } finally {
-      setIsUpdatingProgress(false);
-    }
-  };
-
   const handleStatusChange = async (newStatus: GoalStatus) => {
     if (!goal) return;
     setIsUpdatingStatus(true);
@@ -147,7 +142,33 @@ export function GoalDetailView({
     }
   };
 
-  const currentProgress = localProgress ?? goal?.progress ?? 0;
+  const handleSubGoalToggle = async (subGoal: GoalType) => {
+    setUpdatingSubGoalId(subGoal.id);
+    try {
+      const newStatus =
+        subGoal.status === "completed" ? "not_started" : "completed";
+      await updateGoalApi(familyId, subGoal.id, { status: newStatus });
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: goalKeys.detail(familyId, goalId),
+      });
+      toast.success(
+        newStatus === "completed"
+          ? "Sub-goal completed!"
+          : "Sub-goal marked incomplete"
+      );
+    } catch {
+      toast.error("Failed to update sub-goal");
+    } finally {
+      setUpdatingSubGoalId(null);
+    }
+  };
+
+  // Filter to show only non-draft, non-abandoned sub-goals
+  const activeSubGoals = subGoals?.filter(
+    (sg) => !sg.is_draft && sg.status !== "abandoned"
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -195,47 +216,124 @@ export function GoalDetailView({
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Progress</CardTitle>
+                  {goal.children_count > 0 && (
+                    <CardDescription>
+                      Based on {goal.children_count} sub-goal
+                      {goal.children_count !== 1 ? "s" : ""} completion
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <Progress value={currentProgress} className="h-3 flex-1" />
+                    <Progress
+                      value={goal.aggregated_progress}
+                      className="h-3 flex-1"
+                    />
                     <span className="w-12 text-right font-medium">
-                      {currentProgress}%
+                      {goal.aggregated_progress}%
                     </span>
                   </div>
-                  {canManage && (
-                    <div className="space-y-2">
-                      <Slider
-                        value={[currentProgress]}
-                        onValueChange={handleProgressChange}
-                        max={100}
-                        step={5}
-                      />
-                      {localProgress !== null &&
-                        localProgress !== goal.progress && (
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setLocalProgress(null)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={handleProgressSave}
-                              disabled={isUpdatingProgress}
-                            >
-                              {isUpdatingProgress
-                                ? "Saving..."
-                                : "Save Progress"}
-                            </Button>
-                          </div>
-                        )}
-                    </div>
+                  {goal.children_count === 0 && (
+                    <p className="text-muted-foreground text-sm">
+                      {goal.status === "completed"
+                        ? "Goal marked as completed"
+                        : "Create sub-goals to track progress, or mark the goal as completed when done."}
+                    </p>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Sub-Goals Section */}
+              {(goal.children_count > 0 || isLoadingSubGoals) && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Sub-Goals</CardTitle>
+                    <CardDescription>
+                      Check off sub-goals to track your progress
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingSubGoals ? (
+                      <div className="text-muted-foreground py-4 text-center text-sm">
+                        Loading sub-goals...
+                      </div>
+                    ) : activeSubGoals && activeSubGoals.length > 0 ? (
+                      <div className="space-y-3">
+                        {activeSubGoals.map((subGoal) => (
+                          <div
+                            key={subGoal.id}
+                            className="flex items-start gap-3 rounded-lg border p-3"
+                          >
+                            <Checkbox
+                              id={`subgoal-${subGoal.id}`}
+                              checked={subGoal.status === "completed"}
+                              disabled={
+                                !canManage || updatingSubGoalId === subGoal.id
+                              }
+                              onCheckedChange={() =>
+                                handleSubGoalToggle(subGoal)
+                              }
+                              className="mt-0.5"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor={`subgoal-${subGoal.id}`}
+                                className={`cursor-pointer font-medium ${
+                                  subGoal.status === "completed"
+                                    ? "text-muted-foreground line-through"
+                                    : ""
+                                }`}
+                              >
+                                {subGoal.title}
+                              </label>
+                              {subGoal.description && (
+                                <p
+                                  className={`mt-1 text-sm ${
+                                    subGoal.status === "completed"
+                                      ? "text-muted-foreground/60"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {subGoal.description}
+                                </p>
+                              )}
+                              {subGoal.due_date && (
+                                <p
+                                  className={`mt-1 text-xs ${
+                                    isOverdue(subGoal.due_date) &&
+                                    subGoal.status !== "completed"
+                                      ? "text-destructive"
+                                      : isDueSoon(subGoal.due_date) &&
+                                          subGoal.status !== "completed"
+                                        ? "text-yellow-600"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  Due: {formatDueDate(subGoal.due_date)}
+                                </p>
+                              )}
+                            </div>
+                            {updatingSubGoalId === subGoal.id && (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground py-4 text-center text-sm">
+                        No active sub-goals found
+                      </p>
+                    )}
+                    {goal.draft_children_count > 0 && (
+                      <p className="text-muted-foreground mt-3 text-sm">
+                        {goal.draft_children_count} draft sub-goal
+                        {goal.draft_children_count !== 1 ? "s" : ""} pending
+                        review
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Status Update */}
               {canManage && (

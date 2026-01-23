@@ -43,6 +43,9 @@ gem "twilio-ruby", "~> 7.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
+# GitHub API for trackable goals issue creation
+gem "octokit", "~> 9.0"
+
 # Error tracking (Sentry SDK - works with Glitchtip)
 gem "sentry-rails", "~> 5.22"
 gem "sentry-ruby", "~> 5.22"

@@ -38,6 +38,8 @@ export interface Goal {
   aggregated_progress: number;
   // Position for ordering
   position: number | null;
+  // Trackable goals (can be auto-tracked via external integrations)
+  trackable: boolean;
 }
 
 // Enums
@@ -51,6 +53,7 @@ export type GoalStatus =
 export type GoalVisibility = "personal" | "shared" | "family";
 
 // Create/Update data types
+// Note: progress is calculated from sub-goal completion, not user-settable
 export interface CreateGoalData {
   title: string;
   description?: string;
@@ -62,11 +65,11 @@ export interface CreateGoalData {
   time_scale: TimeScale;
   status?: GoalStatus;
   visibility?: GoalVisibility;
-  progress?: number;
   due_date?: string;
   parent_id?: number | null;
   assignee_ids?: number[];
   generate_sub_goals?: boolean; // Set to false to opt out of auto-generation for annual/quarterly goals
+  trackable?: boolean; // Flag for goals that can be auto-tracked via external integrations
 }
 
 export interface UpdateGoalData {
@@ -80,11 +83,11 @@ export interface UpdateGoalData {
   time_scale?: TimeScale;
   status?: GoalStatus;
   visibility?: GoalVisibility;
-  progress?: number;
   due_date?: string;
   parent_id?: number | null;
   assignee_ids?: number[];
   is_draft?: boolean; // Set to false to accept a draft goal
+  trackable?: boolean; // Flag for goals that can be auto-tracked via external integrations
 }
 
 // Filter params for listing goals
@@ -94,6 +97,7 @@ export interface GoalFilters {
   visibility?: GoalVisibility;
   assignee_id?: number;
   mentioned_by?: number;
+  parent_id?: number;
 }
 
 // API functions
@@ -109,6 +113,8 @@ export async function getGoals(
     params.append("assignee_id", filters.assignee_id.toString());
   if (filters?.mentioned_by)
     params.append("mentioned_by", filters.mentioned_by.toString());
+  if (filters?.parent_id)
+    params.append("parent_id", filters.parent_id.toString());
 
   const queryString = params.toString();
   const url = `/families/${familyId}/goals${queryString ? `?${queryString}` : ""}`;
@@ -271,12 +277,19 @@ export interface Milestone {
   suggested_progress: number;
 }
 
+export interface TrackabilityAssessment {
+  is_trackable: boolean;
+  reason: string;
+  potential_integrations: string[];
+}
+
 export interface GoalRefinementResponse {
   smart_suggestions: SmartSuggestions;
   alternative_titles: string[];
   alternative_descriptions: string[];
   potential_obstacles: Obstacle[];
   milestones: Milestone[];
+  trackability: TrackabilityAssessment;
   overall_feedback: string;
 }
 

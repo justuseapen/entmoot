@@ -477,14 +477,7 @@ RSpec.describe "Api::V1::Goals" do
         expect(json_response["errors"]).to include("Title can't be blank")
       end
 
-      it "returns 422 when progress is out of range" do
-        invalid_params = { goal: { title: "Test", progress: 150 } }
-
-        post "/api/v1/families/#{family.id}/goals", params: invalid_params, headers: auth_headers(user)
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(json_response["errors"].first).to include("Progress")
-      end
+      # Note: progress is now calculated from sub-goal completion, not user-settable
 
       it "returns 422 for invalid time_scale" do
         invalid_params = { goal: { title: "Test", time_scale: "invalid" } }
@@ -523,11 +516,11 @@ RSpec.describe "Api::V1::Goals" do
 
       it "updates multiple fields at once" do
         patch "/api/v1/families/#{family.id}/goals/#{goal.id}",
-              params: { goal: { status: "in_progress", progress: 25 } },
+              params: { goal: { status: "in_progress", description: "Updated description" } },
               headers: auth_headers(user)
 
         expect(json_response["goal"]["status"]).to eq("in_progress")
-        expect(json_response["goal"]["progress"]).to eq(25)
+        expect(json_response["goal"]["description"]).to eq("Updated description")
       end
 
       it "updates only provided fields" do
@@ -656,13 +649,7 @@ RSpec.describe "Api::V1::Goals" do
         expect(json_response["errors"]).to include("Title can't be blank")
       end
 
-      it "returns 422 when progress is invalid" do
-        patch "/api/v1/families/#{family.id}/goals/#{goal.id}",
-              params: { goal: { progress: -10 } },
-              headers: auth_headers(user)
-
-        expect(response).to have_http_status(:unprocessable_content)
-      end
+      # Note: progress is now calculated from sub-goal completion, not user-settable
     end
 
     context "when user is not a family member" do

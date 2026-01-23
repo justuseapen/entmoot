@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MentionInput } from "@/components/ui/mention-input";
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -69,10 +69,10 @@ const goalSchema = z.object({
     "abandoned",
   ]),
   visibility: z.enum(["personal", "shared", "family"]),
-  progress: z.number().min(0).max(100),
   due_date: z.string().optional(),
   parent_id: z.number().nullable().optional(),
   assignee_ids: z.array(z.number()).optional(),
+  trackable: z.boolean().optional(),
 });
 
 type GoalFormData = z.infer<typeof goalSchema>;
@@ -193,18 +193,18 @@ export function GoalModal({
       time_scale: "weekly",
       status: "not_started",
       visibility: "family",
-      progress: 0,
       due_date: "",
       parent_id: null,
       assignee_ids: [],
+      trackable: false,
     },
   });
 
   const selectedTimeScale = watch("time_scale");
   const selectedStatus = watch("status");
   const selectedVisibility = watch("visibility");
-  const selectedProgress = watch("progress");
   const selectedAssignees = watch("assignee_ids") || [];
+  const selectedTrackable = watch("trackable") || false;
 
   // Reset form when modal opens/closes or goal changes
   useEffect(() => {
@@ -226,10 +226,10 @@ export function GoalModal({
           time_scale: goal.time_scale,
           status: goal.status,
           visibility: goal.visibility,
-          progress: goal.progress,
           due_date: goal.due_date || "",
           parent_id: goal.parent_id,
           assignee_ids: goal.assignees.map((a) => a.id),
+          trackable: goal.trackable,
         });
       } else {
         reset({
@@ -243,10 +243,10 @@ export function GoalModal({
           time_scale: defaultValues?.time_scale || "weekly",
           status: "not_started",
           visibility: "family",
-          progress: 0,
           due_date: "",
           parent_id: defaultValues?.parent_id ?? null,
           assignee_ids: [],
+          trackable: false,
         });
       }
     }
@@ -310,10 +310,10 @@ export function GoalModal({
         time_scale: data.time_scale as TimeScale,
         status: data.status as GoalStatus,
         visibility: data.visibility as GoalVisibility,
-        progress: data.progress,
         due_date: data.due_date || undefined,
         parent_id: data.parent_id || undefined,
         assignee_ids: data.assignee_ids,
+        trackable: data.trackable,
         // Clear draft flag when saving an edited draft goal
         ...(isEditing && goal?.is_draft ? { is_draft: false } : {}),
       };
@@ -523,20 +523,6 @@ export function GoalModal({
         </div>
       </div>
 
-      {/* Progress Slider */}
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <Label>Progress</Label>
-          <span className="text-sm font-medium">{selectedProgress}%</span>
-        </div>
-        <Slider
-          value={[selectedProgress]}
-          onValueChange={(values) => setValue("progress", values[0])}
-          max={100}
-          step={5}
-        />
-      </div>
-
       {/* Parent Goal */}
       <div className="space-y-2">
         <Label>Link to Parent Goal</Label>
@@ -586,6 +572,23 @@ export function GoalModal({
             No family members to assign
           </p>
         )}
+      </div>
+
+      {/* Trackable */}
+      <div className="flex items-start space-x-3 rounded-lg border p-4">
+        <Checkbox
+          id="trackable"
+          checked={selectedTrackable}
+          onCheckedChange={(checked) => setValue("trackable", checked === true)}
+        />
+        <div className="space-y-1">
+          <Label htmlFor="trackable" className="cursor-pointer font-medium">
+            Trackable Goal
+          </Label>
+          <p className="text-muted-foreground text-sm">
+            Mark this goal if its progress can be automatically tracked via external integrations (e.g., Plaid for finances, Chess.com for ratings, fitness apps for workouts).
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -864,19 +867,6 @@ export function GoalModal({
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label>Progress</Label>
-                <span className="text-sm font-medium">{selectedProgress}%</span>
-              </div>
-              <Slider
-                value={[selectedProgress]}
-                onValueChange={(values) => setValue("progress", values[0])}
-                max={100}
-                step={5}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label>Link to Parent Goal</Label>
               <Select
                 value={watch("parent_id")?.toString() || "none"}
@@ -1030,9 +1020,13 @@ export function GoalModal({
                         relevant: watch("relevant") || "",
                         time_bound: watch("time_bound") || "",
                       }}
+                      currentTrackable={selectedTrackable}
                       onAcceptSmartSuggestion={handleAcceptSmartSuggestion}
                       onAcceptTitle={handleAcceptTitle}
                       onAcceptDescription={handleAcceptDescription}
+                      onAcceptTrackable={(trackable) =>
+                        setValue("trackable", trackable)
+                      }
                       onDismiss={handleDismissRefinement}
                       onCreateSubGoal={
                         onCreateSubGoal

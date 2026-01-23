@@ -128,7 +128,7 @@ module Api
           :title, :description,
           :specific, :measurable, :achievable, :relevant, :time_bound,
           :time_scale, :status, :visibility,
-          :progress, :due_date, :parent_id, :is_draft, :position
+          :due_date, :parent_id, :is_draft, :position, :trackable
         )
       end
 
@@ -146,6 +146,7 @@ module Api
           .by_visibility(params[:visibility])
           .by_assignee(params[:assignee_id])
           .mentioned_by(params[:mentioned_by])
+          .by_parent_id(params[:parent_id])
           .ordered
           .includes(:creator, :assignees)
       end
@@ -186,7 +187,7 @@ module Api
           family_id: goal.family_id, created_at: goal.created_at, updated_at: goal.updated_at,
           is_draft: goal.is_draft, children_count: goal.children_count,
           draft_children_count: goal.draft_children_count, aggregated_progress: goal.aggregated_progress,
-          position: goal.position
+          position: goal.position, trackable: goal.trackable
         }
       end
 

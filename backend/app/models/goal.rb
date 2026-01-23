@@ -56,6 +56,10 @@ class Goal < ApplicationRecord
     joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
   }
   scope :ordered, -> { order(Arel.sql("position ASC NULLS LAST, created_at DESC")) }
+  scope :trackable, -> { where(trackable: true) }
+  scope :by_parent_id, lambda { |parent_id|
+    where(parent_id: parent_id) if parent_id.present?
+  }
 
   def assign_user(user)
     goal_assignments.find_or_create_by(user: user)
@@ -87,11 +91,25 @@ class Goal < ApplicationRecord
     assignees.pluck(:id)
   end
 
-  # Returns aggregated progress from children, or own progress if no children
+  # Returns progress calculated from sub-goal completion
+  # - For goals with non-draft children: percentage of completed children
+  # - For leaf goals (no children): 100 if completed, 0 otherwise
   def aggregated_progress
-    return progress if children.empty?
+    active_children = children.where.not(status: :abandoned).where(is_draft: false)
 
-    children.where.not(status: :abandoned).average(:progress)&.round || 0
+    return completion_progress if active_children.empty?
+
+    # Calculate percentage of completed children (recursive aggregation)
+    completed_count = active_children.where(status: :completed).count
+    total_count = active_children.count
+    return 0 if total_count.zero?
+
+    ((completed_count.to_f / total_count) * 100).round
+  end
+
+  # Progress based on completion status (for leaf goals)
+  def completion_progress
+    completed? ? 100 : 0
   end
 
   # Count of non-abandoned children
@@ -107,8 +125,18 @@ class Goal < ApplicationRecord
   after_destroy :remove_from_calendars
   # Calendar sync callbacks
   after_commit :schedule_calendar_sync, on: %i[create update], if: :should_sync_to_calendar?
+  # GitHub issue creation for trackable goals
+  after_commit :create_trackable_goal_issue, on: %i[create update], if: :should_create_github_issue?
 
   private
+
+  def should_create_github_issue?
+    trackable? && saved_change_to_trackable? && trackable_previously_was == false
+  end
+
+  def create_trackable_goal_issue
+    TrackableGoalIssueJob.perform_later(id)
+  end
 
   def should_sync_to_calendar?
     # Only sync if relevant attributes changed

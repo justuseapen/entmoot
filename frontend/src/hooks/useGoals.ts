@@ -127,3 +127,14 @@ export function useUpdateGoalPositions(familyId: number) {
 export function useAnnualGoals(familyId: number) {
   return useGoals(familyId, { time_scale: "annual" });
 }
+
+// Convenience hook for sub-goals (children of a parent goal)
+export function useSubGoals(familyId: number, parentId: number | null) {
+  const { isAuthenticated } = useAuthStore();
+  return useQuery({
+    queryKey: goalKeys.list(familyId, { parent_id: parentId ?? undefined }),
+    queryFn: () => getGoals(familyId, { parent_id: parentId ?? undefined }),
+    enabled: isAuthenticated && !!familyId && !!parentId,
+    select: (data) => data.goals,
+  });
+}

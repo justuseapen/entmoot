@@ -27,12 +27,14 @@ interface AIRefinementPanelProps {
     relevant: string;
     time_bound: string;
   };
+  currentTrackable?: boolean;
   onAcceptSmartSuggestion: (
     field: keyof SmartSuggestions,
     value: string
   ) => void;
   onAcceptTitle: (title: string) => void;
   onAcceptDescription: (description: string) => void;
+  onAcceptTrackable?: (trackable: boolean) => void;
   onDismiss: () => void;
   onCreateSubGoal?: (milestone: MilestoneSubGoal) => void;
 }
@@ -40,9 +42,11 @@ interface AIRefinementPanelProps {
 export function AIRefinementPanel({
   refinement,
   currentValues,
+  currentTrackable = false,
   onAcceptSmartSuggestion,
   onAcceptTitle,
   onAcceptDescription,
+  onAcceptTrackable,
   onDismiss,
   onCreateSubGoal,
 }: AIRefinementPanelProps) {
@@ -296,6 +300,69 @@ export function AIRefinementPanel({
             </div>
           </SuggestionSection>
         )}
+
+      {/* Trackability Assessment */}
+      {refinement.trackability && !dismissedSuggestions.has("trackability") && (
+        <SuggestionSection
+          title="Trackability Assessment"
+          subtitle="Can this goal be automatically tracked?"
+          icon="📊"
+          onDismiss={() => handleDismissSuggestion("trackability")}
+        >
+          <div className="rounded-md bg-white p-3">
+            <div className="flex items-start gap-3">
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg ${
+                  refinement.trackability.is_trackable
+                    ? "bg-green-100"
+                    : "bg-gray-100"
+                }`}
+              >
+                {refinement.trackability.is_trackable ? "✓" : "○"}
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">
+                  {refinement.trackability.is_trackable
+                    ? "This goal can be tracked automatically"
+                    : "This goal requires manual progress updates"}
+                </div>
+                <div className="mt-1 text-sm text-gray-600">
+                  {refinement.trackability.reason}
+                </div>
+                {refinement.trackability.potential_integrations.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {refinement.trackability.potential_integrations.map(
+                      (integration, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {integration}
+                        </Badge>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            {refinement.trackability.is_trackable &&
+              onAcceptTrackable &&
+              !currentTrackable && (
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onAcceptTrackable(true)}
+                  >
+                    Mark as Trackable
+                  </Button>
+                </div>
+              )}
+            {currentTrackable && (
+              <div className="mt-3 flex justify-end">
+                <Badge variant="secondary">Already marked trackable</Badge>
+              </div>
+            )}
+          </div>
+        </SuggestionSection>
+      )}
 
       <Separator />
 

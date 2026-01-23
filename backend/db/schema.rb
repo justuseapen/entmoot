@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_23_213126) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_23_220822) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -202,6 +202,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_23_213126) do
     t.datetime "updated_at", null: false
     t.boolean "is_draft", default: false, null: false
     t.integer "position"
+    t.boolean "trackable", default: false, null: false
     t.index ["creator_id", "visibility"], name: "index_goals_on_creator_id_and_visibility"
     t.index ["creator_id"], name: "index_goals_on_creator_id"
     t.index ["family_id", "creator_id", "time_scale", "position"], name: "idx_on_family_id_creator_id_time_scale_position_03c0ba4628"

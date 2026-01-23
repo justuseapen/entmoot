@@ -14,6 +14,14 @@ class GoalRefinementService
     2. Alternative title and description options
     3. Potential obstacles the user might face
     4. Milestone recommendations to break down the goal
+    5. Assessment of whether the goal is "trackable" - meaning its progress could be automatically measured via external integrations
+
+    A goal is considered "trackable" if its progress can be automatically measured through:
+    - Financial APIs (Plaid) - net worth, savings, debt payoff, investment growth
+    - Gaming/Sports APIs (Chess.com, Lichess, Strava, etc.) - ratings, rankings, performance metrics
+    - Health/Fitness APIs - weight, steps, workout frequency
+    - Learning platforms - course completion, certifications
+    - Any other quantifiable metric from an external data source
 
     Be constructive, encouraging, and practical. Focus on actionable improvements.
     Respond in valid JSON format only, with no additional text.
@@ -25,6 +33,7 @@ class GoalRefinementService
     "alternative_titles": ["Title 1", "Title 2"], "alternative_descriptions": ["Desc 1"],
     "potential_obstacles": [{"obstacle": "...", "mitigation": "..."}],
     "milestones": [{"title": "...", "description": "...", "suggested_progress": 25}],
+    "trackability": {"is_trackable": true/false, "reason": "Explanation of why this goal is or isn't trackable", "potential_integrations": ["Plaid", "Chess.com", etc.]},
     "overall_feedback": "..."}
   FORMAT
 
@@ -112,6 +121,7 @@ class GoalRefinementService
       alternative_descriptions: normalize_array(data["alternative_descriptions"], max: 3),
       potential_obstacles: normalize_obstacles(data["potential_obstacles"]),
       milestones: normalize_milestones(data["milestones"]),
+      trackability: normalize_trackability(data["trackability"]),
       overall_feedback: data["overall_feedback"].to_s.presence || "Goal analysis complete."
     }
   end
@@ -157,5 +167,23 @@ class GoalRefinementService
         suggested_progress: ms["suggested_progress"].to_i.clamp(0, 100)
       }
     end
+  end
+
+  def normalize_trackability(trackability)
+    return default_trackability unless trackability.is_a?(Hash)
+
+    {
+      is_trackable: trackability["is_trackable"] == true,
+      reason: trackability["reason"].to_s.presence || "No assessment provided.",
+      potential_integrations: normalize_array(trackability["potential_integrations"], max: 10)
+    }
+  end
+
+  def default_trackability
+    {
+      is_trackable: false,
+      reason: "No trackability assessment available.",
+      potential_integrations: []
+    }
   end
 end
