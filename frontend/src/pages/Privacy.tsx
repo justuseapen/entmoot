@@ -174,6 +174,22 @@ export function Privacy() {
               className="mb-4 text-xl font-semibold"
               style={{ color: LANDING_COLORS.darkForest }}
             >
+              Lifetime Access Data Retention
+            </h2>
+            <p className="mb-4">
+              For Founding Family lifetime access customers, we retain your data
+              for as long as the Entmoot service remains operational. Your
+              lifetime access includes all future feature updates. In the event
+              of service discontinuation, we will provide advance notice and
+              data export options.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2
+              className="mb-4 text-xl font-semibold"
+              style={{ color: LANDING_COLORS.darkForest }}
+            >
               Third-Party Services
             </h2>
             <p className="mb-4">
