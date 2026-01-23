@@ -1,23 +1,14 @@
 import { Quote } from "lucide-react";
-
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { HERITAGE_COLORS } from "./design-system";
 
 export function SocialProofBar() {
   return (
     <section
-      className="relative py-10 sm:py-12"
+      className="relative py-12 sm:py-16"
       style={{
-        background: `linear-gradient(135deg, ${LANDING_COLORS.leafGreen}25 0%, ${LANDING_COLORS.forestGreen}20 100%)`,
+        backgroundColor: HERITAGE_COLORS.cream,
+        borderTop: `1px solid ${HERITAGE_COLORS.antiqueBrass}20`,
+        borderBottom: `1px solid ${HERITAGE_COLORS.antiqueBrass}20`,
       }}
     >
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -25,11 +16,14 @@ export function SocialProofBar() {
         <div className="flex flex-col items-center text-center">
           <Quote
             className="mb-4 h-8 w-8 rotate-180"
-            style={{ color: LANDING_COLORS.forestGreen }}
+            style={{ color: HERITAGE_COLORS.antiqueGold }}
           />
           <blockquote
             className="mb-4 text-xl font-medium italic sm:text-2xl"
-            style={{ color: LANDING_COLORS.darkForest }}
+            style={{
+              color: HERITAGE_COLORS.charcoal,
+              fontFamily: "'Georgia', serif",
+            }}
           >
             Built by a dad tired of his family being four people living in the
             same house, not a team.
@@ -38,20 +32,20 @@ export function SocialProofBar() {
             {/* Founder avatar placeholder - can be replaced with actual image */}
             <div
               className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white"
-              style={{ backgroundColor: LANDING_COLORS.forestGreen }}
+              style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
             >
               JE
             </div>
             <div className="text-left">
               <p
                 className="font-semibold"
-                style={{ color: LANDING_COLORS.darkForest }}
+                style={{ color: HERITAGE_COLORS.charcoal }}
               >
                 Justus Eapen
               </p>
               <p
                 className="text-sm"
-                style={{ color: LANDING_COLORS.earthBrown }}
+                style={{ color: HERITAGE_COLORS.sepia }}
               >
                 Founder, Dad of 2
               </p>
@@ -61,17 +55,17 @@ export function SocialProofBar() {
 
         {/* Mission statement */}
         <div
-          className="mt-8 rounded-lg border-l-4 p-4"
+          className="mt-8 rounded-lg border-l-4 p-5"
           style={{
-            backgroundColor: `${LANDING_COLORS.creamWhite}80`,
-            borderColor: LANDING_COLORS.forestGreen,
+            backgroundColor: HERITAGE_COLORS.parchment,
+            borderColor: HERITAGE_COLORS.antiqueGold,
           }}
         >
           <p
-            className="text-center text-sm sm:text-base"
-            style={{ color: LANDING_COLORS.earthBrown }}
+            className="text-center text-sm leading-relaxed sm:text-base"
+            style={{ color: HERITAGE_COLORS.sepia }}
           >
-            <strong style={{ color: LANDING_COLORS.darkForest }}>
+            <strong style={{ color: HERITAGE_COLORS.charcoal }}>
               Our Mission:
             </strong>{" "}
             We believe the family dinner table is the most important conference

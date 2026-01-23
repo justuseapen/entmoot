@@ -1,278 +1,279 @@
-import { Link } from "react-router-dom";
-import { Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePrefersReducedMotion } from "@/hooks/useScrollAnimation";
+import { HERITAGE_COLORS, GRADIENTS } from "./design-system";
+import {
+  STRIPE_PAYMENT_LINK,
+  PRICE_DISPLAY,
+  REGULAR_PRICE_DISPLAY,
+} from "@/config/pricing";
 
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
-
-// Blocky tree SVG component for the forest silhouette
-function BlockyTree({
-  height,
-  className = "",
-}: {
-  height: number;
-  className?: string;
-}) {
-  const width = height * 0.6;
-  const trunkWidth = width * 0.2;
-  const trunkHeight = height * 0.25;
-
+// Tree of Life decorative element - elegant botanical style
+function TreeOfLifeDecoration({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className={className}
-      style={{ color: LANDING_COLORS.darkForest }}
-      aria-hidden="true"
-      role="presentation"
-    >
-      {/* Tree crown - blocky/pixelated style with stacked rectangles */}
-      <rect
-        x={width * 0.2}
-        y={0}
-        width={width * 0.6}
-        height={height * 0.25}
-        fill="currentColor"
-      />
-      <rect
-        x={width * 0.1}
-        y={height * 0.2}
-        width={width * 0.8}
-        height={height * 0.25}
-        fill="currentColor"
-      />
-      <rect
-        x={0}
-        y={height * 0.4}
-        width={width}
-        height={height * 0.25}
-        fill="currentColor"
-      />
-      {/* Trunk */}
-      <rect
-        x={(width - trunkWidth) / 2}
-        y={height * 0.6}
-        width={trunkWidth}
-        height={trunkHeight}
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-// Floating island decorative element
-function FloatingIsland({
-  className = "",
-  animate = true,
-}: {
-  className?: string;
-  animate?: boolean;
-}) {
-  return (
-    <div className={`absolute ${className}`} aria-hidden="true">
+    <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
       <svg
-        width="80"
-        height="60"
-        viewBox="0 0 80 60"
-        className={animate ? "animate-float" : ""}
-        style={{ color: LANDING_COLORS.leafGreen }}
-        role="presentation"
+        viewBox="0 0 200 240"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full"
+        style={{ color: HERITAGE_COLORS.deepForest }}
       >
-        {/* Island base */}
-        <ellipse
-          cx="40"
-          cy="50"
-          rx="35"
-          ry="10"
-          fill={LANDING_COLORS.earthBrown}
-          opacity="0.8"
+        {/* Outer circle */}
+        <circle
+          cx="100"
+          cy="120"
+          r="95"
+          stroke="currentColor"
+          strokeWidth="1"
+          fill="none"
+          opacity="0.15"
         />
-        {/* Grass top */}
-        <rect x="10" y="40" width="60" height="12" fill="currentColor" rx="2" />
-        {/* Small tree */}
-        <rect
-          x="35"
-          y="20"
-          width="10"
-          height="20"
-          fill={LANDING_COLORS.forestGreen}
+        {/* Inner decorative circle */}
+        <circle
+          cx="100"
+          cy="120"
+          r="85"
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          opacity="0.1"
         />
-        <rect
-          x="30"
-          y="10"
-          width="20"
-          height="15"
-          fill={LANDING_COLORS.forestGreen}
+
+        {/* Tree trunk */}
+        <path
+          d="M100 200 L100 140"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          opacity="0.2"
+        />
+
+        {/* Main branches - organic curves */}
+        <path
+          d="M100 140 Q70 120 50 80"
+          stroke="currentColor"
+          strokeWidth="2"
+          fill="none"
+          opacity="0.15"
+        />
+        <path
+          d="M100 140 Q130 120 150 80"
+          stroke="currentColor"
+          strokeWidth="2"
+          fill="none"
+          opacity="0.15"
+        />
+        <path
+          d="M100 140 L100 60"
+          stroke="currentColor"
+          strokeWidth="2"
+          opacity="0.15"
+        />
+
+        {/* Secondary branches */}
+        <path
+          d="M70 100 Q55 85 45 60"
+          stroke="currentColor"
+          strokeWidth="1"
+          fill="none"
+          opacity="0.1"
+        />
+        <path
+          d="M130 100 Q145 85 155 60"
+          stroke="currentColor"
+          strokeWidth="1"
+          fill="none"
+          opacity="0.1"
+        />
+
+        {/* Roots - mirrored below */}
+        <path
+          d="M100 200 Q70 210 50 230"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+          opacity="0.1"
+        />
+        <path
+          d="M100 200 Q130 210 150 230"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+          opacity="0.1"
         />
       </svg>
     </div>
   );
 }
 
-export function HeroSection() {
-  const prefersReducedMotion = usePrefersReducedMotion();
+// Decorative leaf/branch accent
+function BranchAccent({ className = "", flip = false }: { className?: string; flip?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 120 40"
+      fill="none"
+      className={`${className} ${flip ? "scale-x-[-1]" : ""}`}
+      style={{ color: HERITAGE_COLORS.sageGreen }}
+      aria-hidden="true"
+    >
+      <path
+        d="M10 20 Q40 10 60 20 Q80 30 110 20"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+        opacity="0.4"
+      />
+      {/* Small leaves along the branch */}
+      <ellipse cx="30" cy="15" rx="8" ry="4" fill="currentColor" opacity="0.2" transform="rotate(-20 30 15)" />
+      <ellipse cx="50" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.15" transform="rotate(-10 50 18)" />
+      <ellipse cx="70" cy="22" rx="8" ry="4" fill="currentColor" opacity="0.2" transform="rotate(10 70 22)" />
+      <ellipse cx="90" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.15" transform="rotate(20 90 18)" />
+    </svg>
+  );
+}
 
+export function HeroSection() {
   return (
     <section className="relative flex min-h-screen flex-col overflow-hidden pt-16">
-      {/* Gradient background - dawn pink/orange to sky blue */}
+      {/* Gradient background - soft parchment tones */}
       <div
         className="absolute inset-0"
+        style={{ background: GRADIENTS.heroBackground }}
+      />
+
+      {/* Subtle texture overlay */}
+      <div
+        className="absolute inset-0 opacity-30"
         style={{
-          background: `linear-gradient(180deg,
-            #FFB5A7 0%,
-            #FCD5CE 20%,
-            ${LANDING_COLORS.skyBlue}80 60%,
-            ${LANDING_COLORS.skyBlue} 100%
-          )`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231C4532' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
 
-      {/* Floating decorative elements */}
-      <FloatingIsland
-        className="top-[20%] left-[5%] hidden opacity-60 lg:block"
-        animate={!prefersReducedMotion}
-      />
-      <FloatingIsland
-        className="top-[25%] right-[10%] hidden scale-75 opacity-50 lg:block"
-        animate={!prefersReducedMotion}
-      />
-      <FloatingIsland
-        className="top-[35%] left-[15%] hidden scale-50 opacity-40 lg:block"
-        animate={!prefersReducedMotion}
-      />
+      {/* Tree of Life background decoration - left */}
+      <TreeOfLifeDecoration className="absolute -left-20 top-1/4 h-96 w-96 opacity-50 lg:opacity-70" />
+
+      {/* Tree of Life background decoration - right */}
+      <TreeOfLifeDecoration className="absolute -right-20 top-1/3 h-80 w-80 opacity-30 lg:opacity-50" />
 
       {/* Main content */}
-      <div className="relative z-10 mx-auto flex flex-1 flex-col items-center justify-center px-4 pb-32 text-center sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex flex-1 flex-col items-center justify-center px-4 pb-24 text-center sm:px-6 lg:px-8">
         {/* Launch badge */}
         <div
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium"
           style={{
-            backgroundColor: `${LANDING_COLORS.forestGreen}15`,
-            color: LANDING_COLORS.forestGreen,
+            backgroundColor: `${HERITAGE_COLORS.deepForest}08`,
+            borderColor: `${HERITAGE_COLORS.deepForest}20`,
+            color: HERITAGE_COLORS.deepForest,
           }}
         >
-          <Sparkles className="h-4 w-4" />
+          <span
+            className="h-2 w-2 rounded-full animate-pulse"
+            style={{ backgroundColor: HERITAGE_COLORS.antiqueGold }}
+          />
           Founding Family Launch
         </div>
+
+        {/* Decorative branch above headline */}
+        <BranchAccent className="mb-4 h-8 w-32 opacity-60" />
 
         {/* Headline */}
         <h1
           className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
-          style={{ color: LANDING_COLORS.darkForest }}
+          style={{
+            color: HERITAGE_COLORS.charcoal,
+            fontFamily: "'Georgia', serif",
+          }}
         >
-          Stop Managing Your Family. <br className="hidden sm:inline" />
-          Start Leading Them.
+          Stop Managing Your Family.{" "}
+          <br className="hidden sm:inline" />
+          <span style={{ color: HERITAGE_COLORS.deepForest }}>
+            Start Leading Them.
+          </span>
         </h1>
 
         {/* Subheadline */}
         <p
-          className="mx-auto mb-8 max-w-2xl text-lg sm:text-xl"
-          style={{ color: LANDING_COLORS.darkForest, opacity: 0.85 }}
+          className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:text-xl"
+          style={{ color: HERITAGE_COLORS.sepia }}
         >
-          Most families plan day-to-day. Yours will plan
-          generation-to-generation. The only goal platform built for families
-          first—connecting your child's "clean room" task to your family's dream
-          vacation.
+          Most families plan day-to-day. Yours will plan generation-to-generation.
+          The only goal platform built for families first—connecting your child's
+          daily tasks to your family's greatest dreams.
         </p>
 
-        {/* Price */}
-        <div className="mb-6">
+        {/* Price badge */}
+        <div
+          className="mb-8 inline-flex items-center gap-3 rounded-lg border px-6 py-3"
+          style={{
+            backgroundColor: HERITAGE_COLORS.cream,
+            borderColor: `${HERITAGE_COLORS.antiqueGold}40`,
+          }}
+        >
+          <span
+            className="text-sm font-medium line-through opacity-60"
+            style={{ color: HERITAGE_COLORS.sepia }}
+          >
+            {REGULAR_PRICE_DISPLAY}
+          </span>
           <span
             className="text-3xl font-bold sm:text-4xl"
-            style={{ color: LANDING_COLORS.forestGreen }}
+            style={{ color: HERITAGE_COLORS.deepForest }}
           >
-            $149 Lifetime
+            {PRICE_DISPLAY}
+          </span>
+          <span
+            className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+            style={{ backgroundColor: HERITAGE_COLORS.antiqueGold }}
+          >
+            Lifetime
           </span>
         </div>
 
-        {/* CTA buttons */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-          {/* Primary CTA */}
-          <Button
-            asChild
-            size="lg"
-            className="gap-2 rounded-lg px-8 py-6 text-base font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-            style={{ backgroundColor: LANDING_COLORS.forestGreen }}
-          >
-            <Link to="/register?plan=lifetime">
-              <Sparkles className="h-5 w-5" />
-              Claim Your Founding Family Spot - $149 Lifetime
-            </Link>
-          </Button>
+        {/* Single CTA button */}
+        <Button
+          asChild
+          size="lg"
+          className="gap-2 rounded-lg px-10 py-7 text-lg font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
+          style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
+        >
+          <a href={STRIPE_PAYMENT_LINK}>
+            Claim Your Founding Family Spot
+          </a>
+        </Button>
 
-          {/* Secondary CTA */}
-          <Button
-            variant="outline"
-            size="lg"
-            className="gap-2 rounded-lg border-2 bg-white/80 px-8 py-6 text-base font-semibold backdrop-blur-sm transition-all hover:bg-white"
-            style={{
-              borderColor: LANDING_COLORS.forestGreen,
-              color: LANDING_COLORS.forestGreen,
-            }}
-          >
-            <Play className="h-5 w-5" />
-            Watch Demo
-          </Button>
-        </div>
+        {/* Trust indicators */}
+        <p
+          className="mt-6 text-sm"
+          style={{ color: HERITAGE_COLORS.sepia, opacity: 0.8 }}
+        >
+          One-time payment · Lifetime access · No subscriptions ever
+        </p>
+
+        {/* Decorative branch below CTA */}
+        <BranchAccent className="mt-8 h-8 w-32 opacity-40" flip />
       </div>
 
-      {/* Blocky forest silhouette at bottom - decorative */}
+      {/* Bottom decorative border - elegant line with medallion hint */}
       <div
-        className="absolute right-0 bottom-0 left-0 z-0"
-        style={{ backgroundColor: LANDING_COLORS.darkForest }}
-        aria-hidden="true"
+        className="absolute right-0 bottom-0 left-0 h-24"
+        style={{
+          background: `linear-gradient(180deg, transparent 0%, ${HERITAGE_COLORS.parchment} 100%)`,
+        }}
       >
-        <div className="relative h-32 sm:h-40 lg:h-48">
-          {/* Forest silhouette - varying heights */}
-          <div className="absolute bottom-0 flex w-full items-end justify-around">
-            <BlockyTree height={80} className="hidden sm:block" />
-            <BlockyTree height={100} />
-            <BlockyTree height={70} className="hidden lg:block" />
-            <BlockyTree height={120} />
-            <BlockyTree height={90} />
-            <BlockyTree height={110} className="hidden sm:block" />
-            <BlockyTree height={75} />
-            <BlockyTree height={130} className="hidden lg:block" />
-            <BlockyTree height={85} />
-            <BlockyTree height={105} className="hidden sm:block" />
-            <BlockyTree height={95} />
-            <BlockyTree height={115} className="hidden lg:block" />
-            <BlockyTree height={80} />
-          </div>
+        <div className="flex h-full items-end justify-center pb-4">
+          <div
+            className="h-px w-32 sm:w-48"
+            style={{ backgroundColor: `${HERITAGE_COLORS.antiqueBrass}30` }}
+          />
+          <div
+            className="mx-4 h-2 w-2 rotate-45"
+            style={{ backgroundColor: `${HERITAGE_COLORS.antiqueBrass}40` }}
+          />
+          <div
+            className="h-px w-32 sm:w-48"
+            style={{ backgroundColor: `${HERITAGE_COLORS.antiqueBrass}30` }}
+          />
         </div>
       </div>
-
-      {/* CSS for floating animation */}
-      <style>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-        .animate-float:nth-child(2) {
-          animation-delay: 1s;
-        }
-        .animate-float:nth-child(3) {
-          animation-delay: 2s;
-        }
-      `}</style>
     </section>
   );
 }

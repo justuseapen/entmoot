@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { TreePine, ArrowLeft, Heart, Users, Target } from "lucide-react";
+import { STRIPE_PAYMENT_LINK } from "@/config/pricing";
 
 const LANDING_COLORS = {
   forestGreen: "#2D5A27",
@@ -170,13 +171,13 @@ export function About() {
           >
             Ready to transform your family's planning?
           </h2>
-          <Link
-            to="/register?plan=lifetime"
+          <a
+            href={STRIPE_PAYMENT_LINK}
             className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-all hover:opacity-90"
             style={{ backgroundColor: LANDING_COLORS.forestGreen }}
           >
             Get Started Today
-          </Link>
+          </a>
         </section>
       </main>
     </div>

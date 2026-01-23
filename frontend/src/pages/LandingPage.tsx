@@ -12,18 +12,8 @@ import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { FinalCTASection } from "@/components/landing/FinalCTASection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
-
-// Landing page design system colors from PRD
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { NewsletterSignup } from "@/components/landing/NewsletterSignup";
+import { HERITAGE_COLORS } from "@/components/landing/design-system";
 
 export function LandingPage() {
   const { isAuthenticated } = useAuthStore();
@@ -36,7 +26,7 @@ export function LandingPage() {
   return (
     <div
       className="min-h-screen scroll-smooth"
-      style={{ backgroundColor: LANDING_COLORS.creamWhite }}
+      style={{ backgroundColor: HERITAGE_COLORS.parchment }}
     >
       <LandingPageSEO />
       <LandingNav />
@@ -56,7 +46,7 @@ export function LandingPage() {
         {/* How It Works Section */}
         <HowItWorksSection />
 
-        {/* Testimonials Section */}
+        {/* Founding Families Section (formerly Testimonials) */}
         <TestimonialsSection />
 
         {/* Pricing Section - Single LTD Card */}
@@ -65,8 +55,18 @@ export function LandingPage() {
         {/* FAQ Section */}
         <FAQSection />
 
-        {/* Final CTA Section with Countdown */}
+        {/* Final CTA Section */}
         <FinalCTASection />
+
+        {/* Newsletter Section */}
+        <section
+          className="py-16 sm:py-20"
+          style={{ backgroundColor: HERITAGE_COLORS.parchment }}
+        >
+          <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
+            <NewsletterSignup variant="card" location="landing_footer" />
+          </div>
+        </section>
       </main>
 
       {/* Footer */}

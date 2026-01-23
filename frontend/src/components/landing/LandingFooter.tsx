@@ -1,19 +1,29 @@
 import { Link } from "react-router-dom";
-import { TreePine, Twitter, Instagram, Facebook } from "lucide-react";
+import { Twitter, Instagram, Facebook } from "lucide-react";
+import { HERITAGE_COLORS } from "./design-system";
 
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+// Tree of Life Medallion Logo for footer
+function MedallionLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 40 40"
+      fill="none"
+      className={className}
+      style={{ color: HERITAGE_COLORS.sageGreen }}
+    >
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <circle cx="20" cy="20" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <path d="M20 32 L20 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M20 22 Q14 18 10 12" stroke="currentColor" strokeWidth="1" fill="none" />
+      <path d="M20 22 Q26 18 30 12" stroke="currentColor" strokeWidth="1" fill="none" />
+      <path d="M20 22 L20 10" stroke="currentColor" strokeWidth="1" />
+      <path d="M20 32 Q14 34 10 36" stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.6" />
+      <path d="M20 32 Q26 34 30 36" stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.6" />
+    </svg>
+  );
+}
 
-// Discord icon (Lucide doesn't have it, so using a simple SVG)
+// Discord icon (Lucide doesn't have it)
 function DiscordIcon({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -34,27 +44,14 @@ interface FooterLinkProps {
 }
 
 function FooterLink({ href, children, external = false }: FooterLinkProps) {
-  const linkStyles = {
-    color: `${LANDING_COLORS.creamWhite}B3`, // 70% opacity
-    transition: "color 0.2s ease",
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.currentTarget.style.color = LANDING_COLORS.leafGreen;
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.currentTarget.style.color = `${LANDING_COLORS.creamWhite}B3`;
-  };
+  const baseClass = "text-sm transition-colors duration-200";
 
   if (external || href.startsWith("http") || href === "#") {
     return (
       <a
         href={href}
-        style={linkStyles}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className="text-sm"
+        className={`${baseClass} hover:opacity-80`}
+        style={{ color: `${HERITAGE_COLORS.parchment}99` }}
         {...(external && { target: "_blank", rel: "noopener noreferrer" })}
       >
         {children}
@@ -65,10 +62,8 @@ function FooterLink({ href, children, external = false }: FooterLinkProps) {
   return (
     <Link
       to={href}
-      style={linkStyles}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="text-sm"
+      className={`${baseClass} hover:opacity-80`}
+      style={{ color: `${HERITAGE_COLORS.parchment}99` }}
     >
       {children}
     </Link>
@@ -84,8 +79,8 @@ function FooterColumn({ title, links }: FooterColumnProps) {
   return (
     <div>
       <h3
-        className="mb-4 text-sm font-semibold tracking-wider uppercase"
-        style={{ color: LANDING_COLORS.creamWhite }}
+        className="mb-4 text-sm font-semibold uppercase tracking-wider"
+        style={{ color: HERITAGE_COLORS.parchment }}
       >
         {title}
       </h3>
@@ -115,18 +110,10 @@ function SocialIcon({ href, label, icon }: SocialIconProps) {
       aria-label={label}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:scale-110"
+      className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 hover:scale-110"
       style={{
-        backgroundColor: `${LANDING_COLORS.creamWhite}15`,
-        color: `${LANDING_COLORS.creamWhite}B3`,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = `${LANDING_COLORS.leafGreen}30`;
-        e.currentTarget.style.color = LANDING_COLORS.leafGreen;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = `${LANDING_COLORS.creamWhite}15`;
-        e.currentTarget.style.color = `${LANDING_COLORS.creamWhite}B3`;
+        backgroundColor: `${HERITAGE_COLORS.parchment}10`,
+        color: `${HERITAGE_COLORS.parchment}80`,
       }}
     >
       {icon}
@@ -152,21 +139,21 @@ export function LandingFooter() {
   ];
 
   return (
-    <footer style={{ backgroundColor: LANDING_COLORS.darkForest }}>
+    <footer style={{ backgroundColor: HERITAGE_COLORS.deepForest }}>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         {/* Main footer content */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand column */}
           <div className="sm:col-span-2 lg:col-span-1">
             {/* Logo */}
-            <Link to="/" className="mb-4 flex items-center gap-2">
-              <TreePine
-                className="h-8 w-8"
-                style={{ color: LANDING_COLORS.leafGreen }}
-              />
+            <Link to="/" className="mb-4 flex items-center gap-2.5">
+              <MedallionLogo className="h-9 w-9" />
               <span
-                className="text-xl font-bold"
-                style={{ color: LANDING_COLORS.creamWhite }}
+                className="text-xl font-semibold"
+                style={{
+                  color: HERITAGE_COLORS.parchment,
+                  fontFamily: "'Georgia', serif",
+                }}
               >
                 Entmoot
               </span>
@@ -174,9 +161,9 @@ export function LandingFooter() {
             {/* Tagline */}
             <p
               className="text-sm"
-              style={{ color: `${LANDING_COLORS.creamWhite}80` }}
+              style={{ color: `${HERITAGE_COLORS.parchment}70` }}
             >
-              Building family adventures since 2026
+              Building intentional families since 2026
             </p>
           </div>
 
@@ -192,14 +179,14 @@ export function LandingFooter() {
           {/* Social column */}
           <div>
             <h3
-              className="mb-4 text-sm font-semibold tracking-wider uppercase"
-              style={{ color: LANDING_COLORS.creamWhite }}
+              className="mb-4 text-sm font-semibold uppercase tracking-wider"
+              style={{ color: HERITAGE_COLORS.parchment }}
             >
               Connect
             </h3>
             <div className="flex gap-3">
               <SocialIcon
-                href="https://twitter.com/entmoot"
+                href="https://twitter.com/entmootapp"
                 label="Twitter"
                 icon={<Twitter className="h-5 w-5" />}
               />
@@ -225,12 +212,12 @@ export function LandingFooter() {
         {/* Divider */}
         <div
           className="mt-12 border-t pt-8"
-          style={{ borderColor: `${LANDING_COLORS.creamWhite}15` }}
+          style={{ borderColor: `${HERITAGE_COLORS.parchment}15` }}
         >
           {/* Copyright */}
           <p
             className="text-center text-sm"
-            style={{ color: `${LANDING_COLORS.creamWhite}60` }}
+            style={{ color: `${HERITAGE_COLORS.parchment}50` }}
           >
             &copy; 2026 Entmoot. All rights reserved.
           </p>

@@ -6,26 +6,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AnimatedSection } from "./AnimatedSection";
-
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { HERITAGE_COLORS } from "./design-system";
+import { PRICE_DISPLAY, REGULAR_PRICE_DISPLAY } from "@/config/pricing";
 
 // FAQ data per PRD acceptance criteria + LTD-specific questions
 const faqItems = [
   {
     id: "faq-1",
     question: "What exactly do I get with the Founding Family Edition?",
-    answer:
-      "You get lifetime access to Entmoot for a one-time payment of $149 (normally $499). This includes unlimited family members, AI goal coaching powered by Claude, all badge collections, multi-scale reviews from daily to annual, calendar sync with Google/Apple/Outlook, COPPA compliance for kids, and all future updates. No monthly fees, ever.",
+    answer: `You get lifetime access to Entmoot for a one-time payment of ${PRICE_DISPLAY} (normally ${REGULAR_PRICE_DISPLAY}). This includes unlimited family members, AI goal coaching powered by Claude, all badge collections, multi-scale reviews from daily to annual, calendar sync with Google/Apple/Outlook, COPPA compliance for kids, and all future updates. No monthly fees, ever.`,
   },
   {
     id: "faq-2",
@@ -90,20 +79,29 @@ export function FAQSection() {
       <AnimatedSection
         id="faq"
         className="py-16 sm:py-20 lg:py-24"
-        style={{ backgroundColor: LANDING_COLORS.creamWhite }}
+        style={{ backgroundColor: HERITAGE_COLORS.cream }}
       >
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           {/* Section headline */}
           <div className="mb-12 text-center lg:mb-16">
+            <p
+              className="mb-3 text-sm font-medium uppercase tracking-wider"
+              style={{ color: HERITAGE_COLORS.antiqueGold }}
+            >
+              Common Questions
+            </p>
             <h2
               className="text-3xl font-bold sm:text-4xl lg:text-5xl"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{
+                color: HERITAGE_COLORS.charcoal,
+                fontFamily: "'Georgia', serif",
+              }}
             >
-              Questions from the Council
+              Frequently Asked Questions
             </h2>
             <p
               className="mt-4 text-lg"
-              style={{ color: LANDING_COLORS.earthBrown }}
+              style={{ color: HERITAGE_COLORS.sepia }}
             >
               Everything you need to know about the Founding Family Edition
             </p>
@@ -116,17 +114,17 @@ export function FAQSection() {
                 key={item.id}
                 value={item.id}
                 className="border-b"
-                style={{ borderColor: `${LANDING_COLORS.earthBrown}30` }}
+                style={{ borderColor: `${HERITAGE_COLORS.antiqueBrass}30` }}
               >
                 <AccordionTrigger
                   className="py-5 text-left text-base font-semibold hover:no-underline sm:text-lg"
-                  style={{ color: LANDING_COLORS.darkForest }}
+                  style={{ color: HERITAGE_COLORS.charcoal }}
                 >
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent
                   className="text-base leading-relaxed"
-                  style={{ color: LANDING_COLORS.earthBrown }}
+                  style={{ color: HERITAGE_COLORS.sepia }}
                 >
                   {item.answer}
                 </AccordionContent>
