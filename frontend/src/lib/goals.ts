@@ -36,6 +36,8 @@ export interface Goal {
   children_count: number;
   draft_children_count: number;
   aggregated_progress: number;
+  // Position for ordering
+  position: number | null;
 }
 
 // Enums
@@ -323,6 +325,26 @@ export async function regenerateSubGoals(
     `/families/${familyId}/goals/${goalId}/regenerate_sub_goals`,
     {
       method: "POST",
+    }
+  );
+}
+
+// Goal position update types
+export interface GoalPositionUpdate {
+  id: number;
+  position: number;
+}
+
+// Update goal positions API
+export async function updateGoalPositions(
+  familyId: number,
+  positions: GoalPositionUpdate[]
+): Promise<{ message: string; goals: Goal[] }> {
+  return apiFetch<{ message: string; goals: Goal[] }>(
+    `/families/${familyId}/goals/update_positions`,
+    {
+      method: "POST",
+      body: JSON.stringify({ positions }),
     }
   );
 }

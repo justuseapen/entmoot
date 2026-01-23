@@ -55,6 +55,7 @@ class Goal < ApplicationRecord
   scope :mentioned_by, lambda { |user_id|
     joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
   }
+  scope :ordered, -> { order(Arel.sql("position ASC NULLS LAST, created_at DESC")) }
 
   def assign_user(user)
     goal_assignments.find_or_create_by(user: user)

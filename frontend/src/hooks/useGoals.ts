@@ -8,9 +8,11 @@ import {
   deleteGoal,
   refineGoal,
   regenerateSubGoals,
+  updateGoalPositions,
   type CreateGoalData,
   type UpdateGoalData,
   type GoalFilters,
+  type GoalPositionUpdate,
 } from "@/lib/goals";
 
 // Query keys
@@ -104,6 +106,19 @@ export function useRegenerateSubGoals(familyId: number, goalId: number) {
       queryClient.invalidateQueries({
         queryKey: goalKeys.detail(familyId, goalId),
       });
+    },
+  });
+}
+
+// Update goal positions mutation
+export function useUpdateGoalPositions(familyId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (positions: GoalPositionUpdate[]) =>
+      updateGoalPositions(familyId, positions),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
     },
   });
 }

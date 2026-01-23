@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -44,6 +44,7 @@ export function Goals() {
   const familyId = parseInt(id || "0");
   const { user } = useAuthStore();
   const { celebrateFirstAction } = useCelebration();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Filter state
   const [filters, setFilters] = useState<GoalFilters>({});
@@ -51,7 +52,14 @@ export function Goals() {
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const [viewingGoalId, setViewingGoalId] = useState<number | null>(null);
+  const [viewingGoalId, setViewingGoalId] = useState<number | null>(() => {
+    const goalIdParam = searchParams.get("goalId");
+    if (goalIdParam) {
+      const goalId = parseInt(goalIdParam);
+      return isNaN(goalId) ? null : goalId;
+    }
+    return null;
+  });
   const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
   const [showAITab, setShowAITab] = useState(false);
   const [pendingSubGoal, setPendingSubGoal] = useState<{
@@ -140,6 +148,7 @@ export function Goals() {
   // Action handlers
   const handleGoalClick = (goal: Goal) => {
     setViewingGoalId(goal.id);
+    setSearchParams({ goalId: goal.id.toString() });
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -521,7 +530,11 @@ export function Goals() {
           familyMembers={familyMembers}
           open={!!viewingGoalId}
           onOpenChange={(open) => {
-            if (!open) setViewingGoalId(null);
+            if (!open) {
+              setViewingGoalId(null);
+              searchParams.delete("goalId");
+              setSearchParams(searchParams);
+            }
           }}
           onEdit={canManageGoals ? handleEditGoal : undefined}
           onRefineWithAI={canManageGoals ? handleRefineWithAI : undefined}

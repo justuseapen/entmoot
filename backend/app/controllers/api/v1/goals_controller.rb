@@ -81,6 +81,34 @@ module Api
         }
       end
 
+      def update_positions
+        authorize @family, :update_positions?, policy_class: GoalPolicy
+
+        ActiveRecord::Base.transaction do
+          # First, assign temporary negative positions to avoid uniqueness conflicts
+          positions_params.each_with_index do |position_data, index|
+            goal = current_user.created_goals.where(family: @family).find(position_data[:id])
+            goal.update_column(:position, -(index + 1))
+          end
+
+          # Then, assign the final positions
+          positions_params.each do |position_data|
+            goal = current_user.created_goals.where(family: @family).find(position_data[:id])
+            goal.update_column(:position, position_data[:position])
+          end
+        end
+
+        goals = filtered_goals
+        render json: {
+          message: "Positions updated successfully.",
+          goals: goals.map { |goal| goal_response(goal) }
+        }
+      rescue ActiveRecord::RecordNotFound
+        render_error("Goal not found", status: :not_found)
+      rescue ActiveRecord::RecordInvalid => e
+        render_error(e.record.errors.full_messages.join(", "), status: :unprocessable_content)
+      end
+
       private
 
       def set_family
@@ -100,8 +128,14 @@ module Api
           :title, :description,
           :specific, :measurable, :achievable, :relevant, :time_bound,
           :time_scale, :status, :visibility,
-          :progress, :due_date, :parent_id, :is_draft
+          :progress, :due_date, :parent_id, :is_draft, :position
         )
+      end
+
+      def positions_params
+        params.require(:positions).map do |p|
+          p.permit(:id, :position)
+        end
       end
 
       def filtered_goals
@@ -112,7 +146,7 @@ module Api
           .by_visibility(params[:visibility])
           .by_assignee(params[:assignee_id])
           .mentioned_by(params[:mentioned_by])
-          .order(created_at: :desc)
+          .ordered
           .includes(:creator, :assignees)
       end
 
@@ -151,7 +185,8 @@ module Api
           progress: goal.progress, due_date: goal.due_date, parent_id: goal.parent_id,
           family_id: goal.family_id, created_at: goal.created_at, updated_at: goal.updated_at,
           is_draft: goal.is_draft, children_count: goal.children_count,
-          draft_children_count: goal.draft_children_count, aggregated_progress: goal.aggregated_progress
+          draft_children_count: goal.draft_children_count, aggregated_progress: goal.aggregated_progress,
+          position: goal.position
         }
       end
 

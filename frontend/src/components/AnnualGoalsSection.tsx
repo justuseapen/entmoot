@@ -1,6 +1,21 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Target } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,11 +24,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { useAnnualGoals } from "@/hooks/useGoals";
+import { SortableGoalItem } from "@/components/SortableGoalItem";
+import { useAnnualGoals, useUpdateGoalPositions } from "@/hooks/useGoals";
 import { cn } from "@/lib/utils";
-import { formatDueDate, isOverdue, isDueSoon } from "@/lib/goals";
+import { type Goal } from "@/lib/goals";
 
 interface AnnualGoalsSectionProps {
   familyId: number;
@@ -22,14 +36,83 @@ interface AnnualGoalsSectionProps {
 export function AnnualGoalsSection({ familyId }: AnnualGoalsSectionProps) {
   const [expanded, setExpanded] = useState(true);
   const { data: annualGoals, isLoading } = useAnnualGoals(familyId);
+  const updatePositions = useUpdateGoalPositions(familyId);
 
   // Filter to only show active annual goals (not completed or abandoned)
-  const activeAnnualGoals = annualGoals?.filter(
-    (goal) => goal.status !== "completed" && goal.status !== "abandoned"
+  const activeAnnualGoals = useMemo(
+    () =>
+      annualGoals?.filter(
+        (goal) => goal.status !== "completed" && goal.status !== "abandoned"
+      ) ?? [],
+    [annualGoals]
   );
 
+  // Local state for optimistic updates during drag
+  const [localGoals, setLocalGoals] = useState<Goal[] | null>(null);
+
+  // Use local state only while mutation is pending, otherwise use server data
+  const goalsToDisplay = useMemo(() => {
+    // Use local state only if mutation is pending and we have local goals
+    if (updatePositions.isPending && localGoals) {
+      return localGoals;
+    }
+    return activeAnnualGoals;
+  }, [updatePositions.isPending, localGoals, activeAnnualGoals]);
+
+  // Display only top 3 goals on the dashboard widget
+  const displayedGoals = goalsToDisplay.slice(0, 3);
+  const hasMoreGoals = activeAnnualGoals.length > 3;
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = activeAnnualGoals.findIndex(
+        (g) => g.id.toString() === active.id
+      );
+      const newIndex = activeAnnualGoals.findIndex(
+        (g) => g.id.toString() === over.id
+      );
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Optimistic update
+        const newOrder = arrayMove(activeAnnualGoals, oldIndex, newIndex);
+        setLocalGoals(newOrder);
+
+        // Persist to server
+        const positions = newOrder.map((goal, index) => ({
+          id: goal.id,
+          position: index + 1,
+        }));
+
+        updatePositions.mutate(positions, {
+          onError: () => {
+            // Revert on error
+            setLocalGoals(null);
+          },
+          onSuccess: () => {
+            // Clear local state to use server data
+            setLocalGoals(null);
+          },
+        });
+      }
+    }
+  };
+
   // Don't render if no annual goals
-  if (!isLoading && (!activeAnnualGoals || activeAnnualGoals.length === 0)) {
+  if (!isLoading && activeAnnualGoals.length === 0) {
     return null;
   }
 
@@ -59,81 +142,32 @@ export function AnnualGoalsSection({ familyId }: AnnualGoalsSectionProps) {
             <p className="text-muted-foreground text-sm">Loading...</p>
           ) : (
             <div className="space-y-4">
-              {activeAnnualGoals?.map((goal) => (
-                <div
-                  key={goal.id}
-                  className="rounded-lg border border-amber-200 bg-white p-4"
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={displayedGoals.map((g) => g.id.toString())}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        to={`/families/${familyId}/goals/${goal.id}`}
-                        className="font-medium hover:text-amber-700 hover:underline"
-                      >
-                        {goal.title}
-                      </Link>
-                      {goal.due_date && (
-                        <p
-                          className={cn(
-                            "mt-1 text-xs",
-                            isOverdue(goal.due_date)
-                              ? "font-medium text-red-600"
-                              : isDueSoon(goal.due_date)
-                                ? "font-medium text-amber-600"
-                                : "text-muted-foreground"
-                          )}
-                        >
-                          {isOverdue(goal.due_date)
-                            ? "Overdue"
-                            : `Due ${formatDueDate(goal.due_date)}`}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex flex-shrink-0 items-center gap-2">
-                      {goal.draft_children_count > 0 && (
-                        <Badge
-                          variant="outline"
-                          className="border-amber-300 bg-amber-100 text-amber-800"
-                        >
-                          {goal.draft_children_count} draft
-                          {goal.draft_children_count === 1 ? "" : "s"}
-                        </Badge>
-                      )}
-                      {goal.children_count > 0 && (
-                        <span className="text-muted-foreground text-xs">
-                          {goal.children_count} sub-goal
-                          {goal.children_count === 1 ? "" : "s"}
-                        </span>
-                      )}
-                    </div>
+                  <div className="space-y-4">
+                    {displayedGoals.map((goal) => (
+                      <SortableGoalItem
+                        key={goal.id}
+                        goal={goal}
+                        familyId={familyId}
+                      />
+                    ))}
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">
-                        {goal.aggregated_progress}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={goal.aggregated_progress}
-                      className="h-2"
-                    />
-                  </div>
-                  {goal.draft_children_count > 0 && (
-                    <div className="mt-3">
-                      <Button asChild size="sm" variant="outline">
-                        <Link to={`/families/${familyId}/goals/tree`}>
-                          Review Draft Sub-Goals
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                </SortableContext>
+              </DndContext>
               <div className="flex justify-end">
                 <Button asChild variant="ghost" size="sm">
                   <Link to={`/families/${familyId}/goals?time_scale=annual`}>
-                    View All Annual Goals
+                    {hasMoreGoals
+                      ? `View All ${activeAnnualGoals.length} Annual Goals`
+                      : "View All Annual Goals"}
                   </Link>
                 </Button>
               </div>

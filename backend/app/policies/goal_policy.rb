@@ -29,6 +29,10 @@ class GoalPolicy < ApplicationPolicy
     can_manage_goals? && record.visible_to?(user)
   end
 
+  def update_positions?
+    can_manage_goals?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       # Start with goals in families the user is a member of

@@ -20,6 +20,29 @@ RSpec.describe "Api::V1::Goals" do
         expect(json_response["goals"].pluck("id")).to match_array(goals.map(&:id))
       end
 
+      it "returns goals ordered by position then created_at" do
+        goal3 = create(:goal, :family_visible, family: family, creator: user, position: 3)
+        goal1 = create(:goal, :family_visible, family: family, creator: user, position: 1)
+        goal2 = create(:goal, :family_visible, family: family, creator: user, position: 2)
+        goal_no_pos = create(:goal, :family_visible, family: family, creator: user, position: nil)
+
+        get "/api/v1/families/#{family.id}/goals", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        goal_ids = json_response["goals"].pluck("id")
+        # Goals with positions should come first, ordered by position
+        # Goals without positions come last, ordered by created_at desc
+        expect(goal_ids).to eq([goal1.id, goal2.id, goal3.id, goal_no_pos.id])
+      end
+
+      it "includes position in the response" do
+        goal = create(:goal, :family_visible, family: family, creator: user, position: 5)
+
+        get "/api/v1/families/#{family.id}/goals", headers: auth_headers(user)
+
+        expect(json_response["goals"].first["position"]).to eq(5)
+      end
+
       it "returns empty array when family has no goals" do
         get "/api/v1/families/#{family.id}/goals", headers: auth_headers(user)
 
@@ -1028,6 +1051,151 @@ RSpec.describe "Api::V1::Goals" do
     context "when not authenticated" do
       it "returns 401" do
         post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals"
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
+  describe "POST /api/v1/families/:family_id/goals/update_positions" do
+    context "when user is admin" do
+      before { create(:family_membership, :admin, family: family, user: user) }
+
+      it "updates goal positions" do
+        goal1 = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+        goal2 = create(:goal, :annual, :family_visible, family: family, creator: user, position: 2)
+        goal3 = create(:goal, :annual, :family_visible, family: family, creator: user, position: 3)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: {
+               positions: [
+                 { id: goal2.id, position: 1 },
+                 { id: goal3.id, position: 2 },
+                 { id: goal1.id, position: 3 }
+               ]
+             },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["message"]).to eq("Positions updated successfully.")
+
+        expect(goal1.reload.position).to eq(3)
+        expect(goal2.reload.position).to eq(1)
+        expect(goal3.reload.position).to eq(2)
+      end
+
+      it "returns updated goals in new order" do
+        goal1 = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+        goal2 = create(:goal, :annual, :family_visible, family: family, creator: user, position: 2)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: {
+               positions: [
+                 { id: goal2.id, position: 1 },
+                 { id: goal1.id, position: 2 }
+               ]
+             },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["goals"]).to be_an(Array)
+        expect(json_response["goals"].first["position"]).to eq(1)
+      end
+
+      it "cannot update goals created by another user" do
+        other_user = create(:user)
+        create(:family_membership, :adult, family: family, user: other_user)
+        other_goal = create(:goal, :annual, :family_visible, family: family, creator: other_user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: other_goal.id, position: 1 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "returns 404 for non-existent goal" do
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: 999_999, position: 1 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when user is adult" do
+      before { create(:family_membership, :adult, family: family, user: user) }
+
+      it "updates goal positions" do
+        goal = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: goal.id, position: 2 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(goal.reload.position).to eq(2)
+      end
+    end
+
+    context "when user is teen" do
+      before { create(:family_membership, :teen, family: family, user: user) }
+
+      it "returns 403" do
+        goal = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: goal.id, position: 2 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when user is child" do
+      before { create(:family_membership, :child, family: family, user: user) }
+
+      it "returns 403" do
+        goal = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: goal.id, position: 2 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when user is observer" do
+      before { create(:family_membership, :observer, family: family, user: user) }
+
+      it "returns 403" do
+        goal = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: goal.id, position: 2 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when user is not a family member" do
+      it "returns 403" do
+        goal = create(:goal, :annual, :family_visible, family: family, creator: user, position: 1)
+
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [{ id: goal.id, position: 2 }] },
+             headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when not authenticated" do
+      it "returns 401" do
+        post "/api/v1/families/#{family.id}/goals/update_positions",
+             params: { positions: [] }
 
         expect(response).to have_http_status(:unauthorized)
       end
