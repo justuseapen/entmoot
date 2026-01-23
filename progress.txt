@@ -494,3 +494,17 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - admin/adult can manage goals; teen/child/observer can only view
   - All roles can view daily_plans/weekly_reviews, but only owner can update/delete
 ---
+
+## 2026-01-23 - US-008: Create multi-family switching spec
+- What was implemented: Created 16 test examples verifying multi-family data isolation
+- Files changed:
+  - backend/spec/requests/multi_family_spec.rb (new)
+- **Learnings for future iterations:**
+  - Accessing resources via wrong family_id returns 404 (not 403) because the resource is scoped to the family in the URL
+  - 403 is returned when user tries to access a family they have no membership in at all
+  - Use `before do` block with `create()` for setup that doesn't need direct reference (memberships, goals created for isolation testing)
+  - Use `let(:x) { Model.find_by(field: value) }` to reference records created in before block without adding memoized helpers
+  - Reorganize describe blocks to keep memoized helpers under 7 per block (rubocop RSpec/MultipleMemoizedHelpers)
+  - Use `.pluck("field")` instead of `.map { |r| r["field"] }` for array extraction (Rails/Pluck)
+  - Avoid numbered let names like `goal_a1` - use descriptive names like `goal_in_family_a`
+---
