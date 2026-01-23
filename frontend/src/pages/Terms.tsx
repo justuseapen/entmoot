@@ -207,12 +207,13 @@ export function Terms() {
               className="mb-4 text-xl font-semibold"
               style={{ color: LANDING_COLORS.darkForest }}
             >
-              Refund Policy
+              Refund Policy - Final Sale
             </h2>
             <p className="mb-4">
-              We offer a 30-day money-back guarantee for lifetime access
-              purchases. If you're not satisfied with Entmoot within 30 days of
-              purchase, contact us for a full refund.
+              All purchases of the Founding Family Edition are final. Due to the
+              nature of lifetime access and immediate product delivery, we do
+              not offer refunds. Please ensure Entmoot is right for your family
+              before purchasing.
             </p>
           </section>
 

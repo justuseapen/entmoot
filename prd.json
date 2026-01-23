@@ -89,8 +89,8 @@
         "Typecheck passes (npm run build)"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Updated Refund Policy section title to 'Refund Policy - Final Sale' and changed text to no-refund policy for Founding Family Edition. Note: HERITAGE_COLORS doesn't exist (LANDING_COLORS is used throughout), and logo-medallion.svg isn't set up as source asset - kept TreePine icon. TypeScript build passes."
     },
     {
       "id": "US-006",
