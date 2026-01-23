@@ -1,37 +1,31 @@
 import { Link } from "react-router-dom";
-import { TreePine, ArrowLeft } from "lucide-react";
-
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { ArrowLeft } from "lucide-react";
+import { HERITAGE_COLORS } from "@/components/landing/design-system";
 
 export function Terms() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: LANDING_COLORS.creamWhite }}
+      style={{ backgroundColor: HERITAGE_COLORS.parchment }}
     >
       {/* Header */}
       <header
         className="border-b"
-        style={{ borderColor: `${LANDING_COLORS.forestGreen}20` }}
+        style={{ borderColor: `${HERITAGE_COLORS.deepForest}20` }}
       >
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <TreePine
+            <img
+              src="/logo-medallion.svg"
+              alt="Entmoot"
               className="h-8 w-8"
-              style={{ color: LANDING_COLORS.forestGreen }}
             />
             <span
               className="text-xl font-bold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{
+                color: HERITAGE_COLORS.charcoal,
+                fontFamily: "'Georgia', serif",
+              }}
             >
               Entmoot
             </span>
@@ -39,7 +33,7 @@ export function Terms() {
           <Link
             to="/"
             className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
-            style={{ color: LANDING_COLORS.forestGreen }}
+            style={{ color: HERITAGE_COLORS.deepForest }}
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Home
@@ -51,25 +45,25 @@ export function Terms() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
         <h1
           className="mb-4 text-3xl font-bold sm:text-4xl"
-          style={{ color: LANDING_COLORS.darkForest }}
+          style={{ color: HERITAGE_COLORS.charcoal }}
         >
           Terms of Service
         </h1>
         <p
           className="mb-8 text-sm"
-          style={{ color: LANDING_COLORS.earthBrown }}
+          style={{ color: HERITAGE_COLORS.sepia }}
         >
           Last updated: January 2026
         </p>
 
         <div
           className="prose prose-lg max-w-none"
-          style={{ color: LANDING_COLORS.earthBrown }}
+          style={{ color: HERITAGE_COLORS.sepia }}
         >
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Agreement to Terms
             </h2>
@@ -83,7 +77,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Description of Service
             </h2>
@@ -98,7 +92,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Accounts
             </h2>
@@ -118,7 +112,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Lifetime Access
             </h2>
@@ -139,7 +133,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Acceptable Use
             </h2>
@@ -157,7 +151,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Intellectual Property
             </h2>
@@ -176,7 +170,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Disclaimer of Warranties
             </h2>
@@ -191,7 +185,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Limitation of Liability
             </h2>
@@ -205,7 +199,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Refund Policy - Final Sale
             </h2>
@@ -220,7 +214,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Termination
             </h2>
@@ -234,7 +228,7 @@ export function Terms() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Changes to Terms
             </h2>
@@ -248,7 +242,7 @@ export function Terms() {
           <section>
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Contact Us
             </h2>
@@ -257,7 +251,7 @@ export function Terms() {
               <a
                 href="mailto:legal@entmoot.app"
                 className="font-medium"
-                style={{ color: LANDING_COLORS.forestGreen }}
+                style={{ color: HERITAGE_COLORS.deepForest }}
               >
                 legal@entmoot.app
               </a>

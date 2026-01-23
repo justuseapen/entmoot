@@ -1,37 +1,31 @@
 import { Link } from "react-router-dom";
-import { TreePine, ArrowLeft } from "lucide-react";
-
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { ArrowLeft } from "lucide-react";
+import { HERITAGE_COLORS } from "@/components/landing/design-system";
 
 export function Privacy() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: LANDING_COLORS.creamWhite }}
+      style={{ backgroundColor: HERITAGE_COLORS.parchment }}
     >
       {/* Header */}
       <header
         className="border-b"
-        style={{ borderColor: `${LANDING_COLORS.forestGreen}20` }}
+        style={{ borderColor: `${HERITAGE_COLORS.deepForest}20` }}
       >
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <TreePine
+            <img
+              src="/logo-medallion.svg"
+              alt="Entmoot"
               className="h-8 w-8"
-              style={{ color: LANDING_COLORS.forestGreen }}
             />
             <span
               className="text-xl font-bold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{
+                color: HERITAGE_COLORS.charcoal,
+                fontFamily: "'Georgia', serif",
+              }}
             >
               Entmoot
             </span>
@@ -39,7 +33,7 @@ export function Privacy() {
           <Link
             to="/"
             className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
-            style={{ color: LANDING_COLORS.forestGreen }}
+            style={{ color: HERITAGE_COLORS.deepForest }}
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Home
@@ -51,25 +45,25 @@ export function Privacy() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
         <h1
           className="mb-4 text-3xl font-bold sm:text-4xl"
-          style={{ color: LANDING_COLORS.darkForest }}
+          style={{ color: HERITAGE_COLORS.charcoal }}
         >
           Privacy Policy
         </h1>
         <p
           className="mb-8 text-sm"
-          style={{ color: LANDING_COLORS.earthBrown }}
+          style={{ color: HERITAGE_COLORS.sepia }}
         >
           Last updated: January 2026
         </p>
 
         <div
           className="prose prose-lg max-w-none"
-          style={{ color: LANDING_COLORS.earthBrown }}
+          style={{ color: HERITAGE_COLORS.sepia }}
         >
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Introduction
             </h2>
@@ -85,7 +79,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Information We Collect
             </h2>
@@ -103,7 +97,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               COPPA Compliance
             </h2>
@@ -125,7 +119,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               How We Use Your Information
             </h2>
@@ -144,7 +138,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Data Security
             </h2>
@@ -158,7 +152,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Data Retention
             </h2>
@@ -172,7 +166,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Lifetime Access Data Retention
             </h2>
@@ -188,7 +182,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Third-Party Services
             </h2>
@@ -202,7 +196,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Cookies
             </h2>
@@ -215,7 +209,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Your Rights
             </h2>
@@ -232,7 +226,7 @@ export function Privacy() {
           <section className="mb-8">
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Contact Us
             </h2>
@@ -242,7 +236,7 @@ export function Privacy() {
               <a
                 href="mailto:privacy@entmoot.app"
                 className="font-medium"
-                style={{ color: LANDING_COLORS.forestGreen }}
+                style={{ color: HERITAGE_COLORS.deepForest }}
               >
                 privacy@entmoot.app
               </a>
@@ -253,7 +247,7 @@ export function Privacy() {
           <section>
             <h2
               className="mb-4 text-xl font-semibold"
-              style={{ color: LANDING_COLORS.darkForest }}
+              style={{ color: HERITAGE_COLORS.charcoal }}
             >
               Changes to This Policy
             </h2>
