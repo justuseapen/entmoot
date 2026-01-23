@@ -34,8 +34,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created migration with email (not null, unique index), status (default 0, indexed), subscribed_at, unsubscribed_at, timestamps. Migration ran successfully."
     },
     {
       "id": "US-003",
@@ -52,8 +52,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created controller with skip_before_action :authenticate_user!, create action accepting email param, returning 201 on success and 422 on validation/duplicate errors. Sets subscribed_at on creation. Rubocop passes."
     },
     {
       "id": "US-004",
@@ -71,8 +71,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added route POST /api/v1/newsletter/subscribe. Created comprehensive request specs (10 examples) testing success, invalid format, duplicates (case-insensitive), and missing/empty email. All specs pass, rubocop clean."
     },
     {
       "id": "US-005",

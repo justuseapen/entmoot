@@ -428,3 +428,37 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Email uniqueness validation uses `case_sensitive: false` to prevent duplicates differing only in case
   - Model created before migration - that's OK, Rails handles this gracefully
 ---
+
+## 2026-01-23 - US-002: Create newsletter_subscriptions migration
+- What was implemented: Created database migration for newsletter_subscriptions table
+- Files changed:
+  - backend/db/migrate/20260123123750_create_newsletter_subscriptions.rb (new)
+  - backend/db/schema.rb (auto-updated)
+- **Learnings for future iterations:**
+  - Use Ruby 3.4.4 for running migrations (bundle exec rails db:migrate), not 3.3.0 - connection_pool has syntax issues with 3.3.0
+  - Always add unique index on email fields for subscription tables
+  - Status column uses integer type with default 0 (matches enum integer values)
+---
+
+## 2026-01-23 - US-003: Create NewsletterSubscriptionsController
+- What was implemented: Created API controller for newsletter subscription with public endpoint
+- Files changed:
+  - backend/app/controllers/api/v1/newsletter_subscriptions_controller.rb (new)
+- **Learnings for future iterations:**
+  - Use skip_before_action :authenticate_user! for public endpoints (similar to feedback controller)
+  - Use LOWER() in SQL for case-insensitive duplicate check before model validation
+  - params.require(:email) returns 400 for missing/empty params - model validation is skipped
+  - Return friendly error message for duplicates instead of generic validation error
+---
+
+## 2026-01-23 - US-004: Add newsletter route and request specs
+- What was implemented: Added route and comprehensive request specs for newsletter subscription
+- Files changed:
+  - backend/config/routes.rb (added newsletter/subscribe route)
+  - backend/spec/requests/api/v1/newsletter_subscriptions_spec.rb (new)
+- **Learnings for future iterations:**
+  - freeze_time helper from ActiveSupport is useful for testing timestamps
+  - params.require() returns 400 Bad Request for both missing and empty string params
+  - Case-insensitive duplicate detection tested with uppercase email in spec
+  - Newsletter subscription route placed near other public routes (webhooks section)
+---
