@@ -462,3 +462,35 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Case-insensitive duplicate detection tested with uppercase email in spec
   - Newsletter subscription route placed near other public routes (webhooks section)
 ---
+
+## 2026-01-23 - US-005: Update Terms of Service for LTD no-refund policy
+- What was implemented: Updated refund policy section with no-refund policy for Founding Family Edition
+- Files changed:
+  - frontend/src/pages/Terms.tsx
+- **Learnings for future iterations:**
+  - HERITAGE_COLORS mentioned in PRD doesn't exist - LANDING_COLORS is used throughout landing components
+  - logo-medallion.svg exists in dist but not set up as a source asset
+  - Terms and Privacy pages use identical color/layout patterns - update both when changing design system
+---
+
+## 2026-01-23 - US-006: Update Privacy Policy with LTD data retention
+- What was implemented: Added Lifetime Access Data Retention section explaining data handling for LTD customers
+- Files changed:
+  - frontend/src/pages/Privacy.tsx
+- **Learnings for future iterations:**
+  - Same design system patterns as Terms.tsx - both share LANDING_COLORS local constant
+---
+
+## 2026-01-23 - US-007: Create comprehensive role permissions spec
+- What was implemented: Created 34 request specs testing role-based permissions for all 5 user roles
+- Files changed:
+  - backend/spec/requests/role_permissions_spec.rb (new)
+- **Learnings for future iterations:**
+  - Goals controller expects params wrapped in `goal:` key, not flat params
+  - DailyPlans/WeeklyReviews expect params wrapped in `daily_plan:`/`weekly_review:` keys
+  - Delete endpoints return 200 with JSON message, not 204 No Content
+  - Use hash for users (`users[:admin]`) to consolidate memoized helpers under rubocop limit of 7
+  - Use `:aggregate_failures` tag for specs that loop through multiple roles
+  - admin/adult can manage goals; teen/child/observer can only view
+  - All roles can view daily_plans/weekly_reviews, but only owner can update/delete
+---

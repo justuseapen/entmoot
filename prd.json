@@ -126,8 +126,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created spec with 34 examples testing all 5 roles (admin, adult, teen, child, observer). Tests Goals CRUD, DailyPlans, WeeklyReviews, and non-member access. Verifies 200/201 for authorized actions and 403 Forbidden for unauthorized. All specs pass, rubocop clean."
     },
     {
       "id": "US-008",
