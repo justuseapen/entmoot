@@ -16,10 +16,18 @@ module Api
           user = User.find_by(email: params.dig(:user, :email))
 
           if user
-            user.send_reset_password_instructions
-            render json: {
-              message: "Password reset instructions have been sent to your email."
-            }, status: :ok
+            begin
+              user.send_reset_password_instructions
+              render json: {
+                message: "Password reset instructions have been sent to your email."
+              }, status: :ok
+            rescue StandardError => e
+              Rails.logger.error("Failed to send password reset email: #{e.message}")
+              render_error(
+                "Unable to send password reset email. Please try again later.",
+                errors: ["Email delivery failed"]
+              )
+            end
           else
             render_error(
               FRIENDLY_ERROR_MESSAGES[:email_not_found],
