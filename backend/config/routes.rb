@@ -157,6 +157,9 @@ Rails.application.routes.draw do
       # Email unsubscribe (public route with token)
       get "unsubscribe", to: "email_subscriptions#unsubscribe", as: :unsubscribe
 
+      # Newsletter subscription (public route)
+      post "newsletter/subscribe", to: "newsletter_subscriptions#create"
+
       # Webhooks (public routes)
       post "webhooks/twilio", to: "webhooks#twilio"
 

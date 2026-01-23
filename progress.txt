@@ -417,3 +417,109 @@ Started: Tue Jan 20 16:20:13 EST 2026
   - Query key pattern for mentions: `["mentions", "recent", familyId]`
   - RecentMention type includes mentioner object with id/name, not just user_id
 ---
+
+## 2026-01-23 - US-001: Create NewsletterSubscription model
+- What was implemented: Created NewsletterSubscription model for storing newsletter email subscriptions
+- Files changed:
+  - backend/app/models/newsletter_subscription.rb (new)
+- **Learnings for future iterations:**
+  - Use URI::MailTo::EMAIL_REGEXP for email validation - consistent with other models in codebase
+  - For integer enums use simple hash syntax: `enum :status, { pending: 0, confirmed: 1, unsubscribed: 2 }`
+  - Email uniqueness validation uses `case_sensitive: false` to prevent duplicates differing only in case
+  - Model created before migration - that's OK, Rails handles this gracefully
+---
+
+## 2026-01-23 - US-002: Create newsletter_subscriptions migration
+- What was implemented: Created database migration for newsletter_subscriptions table
+- Files changed:
+  - backend/db/migrate/20260123123750_create_newsletter_subscriptions.rb (new)
+  - backend/db/schema.rb (auto-updated)
+- **Learnings for future iterations:**
+  - Use Ruby 3.4.4 for running migrations (bundle exec rails db:migrate), not 3.3.0 - connection_pool has syntax issues with 3.3.0
+  - Always add unique index on email fields for subscription tables
+  - Status column uses integer type with default 0 (matches enum integer values)
+---
+
+## 2026-01-23 - US-003: Create NewsletterSubscriptionsController
+- What was implemented: Created API controller for newsletter subscription with public endpoint
+- Files changed:
+  - backend/app/controllers/api/v1/newsletter_subscriptions_controller.rb (new)
+- **Learnings for future iterations:**
+  - Use skip_before_action :authenticate_user! for public endpoints (similar to feedback controller)
+  - Use LOWER() in SQL for case-insensitive duplicate check before model validation
+  - params.require(:email) returns 400 for missing/empty params - model validation is skipped
+  - Return friendly error message for duplicates instead of generic validation error
+---
+
+## 2026-01-23 - US-004: Add newsletter route and request specs
+- What was implemented: Added route and comprehensive request specs for newsletter subscription
+- Files changed:
+  - backend/config/routes.rb (added newsletter/subscribe route)
+  - backend/spec/requests/api/v1/newsletter_subscriptions_spec.rb (new)
+- **Learnings for future iterations:**
+  - freeze_time helper from ActiveSupport is useful for testing timestamps
+  - params.require() returns 400 Bad Request for both missing and empty string params
+  - Case-insensitive duplicate detection tested with uppercase email in spec
+  - Newsletter subscription route placed near other public routes (webhooks section)
+---
+
+## 2026-01-23 - US-005: Update Terms of Service for LTD no-refund policy
+- What was implemented: Updated refund policy section with no-refund policy for Founding Family Edition
+- Files changed:
+  - frontend/src/pages/Terms.tsx
+- **Learnings for future iterations:**
+  - HERITAGE_COLORS mentioned in PRD doesn't exist - LANDING_COLORS is used throughout landing components
+  - logo-medallion.svg exists in dist but not set up as a source asset
+  - Terms and Privacy pages use identical color/layout patterns - update both when changing design system
+---
+
+## 2026-01-23 - US-006: Update Privacy Policy with LTD data retention
+- What was implemented: Added Lifetime Access Data Retention section explaining data handling for LTD customers
+- Files changed:
+  - frontend/src/pages/Privacy.tsx
+- **Learnings for future iterations:**
+  - Same design system patterns as Terms.tsx - both share LANDING_COLORS local constant
+---
+
+## 2026-01-23 - US-007: Create comprehensive role permissions spec
+- What was implemented: Created 34 request specs testing role-based permissions for all 5 user roles
+- Files changed:
+  - backend/spec/requests/role_permissions_spec.rb (new)
+- **Learnings for future iterations:**
+  - Goals controller expects params wrapped in `goal:` key, not flat params
+  - DailyPlans/WeeklyReviews expect params wrapped in `daily_plan:`/`weekly_review:` keys
+  - Delete endpoints return 200 with JSON message, not 204 No Content
+  - Use hash for users (`users[:admin]`) to consolidate memoized helpers under rubocop limit of 7
+  - Use `:aggregate_failures` tag for specs that loop through multiple roles
+  - admin/adult can manage goals; teen/child/observer can only view
+  - All roles can view daily_plans/weekly_reviews, but only owner can update/delete
+---
+
+## 2026-01-23 - US-008: Create multi-family switching spec
+- What was implemented: Created 16 test examples verifying multi-family data isolation
+- Files changed:
+  - backend/spec/requests/multi_family_spec.rb (new)
+- **Learnings for future iterations:**
+  - Accessing resources via wrong family_id returns 404 (not 403) because the resource is scoped to the family in the URL
+  - 403 is returned when user tries to access a family they have no membership in at all
+  - Use `before do` block with `create()` for setup that doesn't need direct reference (memberships, goals created for isolation testing)
+  - Use `let(:x) { Model.find_by(field: value) }` to reference records created in before block without adding memoized helpers
+  - Reorganize describe blocks to keep memoized helpers under 7 per block (rubocop RSpec/MultipleMemoizedHelpers)
+  - Use `.pluck("field")` instead of `.map { |r| r["field"] }` for array extraction (Rails/Pluck)
+  - Avoid numbered let names like `goal_a1` - use descriptive names like `goal_in_family_a`
+---
+
+## 2026-01-23 - US-009: Create onboarding flow integration spec
+- What was implemented: Created comprehensive integration tests for complete onboarding flow
+- Files changed:
+  - backend/spec/requests/onboarding_flow_spec.rb (new - 28 test examples)
+- **Learnings for future iterations:**
+  - When testing multi-step flows with different auth contexts, use `reset!` to clear the integration session between steps
+  - `Warden.test_reset!` alone doesn't clear the session in Rails integration tests - `reset!` from ActionDispatch is needed
+  - Use `let(:x) do ... end` for factory creates with many attributes to avoid line length issues
+  - End-to-end integration tests that intentionally test a full flow can use `# rubocop:disable RSpec/ExampleLength`
+  - Store tokens/values before calling `reset!` as the objects may be affected by session clearing
+  - The `/api/v1/auth/register` endpoint returns `onboarding_required` flag for new users
+  - Family creation via POST /api/v1/families automatically creates admin FamilyMembership for creator
+  - Invitation acceptance can create new users inline via `user` params when unauthenticated
+---
