@@ -40,6 +40,7 @@ import { StreaksSummary } from "@/components/StreaksSummary";
 import { BadgeShowcase } from "@/components/BadgeShowcase";
 import { PointsDisplay } from "@/components/PointsDisplay";
 import { FirstReflectionPrompt } from "@/components/FirstReflectionPrompt";
+import { AnnualGoalsSection } from "@/components/AnnualGoalsSection";
 
 // Non-Negotiables section with incomplete first, completed under "Show more"
 interface NonNegotiablesSectionProps {
@@ -284,6 +285,11 @@ export function Dashboard() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Annual Goals Section - shown at top for visibility */}
+            {currentFamily && (
+              <AnnualGoalsSection familyId={currentFamily.id} />
+            )}
+
             {/* Quick Actions */}
             <Card>
               <CardHeader className="pb-3">

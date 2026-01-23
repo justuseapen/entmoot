@@ -38,13 +38,14 @@ export function useUpdateOnboardingStep() {
       stepName: string;
       data?: Record<string, unknown>;
     }) => {
-      return apiFetch<{ message: string; next_step: number; completed_at?: string }>(
-        `/onboarding/step/${stepName}`,
-        {
-          method: "POST",
-          body: data ? JSON.stringify(data) : undefined,
-        }
-      );
+      return apiFetch<{
+        message: string;
+        next_step: number;
+        completed_at?: string;
+      }>(`/onboarding/step/${stepName}`, {
+        method: "POST",
+        body: data ? JSON.stringify(data) : undefined,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["onboarding", "status"] });

@@ -910,4 +910,189 @@ RSpec.describe "Api::V1::Goals" do
       end
     end
   end
+
+  describe "POST /api/v1/families/:family_id/goals/:id/regenerate_sub_goals" do
+    let!(:goal) do
+      create(:goal, :annual, :family_visible, family: family, creator: user, title: "Get pilot's license",
+                                              due_date: 1.year.from_now.to_date)
+    end
+
+    context "when user is admin" do
+      before do
+        create(:family_membership, :admin, family: family, user: user)
+        allow(SubGoalGenerationJob).to receive(:perform_later)
+      end
+
+      it "enqueues the sub-goal generation job" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        expect(SubGoalGenerationJob).to have_received(:perform_later).with(goal_id: goal.id, user_id: user.id)
+      end
+
+      it "returns success message" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(json_response["message"]).to eq("Sub-goal generation started. You'll be notified when complete.")
+      end
+
+      it "deletes existing draft sub-goals" do
+        draft_sub_goal = create(:goal, :quarterly, :family_visible, family: family, creator: user, parent: goal,
+                                                                    is_draft: true)
+        accepted_sub_goal = create(:goal, :quarterly, :family_visible, family: family, creator: user, parent: goal,
+                                                                       is_draft: false)
+
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(Goal.exists?(draft_sub_goal.id)).to be(false)
+        expect(Goal.exists?(accepted_sub_goal.id)).to be(true)
+      end
+
+      it "returns updated goal with children counts" do
+        create(:goal, :quarterly, :family_visible, family: family, creator: user, parent: goal, is_draft: false)
+
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(json_response["goal"]["children_count"]).to eq(1)
+        expect(json_response["goal"]["draft_children_count"]).to eq(0)
+      end
+    end
+
+    context "when user is adult" do
+      before do
+        create(:family_membership, :adult, family: family, user: user)
+        allow(SubGoalGenerationJob).to receive(:perform_later)
+      end
+
+      it "allows regeneration" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when user is teen" do
+      before { create(:family_membership, :teen, family: family, user: user) }
+
+      it "returns 403" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "with visibility restrictions" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:family_membership, :adult, family: family, user: other_user)
+        allow(SubGoalGenerationJob).to receive(:perform_later)
+      end
+
+      it "returns 403 for personal goals of other users" do
+        personal_goal = create(:goal, :annual, :personal, family: family, creator: user, due_date: 1.year.from_now.to_date)
+
+        post "/api/v1/families/#{family.id}/goals/#{personal_goal.id}/regenerate_sub_goals",
+             headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "allows regeneration for family-visible goals" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals", headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "allows regeneration of shared goals when assigned" do
+        shared_goal = create(:goal, :annual, :shared, family: family, creator: user, due_date: 1.year.from_now.to_date)
+        shared_goal.assign_user(other_user)
+
+        post "/api/v1/families/#{family.id}/goals/#{shared_goal.id}/regenerate_sub_goals",
+             headers: auth_headers(other_user)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when goal does not exist" do
+      before { create(:family_membership, :admin, family: family, user: user) }
+
+      it "returns 404" do
+        post "/api/v1/families/#{family.id}/goals/999999/regenerate_sub_goals", headers: auth_headers(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when not authenticated" do
+      it "returns 401" do
+        post "/api/v1/families/#{family.id}/goals/#{goal.id}/regenerate_sub_goals"
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
+  describe "sub-goal auto-generation on create" do
+    let(:valid_annual_params) do
+      {
+        goal: {
+          title: "Get pilot's license",
+          time_scale: "annual",
+          due_date: 1.year.from_now.to_date.to_s,
+          visibility: "family"
+        }
+      }
+    end
+
+    before do
+      create(:family_membership, :admin, family: family, user: user)
+      allow(SubGoalGenerationJob).to receive(:perform_later)
+    end
+
+    it "enqueues sub-goal generation for annual goals" do
+      post "/api/v1/families/#{family.id}/goals", params: valid_annual_params, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      goal_id = json_response["goal"]["id"]
+      expect(SubGoalGenerationJob).to have_received(:perform_later).with(goal_id: goal_id, user_id: user.id)
+    end
+
+    it "enqueues sub-goal generation for quarterly goals" do
+      quarterly_params = valid_annual_params.deep_merge(goal: { time_scale: "quarterly" })
+
+      post "/api/v1/families/#{family.id}/goals", params: quarterly_params, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(SubGoalGenerationJob).to have_received(:perform_later)
+    end
+
+    it "does not enqueue for monthly goals" do
+      monthly_params = valid_annual_params.deep_merge(goal: { time_scale: "monthly" })
+
+      post "/api/v1/families/#{family.id}/goals", params: monthly_params, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(SubGoalGenerationJob).not_to have_received(:perform_later)
+    end
+
+    it "does not enqueue when generate_sub_goals is false" do
+      opt_out_params = valid_annual_params.deep_merge(goal: { generate_sub_goals: false })
+
+      post "/api/v1/families/#{family.id}/goals", params: opt_out_params, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(SubGoalGenerationJob).not_to have_received(:perform_later)
+    end
+
+    it "does not enqueue for goals without due dates" do
+      no_due_date_params = valid_annual_params.deep_merge(goal: { due_date: nil })
+
+      post "/api/v1/families/#{family.id}/goals", params: no_due_date_params, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(SubGoalGenerationJob).not_to have_received(:perform_later)
+    end
+  end
 end

@@ -86,6 +86,23 @@ class Goal < ApplicationRecord
     assignees.pluck(:id)
   end
 
+  # Returns aggregated progress from children, or own progress if no children
+  def aggregated_progress
+    return progress if children.empty?
+
+    children.where.not(status: :abandoned).average(:progress)&.round || 0
+  end
+
+  # Count of non-abandoned children
+  def children_count
+    children.where.not(status: :abandoned).count
+  end
+
+  # Count of draft children awaiting review
+  def draft_children_count
+    children.where(is_draft: true).count
+  end
+
   after_destroy :remove_from_calendars
   # Calendar sync callbacks
   after_commit :schedule_calendar_sync, on: %i[create update], if: :should_sync_to_calendar?

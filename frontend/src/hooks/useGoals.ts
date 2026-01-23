@@ -7,6 +7,7 @@ import {
   updateGoal,
   deleteGoal,
   refineGoal,
+  regenerateSubGoals,
   type CreateGoalData,
   type UpdateGoalData,
   type GoalFilters,
@@ -89,4 +90,25 @@ export function useRefineGoal(familyId: number, goalId: number) {
     mutationFn: () => refineGoal(familyId, goalId),
     // Don't invalidate queries - refinement doesn't change the goal until user accepts
   });
+}
+
+// Sub-goal regeneration mutation
+export function useRegenerateSubGoals(familyId: number, goalId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => regenerateSubGoals(familyId, goalId),
+    onSuccess: () => {
+      // Invalidate goal lists and the specific goal to show updated children
+      queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: goalKeys.detail(familyId, goalId),
+      });
+    },
+  });
+}
+
+// Convenience hook for annual goals
+export function useAnnualGoals(familyId: number) {
+  return useGoals(familyId, { time_scale: "annual" });
 }

@@ -5,7 +5,13 @@ import { HERITAGE_COLORS } from "./design-system";
 import { STRIPE_PAYMENT_LINK, PRICE_DISPLAY } from "@/config/pricing";
 
 // Elegant tree silhouette for the bottom
-function TreeSilhouette({ height, className = "" }: { height: number; className?: string }) {
+function TreeSilhouette({
+  height,
+  className = "",
+}: {
+  height: number;
+  className?: string;
+}) {
   const width = height * 0.5;
 
   return (
@@ -128,10 +134,7 @@ export function FinalCTASection() {
       </div>
 
       {/* Elegant tree silhouettes at bottom */}
-      <div
-        className="absolute right-0 bottom-0 left-0 z-0"
-        aria-hidden="true"
-      >
+      <div className="absolute right-0 bottom-0 left-0 z-0" aria-hidden="true">
         <div className="relative h-24 sm:h-32 lg:h-40">
           <div className="absolute bottom-0 flex w-full items-end justify-around opacity-30">
             <TreeSilhouette height={60} className="hidden sm:block" />

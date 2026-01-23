@@ -85,7 +85,7 @@ export function FAQSection() {
           {/* Section headline */}
           <div className="mb-12 text-center lg:mb-16">
             <p
-              className="mb-3 text-sm font-medium uppercase tracking-wider"
+              className="mb-3 text-sm font-medium tracking-wider uppercase"
               style={{ color: HERITAGE_COLORS.antiqueGold }}
             >
               Common Questions

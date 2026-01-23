@@ -22,9 +22,24 @@ function MedallionLogo({ className = "" }: { className?: string }) {
       style={{ color: HERITAGE_COLORS.deepForest }}
     >
       {/* Outer circle */}
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <circle
+        cx="20"
+        cy="20"
+        r="18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        fill="none"
+      />
       {/* Inner circle */}
-      <circle cx="20" cy="20" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <circle
+        cx="20"
+        cy="20"
+        r="15"
+        stroke="currentColor"
+        strokeWidth="0.5"
+        fill="none"
+        opacity="0.5"
+      />
 
       {/* Tree trunk */}
       <path
@@ -47,11 +62,7 @@ function MedallionLogo({ className = "" }: { className?: string }) {
         strokeWidth="1"
         fill="none"
       />
-      <path
-        d="M20 22 L20 10"
-        stroke="currentColor"
-        strokeWidth="1"
-      />
+      <path d="M20 22 L20 10" stroke="currentColor" strokeWidth="1" />
 
       {/* Roots */}
       <path
@@ -121,9 +132,7 @@ export function LandingNav() {
         isScrolled ? "shadow-sm" : ""
       }`}
       style={{
-        backgroundColor: isScrolled
-          ? HERITAGE_COLORS.parchment
-          : "transparent",
+        backgroundColor: isScrolled ? HERITAGE_COLORS.parchment : "transparent",
         borderBottom: isScrolled
           ? `1px solid ${HERITAGE_COLORS.antiqueBrass}15`
           : "none",
@@ -176,9 +185,7 @@ export function LandingNav() {
             className="rounded-lg px-5 py-2 text-sm font-medium text-white transition-all hover:opacity-90"
             style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
           >
-            <a href={STRIPE_PAYMENT_LINK}>
-              Get Lifetime Access
-            </a>
+            <a href={STRIPE_PAYMENT_LINK}>Get Lifetime Access</a>
           </Button>
         </div>
 

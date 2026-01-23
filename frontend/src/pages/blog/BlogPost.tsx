@@ -943,10 +943,7 @@ export function BlogPost() {
               >
                 Ready to start your family's journey?
               </h3>
-              <p
-                className="mb-6"
-                style={{ color: HERITAGE_COLORS.sepia }}
-              >
+              <p className="mb-6" style={{ color: HERITAGE_COLORS.sepia }}>
                 Join the Founding Families and get lifetime access to Entmoot.
               </p>
               <a
