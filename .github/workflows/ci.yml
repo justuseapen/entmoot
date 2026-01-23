@@ -5,6 +5,8 @@ on:
     branches: [main, master, feature/mvp-foundation]
   pull_request:
     branches: [main, master]
+  # Allow this workflow to be called by other workflows (e.g., deploy-staging)
+  workflow_call:
 
 jobs:
   backend:

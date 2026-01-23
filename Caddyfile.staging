@@ -1,0 +1,26 @@
+{$DOMAIN:staging.entmoot.app} {
+    # Enable compression
+    encode gzip zstd
+
+    # Proxy all requests to Rails
+    # Rails serves both API endpoints and static frontend files
+    # (with RAILS_SERVE_STATIC_FILES=true)
+    reverse_proxy web_staging:3000
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Environment "staging"
+        -Server
+    }
+
+    # Logging (more verbose for staging)
+    log {
+        output stdout
+        format console
+        level DEBUG
+    }
+}

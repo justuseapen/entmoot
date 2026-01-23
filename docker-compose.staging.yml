@@ -1,0 +1,139 @@
+version: "3.8"
+
+# Staging environment for Entmoot
+# Runs alongside production on the same server with isolated resources
+
+services:
+  # PostgreSQL Database (Staging)
+  postgres_staging:
+    image: postgres:16-alpine
+    container_name: entmoot_postgres_staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-entmoot_staging}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-entmoot_staging}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-entmoot_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - entmoot_staging_network
+
+  # Redis for Sidekiq and ActionCable (Staging)
+  redis_staging:
+    image: redis:7-alpine
+    container_name: entmoot_redis_staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - entmoot_staging_network
+
+  # Rails Web Application (Staging)
+  # Uses pre-built image from GitHub Container Registry
+  web_staging:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-org/entmoot}/backend:${IMAGE_TAG:-staging}
+    container_name: entmoot_web_staging
+    restart: unless-stopped
+    depends_on:
+      postgres_staging:
+        condition: service_healthy
+      redis_staging:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: staging
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?RAILS_MASTER_KEY is required}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
+      DATABASE_URL: postgres://${POSTGRES_USER:-entmoot_staging}:${POSTGRES_PASSWORD}@postgres_staging:5432/${POSTGRES_DB:-entmoot_staging}
+      REDIS_URL: redis://redis_staging:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://staging.entmoot.app}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      MAILER_FROM: ${MAILER_FROM:-staging@entmoot.app}
+      DOMAIN: ${DOMAIN:-staging.entmoot.app}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${IMAGE_TAG:-staging}
+    volumes:
+      - rails_staging_storage:/rails/storage
+    networks:
+      - entmoot_staging_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Sidekiq Background Job Processor (Staging)
+  sidekiq_staging:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-org/entmoot}/backend:${IMAGE_TAG:-staging}
+    container_name: entmoot_sidekiq_staging
+    restart: unless-stopped
+    depends_on:
+      postgres_staging:
+        condition: service_healthy
+      redis_staging:
+        condition: service_healthy
+      web_staging:
+        condition: service_healthy
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: staging
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      DATABASE_URL: postgres://${POSTGRES_USER:-entmoot_staging}:${POSTGRES_PASSWORD}@postgres_staging:5432/${POSTGRES_DB:-entmoot_staging}
+      REDIS_URL: redis://redis_staging:6379/0
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      MAILER_FROM: ${MAILER_FROM:-staging@entmoot.app}
+      DOMAIN: ${DOMAIN:-staging.entmoot.app}
+      SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-3}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    volumes:
+      - rails_staging_storage:/rails/storage
+    networks:
+      - entmoot_staging_network
+
+  # Caddy Reverse Proxy with Automatic HTTPS (Staging)
+  caddy_staging:
+    image: caddy:2-alpine
+    container_name: entmoot_caddy_staging
+    restart: unless-stopped
+    depends_on:
+      - web_staging
+    ports:
+      - "8080:80"
+      - "8443:443"
+      - "8443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:-staging.entmoot.app}
+    volumes:
+      - ./Caddyfile.staging:/etc/caddy/Caddyfile:ro
+      - caddy_staging_data:/data
+      - caddy_staging_config:/config
+    networks:
+      - entmoot_staging_network
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:
+  rails_staging_storage:
+  caddy_staging_data:
+  caddy_staging_config:
+
+networks:
+  entmoot_staging_network:
+    driver: bridge
