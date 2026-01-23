@@ -122,7 +122,6 @@ services:
       DOMAIN: ${DOMAIN:-staging.entmoot.app}
     volumes:
       - ./Caddyfile.staging:/etc/caddy/Caddyfile:ro
-      - ./frontend/dist:/srv/frontend:ro
       - caddy_staging_data:/data
       - caddy_staging_config:/config
     networks:

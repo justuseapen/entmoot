@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Docker files (not needed in build context)
+docker-compose*.yml
+Caddyfile*
+
+# Environment files
+.env*
+!.env*.example
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Scripts (not needed for build)
+scripts/
+
+# Backend-specific ignores
+backend/.bundle
+backend/log/*
+backend/tmp/*
+backend/storage/*
+backend/config/master.key
+backend/config/credentials/*.key
+
+# Frontend-specific ignores
+frontend/node_modules
+frontend/dist
+frontend/.env*
+!frontend/.env*.example
+
+# Test files (not needed in production image)
+backend/spec
+frontend/src/**/*.test.*
+frontend/src/**/*.spec.*

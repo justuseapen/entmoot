@@ -46,12 +46,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download frontend artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist-${{ github.sha }}
-          path: frontend/dist
-
       - name: Trigger Coolify Deployment
         id: coolify_deploy
         run: |

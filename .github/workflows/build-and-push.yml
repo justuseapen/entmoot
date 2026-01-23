@@ -9,15 +9,15 @@ on:
     outputs:
       image_tag:
         description: "The Docker image tag that was built"
-        value: ${{ jobs.build-backend.outputs.image_tag }}
+        value: ${{ jobs.build.outputs.image_tag }}
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/backend
 
 jobs:
-  build-backend:
-    name: Build Backend Image
+  build:
+    name: Build Application Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,11 +52,11 @@ jobs:
             type=raw,value=staging,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
 
-      - name: Build and push backend image
+      - name: Build and push application image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -64,37 +64,5 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
-
-  build-frontend:
-    name: Build Frontend
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build frontend (staging)
-        working-directory: frontend
-        env:
-          VITE_APP_VERSION: ${{ github.sha }}
-          VITE_SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
-        run: npm run build
-
-      - name: Upload frontend build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist-${{ github.sha }}
-          path: frontend/dist
-          retention-days: 7
+            VITE_APP_VERSION=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.STAGING_SENTRY_DSN }}
