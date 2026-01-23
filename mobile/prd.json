@@ -1,0 +1,1059 @@
+{
+  "project": "Entmoot Mobile",
+  "branchName": "ralph/react-native-mobile-app",
+  "description": "React Native iOS mobile app for Entmoot family planning platform with authentication, daily planning, goals, habits, reflections, push notifications, offline sync, and gamification",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Initialize Expo Project",
+      "description": "As a developer, I need a properly configured Expo project so that I can build the mobile app.",
+      "acceptanceCriteria": [
+        "Create new Expo project with `npx create-expo-app@latest . --template blank-typescript` in /mobile directory",
+        "Configure TypeScript strict mode in tsconfig.json",
+        "Set up path aliases (`@/` for `src/`) in tsconfig.json and babel.config.js",
+        "Configure app.json with bundle identifier `com.entmoot.mobile`",
+        "Set minimum iOS deployment target to 14.0 in app.json",
+        "Add .gitignore for React Native/Expo",
+        "Project builds successfully with `npx expo start`",
+        "Typecheck passes with `npx tsc --noEmit`"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Completed - babel.config.js added, bundle identifier fixed to com.entmoot.mobile, iOS min version set to 14.0"
+    },
+    {
+      "id": "US-002",
+      "title": "Configure Development Environment",
+      "description": "As a developer, I need linting, formatting, and testing configured so that code quality is maintained.",
+      "acceptanceCriteria": [
+        "Install and configure ESLint with @react-native/eslint-config",
+        "Install and configure Prettier with .prettierrc",
+        "Install Jest and @testing-library/react-native",
+        "Add npm scripts: lint, format, test, typecheck",
+        "Create .env.example with API_URL=http://localhost:3000",
+        "Install react-native-dotenv and configure babel.config.js",
+        "All scripts run without errors",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Completed - ESLint already configured, added Jest with jest-expo and @testing-library/react-native, configured react-native-dotenv with @env module support"
+    },
+    {
+      "id": "US-003",
+      "title": "Set Up Navigation Structure",
+      "description": "As a developer, I need the navigation structure defined so that users can move between screens.",
+      "acceptanceCriteria": [
+        "Install expo-router and configure in app.json",
+        "Create app/(auth) group with login.tsx, register.tsx, forgot-password.tsx placeholder screens",
+        "Create app/(tabs) group with today.tsx, goals.tsx, me.tsx placeholder screens",
+        "Create app/(tabs)/_layout.tsx with tab bar showing icons and labels",
+        "Create stack screens: app/onboarding/index.tsx, app/settings/index.tsx, app/goal/[id].tsx",
+        "Implement auth guard in app/_layout.tsx that redirects to login if not authenticated",
+        "Tab bar shows icons (Ionicons) and labels for Today, Goals, Me",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Completed - expo-router installed, app directory created with file-based routing, auth guard implemented, Ionicons used for tab icons"
+    },
+    {
+      "id": "US-004",
+      "title": "Create Design System Foundation",
+      "description": "As a developer, I need reusable UI components so that the app has consistent styling.",
+      "acceptanceCriteria": [
+        "Install react-native-paper and configure PaperProvider in app/_layout.tsx",
+        "Create src/theme/colors.ts with Entmoot brand colors (primary: #4F46E5, secondary, success, warning, error)",
+        "Create src/components/ui/Typography.tsx with H1, H2, H3, Body, Caption variants",
+        "Create src/components/ui/Button.tsx with primary, secondary, outline, ghost variants",
+        "Create src/components/ui/Card.tsx with shadow and rounded corners",
+        "Create src/components/ui/Input.tsx with label, error state, and helper text",
+        "Create src/components/ui/LoadingSpinner.tsx component",
+        "All components exported from src/components/ui/index.ts",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Completed - react-native-paper installed, PaperProvider configured, all UI components created with consistent styling"
+    },
+    {
+      "id": "US-005",
+      "title": "Implement Secure Storage Service",
+      "description": "As a developer, I need secure storage for auth tokens so that user sessions are protected.",
+      "acceptanceCriteria": [
+        "Install expo-secure-store",
+        "Create src/services/secureStorage.ts",
+        "Implement setItem(key: string, value: string): Promise<void>",
+        "Implement getItem(key: string): Promise<string | null>",
+        "Implement removeItem(key: string): Promise<void>",
+        "Handle storage errors gracefully with try/catch",
+        "Export storage keys constants: SESSION_TOKEN, USER_DATA, FAMILY_ID, BIOMETRIC_ENABLED",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Completed - expo-secure-store installed, secureStorage.ts created with setItem/getItem/removeItem and STORAGE_KEYS constants"
+    },
+    {
+      "id": "US-006",
+      "title": "Create API Client",
+      "description": "As a developer, I need an API client configured for the Rails backend so that I can make authenticated requests.",
+      "acceptanceCriteria": [
+        "Install @tanstack/react-query",
+        "Create src/lib/api.ts with typed fetch wrapper",
+        "Configure base URL from process.env.API_URL",
+        "Implement request function that attaches session token from secure storage",
+        "Handle 401 responses by clearing storage and redirecting to login",
+        "Create typed methods: get<T>, post<T>, patch<T>, del<T>",
+        "Handle network errors with user-friendly messages",
+        "Create and export QueryClient in src/lib/queryClient.ts",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Completed - @tanstack/react-query installed, api.ts enhanced with typed get/post/patch/del methods, queryClient.ts created with mobile-optimized defaults"
+    },
+    {
+      "id": "US-007",
+      "title": "Implement Auth Store",
+      "description": "As a developer, I need an auth store so that authentication state is managed globally.",
+      "acceptanceCriteria": [
+        "Install zustand",
+        "Create src/stores/authStore.ts",
+        "Define AuthState type with user, isAuthenticated, isLoading, currentFamilyId",
+        "Implement login action that stores session and user data",
+        "Implement logout action that clears storage and resets state",
+        "Implement setCurrentFamily action",
+        "Implement hydrate action that loads from secure storage on app launch",
+        "Create useAuth hook that returns store state and actions",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Completed - Added currentFamilyId state, setCurrentFamily action, useAuth hook alias. Store persists familyId to secure storage."
+    },
+    {
+      "id": "US-008",
+      "title": "Build Login Screen",
+      "description": "As a user, I want to log in with email and password so that I can access my account.",
+      "acceptanceCriteria": [
+        "Implement app/(auth)/login.tsx with full UI",
+        "Email TextInput with keyboardType='email-address' and autoCapitalize='none'",
+        "Password TextInput with secureTextEntry and show/hide toggle icon",
+        "Log In Button calls POST /api/v1/auth/login",
+        "Show ActivityIndicator during API call",
+        "Display error Alert for invalid credentials",
+        "Link to Forgot Password screen using router.push",
+        "Link to Create Account screen using router.push",
+        "On success, call authStore.login() and router.replace('/(tabs)/today')",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Completed - Full login UI with email/password inputs, show/hide password toggle, form validation, loading state, error handling, and navigation to forgot-password and register screens"
+    },
+    {
+      "id": "US-009",
+      "title": "Build Registration Screen",
+      "description": "As a new user, I want to create an account so that I can start using Entmoot.",
+      "acceptanceCriteria": [
+        "Implement app/(auth)/register.tsx with full UI",
+        "Name TextInput (required)",
+        "Email TextInput with validation",
+        "Password TextInput with requirements text (min 8 chars)",
+        "Confirm Password TextInput",
+        "Create Account Button calls POST /api/v1/auth/register",
+        "Show loading state during API call",
+        "Display validation errors from API response",
+        "Link back to login screen",
+        "On success, call authStore.login() and router.replace('/onboarding')",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Completed - Full registration UI with name/email/password/confirm password fields, client-side and API error handling, show/hide password toggles, navigation to onboarding on success"
+    },
+    {
+      "id": "US-010",
+      "title": "Build Forgot Password Screen",
+      "description": "As a user, I want to reset my password so that I can regain access to my account.",
+      "acceptanceCriteria": [
+        "Implement app/(auth)/forgot-password.tsx with full UI",
+        "Email TextInput",
+        "Send Reset Link Button calls POST /api/v1/auth/password",
+        "Show success Alert: 'Check your email for reset instructions'",
+        "Show error Alert for unregistered email",
+        "Link back to login screen",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Completed - Full forgot password UI with email validation, loading state, success/error alerts, back navigation with arrow button and footer link"
+    },
+    {
+      "id": "US-011",
+      "title": "Implement Biometric Authentication",
+      "description": "As a user, I want to use Face ID to log in so that access is faster and more secure.",
+      "acceptanceCriteria": [
+        "Install expo-local-authentication",
+        "Create src/services/biometrics.ts",
+        "Implement isAvailable(): Promise<boolean> to check device support",
+        "Implement authenticate(): Promise<boolean> to prompt biometric",
+        "Store biometric preference in secure storage",
+        "In app/_layout.tsx, prompt biometric on app foreground if enabled and has stored session",
+        "Fall back to showing login screen if biometric fails",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "Completed - expo-local-authentication installed, biometrics.ts created with all required functions, app/_layout.tsx updated to prompt biometric on foreground"
+    },
+    {
+      "id": "US-012",
+      "title": "Build Onboarding Welcome Flow",
+      "description": "As a new user, I want to see a welcome screen so that I understand what Entmoot offers.",
+      "acceptanceCriteria": [
+        "Install react-native-pager-view for swipeable pages",
+        "Create app/onboarding/index.tsx with 4 swipeable pages",
+        "Page 1: Welcome message with app name/logo",
+        "Page 2: 'Plan Your Day' with daily planning illustration/icon",
+        "Page 3: 'Track Habits' with habit tracking illustration/icon",
+        "Page 4: 'Achieve Goals' with goal setting illustration/icon",
+        "Page indicators (dots) showing current position",
+        "Get Started button on final page navigates to family-setup",
+        "Skip button on all pages navigates to family-setup",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "Completed - 4 swipeable pages with PagerView, Ionicons for illustrations, page indicators, Get Started and Skip buttons"
+    },
+    {
+      "id": "US-013",
+      "title": "Build Family Setup Screen",
+      "description": "As a new user, I want to create or join a family so that I can start planning.",
+      "acceptanceCriteria": [
+        "Create app/onboarding/family-setup.tsx",
+        "Two option cards: 'Create a Family' and 'Join a Family'",
+        "Create Family: shows name TextInput, Create button calls POST /api/v1/families",
+        "Join Family: shows invitation code TextInput, Join button calls POST /api/v1/invitations/:token/accept",
+        "Auto-detect timezone using expo-localization",
+        "Show loading states during API calls",
+        "On success, set currentFamilyId in authStore and router.replace('/(tabs)/today')",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Completed - Family setup screen with select mode (cards), create mode, and join mode. Uses expo-localization getCalendars() for auto timezone detection."
+    },
+    {
+      "id": "US-014",
+      "title": "Build First Goal Prompt",
+      "description": "As a new user, I want guidance to create my first goal so that I understand how goal-setting works.",
+      "acceptanceCriteria": [
+        "Create src/components/FirstGoalPrompt.tsx modal component",
+        "Check GET /api/v1/users/me/first_goal_prompt for eligibility on Today screen mount",
+        "If eligible, show modal with AI-generated suggestions from API",
+        "Display 3 suggested goals as selectable cards",
+        "Allow writing custom goal with TextInput",
+        "Create button calls POST /api/v1/families/:id/goals",
+        "Dismiss button calls POST /api/v1/users/me/first_goal_prompt/dismiss",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "Completed - FirstGoalPrompt.tsx modal with useFirstGoalPrompt hook, selectable suggestion cards, custom goal input, create and dismiss functionality"
+    },
+    {
+      "id": "US-015",
+      "title": "Create Daily Plan Data Layer",
+      "description": "As a developer, I need data fetching hooks for daily plans so that screens can display planning data.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useDailyPlan.ts",
+        "Define DailyPlan, DailyTask, TopPriority, HabitCompletion TypeScript types",
+        "Implement useTodayPlan() hook fetching GET /api/v1/families/:id/daily_plans/today",
+        "Implement useUpdateDailyPlan() mutation for PATCH /api/v1/families/:id/daily_plans/:id",
+        "Include nested attributes in update: daily_tasks_attributes, top_priorities_attributes, habit_completions_attributes",
+        "Configure optimistic updates for task/habit completion toggles",
+        "Invalidate daily plan query on mutation success",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": "Completed - Created useDailyPlan.ts with all types (DailyPlan, DailyTask, TopPriority, HabitCompletion), useTodayPlan hook, useUpdateDailyPlan mutation with optimistic updates"
+    },
+    {
+      "id": "US-016",
+      "title": "Build Today Screen Header",
+      "description": "As a user, I want to see today's date and my planning progress so that I know my status.",
+      "acceptanceCriteria": [
+        "Update app/(tabs)/today.tsx with header section",
+        "Display current date formatted as 'Wednesday, January 22' using date-fns",
+        "Show greeting based on time: 'Good morning/afternoon/evening, {name}'",
+        "Display completion badge showing 'X/Y completed' from daily plan stats",
+        "Implement RefreshControl for pull-to-refresh that refetches daily plan",
+        "Show loading skeleton while fetching",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": "Completed - Header with date (date-fns), time-based greeting, completion badge, RefreshControl, loading skeleton"
+    },
+    {
+      "id": "US-017",
+      "title": "Build Today Screen Intention Section",
+      "description": "As a user, I want to set my daily intention so that I stay focused on what matters.",
+      "acceptanceCriteria": [
+        "Add 'Today's Intention' section to Today screen",
+        "Display current intention text if set",
+        "Show placeholder: 'What's your focus for today?' if empty",
+        "Tap to open inline TextInput for editing",
+        "Save intention on blur via useUpdateDailyPlan mutation",
+        "Show subtle saving indicator during save",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": "Completed - IntentionSection component with inline editing, saving indicator, loading skeleton"
+    },
+    {
+      "id": "US-018",
+      "title": "Build Today Screen Top Priorities",
+      "description": "As a user, I want to see and manage my top 3 priorities so that I focus on important tasks.",
+      "acceptanceCriteria": [
+        "Add 'Top Priorities' section to Today screen below intention",
+        "Display up to 3 priority items from daily plan",
+        "Each priority shows: checkbox, title, optional goal badge",
+        "Tap checkbox toggles completion with haptic feedback (use Haptics.impactAsync)",
+        "Swipe left reveals delete action using react-native-gesture-handler",
+        "Add Priority button (disabled if 3 exist) opens AddPriorityModal",
+        "Save changes via useUpdateDailyPlan mutation",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": "Completed - Top Priorities section with checkbox toggles, haptic feedback, swipe-to-delete, goal badges, Add Priority button"
+    },
+    {
+      "id": "US-019",
+      "title": "Build Today Screen Habits Section",
+      "description": "As a user, I want to track my daily habits so that I maintain consistency.",
+      "acceptanceCriteria": [
+        "Add 'Non-Negotiables' section to Today screen below priorities",
+        "Fetch habits via GET /api/v1/families/:id/habits",
+        "Display each habit with checkbox and name",
+        "Tap checkbox toggles completion with haptic feedback",
+        "Completion updates habit_completions_attributes in daily plan",
+        "Show streak count badge (fire icon + number) if habit has streak > 0",
+        "Visual distinction: completed habits show checkmark and muted text",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": "Completed - Non-Negotiables section with checkbox toggles, haptic feedback, completion counts, visual distinction for completed habits. Streak badges UI ready but backend doesn't support per-habit streaks yet."
+    },
+    {
+      "id": "US-020",
+      "title": "Build Today Screen Tasks Section",
+      "description": "As a user, I want to manage additional tasks so that I track everything I need to do.",
+      "acceptanceCriteria": [
+        "Add 'Tasks' section to Today screen below habits",
+        "Display all daily_tasks from daily plan",
+        "Each task shows: checkbox, title, optional assignee avatar",
+        "Tap checkbox toggles completion",
+        "Swipe left reveals delete action",
+        "Add Task inline TextInput at bottom with placeholder 'Add a task...'",
+        "Press enter/return to add task and clear input",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": "Completed - Tasks section with TaskItem component, checkbox toggle, swipe-to-delete, assignee avatar, inline add task input with enter/return submit"
+    },
+    {
+      "id": "US-021",
+      "title": "Build Add Priority Modal",
+      "description": "As a user, I want to add a new priority so that I can plan my focus areas.",
+      "acceptanceCriteria": [
+        "Install @gorhom/bottom-sheet for bottom sheet modal",
+        "Create src/components/AddPriorityModal.tsx",
+        "Title TextInput (required) with placeholder",
+        "Optional goal picker using Picker component showing user's goals",
+        "Add button saves priority via useUpdateDailyPlan mutation",
+        "Close modal on success",
+        "Modal adjusts when keyboard shows using KeyboardAvoidingView",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": "Completed - @gorhom/bottom-sheet installed with react-native-reanimated, AddPriorityModal created with goal picker dropdown, integrated into Today screen"
+    },
+    {
+      "id": "US-022",
+      "title": "Build End-of-Day Reflection Prompt",
+      "description": "As a user, I want to be prompted for evening reflection so that I close out my day mindfully.",
+      "acceptanceCriteria": [
+        "Create src/components/EveningReflectionBanner.tsx",
+        "Show banner at top of Today screen after 6 PM if shutdown_shipped is empty",
+        "Banner text: 'Time to reflect on your day'",
+        "Dismiss button hides banner for current session",
+        "Tap opens bottom sheet modal with reflection form",
+        "Form has: 'What shipped?' and 'What blocked you?' TextInputs",
+        "Mood selector with 5 emoji options (great, good, okay, difficult, rough)",
+        "Save button updates daily plan shutdown_shipped, shutdown_blocked fields",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": "Completed - EveningReflectionBanner with banner UI, bottom sheet modal, mood selector, shutdown_shipped/shutdown_blocked form fields"
+    },
+    {
+      "id": "US-023",
+      "title": "Create Habits Data Layer",
+      "description": "As a developer, I need data fetching hooks for habits so that screens can display and manage habits.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useHabits.ts",
+        "Define Habit TypeScript type matching backend model",
+        "Implement useHabits() hook fetching GET /api/v1/families/:id/habits",
+        "Implement useCreateHabit() mutation for POST",
+        "Implement useUpdateHabit() mutation for PATCH",
+        "Implement useDeleteHabit() mutation for DELETE",
+        "Implement useReorderHabits() mutation for POST /api/v1/families/:id/habits/update_positions",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": "Completed - Created useHabits.ts with Habit type, useHabits, useCreateHabit, useUpdateHabit, useDeleteHabit, useReorderHabits hooks with optimistic updates"
+    },
+    {
+      "id": "US-024",
+      "title": "Build Habits Management Screen",
+      "description": "As a user, I want to manage my habits so that I can customize my daily tracking.",
+      "acceptanceCriteria": [
+        "Create app/settings/habits.tsx",
+        "Install react-native-draggable-flatlist for drag reordering",
+        "List all habits with drag handle icon for reordering",
+        "Swipe left reveals delete action with confirmation Alert",
+        "Tap habit opens inline edit mode for name",
+        "Add Habit button at bottom opens TextInput for new habit name",
+        "Save order changes via useReorderHabits mutation on drag end",
+        "Show error if trying to add more than 10 habits",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": "Completed - Created habits management screen with drag-to-reorder using DraggableFlatList, swipe-to-delete, inline edit mode, and add habit with 10-habit limit"
+    },
+    {
+      "id": "US-025",
+      "title": "Create Goals Data Layer",
+      "description": "As a developer, I need data fetching hooks for goals so that screens can display and manage goals.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useGoals.ts",
+        "Define Goal TypeScript type with all fields including SMART fields",
+        "Define GoalFilters type: time_scale, status, visibility, assignee_id",
+        "Implement useGoals(filters) hook with query params",
+        "Implement useGoal(id) hook for single goal",
+        "Implement useCreateGoal() mutation",
+        "Implement useUpdateGoal() mutation",
+        "Implement useDeleteGoal() mutation",
+        "Implement useRefineGoal() mutation for POST /api/v1/families/:id/goals/:id/refine",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": "Completed - Created complete Goals data layer with Goal type (includes SMART fields, creator, assignees), GoalFilters, useGoals, useGoal, useCreateGoal, useUpdateGoal, useDeleteGoal, useRefineGoal hooks with cache invalidation"
+    },
+    {
+      "id": "US-026",
+      "title": "Build Goals List Screen",
+      "description": "As a user, I want to see all my goals so that I can track my progress.",
+      "acceptanceCriteria": [
+        "Update app/(tabs)/goals.tsx with full implementation",
+        "Filter tabs at top: Daily, Weekly, Monthly, Quarterly, Annual (scrollable)",
+        "Each goal card shows: title, progress bar (percentage), due date, status badge",
+        "Status badge colors: green (completed), blue (in_progress), yellow (at_risk), gray (not_started)",
+        "Tap goal navigates to app/goal/[id]",
+        "Floating action button (FAB) navigates to app/goal/create",
+        "RefreshControl for pull-to-refresh",
+        "Empty state with illustration and 'Create your first goal' message",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": "Completed - Goals list screen with filter tabs (Daily/Weekly/Monthly/Quarterly/Annual), goal cards with progress bars and status badges, FAB for navigation to create, empty state with illustration, pull-to-refresh"
+    },
+    {
+      "id": "US-027",
+      "title": "Build Goal Detail Screen",
+      "description": "As a user, I want to view and edit a goal so that I can track and update my progress.",
+      "acceptanceCriteria": [
+        "Create app/goal/[id].tsx",
+        "Display title, description, progress percentage, due date, status",
+        "Show SMART breakdown section if any SMART fields populated",
+        "Progress slider (0-100) that updates goal on slide end",
+        "Status picker dropdown (not_started, in_progress, at_risk, completed, abandoned)",
+        "Edit button in header navigates to edit screen or opens edit modal",
+        "Delete button with confirmation Alert, calls useDeleteGoal, navigates back",
+        "Show child goals section if goal has children",
+        "Show assigned family members with avatars",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": "Completed - Full goal detail screen with title, description, progress slider, status picker dropdown, SMART breakdown, child goals, assignees with avatars, delete with confirmation, edit button, loading skeleton, error state"
+    },
+    {
+      "id": "US-028",
+      "title": "Build Create Goal Screen",
+      "description": "As a user, I want to create a new goal so that I can track what I want to achieve.",
+      "acceptanceCriteria": [
+        "Create app/goal/create.tsx",
+        "Title TextInput (required)",
+        "Description TextInput multiline (optional)",
+        "Time scale picker: segmented control with Daily, Weekly, Monthly, Quarterly, Annual",
+        "Due date picker using @react-native-community/datetimepicker",
+        "Visibility picker: Personal, Shared, Family radio options",
+        "Assignee multi-select showing family members with checkboxes",
+        "Create button calls useCreateGoal and navigates to goal detail on success",
+        "Refine with AI button (implement in next story)",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": "Completed - Full create goal screen with title/description inputs, time scale segmented control, date picker, visibility radio options, assignee multi-select with family members, create button with API call, Refine with AI placeholder button"
+    },
+    {
+      "id": "US-029",
+      "title": "Build AI Goal Refinement",
+      "description": "As a user, I want AI to help refine my goal so that it follows SMART criteria.",
+      "acceptanceCriteria": [
+        "Add Refine with AI button to goal create/edit screens",
+        "Call POST /api/v1/families/:id/goals/:id/refine (or preview endpoint)",
+        "Show loading modal with 'AI is thinking...' message",
+        "Display AI suggestions in modal with 5 SMART sections",
+        "Each section shows current value and suggested value",
+        "Accept/Reject buttons per section",
+        "Apply All button accepts all suggestions at once",
+        "Accepted suggestions update form fields",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": "Completed - AIRefinementModal component created with loading/error states, SMART suggestions with accept/reject buttons, Apply All functionality, alternative titles, obstacles, and milestones display. Integrated into goal detail (direct refine) and create (Create & Refine flow) screens."
+    },
+    {
+      "id": "US-030",
+      "title": "Create Reflections Data Layer",
+      "description": "As a developer, I need data fetching hooks for reflections so that screens can manage reflections.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useReflections.ts",
+        "Define Reflection TypeScript type with all fields",
+        "Define ReflectionType enum: evening, weekly, monthly, quarterly, annual, quick",
+        "Define ReflectionFilters type: type, user_id, from, to",
+        "Implement useReflections(filters) hook",
+        "Implement useCreateReflection() mutation",
+        "Implement useUpdateReflection() mutation",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": "Completed - Created useReflections.ts with Reflection, ReflectionType, ReflectionMood types, ReflectionFilters, useReflections, useReflection, useCreateReflection, useUpdateReflection hooks with cache invalidation"
+    },
+    {
+      "id": "US-031",
+      "title": "Build Quick Reflection Screen",
+      "description": "As a user, I want to capture a quick reflection so that I can note thoughts anytime.",
+      "acceptanceCriteria": [
+        "Create app/reflection/quick.tsx",
+        "Mood selector: 5 emoji buttons (great, good, okay, difficult, rough) with labels",
+        "Energy level slider: 1-5 with labels (Low to High)",
+        "What's on your mind? multiline TextInput",
+        "Gratitude items: dynamic list with Add button to add more TextInputs",
+        "Save button creates reflection via useCreateReflection with type='quick'",
+        "Navigate back on success with success toast/alert",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": true,
+      "notes": "Completed - Created Quick Reflection screen with mood selector (5 emoji options), energy level slider (1-5), thoughts multiline input, dynamic gratitude items list, save functionality with useCreateReflection hook, success alert, and navigation back"
+    },
+    {
+      "id": "US-032",
+      "title": "Build Weekly Review Screen",
+      "description": "As a user, I want to complete my weekly review so that I reflect on my progress.",
+      "acceptanceCriteria": [
+        "Create app/reflection/weekly.tsx",
+        "Create src/hooks/useWeeklyReviews.ts with useCurrentWeeklyReview hook",
+        "Fetch via GET /api/v1/families/:id/weekly_reviews/current",
+        "Display sections: Wins Shipped, Losses/Friction, Metrics Notes, System to Adjust",
+        "Each section is multiline TextInput",
+        "Auto-save on blur with 500ms debounce via useUpdateWeeklyReview mutation",
+        "Show computed metrics card: habit completion %, task completion %, goals progress",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": true,
+      "notes": "Completed - Created useWeeklyReviews.ts with all types and hooks (useCurrentWeeklyReview, useWeeklyReviews, useWeeklyReview, useUpdateWeeklyReview), built Weekly Review screen with MetricsCard showing task/goal stats and habit tally, four ReviewTextSection components with auto-save on blur with 500ms debounce"
+    },
+    {
+      "id": "US-033",
+      "title": "Build Me Tab Screen",
+      "description": "As a user, I want to see my profile and stats so that I understand my progress.",
+      "acceptanceCriteria": [
+        "Update app/(tabs)/me.tsx with full implementation",
+        "Display user avatar (or placeholder), name, email from authStore",
+        "Streak badges section showing daily planning, reflection, weekly review streaks",
+        "Total points display with number",
+        "Recent badges section (last 3 earned)",
+        "Quick links as list items: Settings, Manage Habits, Notifications, Family",
+        "Logout button at bottom that calls authStore.logout and navigates to login",
+        "Typecheck passes"
+      ],
+      "priority": 33,
+      "passes": true,
+      "notes": "Completed - Full Me tab screen with user profile header (avatar/initials, name, email), streaks section (daily planning, reflection, weekly review) with fire emoji and at-risk indicators, points section with total and this week, recent badges (last 3 earned), quick links (Settings, Manage Habits, Notifications, Family), logout button with confirmation"
+    },
+    {
+      "id": "US-034",
+      "title": "Build Settings Screen",
+      "description": "As a user, I want to access settings so that I can customize the app.",
+      "acceptanceCriteria": [
+        "Update app/settings/index.tsx with full implementation",
+        "Section: Account - Edit Profile row, Change Password row",
+        "Section: Notifications - navigates to notifications settings",
+        "Section: Security - Biometric Login toggle switch",
+        "Section: About - Version number, Terms link, Privacy Policy link",
+        "Delete Account row with red text, confirmation flow before deletion",
+        "Each row navigates to appropriate screen or opens external link",
+        "Typecheck passes"
+      ],
+      "priority": 34,
+      "passes": true,
+      "notes": "Completed - Full settings screen with Account, Notifications, Security, and About sections. Biometric toggle with Face ID/Touch ID support, Terms/Privacy links, Delete Account with two-step confirmation flow"
+    },
+    {
+      "id": "US-035",
+      "title": "Build Edit Profile Screen",
+      "description": "As a user, I want to edit my profile so that I can update my information.",
+      "acceptanceCriteria": [
+        "Create app/settings/profile.tsx",
+        "Install expo-image-picker",
+        "Avatar section: current avatar or placeholder, tap to choose from camera/library",
+        "Name TextInput prefilled with current name",
+        "Save button calls PATCH /api/v1/users/me/profile",
+        "Show loading indicator during save",
+        "Navigate back on success with updated authStore user data",
+        "Typecheck passes"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": "Completed - expo-image-picker installed, profile.tsx created with avatar selection (camera/library), name input, save functionality, settings/profile route added"
+    },
+    {
+      "id": "US-036",
+      "title": "Build Family Management Screen",
+      "description": "As a user, I want to manage my family so that I can invite members and switch families.",
+      "acceptanceCriteria": [
+        "Create app/settings/family.tsx",
+        "Create src/hooks/useFamilies.ts with useFamilies, useFamilyMembers hooks",
+        "List all families user belongs to as selectable cards",
+        "Current family shows checkmark indicator",
+        "Tap family to switch: updates authStore.currentFamilyId",
+        "Show family members section for current family with role badges",
+        "Invite Member button (visible for admin/adult roles) opens invite modal",
+        "Invite modal: email TextInput, role picker (observer, child, teen, adult), Send button",
+        "Typecheck passes"
+      ],
+      "priority": 36,
+      "passes": true,
+      "notes": "Completed - useFamilies.ts created with useFamilies, useFamilyMembers, useFamilyInvitations, useCreateInvitation hooks. Family management screen with family switching, member list with role badges, invite modal with email and role picker"
+    },
+    {
+      "id": "US-037",
+      "title": "Set Up Push Notification Infrastructure",
+      "description": "As a developer, I need push notification infrastructure so that users receive reminders.",
+      "acceptanceCriteria": [
+        "Install expo-notifications",
+        "Configure notification settings in app.json (icon, color, sounds)",
+        "Create src/services/notifications.ts",
+        "Implement requestPermissions(): Promise<boolean>",
+        "Implement registerForPushNotifications() that gets Expo push token",
+        "Register device token via POST /api/v1/device_tokens with platform='ios'",
+        "Handle token refresh by re-registering",
+        "Implement unregisterToken() for logout that calls DELETE endpoint",
+        "Typecheck passes"
+      ],
+      "priority": 37,
+      "passes": true,
+      "notes": "Completed - expo-notifications installed, src/services/notifications.ts created with requestPermissions, registerForPushNotifications, handleTokenRefresh, unregisterToken. Fixed deprecated removeNotificationSubscription API in pushNotifications.ts."
+    },
+    {
+      "id": "US-038",
+      "title": "Handle Incoming Notifications",
+      "description": "As a user, I want notifications to navigate me to relevant screens so that I can take action.",
+      "acceptanceCriteria": [
+        "Set up notification listeners in app/_layout.tsx using useEffect",
+        "Handle notification received while app foregrounded: show in-app banner",
+        "Handle notification response (tapped): parse payload and navigate",
+        "Define NotificationPayload type with type and targetId fields",
+        "Navigation mapping: reminder -> /(tabs)/today, goal_update -> /goal/[id], family_invite -> /settings/family, badge_earned -> /(tabs)/me",
+        "Create InAppNotificationBanner component for foreground notifications",
+        "Typecheck passes"
+      ],
+      "priority": 38,
+      "passes": true,
+      "notes": "Completed - Set up notification listeners in app/_layout.tsx, created InAppNotificationBanner component with animated slide-in/out, defined NotificationPayload type, implemented navigation mapping for all notification types, handle cold start notifications"
+    },
+    {
+      "id": "US-039",
+      "title": "Build Notification Preferences Screen",
+      "description": "As a user, I want to manage notification settings so that I control what alerts I receive.",
+      "acceptanceCriteria": [
+        "Create app/settings/notifications.tsx",
+        "Create src/hooks/useNotificationPreferences.ts",
+        "Fetch preferences via GET /api/v1/users/me/notification_preferences",
+        "Toggle switches for: Morning Planning, Evening Reflection, Weekly Review, Tips",
+        "Time pickers for: morning_planning_time, evening_reflection_time, weekly_review_time",
+        "Quiet hours: start and end time pickers",
+        "Save changes via PATCH /api/v1/users/me/notification_preferences",
+        "Typecheck passes"
+      ],
+      "priority": 39,
+      "passes": true,
+      "notes": "Completed - useNotificationPreferences.ts hook with full types, app/settings/notifications.tsx with toggle switches, time pickers, day picker for weekly review, quiet hours section, optimistic updates"
+    },
+    {
+      "id": "US-040",
+      "title": "Implement Local Notification Scheduling",
+      "description": "As a user, I want local reminders even when offline so that I stay on track.",
+      "acceptanceCriteria": [
+        "Add scheduleLocalNotifications() to src/services/notifications.ts",
+        "Schedule morning planning reminder at user's configured time daily",
+        "Schedule evening reflection reminder at user's configured time daily",
+        "Schedule weekly review reminder at configured day/time weekly",
+        "Check quiet hours before scheduling - skip if in quiet period",
+        "Call rescheduleAll() when preferences change",
+        "Call cancelAllScheduled() on logout",
+        "Typecheck passes"
+      ],
+      "priority": 40,
+      "passes": true,
+      "notes": "Completed - scheduleLocalNotifications, rescheduleAllNotifications, cancelAllScheduled, isWithinQuietHours functions added to src/services/notifications.ts. Handles daily/weekly triggers with quiet hours checking."
+    },
+    {
+      "id": "US-041",
+      "title": "Set Up Offline Storage",
+      "description": "As a developer, I need offline storage so that data persists when offline.",
+      "acceptanceCriteria": [
+        "Install react-native-mmkv",
+        "Create src/services/offlineStorage.ts",
+        "Initialize MMKV storage instance",
+        "Implement setCache<T>(key: string, data: T): void",
+        "Implement getCache<T>(key: string): T | null",
+        "Implement clearCache(key: string): void",
+        "Define cache keys: DAILY_PLAN, HABITS, GOALS, USER_PROFILE",
+        "Install @react-native-community/netinfo and create useNetworkStatus hook",
+        "Typecheck passes"
+      ],
+      "priority": 41,
+      "passes": true,
+      "notes": "Completed - react-native-mmkv installed, offlineStorage.ts created with MMKV instance and cache functions, useNetworkStatus hook created with @react-native-community/netinfo"
+    },
+    {
+      "id": "US-042",
+      "title": "Implement Offline Sync Queue",
+      "description": "As a developer, I need a sync queue so that offline actions are processed when online.",
+      "acceptanceCriteria": [
+        "Create src/services/syncQueue.ts",
+        "Define SyncQueueItem type: id, action, endpoint, method, payload, timestamp, retryCount",
+        "Implement addToQueue(item): void - persists to MMKV",
+        "Implement getQueue(): SyncQueueItem[]",
+        "Implement processQueue(): Promise<void> - processes items sequentially",
+        "Implement removeFromQueue(id): void",
+        "Handle conflicts: if server returns 409, log and remove from queue",
+        "Retry failed items with exponential backoff (1s, 2s, 4s), max 3 retries",
+        "Trigger processQueue when network status changes to online",
+        "Typecheck passes"
+      ],
+      "priority": 42,
+      "passes": true,
+      "notes": "Completed - src/services/syncQueue.ts created with SyncQueueItem type, addToQueue/getQueue/removeFromQueue functions, processQueue with sequential processing, 409 conflict handling, exponential backoff (1s, 2s, 4s) with max 3 retries, network listener with startNetworkListener/stopNetworkListener"
+    },
+    {
+      "id": "US-043",
+      "title": "Add Offline Indicator UI",
+      "description": "As a user, I want to know when I'm offline so that I understand data may not be synced.",
+      "acceptanceCriteria": [
+        "Create src/components/OfflineBanner.tsx",
+        "Use useNetworkStatus hook to detect offline state",
+        "Show banner at top of screen when isConnected is false",
+        "Banner text: 'You're offline. Changes will sync when connected.'",
+        "Show 'Syncing...' with ActivityIndicator when processing queue",
+        "Show 'Synced ✓' briefly (2 seconds) when queue processed successfully",
+        "Animate banner slide in/out using Animated API",
+        "Add OfflineBanner to app/_layout.tsx",
+        "Typecheck passes"
+      ],
+      "priority": 43,
+      "passes": true,
+      "notes": "Completed - OfflineBanner.tsx created with offline, syncing, and synced states, animated slide in/out using Animated API, added to app/_layout.tsx"
+    },
+    {
+      "id": "US-044",
+      "title": "Enable Offline Daily Planning",
+      "description": "As a user, I want to use daily planning offline so that I can plan without internet.",
+      "acceptanceCriteria": [
+        "Update useTodayPlan to cache response in MMKV on success",
+        "Configure TanStack Query to return cached data as initialData when offline",
+        "Update useUpdateDailyPlan to add to sync queue when network unavailable",
+        "Show optimistic UI updates immediately on mutations",
+        "Add subtle 'pending sync' indicator (small dot) on items not yet synced",
+        "When online and queue processes, remove pending indicators",
+        "On conflict (server newer), refetch and show toast 'Plan updated from server'",
+        "Typecheck passes"
+      ],
+      "priority": 44,
+      "passes": true,
+      "notes": "Completed - useTodayPlan caches responses in MMKV with timestamp, uses initialData from cache for offline, useUpdateDailyPlan adds to sync queue when offline, pending sync tracking with visual dot indicators, conflict detection on reconnect with Alert"
+    },
+    {
+      "id": "US-045",
+      "title": "Implement Calendar Permission Flow",
+      "description": "As a user, I want to grant calendar access so that I can see events in my planning.",
+      "acceptanceCriteria": [
+        "Install expo-calendar",
+        "Create src/services/calendar.ts",
+        "Implement requestCalendarPermissions() with user-facing explanation",
+        "Handle permission denied state: show Alert with 'Open Settings' button",
+        "Store permission status in MMKV cache",
+        "Implement getCalendarPermissionStatus(): Promise<'granted' | 'denied' | 'undetermined'>",
+        "Typecheck passes"
+      ],
+      "priority": 45,
+      "passes": true,
+      "notes": "Completed - expo-calendar installed, src/services/calendar.ts created with requestCalendarPermissions, getCalendarPermissionStatus, getCachedCalendarPermissionStatus, hasCalendarPermission, and openAppSettings functions. Permission status cached in MMKV."
+    },
+    {
+      "id": "US-046",
+      "title": "Display Calendar Events in Today View",
+      "description": "As a user, I want to see today's calendar events so that I plan around my schedule.",
+      "acceptanceCriteria": [
+        "Add getTodayEvents() to src/services/calendar.ts",
+        "Fetch events from all device calendars for today's date range",
+        "Add 'Schedule' section to Today screen (collapsible)",
+        "Display events sorted by start time with time, title, calendar color dot",
+        "Handle all-day events: show at top with 'All day' label",
+        "Tap event opens native calendar app using Linking.openURL",
+        "Refresh events on pull-to-refresh",
+        "Show 'No events today' if empty",
+        "Typecheck passes"
+      ],
+      "priority": 46,
+      "passes": true,
+      "notes": "Completed - getTodayEvents() added to calendar.ts, ScheduleSection component added to Today screen with collapsible UI, calendar color dots, all-day events at top, empty state, permission prompt, refresh on pull-to-refresh, tap to open native calendar"
+    },
+    {
+      "id": "US-047",
+      "title": "Build Google Calendar Connection",
+      "description": "As a user, I want to connect Google Calendar so that my goals sync with my calendar.",
+      "acceptanceCriteria": [
+        "Create app/settings/calendar.tsx",
+        "Create src/hooks/useGoogleCalendar.ts with connection status hook",
+        "Fetch status via GET /api/v1/users/me/google_calendar",
+        "Show connection status: Connected/Not connected",
+        "Connect button: fetch auth URL, open in WebBrowser using expo-web-browser",
+        "Configure deep link entmoot://google-callback to handle OAuth callback",
+        "After connect, show list of synced calendars",
+        "Disconnect button calls DELETE /api/v1/users/me/google_calendar",
+        "Typecheck passes"
+      ],
+      "priority": 47,
+      "passes": true,
+      "notes": "Completed - useGoogleCalendar.ts hook created with connection status, auth URL, connect/disconnect mutations. Calendar settings screen with OAuth flow using expo-web-browser, deep link handling for entmoot://google-callback, synced calendars list display."
+    },
+    {
+      "id": "US-048",
+      "title": "Build Streaks Display",
+      "description": "As a user, I want to see my streaks so that I stay motivated to maintain consistency.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useStreaks.ts fetching GET /api/v1/users/me/streaks",
+        "Create src/components/StreakCard.tsx component",
+        "Display streak cards for: Daily Planning, Evening Reflection, Weekly Review",
+        "Each card shows: icon, current count with fire emoji, 'Best: X days' subtitle",
+        "Highlight milestone achievements (7, 14, 30, 60, 90, 180, 365) with special styling",
+        "Show 'at risk' indicator (warning color) if streak will break tomorrow without activity",
+        "Add StreakCards to Me tab screen",
+        "Typecheck passes"
+      ],
+      "priority": 48,
+      "passes": true,
+      "notes": "Completed - Created src/hooks/useStreaks.ts with useStreaks and useStreak hooks. Created src/components/StreakCard.tsx with StreakCard and StreakCardsRow components. Features: streak type config, milestone highlighting (7, 14, 30, 60, 90, 180, 365), at-risk indicator, empty state, loading skeleton. Refactored Me tab to use shared components."
+    },
+    {
+      "id": "US-049",
+      "title": "Build Points Display",
+      "description": "As a user, I want to see my points so that I feel rewarded for my activities.",
+      "acceptanceCriteria": [
+        "Create src/hooks/usePoints.ts fetching GET /api/v1/users/me/points",
+        "Create src/components/PointsDisplay.tsx component",
+        "Display total points prominently with large number",
+        "Show 'Recent Activity' section with last 10 ledger entries",
+        "Each entry shows: activity type icon, description, +X points, relative timestamp",
+        "Add animated counter effect when points increase (use Animated API)",
+        "Add PointsDisplay to Me tab screen",
+        "Typecheck passes"
+      ],
+      "priority": 49,
+      "passes": true,
+      "notes": "Completed - Created src/hooks/usePoints.ts with usePoints and useRecentActivity hooks. Created src/components/PointsDisplay.tsx with AnimatedCounter (scale + number animation), PointsCard, and full PointsDisplay with recent activity list. Refactored Me tab to use shared PointsCard component."
+    },
+    {
+      "id": "US-050",
+      "title": "Build Badges Display",
+      "description": "As a user, I want to see my badges so that I celebrate my achievements.",
+      "acceptanceCriteria": [
+        "Create src/hooks/useBadges.ts fetching GET /api/v1/users/me/badges and GET /api/v1/badges",
+        "Create src/components/BadgeGrid.tsx component",
+        "Display earned badges in 3-column grid",
+        "Each badge shows: icon/image, name, earned date",
+        "Show locked badges (unearned) with grayscale and lock overlay",
+        "Tap badge opens modal with description, criteria, earned date",
+        "Add subtle shine animation on newly earned badges",
+        "Add BadgeGrid to Me tab screen (or separate Badges screen)",
+        "Typecheck passes"
+      ],
+      "priority": 50,
+      "passes": true,
+      "notes": "Completed - Created src/hooks/useBadges.ts with useUserBadges, useAllBadges hooks and utility functions. Created src/components/BadgeGrid.tsx with BadgeGrid (full view with earned/locked sections) and BadgeRow (compact 3-badge view for Me tab). Features: 3-column grid, locked badges with grayscale and lock overlay, detail modal with category badge and criteria, shine animation for newly earned badges (< 24 hours), progress bar with completion stats. Refactored Me tab to use shared BadgeRow component."
+    },
+    {
+      "id": "US-051",
+      "title": "Show Achievement Celebration Modal",
+      "description": "As a user, I want to be celebrated when I earn achievements so that I feel rewarded.",
+      "acceptanceCriteria": [
+        "Install react-native-confetti-cannon for confetti effect",
+        "Create src/components/AchievementModal.tsx",
+        "Show confetti animation on modal open",
+        "Display achievement icon/badge with congratulatory title",
+        "Show points earned prominently: '+50 points!'",
+        "Awesome! dismiss button with haptic feedback",
+        "Create useAchievementCelebration hook to trigger modal",
+        "Trigger on: badge earned, streak milestone (7, 30, etc), goal completed",
+        "Typecheck passes"
+      ],
+      "priority": 51,
+      "passes": true,
+      "notes": "Completed - react-native-confetti-cannon installed, AchievementModal.tsx created with confetti animation, animated icon bounce, points display with animation, useAchievementCelebration hook with achievement queue, integrated into app layout via NotificationHandler"
+    },
+    {
+      "id": "US-052",
+      "title": "Implement Haptic Feedback",
+      "description": "As a user, I want haptic feedback so that interactions feel responsive.",
+      "acceptanceCriteria": [
+        "Install expo-haptics",
+        "Create src/utils/haptics.ts",
+        "Implement lightImpact() for button presses",
+        "Implement successNotification() for task completion",
+        "Implement warningNotification() for destructive action confirmations",
+        "Implement heavyImpact() for achievements",
+        "Add haptic calls to: checkboxes, buttons, swipe actions, achievements",
+        "Respect system haptic settings (check if enabled)",
+        "Typecheck passes"
+      ],
+      "priority": 52,
+      "passes": true,
+      "notes": "Completed - Created src/utils/haptics.ts with lightImpact, mediumImpact, heavyImpact, successNotification, warningNotification, errorNotification, selectionFeedback functions. Haptics were already being used throughout the app in previous stories."
+    },
+    {
+      "id": "US-053",
+      "title": "Add Loading States and Skeletons",
+      "description": "As a user, I want loading states so that I know content is being fetched.",
+      "acceptanceCriteria": [
+        "Create src/components/ui/Skeleton.tsx with animated shimmer effect",
+        "Create TodaySkeleton component matching Today screen layout",
+        "Create GoalsListSkeleton component matching goals list layout",
+        "Create MeTabSkeleton component matching Me tab layout",
+        "Show skeletons while isLoading is true in respective screens",
+        "Smooth crossfade transition from skeleton to content using Animated",
+        "Typecheck passes"
+      ],
+      "priority": 53,
+      "passes": true,
+      "notes": "Created Skeleton component with animated shimmer effect using React Native Animated API. Created TodaySkeleton, GoalsListSkeleton, MeTabSkeleton components. Integrated animated skeletons into Today, Goals, Me screens and sub-components (StreakCardsRow, PointsCard, BadgeGrid). Created CrossFadeView for smooth transitions."
+    },
+    {
+      "id": "US-054",
+      "title": "Implement Error Handling UI",
+      "description": "As a user, I want clear error messages so that I understand when something goes wrong.",
+      "acceptanceCriteria": [
+        "Create src/components/ErrorBoundary.tsx class component for crash recovery",
+        "ErrorBoundary shows friendly 'Something went wrong' screen with Retry button",
+        "Create src/components/ui/ErrorMessage.tsx for API errors",
+        "ErrorMessage shows icon, message, and Retry button",
+        "Add error handling to all query hooks with user-friendly messages",
+        "Map HTTP status codes to friendly messages (404: Not found, 500: Server error)",
+        "Wrap app in ErrorBoundary in app/_layout.tsx",
+        "Typecheck passes"
+      ],
+      "priority": 54,
+      "passes": true,
+      "notes": "Created ErrorBoundary class component with friendly error UI and Retry button. Created ErrorMessage component with 3 variants (default, inline, card), HTTP status code mapping, and getErrorMessage utility. Wrapped app in ErrorBoundary in _layout.tsx."
+    },
+    {
+      "id": "US-055",
+      "title": "Add App Icons and Splash Screen",
+      "description": "As a user, I want professional app icons so that the app looks polished.",
+      "acceptanceCriteria": [
+        "Create assets/icon.png at 1024x1024 with Entmoot logo",
+        "Create assets/adaptive-icon.png for Android (if needed later)",
+        "Create assets/splash.png with logo centered on brand color background",
+        "Configure app.json icon, splash, and ios.icon fields",
+        "Set splash backgroundColor to Entmoot primary color",
+        "Set splash resizeMode to 'contain'",
+        "Verify icon appears correctly in iOS Simulator home screen",
+        "Typecheck passes"
+      ],
+      "priority": 55,
+      "passes": true,
+      "notes": "Created Entmoot tree logo icon (1024x1024) with stylized tree design on primary indigo background. SVG sources and generate-icons.js script for regenerating icons. Splash screen with centered logo on cream background (#FFF8E7). app.json configured with icon, ios.icon, splash settings."
+    },
+    {
+      "id": "US-056",
+      "title": "Configure App Store Metadata",
+      "description": "As a developer, I need App Store metadata configured so that the app can be submitted.",
+      "acceptanceCriteria": [
+        "Set app name 'Entmoot' in app.json",
+        "Set version '1.0.0' and ios.buildNumber '1'",
+        "Add app description in app.json description field",
+        "Configure privacy policy URL in app.json",
+        "Configure support URL in app.json",
+        "Create assets/screenshots/ directory with placeholder files for required sizes",
+        "Document App Store description in mobile/APP_STORE.md",
+        "Typecheck passes"
+      ],
+      "priority": 56,
+      "passes": true,
+      "notes": "Added description, privacy (public), githubUrl to app.json. Added ios.buildNumber '1'. Created assets/screenshots/ with README.md and placeholders for required iOS sizes. Created APP_STORE.md with full App Store listing copy, keywords, metadata, privacy questionnaire answers."
+    },
+    {
+      "id": "US-057",
+      "title": "Build EAS Configuration",
+      "description": "As a developer, I need EAS configured so that I can build and submit to App Store.",
+      "acceptanceCriteria": [
+        "Run npx eas-cli@latest init in mobile directory",
+        "Run eas build:configure",
+        "Create eas.json with profiles: development, preview, production",
+        "Development profile: developmentClient true, distribution internal",
+        "Preview profile: distribution internal for TestFlight",
+        "Production profile: distribution store for App Store",
+        "Document iOS provisioning setup steps in mobile/BUILD.md",
+        "Verify eas.json is valid with eas build --platform ios --profile preview --dry-run",
+        "Typecheck passes"
+      ],
+      "priority": 57,
+      "passes": true,
+      "notes": "Created eas.json with development/preview/production profiles. Development uses developmentClient with simulator support, Preview uses internal distribution for TestFlight, Production uses store distribution with auto-increment. BUILD.md documents complete iOS provisioning setup including Apple Developer setup, credentials management, and CI/CD integration."
+    }
+  ]
+}

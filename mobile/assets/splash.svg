@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1284" height="2778" viewBox="0 0 1284 2778" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1284" height="2778" fill="#FFF8E7"/>
+
+  <!-- Centered logo -->
+  <g transform="translate(449.4, 1196.4)">
+    <!-- Circle base (family/unity) -->
+    <circle cx="192.6" cy="192.6" r="161.784" fill="#4F46E5" opacity="0.15"/>
+
+    <!-- Tree trunk -->
+    <rect x="169.488" y="231.12" width="46.224" height="96.3" rx="7.704" fill="#4F46E5"/>
+
+    <!-- Main tree crown -->
+    <ellipse cx="192.6" cy="211.85999999999999" rx="107.85600000000001" ry="46.224" fill="#4F46E5"/>
+    <ellipse cx="192.6" cy="161.784" rx="84.744" ry="38.52" fill="#4F46E5"/>
+    <ellipse cx="192.6" cy="123.264" rx="57.779999999999994" ry="30.816" fill="#4F46E5"/>
+
+    <!-- Star accent -->
+    <polygon points="192.6,69.336 204.156,92.448 223.416,92.448 208.00799999999998,107.856 215.712,134.82 192.6,119.41199999999999 169.488,134.82 177.192,107.856 161.784,92.448 181.04399999999998,92.448" fill="#FFFFFF"/>
+  </g>
+
+  <!-- App name below logo -->
+  <text x="642" y="1641.6" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="600" fill="#4F46E5" text-anchor="middle">Entmoot</text>
+</svg>

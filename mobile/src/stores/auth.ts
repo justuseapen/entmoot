@@ -17,11 +17,13 @@ import {
 const TOKEN_KEY = "entmoot_access_token";
 const REFRESH_TOKEN_KEY = "entmoot_refresh_token";
 const USER_KEY = "entmoot_user";
+const FAMILY_ID_KEY = "entmoot_family_id";
 
 interface AuthState {
   user: User | null;
   token: string | null;
   refreshToken: string | null;
+  currentFamilyId: number | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;
@@ -31,6 +33,7 @@ interface AuthState {
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
+  setCurrentFamily: (familyId: number | null) => Promise<void>;
   setLoading: (isLoading: boolean) => void;
 }
 
@@ -53,6 +56,7 @@ async function clearSecureStore(): Promise<void> {
     SecureStore.deleteItemAsync(TOKEN_KEY),
     SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
     SecureStore.deleteItemAsync(USER_KEY),
+    SecureStore.deleteItemAsync(FAMILY_ID_KEY),
   ]);
 }
 
@@ -61,11 +65,13 @@ async function loadFromSecureStore(): Promise<{
   token: string | null;
   refreshToken: string | null;
   user: User | null;
+  familyId: number | null;
 }> {
-  const [token, refreshToken, userJson] = await Promise.all([
+  const [token, refreshToken, userJson, familyIdStr] = await Promise.all([
     SecureStore.getItemAsync(TOKEN_KEY),
     SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
     SecureStore.getItemAsync(USER_KEY),
+    SecureStore.getItemAsync(FAMILY_ID_KEY),
   ]);
 
   let user: User | null = null;
@@ -77,7 +83,9 @@ async function loadFromSecureStore(): Promise<{
     }
   }
 
-  return { token, refreshToken, user };
+  const familyId = familyIdStr ? parseInt(familyIdStr, 10) : null;
+
+  return { token, refreshToken, user, familyId };
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
@@ -98,6 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       user: null,
       token: null,
       refreshToken: null,
+      currentFamilyId: null,
       isAuthenticated: false,
       isLoading: false,
     });
@@ -107,6 +116,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     user: null,
     token: null,
     refreshToken: null,
+    currentFamilyId: null,
     isAuthenticated: false,
     isLoading: false,
     isInitialized: false,
@@ -115,7 +125,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         set({ isLoading: true });
 
-        const { token, refreshToken, user } = await loadFromSecureStore();
+        const { token, refreshToken, user, familyId } =
+          await loadFromSecureStore();
 
         if (token && refreshToken && user) {
           // Set tokens in API client
@@ -128,6 +139,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
               user: currentUser,
               token,
               refreshToken,
+              currentFamilyId: familyId,
               isAuthenticated: true,
               isLoading: false,
               isInitialized: true,
@@ -154,6 +166,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 user: currentUser,
                 token: refreshResult.token,
                 refreshToken: refreshResult.refresh_token,
+                currentFamilyId: familyId,
                 isAuthenticated: true,
                 isLoading: false,
                 isInitialized: true,
@@ -166,6 +179,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 user: null,
                 token: null,
                 refreshToken: null,
+                currentFamilyId: null,
                 isAuthenticated: false,
                 isLoading: false,
                 isInitialized: true,
@@ -278,11 +292,27 @@ export const useAuthStore = create<AuthState>((set, get) => {
         user: null,
         token: null,
         refreshToken: null,
+        currentFamilyId: null,
         isAuthenticated: false,
         isLoading: false,
       });
     },
 
+    setCurrentFamily: async (familyId: number | null) => {
+      if (familyId !== null) {
+        await SecureStore.setItemAsync(FAMILY_ID_KEY, familyId.toString());
+      } else {
+        await SecureStore.deleteItemAsync(FAMILY_ID_KEY);
+      }
+      set({ currentFamilyId: familyId });
+    },
+
     setLoading: (isLoading: boolean) => set({ isLoading }),
   };
 });
+
+/**
+ * Alias for useAuthStore - provides authentication state and actions.
+ * Returns: { user, isAuthenticated, isLoading, currentFamilyId, login, logout, setCurrentFamily, initialize }
+ */
+export const useAuth = useAuthStore;

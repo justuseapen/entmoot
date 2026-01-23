@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent background for foreground layer -->
+  <rect width="1024" height="1024" fill="transparent"/>
+
+  <!-- Centered logo within safe zone -->
+  <g transform="translate(271.872, 271.872)">
+    
+    <!-- Circle base -->
+    <circle cx="240.128" cy="240.128" r="201.70752" fill="#4F46E5" opacity="0.15"/>
+
+    <!-- Tree trunk -->
+    <rect x="211.31264" y="288.1536" width="57.63072" height="120.064" rx="9.60512" fill="#4F46E5"/>
+
+    <!-- Tree crown -->
+    <ellipse cx="240.128" cy="264.1408" rx="134.47168" ry="57.63072" fill="#4F46E5"/>
+    <ellipse cx="240.128" cy="201.70752" rx="105.65632" ry="48.0256" fill="#4F46E5"/>
+    <ellipse cx="240.128" cy="153.68192" rx="72.0384" ry="38.42048" fill="#4F46E5"/>
+
+    <!-- Star accent -->
+    <polygon points="240.128,86.44608 254.53567999999999,115.26144 278.54848,115.26144 259.33824,134.47168 268.94336,168.0896 240.128,148.87936 211.31264,168.0896 220.91776,134.47168 201.70752,115.26144 225.72032,115.26144" fill="#FFFFFF"/>
+  
+  </g>
+</svg>

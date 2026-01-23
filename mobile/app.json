@@ -3,20 +3,27 @@
     "name": "Entmoot",
     "slug": "entmoot",
     "version": "1.0.0",
+    "description": "Family planning and goal tracking app. Plan your day, build habits, set SMART goals with AI coaching, and celebrate achievements together.",
+    "privacy": "public",
+    "githubUrl": "https://github.com/entmoot/entmoot-mobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "entmoot",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFF8E7"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.entmoot.mobile",
+      "bundleIdentifier": "com.entmoot.mobile",
+      "buildNumber": "1",
+      "icon": "./assets/icon.png",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification"],
+        "MinimumOSVersion": "14.0"
       }
     },
     "android": {
@@ -30,7 +37,8 @@
       "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "extra": {
       "releaseChannel": "development",
@@ -39,7 +47,6 @@
       }
     },
     "plugins": [
-      "expo-constants",
       [
         "expo-notifications",
         {
@@ -48,7 +55,9 @@
           "sounds": [],
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-router",
+      "expo-localization"
     ]
   }
 }

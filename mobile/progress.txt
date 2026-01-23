@@ -1,0 +1,1074 @@
+# Ralph Progress Log - Entmoot Mobile App
+
+## Project Context
+- Building React Native iOS app with Expo managed workflow
+- Backend API already exists at /backend (100+ endpoints ready)
+- Web frontend exists at /frontend (can reference for patterns)
+- Mobile app location: /mobile
+
+## Technical Decisions
+- Using Expo SDK 52+ managed workflow
+- expo-router for navigation (file-based routing)
+- react-native-paper for UI components
+- zustand for client state
+- @tanstack/react-query for server state
+- expo-secure-store for auth token storage
+- MMKV for offline caching
+- Session-based auth (not JWT)
+
+## API Base URL
+- Development: http://localhost:3000/api/v1
+- All endpoints documented in backend/app/controllers/api/v1/
+
+## Key Backend Endpoints
+- Auth: POST /auth/login, /auth/register, /auth/logout, GET /auth/me
+- Families: GET/POST /families, GET /families/:id/members
+- Daily Plans: GET /families/:id/daily_plans/today, PATCH /families/:id/daily_plans/:id
+- Habits: GET/POST/PATCH/DELETE /families/:id/habits
+- Goals: GET/POST/PATCH/DELETE /families/:id/goals, POST /goals/:id/refine
+- Reflections: GET/POST/PATCH /families/:id/reflections
+- Reviews: GET /families/:id/weekly_reviews/current
+- Notifications: GET /notifications, POST /device_tokens
+- User: GET /users/me/points, /users/me/streaks, /users/me/badges
+
+## Codebase Patterns
+- Use /bin/bash -c '...' for commands requiring asdf node (v23+) since Expo 54 requires Node 20+
+- Path aliases: @/ maps to src/, @shared maps to ../shared (configured in tsconfig.json and babel.config.js)
+- Run `npx tsc --noEmit` for typecheck before committing
+- iOS bundle identifier: com.entmoot.mobile
+- Environment variables via react-native-dotenv: import { API_URL } from "@env"; (TypeScript types in src/types/env.d.ts)
+- Jest configured with jest-expo preset; use `npm test` or `npm run test:watch`
+- @env mock in __mocks__/@env.js for tests
+- expo-router: File-based routing in /app directory, main entry point is "expo-router/entry" in package.json
+- Design colors: primary=#4F46E5, secondary=#2D5A27, background=#FFF8E7, earthBrown=#795548
+- UI components: Import from @/components/ui (Typography, Button, Card, Input, LoadingSpinner)
+- Theme colors: Import COLORS from @/theme/colors for consistent styling
+- Use @expo/vector-icons Ionicons for icons (already installed)
+- API client: Use `api.get<T>`, `api.post<T>`, `api.patch<T>`, `api.del<T>` for typed requests with auto-auth
+- QueryClient: Import from @/lib/queryClient for TanStack Query setup
+- Auth store: Import useAuthStore or useAuth from @/stores; use currentFamilyId for family-scoped API calls
+- Family ID persistence: setCurrentFamily(id) persists to SecureStore and updates zustand state
+- Services: Import from @/services (secureStorage, biometrics) for platform services
+- Biometric auth: Use shouldPromptBiometric() before authenticate(); respects user preference + device capability
+- Data hooks: Import useTodayPlan, useUpdateDailyPlan from @/hooks for daily plan data; uses TanStack Query with optimistic updates
+- Query keys pattern: Use exported keys objects (e.g., dailyPlanKeys) for consistent cache management
+- Bottom sheet modals: Use @gorhom/bottom-sheet with react-native-reanimated; configure reanimated plugin last in babel.config.js
+- Goals hook: Import useGoals, Goal from @/hooks; filter by status with useGoals({ status: "in_progress" })
+- Components barrel export: Import from @/components (FirstGoalPrompt, AddPriorityModal) for shared components
+- Offline storage: Import from @/services (setCache, getCache, clearCache, CACHE_KEYS) for MMKV caching
+- Network status: Import useNetworkStatus, useIsOnline, checkIsOnline from @/hooks for connectivity monitoring
+
+## Learnings
+(Ralph will append learnings here as iterations progress)
+
+---
+
+## 2026-01-21 - US-001
+- What was implemented: Completed Expo project initialization requirements
+- Files changed: babel.config.js (created), app.json (updated bundle ID, iOS min version), package.json (babel-plugin-module-resolver added)
+- **Learnings for future iterations:**
+  - Expo 54 requires Node.js 20+; use asdf shims for correct version
+  - expo-constants should NOT be in plugins array (it's not a config plugin)
+  - The project already had React Navigation setup (not expo-router) - existing structure should be preserved
+  - Use `/bin/bash -c '/Users/justuseapen/.asdf/shims/npx ...'` pattern for expo commands
+---
+
+## 2026-01-21 - US-002
+- What was implemented: Configured development environment with testing and env variable support
+- Files changed:
+  - .prettierrc (extended with additional rules)
+  - .env.example (created with API_URL)
+  - package.json (added test scripts, jest, jest-expo, @testing-library/react-native, react-native-dotenv)
+  - babel.config.js (added react-native-dotenv plugin)
+  - jest.config.js (created with jest-expo preset and path aliases)
+  - jest.setup.js (created for @testing-library/react-native setup)
+  - src/types/env.d.ts (created TypeScript declaration for @env module)
+  - __mocks__/@env.js (created mock for tests)
+- **Learnings for future iterations:**
+  - ESLint was already configured with TypeScript and React plugins (not @react-native/eslint-config but works)
+  - Use `--legacy-peer-deps` when installing @testing-library/react-native due to React 19 peer conflicts
+  - Jest setup file path must be `<rootDir>/jest.setup.js` not the package path directly
+  - git root is /washington, not /washington/mobile - use relative paths when staging files
+---
+
+## 2026-01-21 - US-003
+- What was implemented: Set up navigation structure with expo-router file-based routing
+- Files changed:
+  - app.json (added scheme, web bundler, expo-router plugin)
+  - package.json (changed main to expo-router/entry, added expo-router and dependencies)
+  - app/_layout.tsx (root layout with auth guard)
+  - app/(auth)/_layout.tsx, login.tsx, register.tsx, forgot-password.tsx (auth screens)
+  - app/(tabs)/_layout.tsx, today.tsx, goals.tsx, me.tsx (main tabs with icons)
+  - app/onboarding/index.tsx, app/settings/index.tsx, app/goal/[id].tsx (stack screens)
+- **Learnings for future iterations:**
+  - expo-router uses app/ directory for file-based routing (not src/)
+  - Use `--legacy-peer-deps` when installing packages with React 19 peer dependency conflicts
+  - The existing src/navigation/ React Navigation code still exists but is not used by expo-router
+  - useSegments() returns the current route segments for auth guard logic
+  - Tab bar icons use @expo/vector-icons/Ionicons - import with { Ionicons } from "@expo/vector-icons"
+---
+
+## 2026-01-21 - US-004
+- What was implemented: Created design system foundation with reusable UI components
+- Files changed:
+  - package.json (added react-native-paper)
+  - app/_layout.tsx (configured PaperProvider with custom theme)
+  - src/theme/colors.ts (created with brand colors and paper theme colors)
+  - src/components/ui/Typography.tsx (H1, H2, H3, Body, Caption variants)
+  - src/components/ui/Button.tsx (primary, secondary, outline, ghost variants)
+  - src/components/ui/Card.tsx (default, outlined, elevated variants + PressableCard)
+  - src/components/ui/Input.tsx (with label, error state, helper text)
+  - src/components/ui/LoadingSpinner.tsx (with optional message and fullScreen mode)
+  - src/components/ui/index.ts (barrel export file)
+- **Learnings for future iterations:**
+  - react-native-paper uses MD3LightTheme as base theme, extend colors with spread operator
+  - PaperProvider must wrap the entire app tree (wrap SafeAreaProvider inside)
+  - Custom UI components don't need to wrap Paper components - plain React Native works well
+  - Use COLORS from @/theme/colors for consistent styling across the app
+  - Button/Card variants are implemented as StyleSheet combinations, not separate components
+  - Import components from @/components/ui (barrel export pattern)
+---
+
+## 2026-01-21 - US-005
+- What was implemented: Created secure storage service for auth tokens and sensitive data
+- Files changed:
+  - package.json (expo-secure-store version updated)
+  - src/services/secureStorage.ts (created with all secure storage functions)
+- **Learnings for future iterations:**
+  - expo-secure-store was already in package.json but at an older version - npm install updated it
+  - Use `--legacy-peer-deps` when installing packages due to React 19 peer dependency conflicts
+  - Import from expo-secure-store: setItemAsync, getItemAsync, deleteItemAsync (not set/get/delete)
+  - STORAGE_KEYS constants help prevent typos and enable TypeScript autocomplete
+  - clearAuthData() helper is useful for logout - clears all auth-related keys at once
+  - Services directory is at src/services/ for platform-specific services
+---
+
+## 2026-01-21 - US-006
+- What was implemented: Created API client with typed convenience methods and TanStack Query setup
+- Files changed:
+  - package.json (added @tanstack/react-query)
+  - src/lib/api.ts (added typed get<T>, post<T>, patch<T>, del<T> methods)
+  - src/lib/queryClient.ts (created with mobile-optimized defaults)
+  - src/lib/index.ts (added queryClient export)
+- **Learnings for future iterations:**
+  - API client was already mostly implemented at src/lib/api.ts with auth token handling
+  - apiClient.setOnAuthError() callback handles 401 redirects (already connected in authStore)
+  - Use `api.get<T>('/endpoint')` for typed GET requests with auto-auth
+  - QueryClient defaults: 5min staleTime, 30min gcTime, refetchOnWindowFocus=false (better mobile UX)
+  - Config uses expo-constants to detect environment (development/staging/production)
+  - API base URL comes from src/lib/config.ts, not @env module
+---
+
+## 2026-01-21 - US-007
+- What was implemented: Enhanced auth store with currentFamilyId state and setCurrentFamily action
+- Files changed:
+  - src/stores/auth.ts (added currentFamilyId state, setCurrentFamily action, useAuth hook alias)
+  - src/stores/index.ts (added useAuth export)
+- **Learnings for future iterations:**
+  - Auth store already existed with zustand, login/logout/register actions, and JWT token handling
+  - zustand was already installed in package.json (v5.0.2)
+  - The store uses custom JWT implementation with token refresh, not Rails session-based auth
+  - Import useAuthStore or useAuth from @/stores - both work identically
+  - currentFamilyId is persisted to SecureStore as FAMILY_ID_KEY ("entmoot_family_id")
+  - setCurrentFamily action both persists to storage AND updates zustand state
+  - The store already has apiClient callbacks for token refresh and auth errors
+---
+
+## 2026-01-21 - US-008
+- What was implemented: Built full login screen with complete UI and functionality
+- Files changed:
+  - app/(auth)/login.tsx (complete rewrite with form, validation, navigation)
+- **Learnings for future iterations:**
+  - Use KeyboardAvoidingView with ScrollView pattern for forms with keyboard
+  - Input component from @/components/ui supports error prop for validation messages
+  - Button component supports loading prop which shows ActivityIndicator
+  - authStore.login() is async and throws error on failure - catch and show Alert
+  - Use router.replace for navigation after successful login (not push)
+  - router.push for navigating to other auth screens (forgot-password, register)
+  - Password show/hide toggle: position absolute TouchableOpacity with Ionicons eye icon
+  - Form validation should clear errors when user starts typing in that field
+  - Use hitSlop on touch targets for better accessibility
+---
+
+## 2026-01-21 - US-009
+- What was implemented: Built full registration screen with complete form and error handling
+- Files changed:
+  - app/(auth)/register.tsx (complete rewrite with registration form UI)
+- **Learnings for future iterations:**
+  - Registration uses authStore.register() which handles saving tokens and user state automatically
+  - RegisterData type from @shared/types requires: name, email, password, password_confirmation
+  - API validation errors may come as JSON with field-level errors (email, password, name, password_confirmation arrays)
+  - Use router.back() for "Log In" link since register is pushed from login screen
+  - Both password fields have show/hide toggles - use separate state (showPassword, showConfirmPassword)
+  - autoComplete="new-password" for registration password fields (vs "password" for login)
+  - helperText prop on Input component shows text below input (used for password requirements)
+---
+
+## 2026-01-21 - US-010
+- What was implemented: Built forgot password screen with email reset functionality
+- Files changed:
+  - app/(auth)/forgot-password.tsx (complete rewrite with forgot password form)
+- **Learnings for future iterations:**
+  - Use apiFetch for unauthenticated API calls (password reset doesn't require auth)
+  - Success alert uses array of buttons to navigate user back to login
+  - COLORS.text is the correct color for primary text (not textPrimary which doesn't exist)
+  - Generic success message avoids revealing whether email exists in system (security best practice)
+  - Back button with Ionicons arrow-back provides clear navigation affordance
+---
+
+## 2026-01-21 - US-011
+- What was implemented: Biometric authentication with Face ID/Touch ID support
+- Files changed:
+  - package.json (added expo-local-authentication)
+  - src/services/biometrics.ts (created with all biometric functions)
+  - src/services/index.ts (created barrel export for services)
+  - app/_layout.tsx (updated AuthGuard for biometric prompt on foreground)
+- **Learnings for future iterations:**
+  - expo-local-authentication uses SecurityLevel enum (BIOMETRIC_STRONG, BIOMETRIC_WEAK) for capability check
+  - Use AuthenticationType enum (FACIAL_RECOGNITION, FINGERPRINT) to determine biometric type
+  - AppState API with addEventListener "change" detects foreground/background transitions
+  - Use useRef for appState and biometricPromptShown to avoid unnecessary re-renders
+  - shouldPromptBiometric helper combines availability check + preference check + session check
+  - biometricLocked state prevents navigation while biometric prompt is active
+  - Services barrel export at src/services/index.ts enables cleaner imports
+---
+
+## 2026-01-21 - US-012
+- What was implemented: Built onboarding welcome flow with 4 swipeable pages
+- Files changed:
+  - package.json (added react-native-pager-view)
+  - app/onboarding/index.tsx (complete rewrite with PagerView for swiping)
+- **Learnings for future iterations:**
+  - react-native-pager-view requires --legacy-peer-deps due to React 19 peer dependency conflicts
+  - PagerView uses onPageSelected callback with e.nativeEvent.position for page tracking
+  - Use useRef<PagerView> with pagerRef.current.setPage(n) for programmatic navigation
+  - Page indicators: active indicator can be wider (24px vs 8px) for visual emphasis
+  - Ionicons provides good icons for onboarding: leaf, sunny, checkmark-circle, trophy
+  - router.push is correct for onboarding → family-setup navigation (not replace)
+  - SafeAreaView needed for proper spacing on devices with notch
+---
+
+## 2026-01-21 - US-013
+- What was implemented: Built family setup screen with create/join family options
+- Files changed:
+  - package.json (added expo-localization)
+  - app.json (added expo-localization plugin)
+  - app/onboarding/family-setup.tsx (created - full implementation)
+- **Learnings for future iterations:**
+  - expo-localization uses getCalendars()[0].timeZone for timezone detection (not Localization.timezone)
+  - PressableCard from @/components/ui is perfect for selectable option cards
+  - Use mode state pattern ("select" | "create" | "join") for multi-step forms with back navigation
+  - api.post<T> from @/lib/api handles auth automatically and returns typed response
+  - setCurrentFamily(id) from authStore persists to SecureStore and updates zustand state
+  - router.replace('/(tabs)/today') for navigation after family setup (no back option)
+---
+
+## 2026-01-21 - US-014
+- What was implemented: Built First Goal Prompt modal component for new user onboarding
+- Files changed:
+  - src/components/FirstGoalPrompt.tsx (created - modal component with suggestion cards)
+  - app/(tabs)/today.tsx (integrated FirstGoalPrompt with eligibility check)
+- **Learnings for future iterations:**
+  - Use Modal with presentationStyle="pageSheet" for native iOS sheet-style modals
+  - Create companion hook (useFirstGoalPrompt) alongside modal component for eligibility checking
+  - PressableCard variant="elevated" with custom borderColor for selected state looks good
+  - Radio-style selection UI: radioCircle with inner filled circle on selection
+  - Custom goal mode: switch from suggestions to TextInput with back navigation
+  - KeyboardAvoidingView with behavior="padding" on iOS for forms in modals
+  - Default suggestions as fallback when API doesn't return suggestions or errors
+  - isCustomMode state pattern for toggling between selection and input modes
+  - API endpoints: GET /users/me/first_goal_prompt (eligibility), POST /users/me/first_goal_prompt/dismiss (dismiss)
+---
+
+## 2026-01-21 - US-015
+- What was implemented: Created daily plan data layer with hooks for fetching and updating daily plans
+- Files changed:
+  - src/hooks/useDailyPlan.ts (created - all types and hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Daily plan API uses nested attributes pattern: daily_tasks_attributes, top_priorities_attributes, habit_completions_attributes
+  - TanStack Query optimistic updates: use onMutate to snapshot and update cache, onError to rollback, onSuccess to sync with server
+  - Query keys pattern: dailyPlanKeys.today(familyId) enables easy invalidation and cache management
+  - HabitCompletion has nested habit info (habit.name, habit.position, habit.is_active)
+  - CompletionStats provides task/priority/habit completion counts for progress display
+  - _destroy: true in nested attributes tells Rails to delete the record
+  - Use Date.now() as temporary ID for optimistic new items (server will replace with real ID)
+  - useAuthStore((state) => state.currentFamilyId) for accessing family ID in hooks
+---
+
+## 2026-01-21 - US-016
+- What was implemented: Built Today Screen Header with date, greeting, and completion stats
+- Files changed:
+  - package.json (added date-fns)
+  - app/(tabs)/today.tsx (complete rewrite with header section)
+- **Learnings for future iterations:**
+  - date-fns format() with "EEEE, MMMM d" gives "Wednesday, January 22" format
+  - Use SafeAreaView edges={["top"]} for screens with custom headers (not system header)
+  - RefreshControl: use refreshing={isFetching && !isLoading} to avoid showing spinner on initial load
+  - Skeleton components: simple Views with backgroundColor matching COLORS.surface look good
+  - CompletionStats from daily plan has tasks_total, tasks_completed, priorities_total, priorities_completed, habits_total, habits_completed
+  - User name available via useAuthStore((state) => state.user?.name)
+---
+
+## 2026-01-21 - US-017
+- What was implemented: Built Today's Intention section with inline editing and save functionality
+- Files changed:
+  - app/(tabs)/today.tsx (added IntentionSection component with edit mode)
+- **Learnings for future iterations:**
+  - useRef<TextInput> with setTimeout focus pattern for delayed focus after state update
+  - Inline edit pattern: isEditing state, TouchableOpacity for display, TextInput for edit
+  - Compare trimmed values before saving to avoid unnecessary API calls
+  - Show saving indicator using ActivityIndicator with "Saving..." text next to section title
+  - useUpdateDailyPlan from @/hooks/useDailyPlan handles intention updates with optimistic UI
+  - Sync local state from props using useEffect when not editing (for server sync)
+  - blurOnSubmit + returnKeyType="done" makes TextInput behave like single-line with done key
+---
+
+## 2026-01-21 - US-018
+- What was implemented: Built Today Screen Top Priorities section with full functionality
+- Files changed:
+  - package.json (added expo-haptics, react-native-gesture-handler)
+  - app/(tabs)/today.tsx (added TopPrioritiesSection, TopPriorityItem components)
+- **Learnings for future iterations:**
+  - Use GestureHandlerRootView wrapper for swipe gestures - wrap entire screen content
+  - expo-haptics: Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) for checkbox, Medium for delete
+  - Swipeable from react-native-gesture-handler: use ref for programmatic close after delete
+  - renderRightActions receives dragX for animation interpolation
+  - Goal badge: use COLORS.primary + "15" for 15% opacity background
+  - Animated.AnimatedInterpolation<number> for proper TypeScript typing with interpolate()
+  - Top priorities max 3: disable Add button with visual feedback when limit reached
+  - Loading skeleton: render 3 placeholder items for visual consistency
+---
+
+## 2026-01-21 - US-019
+- What was implemented: Built Today Screen Non-Negotiables (Habits) Section
+- Files changed:
+  - app/(tabs)/today.tsx (added HabitsSection, HabitItem components, new styles)
+- **Learnings for future iterations:**
+  - Habits data comes from habit_completions in daily plan response (not separate habits endpoint)
+  - Backend habits API doesn't include streak data per-habit yet - streak badge UI is ready but not populated
+  - Sort habits by habit.position to maintain user's preferred order
+  - Reuse existing checkbox styles from priorities for visual consistency
+  - habit_completions_attributes uses completion id (not habit_id) for updates
+  - Empty state should guide users to Settings to add habits
+  - Completion count shows X/Y completed in section header (same pattern as priorities)
+---
+
+## 2026-01-21 - US-020
+- What was implemented: Built Today Screen Tasks Section with full CRUD functionality
+- Files changed:
+  - app/(tabs)/today.tsx (added TaskItem, TasksSection components, new task styles)
+- **Learnings for future iterations:**
+  - Tasks use same pattern as priorities: TaskItem component with swipe-to-delete and checkbox
+  - DailyTask type already exists in useDailyPlan.ts with all needed fields (title, completed, position, assignee, goal)
+  - daily_tasks_attributes supports _destroy: true for deleting tasks
+  - New tasks need position property set to current length for proper ordering
+  - Assignee avatar shows initials on colored background when avatar_url is null
+  - Inline TextInput with onSubmitEditing pattern for quick task entry
+  - Show add button only when input has content (cleaner UX)
+  - Reuse checkbox, deleteAction styles from priorities for visual consistency
+---
+
+## 2026-01-21 - US-021
+- What was implemented: Built Add Priority Modal with bottom sheet and goal picker
+- Files changed:
+  - package.json (added @gorhom/bottom-sheet, react-native-reanimated)
+  - babel.config.js (added react-native-reanimated/plugin)
+  - src/hooks/useGoals.ts (new - useGoals hook with Goal types)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/AddPriorityModal.tsx (new - bottom sheet modal component)
+  - src/components/index.ts (new - components barrel export)
+  - app/(tabs)/today.tsx (integrated AddPriorityModal)
+- **Learnings for future iterations:**
+  - @gorhom/bottom-sheet requires react-native-reanimated as peer dependency
+  - react-native-reanimated/plugin MUST be listed last in babel plugins array
+  - Use --legacy-peer-deps when installing packages due to React 19 peer dependency conflicts
+  - BottomSheet uses index={-1} to start closed, expand() to open
+  - BottomSheetBackdrop: disappearsOnIndex={-1}, appearsOnIndex={0} for proper backdrop behavior
+  - Goal picker implemented as custom dropdown with selectable list (not Picker component)
+  - Use keyboardBehavior="interactive" for smooth keyboard handling in bottom sheet
+  - Goals can be filtered by status: useGoals({ status: "in_progress" })
+  - useGoals returns Goal[] (not paginated) from /families/:id/goals endpoint
+---
+
+## 2026-01-21 - US-022
+- What was implemented: Built End-of-Day Reflection Prompt with banner and modal
+- Files changed:
+  - src/components/EveningReflectionBanner.tsx (new - banner and reflection modal)
+  - src/components/index.ts (export new component and helper functions)
+  - app/(tabs)/today.tsx (integrated EveningReflectionBanner)
+- **Learnings for future iterations:**
+  - Use BottomSheetScrollView for modals with forms to ensure content is scrollable
+  - isEveningTime() and needsEveningReflection() helper functions exported for reuse
+  - Mood selector: 5 emoji options (great, good, okay, difficult, rough) stored as mood ID
+  - Mood can be prepended to shutdown_shipped text for visual display
+  - Banner visibility: show after 6 PM (hour >= 18) AND shutdown_shipped is empty
+  - Session-based dismiss: use useState (not persisted) so banner returns next session
+  - DailyPlan already has shutdown_shipped and shutdown_blocked fields - no type changes needed
+  - Haptics.notificationAsync for success feedback on save
+---
+
+## 2026-01-21 - US-023
+- What was implemented: Created habits data layer with CRUD hooks
+- Files changed:
+  - src/hooks/useHabits.ts (created - all types and hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Habit type matches backend: id, name, position, is_active
+  - Backend habits API response wraps habits in { habits: [] } object
+  - useReorderHabits uses positions array: [{ id: number, position: number }]
+  - All mutation hooks include optimistic updates with rollback on error
+  - habitsKeys pattern follows same structure as dailyPlanKeys and goalsKeys
+  - Import hooks from @/hooks (barrel export)
+---
+
+## 2026-01-21 - US-024
+- What was implemented: Built habits management screen with full CRUD functionality
+- Files changed:
+  - package.json (added react-native-draggable-flatlist)
+  - app/settings/habits.tsx (created - full habits management UI)
+  - app/_layout.tsx (added settings/habits route)
+- **Learnings for future iterations:**
+  - react-native-draggable-flatlist uses ScaleDecorator for scale effect during drag
+  - Use onLongPress with delayLongPress={150} for drag activation (better UX than immediate drag)
+  - RenderItemParams<T> provides item, drag, isActive for render item callback
+  - Swipeable from react-native-gesture-handler: use ref for programmatic close after delete
+  - GestureHandlerRootView must wrap the entire draggable list content
+  - React Compiler requires state setters in useCallback dependency arrays (setEditingHabitId, setEditValue, etc.)
+  - Settings sub-screens need Stack.Screen entry in root layout (_layout.tsx)
+  - MAX_HABITS constant (10) enforced on both add button and handleAddHabit
+---
+
+## 2026-01-21 - US-025
+- What was implemented: Created goals data layer with complete CRUD and AI refinement hooks
+- Files changed:
+  - src/hooks/useGoals.ts (enhanced - added types and mutation hooks)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Goal API response wraps data in objects: { goals: [] } for list, { goal: {} } for detail
+  - GoalUser type for creator/assignees includes: id, name, email, avatar_url
+  - SMART fields (specific, measurable, achievable, relevant, time_bound) only included in detail response
+  - useRefineGoal mutation returns GoalRefinementResponse with smart_suggestions, alternative_titles, potential_obstacles, milestones
+  - Create/update payloads use assignee_ids (array of user IDs) for assigning users to goals
+  - GoalResponse includes is_first_goal and is_first_action flags for gamification
+  - Cache invalidation: invalidateQueries({ queryKey: goalsKeys.all }) refreshes all goal lists
+  - setQueryData for direct cache updates on single goal detail after update
+---
+
+## 2026-01-21 - US-026
+- What was implemented: Built Goals List Screen with filter tabs and goal cards
+- Files changed:
+  - app/(tabs)/goals.tsx (complete rewrite with filter tabs, goal cards, FAB)
+  - app/_layout.tsx (added goal/create route)
+  - app/goal/create.tsx (created placeholder screen)
+- **Learnings for future iterations:**
+  - FAB from react-native-paper provides ready-to-use floating action button
+  - Use horizontal ScrollView for filter tabs (not FlatList) for simpler horizontal scrolling
+  - STATUS_COLORS and STATUS_LABELS maps provide clean status-to-color/label mappings
+  - statusColor + "20" appends 20% opacity for subtle background colors on badges
+  - Goal card press state uses Pressable with style function: ({ pressed }) => [styles.card, pressed && styles.pressed]
+  - Empty state should include action button to create first item (better UX than FAB alone)
+  - FlatList with contentContainerStyle paddingBottom: 100 prevents FAB overlap
+  - SafeAreaView edges={["top"]} for screens with custom headers
+  - Create placeholder screen when FAB navigates to unimplemented feature (prevents navigation errors)
+---
+
+## 2026-01-22 - US-027
+- What was implemented: Built complete Goal Detail Screen with all features
+- Files changed:
+  - app/goal/[id].tsx (complete rewrite with all sections)
+- **Learnings for future iterations:**
+  - @react-native-community/slider already installed - use Slider component for progress control
+  - Progress slider: use onValueChange for local state, onSlidingComplete for API call (avoids excessive requests)
+  - Status picker: custom expandable dropdown (TouchableOpacity + View list) rather than using library picker
+  - SMART breakdown: only show section if any of the 5 SMART fields are populated (check with .some())
+  - Avoid using "children" as a prop name - ESLint error: "Do not pass children as props" - use childGoals instead
+  - Prettier auto-fixes inline style arrays when they exceed line length - no manual formatting needed
+  - useGoal hook fetches single goal detail with full SMART fields, children, and assignees
+  - useUpdateGoal and useDeleteGoal mutations handle optimistic updates and cache invalidation
+  - Delete confirmation: Alert.alert with destructive style button + haptic warning feedback
+  - Edit navigates to /goal/edit/${goalId} (placeholder route for next story)
+---
+
+## 2026-01-22 - US-028
+- What was implemented: Built complete Create Goal Screen with all form fields and API integration
+- Files changed:
+  - app/goal/create.tsx (complete rewrite from placeholder to full implementation)
+- **Learnings for future iterations:**
+  - Family members API: GET /families/:id/members returns { members: FamilyMember[] } with user_id, name, email, avatar_url, role
+  - FamilyMember type: use user_id (not id) when assigning to goals - the id is the membership id
+  - Time scale segmented control: horizontal ScrollView with TouchableOpacity buttons works well for 5+ options
+  - DateTimePicker behavior differs by platform: use display="spinner" on iOS for better UX
+  - Visibility radio picker: custom implementation with radio circle (outer + inner filled) looks cleaner than library pickers
+  - Assignee multi-select: wrap-able row of chips with checkmark icon when selected
+  - CreateGoalPayload uses assignee_ids (array of user IDs) for assignment
+  - useCreateGoal hook returns GoalResponse with goal.id for navigation to detail screen
+  - Refine with AI button placeholder: use dashed border style for "coming soon" features
+  - Footer with absolute positioning and paddingBottom: 32 for safe area on iOS
+---
+
+## 2026-01-22 - US-029
+- What was implemented: Built AI Goal Refinement feature with full modal and integration
+- Files changed:
+  - src/components/AIRefinementModal.tsx (new - modal with loading, error, suggestions display)
+  - src/components/index.ts (export AIRefinementModal)
+  - app/goal/[id].tsx (integrated Refine with AI button and modal)
+  - app/goal/create.tsx (integrated "Create & Refine with AI" flow)
+- **Learnings for future iterations:**
+  - Backend refine endpoint requires an existing goal (POST /families/:id/goals/:id/refine)
+  - For create screen, use "Create & Refine" flow: create goal first, then refine, then navigate to detail
+  - SmartSuggestions type has `string | null` while UpdateGoalPayload expects `string | undefined` - convert null to undefined when applying
+  - BottomSheet with BottomSheetScrollView for scrollable modal content
+  - Accept/reject pattern: use Set<keyof SmartSuggestions> to track which fields are accepted
+  - useEffect with visible + suggestions dependencies to reset acceptedFields when modal opens with new data
+  - GoalRefinementResponse.suggestions includes: smart_suggestions, alternative_titles, alternative_descriptions, potential_obstacles, milestones, overall_feedback
+  - Import Ionicons icons carefully - "bullseye-outline" may not exist, check @expo/vector-icons docs
+---
+
+## 2026-01-22 - US-030
+- What was implemented: Created reflections data layer with hooks for fetching and managing reflections
+- Files changed:
+  - src/hooks/useReflections.ts (new - all types and hooks for reflections)
+  - src/hooks/index.ts (updated - export new hooks and types)
+- **Learnings for future iterations:**
+  - Reflection API response wraps data in { reflections: [] } object for list endpoint
+  - ReflectionType enum: evening, weekly, monthly, quarterly, annual, quick (matches backend)
+  - ReflectionMood enum: great, good, okay, difficult, rough (matches backend enum)
+  - ReflectionFilters supports: type (enum), user_id (number), from (ISO date), to (ISO date)
+  - Backend uses reflection_responses_attributes for nested prompt/response pairs
+  - Backend reflections endpoint: GET/POST/PATCH /families/:id/reflections
+  - Quick reflections are special - they have user_id and family_id directly (not via daily_plan)
+  - reflectionsKeys pattern follows same structure as goalsKeys and habitsKeys
+  - Import hooks from @/hooks (barrel export)
+---
+
+## 2026-01-22 - US-031
+- What was implemented: Built Quick Reflection screen with all form elements and save functionality
+- Files changed:
+  - app/reflection/quick.tsx (new - complete Quick Reflection screen)
+  - app/_layout.tsx (added reflection/quick route)
+- **Learnings for future iterations:**
+  - Create reflection directory: app/reflection/ for reflection-related screens
+  - Mood selector: Use MoodSelector component with array of MoodOption (id, emoji, label)
+  - Energy level slider: @react-native-community/slider with step={1}, show both slider and labels
+  - Gratitude items: Dynamic list with useRef array for TextInput refs, setTimeout for focus after add
+  - CreateReflectionPayload uses reflection_type: "quick" for quick reflections
+  - reflection_responses_attributes for storing free-form text with prompt/response pair structure
+  - Navigate back on success: Use Alert.alert with button that calls router.back()
+  - Prettier requires JSX text with apostrophes to use {"What's on your mind?"} syntax
+  - Stack.Screen route must be added to app/_layout.tsx for new screens outside tabs
+---
+
+## 2026-01-22 - US-032
+- What was implemented: Built Weekly Review screen with data layer and full UI
+- Files changed:
+  - src/hooks/useWeeklyReviews.ts (new - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new weekly review hooks and types)
+  - app/reflection/weekly.tsx (new - complete Weekly Review screen)
+  - app/_layout.tsx (added reflection/weekly route)
+- **Learnings for future iterations:**
+  - Weekly Review API endpoint: GET /families/:id/weekly_reviews/current returns or creates current week's review
+  - WeeklyReview type has many fields: legacy arrays (wins, challenges), review section (wins_shipped, losses_friction), metrics section, system health fields, forward setup fields
+  - API response includes computed metrics and habit_tally when include_metrics: true
+  - Auto-save pattern: use debounce timers with useRef<Record<string, NodeJS.Timeout>>, save on onChangeText (debounced) AND onBlur (immediate)
+  - Fix cleanup effect ref warning: assign debounceTimers.current to local variable inside effect, use that in cleanup
+  - MetricsCard component displays task_completion, goal_progress, and habit_tally from weekly review
+  - HabitTally is Record<string, number> mapping habit name to completion count
+  - Format date range using date-fns: parseISO for week_start_date, add 6 days for end date
+  - Keep saving indicator per-field with savingField state, show ActivityIndicator next to section title
+---
+
+## 2026-01-22 - US-033
+- What was implemented: Built complete Me Tab Screen with all sections
+- Files changed:
+  - app/(tabs)/me.tsx (complete rewrite with profile, streaks, points, badges, quick links, logout)
+- **Learnings for future iterations:**
+  - API endpoints for gamification: GET /users/me/streaks, GET /users/me/points, GET /users/me/badges
+  - Streaks response: { streaks: [{ id, streak_type, current_count, longest_count, last_activity_date, at_risk, next_milestone }] }
+  - Points response: { points: { total, this_week, breakdown }, recent_activity: [...] }
+  - Badges response: { badges: [...], stats: { total_badges, earned_badges, completion_percentage } }
+  - Badge earned field is boolean, use badges.filter(b => b.earned) to get earned badges
+  - Streak milestone highlighting: check if current_count is in [7, 14, 30, 60, 90, 180, 365] array
+  - User avatar_url may be null - use initials fallback (split name, take first char of each word, uppercase)
+  - useAuthStore((state) => state.user?.avatar_url) for accessing user avatar
+  - Quick links pattern: array of { id, label, icon, route } with TouchableOpacity + router.push
+  - Logout flow: Alert.alert confirmation → Haptics.impactAsync → logout() → router.replace("/(auth)/login")
+---
+
+## 2026-01-22 - US-034
+- What was implemented: Built complete Settings Screen with all sections and functionality
+- Files changed:
+  - app/settings/index.tsx (complete rewrite with Account, Notifications, Security, About sections, Delete Account)
+- **Learnings for future iterations:**
+  - Settings screen pattern: Use Section component to wrap related settings with title and card container
+  - SettingRow component: TouchableOpacity with icon, label, optional value, and optional chevron for navigation
+  - SwitchRow component: Similar to SettingRow but with Switch instead of chevron, plus optional sublabel
+  - Biometric service imports: isAvailable (renamed to isBiometricAvailable), isBiometricEnabled, setBiometricEnabled, getBiometricType
+  - Biometric state loading: Use useEffect on mount to check availability, load enabled preference, and get biometric type
+  - External links: Use Linking.canOpenURL() before Linking.openURL() for proper error handling
+  - Delete account flow: Use two-step Alert.alert confirmation (first warning, then "Yes, Delete My Account")
+  - Delete account API: api.del("/users/me") → logout() → router.replace("/(auth)/login")
+  - App version: Hardcode from app.json or use Constants.manifest?.version from expo-constants
+  - Header pattern: View with back button, centered title, and spacer for balance
+---
+
+## 2026-01-22 - US-035
+- What was implemented: Built complete Edit Profile Screen with avatar selection and name editing
+- Files changed:
+  - package.json (added expo-image-picker)
+  - app/settings/profile.tsx (created - full profile editing UI)
+  - app/_layout.tsx (added settings/profile route)
+- **Learnings for future iterations:**
+  - expo-image-picker requires --legacy-peer-deps due to React 19 peer dependency conflicts
+  - ImagePicker.launchCameraAsync and launchImageLibraryAsync use mediaTypes: ["images"] (array, not MediaTypeOptions enum)
+  - Permission handling: requestCameraPermissionsAsync() and requestMediaLibraryPermissionsAsync() return { status } object
+  - ActionSheetIOS.showActionSheetWithOptions for iOS native action sheet (camera/library choice)
+  - Alert.alert for Android equivalent action sheet functionality
+  - Linking.openURL("app-settings:") opens iOS Settings for permission management
+  - Profile API: PATCH /api/v1/users/me/profile accepts { name, avatar_url } - avatar_url must be a URL string (not file://)
+  - useAuthStore.setState({ user: response.user }) for direct state update after profile change
+  - Define pickImage before handleAvatarPress to satisfy React Hook dependency warnings
+  - Avatar placeholder: use user initials when avatar_url is null (same pattern as Me tab)
+  - Read-only email display with disabled opacity (0.7) and hint text for UX clarity
+---
+
+## 2026-01-22 - US-036
+- What was implemented: Built complete Family Management Screen with family switching and invite functionality
+- Files changed:
+  - src/hooks/useFamilies.ts (created - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/family.tsx (created - full family management UI)
+  - app/_layout.tsx (added settings/family route)
+- **Learnings for future iterations:**
+  - Families API: GET /families returns { families: [] }, GET /families/:id returns { family: {} } with members included
+  - Family members API: GET /families/:id/members returns { members: [] } with role, user_id, joined_at
+  - FamilyMember type: id is membership id, use user_id when comparing with current user
+  - Invitations API: POST /families/:id/invitations with { invitation: { email, role } }
+  - INVITABLE_ROLES: admin cannot be invited directly (only adult, teen, child, observer)
+  - canInvite permission check: filter members to find current user, check role is admin or adult
+  - Family switching: call setCurrentFamily(id) then refetch family-scoped data (members)
+  - FamilyCard component: show checkmark indicator for selected family, subtle border highlight
+  - Role badges: use ROLE_COLORS map with 20% opacity background for subtle styling
+  - BottomSheet with BottomSheetView (not BottomSheetScrollView) for simple forms without scrolling
+  - Role picker: custom dropdown with TouchableOpacity toggle and conditional list rendering
+---
+
+## 2026-01-22 - US-037
+- What was implemented: Set up push notification infrastructure with notifications service
+- Files changed:
+  - package.json (updated expo-notifications to ~0.32.16)
+  - src/services/notifications.ts (created - complete notification service)
+  - src/services/index.ts (added notifications export)
+  - src/lib/pushNotifications.ts (fixed deprecated removeNotificationSubscription API)
+- **Learnings for future iterations:**
+  - expo-notifications 0.32+ changed API: use subscription.remove() instead of Notifications.removeNotificationSubscription()
+  - There was already an existing pushNotifications.ts in src/lib/ with similar functionality - new notifications.ts in services follows acceptance criteria more closely
+  - Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId for getting project ID
+  - Device token API: POST /device_tokens with { device_token: { token, platform } } returns { device_token: { id, token, platform, created_at } }
+  - Store device_token.id for later unregistration (DELETE /device_tokens/:id)
+  - PUSH_TOKEN_KEY and DEVICE_TOKEN_ID_KEY stored in secure storage for persistence
+  - setNotificationHandler configures foreground notification behavior (shouldShowAlert, shouldPlaySound, etc.)
+  - Import notifications from @/services for push notification functionality
+---
+
+## 2026-01-22 - US-038
+- What was implemented: Set up incoming push notification handling with in-app banner and navigation
+- Files changed:
+  - app/_layout.tsx (added NotificationHandler component, notification listeners)
+  - src/components/InAppNotificationBanner.tsx (new - animated banner for foreground notifications)
+  - src/components/index.ts (export new component and helper functions)
+- **Learnings for future iterations:**
+  - Notifications.addNotificationReceivedListener() for foreground notifications
+  - Notifications.addNotificationResponseReceivedListener() for when user taps notification
+  - subscription.remove() is the correct way to remove listeners (not deprecated removeNotificationSubscription)
+  - Notifications.getLastNotificationResponseAsync() handles cold start from notification
+  - NotificationHandler wraps main app content, placed inside AuthGuard but outside Stack
+  - Use useRef to store pending notification payload when user is not yet authenticated
+  - Animated spring for banner entrance, Animated timing for exit (smoother UX)
+  - NotificationPayload type: type (NotificationType), targetId, title, body, link, data
+  - Navigation mapping: use router.push(path as never) to bypass strict typing for dynamic routes
+  - Replace [id] in route string with actual id for dynamic routes: /goal/[id] -> /goal/123
+  - Import InAppNotificationBanner and helpers from @/components (barrel export)
+---
+
+## 2026-01-22 - US-039
+- What was implemented: Built complete Notification Preferences Screen with data layer and UI
+- Files changed:
+  - src/hooks/useNotificationPreferences.ts (created - complete data layer with types and hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/notifications.tsx (created - full notification settings UI)
+  - app/_layout.tsx (added settings/notifications route)
+- **Learnings for future iterations:**
+  - Notification preferences API: GET/PATCH /users/me/notification_preferences (singular resource, not collection)
+  - API response wraps data: { notification_preferences: { channels, reminders, quiet_hours, tips, reengagement, check_in_frequency } }
+  - Update payload uses flat structure: { morning_planning: boolean, morning_planning_time: string, ... }
+  - Time values stored as HH:MM strings - use parseTimeString/formatTimeToString helpers for conversion to/from Date
+  - Conditional time pickers: show time picker row only when corresponding toggle is enabled
+  - Day picker: custom dropdown with DAY_LABELS array (Sunday=0 to Saturday=6)
+  - DateTimePicker: use display="spinner" on iOS, mode="time" for time pickers
+  - Section pattern: Use Section component with sectionDescription for explanatory text in quiet hours
+  - Loading/error states: Show skeleton or error UI when data not available
+  - Import hooks from @/hooks barrel export: useNotificationPreferences, useUpdateNotificationPreferences
+---
+
+## 2026-01-22 - US-040
+- What was implemented: Local notification scheduling for morning planning, evening reflection, and weekly review reminders
+- Files changed:
+  - src/services/notifications.ts (added local notification scheduling functions)
+- **Learnings for future iterations:**
+  - expo-notifications uses SchedulableTriggerInputTypes.DAILY for daily notifications and WEEKLY for weekly
+  - DAILY trigger requires { type, hour, minute }; WEEKLY requires { type, weekday, hour, minute }
+  - Weekday for WEEKLY trigger: 1-7 (1 = Sunday), not 0-6 like our API - add 1 when converting
+  - Quiet hours handling: check if notification time falls within quiet period before scheduling
+  - Quiet hours spanning midnight (e.g., 22:00 to 07:00): need special logic comparing minutes-since-midnight
+  - Use notification identifiers (MORNING_PLANNING, etc.) for targeted notification management
+  - scheduleNotificationAsync returns identifier, cancelScheduledNotificationAsync takes identifier
+  - SchedulingPreferences interface matches useNotificationPreferences hook's reminders/quiet_hours structure
+  - cancelAllScheduledNotificationsAsync() clears all scheduled notifications (for reschedule/logout)
+  - Import scheduleLocalNotifications, rescheduleAllNotifications, cancelAllScheduled from @/services
+---
+
+## 2026-01-22 - US-041
+- What was implemented: Set up offline storage infrastructure with MMKV and network status monitoring
+- Files changed:
+  - package.json (added react-native-mmkv, @react-native-community/netinfo)
+  - src/services/offlineStorage.ts (created - MMKV instance, cache functions)
+  - src/hooks/useNetworkStatus.ts (created - network status hook)
+  - src/services/index.ts (export offlineStorage)
+  - src/hooks/index.ts (export useNetworkStatus, useIsOnline, checkIsOnline)
+- **Learnings for future iterations:**
+  - react-native-mmkv v4 uses `createMMKV()` function, not `new MMKV()` class constructor
+  - MMKV methods: `set()`, `getString()`, `getNumber()`, `getBoolean()`, `remove()`, `contains()`, `clearAll()`
+  - Note: MMKV uses `remove()` not `delete()` for removing keys
+  - Import MMKV type separately: `import { createMMKV, type MMKV } from "react-native-mmkv"`
+  - @react-native-community/netinfo provides NetInfoState with isConnected, type, isInternetReachable
+  - NetInfoStateType enum: unknown, none, wifi, cellular, bluetooth, ethernet, etc.
+  - Use --legacy-peer-deps when installing packages due to React 19 peer dependency conflicts
+  - CACHE_KEYS constants help prevent typos and enable TypeScript autocomplete
+  - Import offlineStorage functions from @/services (setCache, getCache, clearCache, CACHE_KEYS)
+  - Import network hooks from @/hooks (useNetworkStatus, useIsOnline, checkIsOnline)
+---
+
+## 2026-01-22 - US-042
+- What was implemented: Created offline sync queue service for processing pending API calls when online
+- Files changed:
+  - src/services/syncQueue.ts (created - complete sync queue implementation)
+  - src/services/index.ts (added syncQueue export)
+- **Learnings for future iterations:**
+  - SyncQueueItem type: id, action (description), endpoint, method, payload, timestamp, retryCount
+  - Sync queue persisted in MMKV with key "sync:queue" as JSON string array
+  - generateId() creates unique IDs with timestamp + random string: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+  - addToQueue() auto-generates id, timestamp, and retryCount (starts at 0)
+  - processQueue() processes items sequentially, re-checks network before each item
+  - 409 Conflict handling: check error message for "409" or "conflict" (case-insensitive), remove from queue
+  - Exponential backoff: BASE_DELAY_MS * Math.pow(2, retryCount) gives 1s, 2s, 4s for retries
+  - Use isProcessing flag to prevent concurrent queue processing
+  - Network listener pattern: store wasOffline state, trigger processQueue when transitioning from offline to online
+  - startNetworkListener/stopNetworkListener for app lifecycle management
+  - addSyncQueueListener for UI components to react to sync events (start, complete, error)
+  - Import sync queue functions from @/services (addToQueue, getQueue, processQueue, startNetworkListener, etc.)
+---
+
+## 2026-01-22 - US-043
+- What was implemented: Created OfflineBanner component for displaying network/sync status
+- Files changed:
+  - src/components/OfflineBanner.tsx (created - complete offline indicator UI)
+  - src/components/index.ts (export OfflineBanner)
+  - app/_layout.tsx (added OfflineBanner to NotificationHandler)
+- **Learnings for future iterations:**
+  - SyncStatus type: "online" | "offline" | "syncing" | "synced" covers all network/sync states
+  - Use addSyncQueueListener from @/services/syncQueue to react to queue processing events (start, complete, error)
+  - Animated API pattern: use spring for enter animation (responsive), timing for exit animation (predictable)
+  - Animated.Value with translateY for slide in/out from top: -100 hidden, 0 visible
+  - Use useSafeAreaInsets to add proper paddingTop for banner beneath notch
+  - Timer cleanup pattern: store timeout ref, clear in useEffect cleanup
+  - SYNCED_DISPLAY_DURATION = 2000ms (2 seconds) for "Synced ✓" message visibility
+  - Status colors: warning (amber) for offline, info (blue) for syncing, success (green) for synced
+  - Import OfflineBanner from @/components (barrel export)
+---
+
+## 2026-01-22 - US-044
+- What was implemented: Enabled offline daily planning with MMKV caching and sync queue integration
+- Files changed:
+  - src/hooks/useDailyPlan.ts (added offline caching, sync queue integration, conflict detection)
+  - src/hooks/index.ts (exported new functions: useRefetchOnReconnect, isPendingSync, getPendingSyncItems, etc.)
+  - app/(tabs)/today.tsx (added PendingSyncIndicator component, reconnect handling)
+- **Learnings for future iterations:**
+  - useTodayPlan caches responses using setCacheWithTimestamp() for staleness checking
+  - Use initialData callback in useQuery to provide cached data instantly: `initialData: () => getCacheWithTimestamp<T>(key)?.data`
+  - checkIsOnline() from useNetworkStatus is async - must await before deciding online/offline path
+  - useUpdateDailyPlan checks network status in mutationFn, adds to sync queue if offline
+  - Track pending sync items separately from sync queue for UI indicators (PENDING_SYNC_KEY = "pending_sync:daily_plan")
+  - PendingSyncItem type: itemId (string | number), itemType ("task" | "priority" | "habit" | "intention" | "shutdown"), timestamp
+  - isPendingSync(itemId, itemType) for checking if specific item needs sync indicator
+  - PendingSyncIndicator component shows small warning-colored dot next to item title
+  - useRefetchOnReconnect hook handles reconnection: refetch data, check conflicts, show alert if server newer
+  - Conflict detection: compare updated_at timestamps, server newer by >1 second = conflict
+  - addSyncQueueListener("complete") to clear pending sync items after queue processes
+  - Use wasOfflineRef pattern to detect online->offline transition: `wasOfflineRef.current = !isOnline`
+  - forceUpdate pattern with `const [, forceUpdate] = useState({})` to trigger re-render when pending items change
+  - Return optimistic response from mutationFn when offline: `{ message: "Queued for sync", daily_plan: updatedPlan, is_first_action: false }`
+---
+
+## 2026-01-22 - US-045
+- What was implemented: Calendar permission flow for device calendar access
+- Files changed:
+  - package.json (added expo-calendar)
+  - src/services/calendar.ts (created - complete calendar permission service)
+  - src/services/index.ts (export calendar service)
+- **Learnings for future iterations:**
+  - expo-calendar uses Calendar.PermissionStatus enum (GRANTED, DENIED, UNDETERMINED)
+  - getCalendarPermissionsAsync() returns { status } object for current permission state
+  - requestCalendarPermissionsAsync() prompts user for permission
+  - Cache permission status in MMKV for synchronous access in UI (CALENDAR_PERMISSION_KEY = "calendar:permission_status")
+  - Permission flow: check current status first, show explanation alert, then request
+  - When denied, use Alert with "Open Settings" button to redirect user
+  - Linking.openURL("app-settings:") opens iOS Settings for permission management
+  - Linking.openSettings() is cross-platform alternative for Android
+  - Import calendar functions from @/services (requestCalendarPermissions, getCalendarPermissionStatus, hasCalendarPermission)
+---
+
+## 2026-01-22 - US-046
+- What was implemented: Display calendar events in Today view with collapsible Schedule section
+- Files changed:
+  - src/services/calendar.ts (added CalendarEvent type, getDeviceCalendars(), getTodayEvents())
+  - app/(tabs)/today.tsx (added ScheduleSection component, CalendarEventItem component, calendar state and handlers)
+- **Learnings for future iterations:**
+  - CalendarEvent interface: id, title, startDate, endDate, allDay, calendarColor, calendarTitle, location, notes
+  - expo-calendar getEventsAsync() takes array of calendar IDs and date range (startDate, endDate)
+  - Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT) gets all event calendars
+  - Sort events: all-day first, then by start time: `sort((a, b) => { if (a.allDay && !b.allDay) return -1; ... }`
+  - Open iOS Calendar app with timestamp: `calshow:${Math.floor(date.getTime() / 1000)}`
+  - Collapsible section pattern: isCollapsed state + chevron toggle icon
+  - ScheduleSection shows permission prompt when hasCalendarPermission is false
+  - Pull-to-refresh should also refresh calendar events: add refreshCalendarEvents() to onRefresh callback
+  - format(date, "h:mm a") from date-fns gives "9:00 AM" format
+  - Import CalendarEvent, getTodayEvents, hasCalendarPermission, requestCalendarPermissions from @/services/calendar
+---
+
+## 2026-01-22 - US-047
+- What was implemented: Built Google Calendar connection screen with OAuth flow
+- Files changed:
+  - package.json (added expo-web-browser)
+  - src/hooks/useGoogleCalendar.ts (created - complete data layer with connection status, auth URL, connect/disconnect hooks)
+  - src/hooks/index.ts (export new hooks and types)
+  - app/settings/calendar.tsx (created - full Google Calendar connection UI)
+  - app/settings/index.tsx (added Google Calendar link in Calendars section)
+  - app/_layout.tsx (added settings/calendar route)
+- **Learnings for future iterations:**
+  - expo-web-browser: use openAuthSessionAsync(authUrl, redirectUrl) for OAuth flow - handles opening and closing browser
+  - Deep link pattern: scheme://path format, e.g., "entmoot://google-callback"
+  - Scheme is already configured in app.json as "entmoot"
+  - Linking.addEventListener("url", handler) for listening to deep links when app is already open
+  - Linking.getInitialURL() for handling deep link when app opened from link (cold start)
+  - Parse OAuth code from URL: new URLSearchParams(url.split("?")[1]).get("code")
+  - Google Calendar API endpoints: GET /users/me/google_calendar (status), GET /users/me/google_calendar/auth_url (OAuth URL), POST /users/me/google_calendar (connect with code), DELETE /users/me/google_calendar (disconnect)
+  - GoogleCalendarConnection type: connected (boolean), email, calendars, connected_at
+  - GoogleCalendar type: id, name, primary (boolean), color
+  - Handle 404/not found errors gracefully in connection query by returning { connected: false }
+  - useMutation for connect/disconnect operations with cache invalidation on success
+  - Import useGoogleCalendarConnection, useFetchAuthUrl, useDisconnectGoogleCalendar, useConnectGoogleCalendar from @/hooks
+---
+
+## 2026-01-22 - US-048
+- What was implemented: Created reusable streaks data layer and components
+- Files changed:
+  - src/hooks/useStreaks.ts (new - useStreaks, useStreak hooks, streak types and utilities)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/StreakCard.tsx (new - StreakCard and StreakCardsRow components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared streak components)
+- **Learnings for future iterations:**
+  - Me tab already had inline implementations of useStreaks, StreakCard, StreaksSection - extracted to reusable modules
+  - STREAK_MILESTONES array exported for reuse: [7, 14, 30, 60, 90, 180, 365]
+  - STREAK_CONFIG provides label, icon, description per streak_type (daily_planning, evening_reflection, weekly_review)
+  - isStreakMilestone(count) utility checks if count is a milestone
+  - StreakCardsRow handles loading state and empty state internally
+  - Import useStreaks, Streak from @/hooks; StreakCard, StreakCardsRow from @/components
+---
+
+## 2026-01-22 - US-049
+- What was implemented: Created reusable points data layer and display components with animated counter
+- Files changed:
+  - src/hooks/usePoints.ts (new - usePoints, useRecentActivity hooks, types, utilities)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/PointsDisplay.tsx (new - AnimatedCounter, PointsDisplay, PointsCard components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared PointsCard component)
+- **Learnings for future iterations:**
+  - Me tab already had inline usePoints hook - extracted to reusable module
+  - AnimatedCounter uses setInterval with frame rate (60fps) and ease-out cubic easing for smooth animation
+  - Use Animated.sequence for scale effect on value increase (1 → 1.15 → 1) for emphasis
+  - previousValueRef pattern to detect value changes and animate from old to new value
+  - ACTIVITY_ICONS maps activity_type to Ionicons icon names with default fallback
+  - formatRelativeTime utility for "Just now", "5m ago", "2h ago", "Yesterday", "3d ago" format
+  - PointsCard is compact version (no activity list), PointsDisplay is full version with Recent Activity section
+  - Import usePoints, PointsResponse from @/hooks; PointsCard, PointsDisplay from @/components
+---
+
+## 2026-01-22 - US-050
+- What was implemented: Created reusable badges data layer and display components with shine animation
+- Files changed:
+  - src/hooks/useBadges.ts (new - useUserBadges, useAllBadges hooks, Badge types, utility functions)
+  - src/hooks/index.ts (export new hooks and types)
+  - src/components/BadgeGrid.tsx (new - BadgeGrid, BadgeRow, BadgeDetailModal components)
+  - src/components/index.ts (export new components)
+  - app/(tabs)/me.tsx (refactored to use shared BadgeRow component, removed inline useBadges hook)
+- **Learnings for future iterations:**
+  - Me tab already had inline useBadges hook - extracted to reusable src/hooks/useBadges.ts module
+  - Two API endpoints: GET /users/me/badges (user's badges with stats), GET /badges (all badges catalog)
+  - UserBadgesResponse includes { badges: Badge[], stats: { total_badges, earned_badges, completion_percentage } }
+  - Badge type: id, name, description, icon, category, criteria, earned, earned_at, points_awarded
+  - BadgeGrid shows full earned/locked sections, BadgeRow shows compact 3-badge view for Me tab
+  - Shine animation: Animated loop with translateX for skewed highlight effect, 2s duration + 3s delay
+  - isNewlyEarned() checks if badge earned_at < 24 hours ago for shine animation trigger
+  - Locked badges: grayscale via 40% opacity on emoji, lock overlay with semi-transparent white background
+  - BadgeDetailModal: spring animation for scale entrance, category badge with color from BADGE_CATEGORIES config
+  - Import useUserBadges, Badge, UserBadgesResponse from @/hooks; BadgeGrid, BadgeRow from @/components
+---
+
+## 2026-01-22 - US-051
+- What was implemented: Created Achievement Celebration Modal with confetti animation for badges, streaks, and goal completions
+- Files changed:
+  - package.json (added react-native-confetti-cannon)
+  - src/components/AchievementModal.tsx (new - complete modal with confetti, animations, hook)
+  - src/components/index.ts (export new component and helpers)
+  - app/_layout.tsx (integrated AchievementModal into NotificationHandler)
+- **Learnings for future iterations:**
+  - react-native-confetti-cannon: use ref.start() to manually trigger confetti, autoStart={false} for controlled start
+  - ConfettiCannon props: count (number of confetti), origin (start point), fadeOut, explosionSpeed, fallSpeed, colors array
+  - Achievement queue pattern: use queueRef to store pending achievements when one is already showing
+  - Animated.sequence for staged entrance: opacity fade → scale spring → icon bounce → points slide up
+  - AchievementType enum: "badge_earned", "streak_milestone", "goal_completed" for different celebration styles
+  - getCelebrationColor/getCelebrationTitle helpers for type-based styling
+  - useAchievementCelebration hook provides: visible, achievement, handleDismiss, celebrateBadgeEarned, celebrateGoalCompleted, checkStreakMilestone
+  - Global listeners pattern: achievementListeners Set<Function> for triggering celebrations from anywhere via triggerAchievementCelebration()
+  - Helper functions: createBadgeAchievement, createStreakMilestoneAchievement, createGoalCompletedAchievement for creating Achievement objects
+  - Heavy haptic feedback on celebration (Haptics.notificationAsync Success), heavy impact on dismiss
+  - Import AchievementModal, useAchievementCelebration, triggerAchievementCelebration, create*Achievement from @/components
+---
+
+## 2026-01-22 - US-052
+- What was implemented: Created centralized haptic feedback utility at src/utils/haptics.ts
+- Files changed:
+  - src/utils/haptics.ts (new - all haptic feedback functions)
+  - src/utils/index.ts (new - barrel export for utils)
+- **Learnings for future iterations:**
+  - expo-haptics was already installed and being used across 18+ files in the codebase
+  - Haptic utility provides standardized functions: lightImpact, mediumImpact, heavyImpact, successNotification, warningNotification, errorNotification, selectionFeedback
+  - Use Platform.OS check to ensure haptics are only called on iOS/Android
+  - try/catch blocks handle unsupported devices gracefully without crashing
+  - Haptics.selectionAsync() is for selection changes (pickers, segment controls) vs impactAsync for taps
+  - Import from @/utils (barrel export) or @/utils/haptics for haptic functions
+  - Existing code already follows correct patterns: Light for taps, Medium for swipe/delete, Success for completion, Warning for destructive confirmation, Heavy for achievements
+---
+
+## 2026-01-22 - US-053
+- What was implemented: Added animated loading skeletons with shimmer effect for Today, Goals, and Me screens
+- Files changed:
+  - src/components/ui/Skeleton.tsx (new - Skeleton, SkeletonCircle, SkeletonText, SkeletonParagraph, SkeletonCard, SkeletonListItem, SkeletonSectionHeader)
+  - src/components/ui/CrossFadeView.tsx (new - CrossFadeView, SimpleFadeView for smooth transitions)
+  - src/components/ui/index.ts (export new components)
+  - src/components/skeletons/TodaySkeleton.tsx (new - full Today screen skeleton)
+  - src/components/skeletons/GoalsListSkeleton.tsx (new - goals list skeleton)
+  - src/components/skeletons/MeTabSkeleton.tsx (new - Me tab skeleton)
+  - src/components/skeletons/index.ts (new - barrel export)
+  - src/components/index.ts (export skeletons)
+  - app/(tabs)/today.tsx (replaced static skeletons with animated ones)
+  - app/(tabs)/goals.tsx (replaced static skeletons with animated ones)
+  - src/components/StreakCard.tsx (updated StreakCardsRow skeleton to use animated Skeleton)
+  - src/components/PointsDisplay.tsx (updated PointsDisplay and PointsCard skeletons to use animated Skeleton)
+  - src/components/BadgeGrid.tsx (updated BadgeGrid and BadgeRow skeletons to use animated Skeleton)
+- **Learnings for future iterations:**
+  - Skeleton shimmer animation: Animated.loop with Animated.timing, translateX interpolation from -SCREEN_WIDTH to SCREEN_WIDTH
+  - SHIMMER_DURATION = 1500ms provides smooth, visible shimmer effect
+  - Use DimensionValue type from react-native for width/height props instead of string | number
+  - Skeleton component accepts width, height, borderRadius, animated, style props
+  - SkeletonCard provides consistent card styling (shadow, borderRadius, padding)
+  - SkeletonListItem renders checkbox circle + text skeleton for list items
+  - CrossFadeView overlays skeleton and content layers with animated opacity
+  - SimpleFadeView is simpler - just fades in content when isLoading becomes false
+  - Import Skeleton components from @/components/ui or @/components
+  - Import screen skeletons (TodaySkeleton, GoalsListSkeleton, MeTabSkeleton) from @/components/skeletons or @/components
+  - Existing screens already have inline skeleton components - update them to use the animated Skeleton component
+  - StreakCardsRow, PointsCard, BadgeRow already handle isLoading prop internally - just update their skeleton rendering
+---
+
+## 2026-01-22 - US-054
+- What was implemented: Created error handling UI components for crash recovery and API errors
+- Files changed:
+  - src/components/ErrorBoundary.tsx (new - class component with error boundary for crash recovery)
+  - src/components/ui/ErrorMessage.tsx (new - reusable error message component with 3 variants)
+  - src/components/index.ts (export ErrorBoundary)
+  - src/components/ui/index.ts (export ErrorMessage and utility functions)
+  - app/_layout.tsx (wrapped app in ErrorBoundary)
+- **Learnings for future iterations:**
+  - ErrorBoundary must be a class component (getDerivedStateFromError and componentDidCatch are class-only methods)
+  - Use __DEV__ global to conditionally show error details in development mode
+  - HTTP_ERROR_MESSAGES mapping provides consistent user-friendly messages for common HTTP status codes
+  - ErrorMessage has 3 variants: default (centered), inline (minimal), card (contained)
+  - getErrorMessage utility handles: Error objects, network errors, timeout errors, abort errors, API response objects with message/error/errors properties
+  - getErrorIcon chooses appropriate icon based on error type (network, timeout, permission, not found, server)
+  - ErrorBoundary should wrap the outermost app content (outside PaperProvider, SafeAreaProvider) for maximum coverage
+  - Import ErrorBoundary from @/components, ErrorMessage/getErrorMessage from @/components/ui
+---
+
+## 2026-01-22 - US-055
+- What was implemented: Added professional app icons and splash screen for Entmoot mobile app
+- Files changed:
+  - assets/icon.png (replaced - new 1024x1024 Entmoot tree logo)
+  - assets/icon.svg (new - SVG source for icon)
+  - assets/adaptive-icon.png (replaced - new Android adaptive icon)
+  - assets/adaptive-icon.svg (new - SVG source for adaptive icon)
+  - assets/splash.png (new - splash screen with centered logo)
+  - assets/splash.svg (new - SVG source for splash screen)
+  - assets/notification-icon.png (new - push notification icon)
+  - assets/notification-icon.svg (new - SVG source for notification icon)
+  - assets/splash-icon.png (deleted - replaced by splash.png)
+  - app.json (updated - icon, ios.icon, splash configuration)
+  - scripts/generate-icons.js (new - icon generation script)
+- **Learnings for future iterations:**
+  - Use svgexport (npx svgexport src.svg dest.png WxH) to convert SVG to PNG
+  - Expo splash.image should be a PNG file (not splash-icon)
+  - ios.icon field in app.json is optional but explicit for iOS-specific icon
+  - Entmoot brand colors: primary=#4F46E5 (indigo), background=#FFF8E7 (cream)
+  - Android adaptive icons need safe zone consideration (66.67% of total size)
+  - scripts/generate-icons.js can regenerate all icons if brand changes
+  - SVG sources kept for future edits without needing original design tools
+---
+
+## 2026-01-22 - US-056
+- What was implemented: Configured App Store metadata in app.json and created comprehensive APP_STORE.md documentation
+- Files changed:
+  - app.json (added description, privacy, githubUrl, ios.buildNumber)
+  - APP_STORE.md (new - complete App Store submission documentation)
+  - assets/screenshots/README.md (new - screenshot size requirements and guidelines)
+  - assets/screenshots/*.placeholder (new - placeholder files for required iOS screenshot sizes)
+- **Learnings for future iterations:**
+  - Expo app.json supports `description`, `privacy` (public/unlisted), `githubUrl` fields for App Store metadata
+  - ios.buildNumber is required for App Store submission (separate from version)
+  - Required iOS screenshot sizes: 6.9" (1320x2868), 6.7" (1290x2796), 6.5" (1242x2688), 5.5" (1242x2208)
+  - iPad Pro 12.9" screenshots: 2048x2732 pixels
+  - APP_STORE.md centralizes all App Store Connect fields (description, keywords, privacy, etc.)
+  - Keywords are comma-separated, max 100 characters total
+  - App Store description max is 4000 characters
+  - Privacy questionnaire requires documenting data collection, linking to identity, and tracking purposes
+---
+
+## 2026-01-22 - US-057
+- What was implemented: Configured EAS Build for iOS App Store submission
+- Files changed:
+  - eas.json (new - complete EAS build configuration with 3 profiles)
+  - BUILD.md (new - comprehensive iOS provisioning and build documentation)
+- **Learnings for future iterations:**
+  - EAS CLI doesn't have a --dry-run flag for builds; use `node -e "require('./eas.json')"` to validate JSON
+  - eas.json cli.appVersionSource: "remote" enables auto version management from EAS servers
+  - Development profile: developmentClient=true enables dev tools, simulator=true for iOS Simulator builds
+  - Preview profile: distribution="internal" for TestFlight, channel="preview" for OTA updates to testers
+  - Production profile: distribution="store" for App Store, autoIncrement=true for build number automation
+  - resourceClass: "m-medium" is default iOS build machine, use "m-large" for faster builds
+  - Environment variables per profile: set API_URL and other env vars in profile's env section
+  - Submit section in eas.json: configure appleId, ascAppId, appleTeamId for automated submission
+  - Placeholder project ID ("your-project-id") causes GraphQL errors until eas init is run with valid Expo account
+  - BUILD.md should document: prerequisites, credential setup, build commands, troubleshooting, and CI/CD examples
+---
