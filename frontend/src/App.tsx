@@ -32,6 +32,7 @@ import { UserProfile } from "./pages/UserProfile";
 import { AdminFeedback } from "./pages/AdminFeedback";
 import { NotFound } from "./pages/NotFound";
 import { ServerError } from "./pages/ServerError";
+import { BlogIndex, BlogPost } from "./pages/blog";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { MainLayout } from "./components/MainLayout";
 import { OnboardingWizard } from "./components/onboarding";
@@ -77,6 +78,8 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/roadmap" element={<Roadmap />} />
+              <Route path="/blog" element={<BlogIndex />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route
                 path="/login"
                 element={

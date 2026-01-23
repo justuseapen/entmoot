@@ -1,17 +1,6 @@
 import { Target, Map, Sun, Moon, Trophy, Users } from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
-
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { HERITAGE_COLORS } from "./design-system";
 
 // Feature data with icons, titles, and descriptions
 const features = [
@@ -68,35 +57,39 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="group relative rounded-xl bg-white p-6 transition-all duration-300 hover:-translate-y-1"
+      className="group relative rounded-xl border p-6 transition-all duration-300 hover:-translate-y-1"
       style={{
-        boxShadow:
-          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        backgroundColor: HERITAGE_COLORS.cream,
+        borderColor: `${HERITAGE_COLORS.antiqueBrass}25`,
+        boxShadow: "0 4px 12px rgba(28, 69, 50, 0.06)",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
+        e.currentTarget.style.boxShadow = "0 12px 24px rgba(28, 69, 50, 0.1)";
+        e.currentTarget.style.borderColor = `${HERITAGE_COLORS.antiqueBrass}40`;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(28, 69, 50, 0.06)";
+        e.currentTarget.style.borderColor = `${HERITAGE_COLORS.antiqueBrass}25`;
       }}
     >
-      {/* Icon with warm gold background circle */}
+      {/* Icon with heritage gold background circle */}
       <div
         className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
-        style={{ backgroundColor: LANDING_COLORS.warmGold }}
+        style={{ backgroundColor: `${HERITAGE_COLORS.antiqueGold}25` }}
       >
         <Icon
           className="h-7 w-7"
-          style={{ color: LANDING_COLORS.darkForest }}
+          style={{ color: HERITAGE_COLORS.deepForest }}
         />
       </div>
 
       {/* Title */}
       <h3
-        className="mb-2 text-lg font-bold sm:text-xl"
-        style={{ color: LANDING_COLORS.darkForest }}
+        className="mb-2 text-lg font-semibold sm:text-xl"
+        style={{
+          color: HERITAGE_COLORS.charcoal,
+          fontFamily: "'Georgia', serif",
+        }}
       >
         {title}
       </h3>
@@ -104,7 +97,7 @@ function FeatureCard({
       {/* Description */}
       <p
         className="text-sm leading-relaxed sm:text-base"
-        style={{ color: LANDING_COLORS.earthBrown }}
+        style={{ color: HERITAGE_COLORS.sepia }}
       >
         {description}
       </p>
@@ -114,21 +107,34 @@ function FeatureCard({
 
 export function FeaturesSection() {
   return (
-    <AnimatedSection id="features" className="py-16 sm:py-20 lg:py-24">
+    <AnimatedSection
+      id="features"
+      className="py-16 sm:py-20 lg:py-24"
+      style={{ backgroundColor: HERITAGE_COLORS.parchment }}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section headline */}
         <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
+          <p
+            className="mb-3 text-sm font-medium uppercase tracking-wider"
+            style={{ color: HERITAGE_COLORS.antiqueGold }}
+          >
+            Everything You Need
+          </p>
           <h2
             className="text-3xl font-bold sm:text-4xl lg:text-5xl"
-            style={{ color: LANDING_COLORS.darkForest }}
+            style={{
+              color: HERITAGE_COLORS.charcoal,
+              fontFamily: "'Georgia', serif",
+            }}
           >
-            Your Family's Toolkit for Epic Adventures
+            Tools for Intentional Families
           </h2>
           <p
             className="mt-4 text-lg sm:text-xl"
-            style={{ color: LANDING_COLORS.earthBrown }}
+            style={{ color: HERITAGE_COLORS.sepia }}
           >
-            Everything you need to plan, play, and grow together
+            Everything you need to plan, reflect, and grow together
           </p>
         </div>
 

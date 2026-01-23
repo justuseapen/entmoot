@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Entmoot OG Image Template</title>
+  <style>
+    /*
+     * OG Image Template - 1200x630px (standard OG image size)
+     * Render this page and screenshot to create og-image.png
+     * Use: npx playwright screenshot --viewport-size=1200,630 og-image-template.html og-image.png
+     */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      font-family: Georgia, 'Times New Roman', serif;
+      background: linear-gradient(135deg, #F5F0E6 0%, #FFF8E7 50%, #F5F0E6 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle pattern overlay */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231C4532' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Decorative border */
+    .border-frame {
+      position: absolute;
+      inset: 20px;
+      border: 2px solid rgba(28, 69, 50, 0.15);
+      border-radius: 8px;
+    }
+
+    /* Corner accents */
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+    }
+    .corner svg {
+      width: 100%;
+      height: 100%;
+    }
+    .corner-tl { top: 30px; left: 30px; }
+    .corner-tr { top: 30px; right: 30px; transform: rotate(90deg); }
+    .corner-bl { bottom: 30px; left: 30px; transform: rotate(-90deg); }
+    .corner-br { bottom: 30px; right: 30px; transform: rotate(180deg); }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 80px;
+    }
+
+    /* Logo medallion */
+    .logo-container {
+      margin-bottom: 30px;
+    }
+
+    .logo-container svg {
+      width: 120px;
+      height: 120px;
+    }
+
+    /* Brand name */
+    .brand-name {
+      font-size: 72px;
+      font-weight: 700;
+      color: #2D2D2D;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    /* Tagline */
+    .tagline {
+      font-size: 32px;
+      color: #1C4532;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    /* Description */
+    .description {
+      font-size: 22px;
+      color: #704214;
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 0 auto 32px;
+    }
+
+    /* Price badge */
+    .price-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: #FFF8E7;
+      border: 2px solid rgba(201, 162, 39, 0.4);
+      border-radius: 12px;
+      padding: 16px 32px;
+    }
+
+    .price-old {
+      font-size: 20px;
+      color: #704214;
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .price-new {
+      font-size: 48px;
+      font-weight: 700;
+      color: #1C4532;
+    }
+
+    .price-label {
+      background: #C9A227;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Bottom decorative line */
+    .bottom-accent {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .accent-line {
+      width: 80px;
+      height: 1px;
+      background: rgba(181, 137, 75, 0.4);
+    }
+
+    .accent-diamond {
+      width: 8px;
+      height: 8px;
+      background: rgba(181, 137, 75, 0.5);
+      transform: rotate(45deg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Border frame -->
+  <div class="border-frame"></div>
+
+  <!-- Corner accents -->
+  <div class="corner corner-tl">
+    <svg viewBox="0 0 40 40" fill="none">
+      <path d="M2 2 L2 15 M2 2 L15 2" stroke="#B5894B" stroke-width="2" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="corner corner-tr">
+    <svg viewBox="0 0 40 40" fill="none">
+      <path d="M2 2 L2 15 M2 2 L15 2" stroke="#B5894B" stroke-width="2" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="corner corner-bl">
+    <svg viewBox="0 0 40 40" fill="none">
+      <path d="M2 2 L2 15 M2 2 L15 2" stroke="#B5894B" stroke-width="2" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="corner corner-br">
+    <svg viewBox="0 0 40 40" fill="none">
+      <path d="M2 2 L2 15 M2 2 L15 2" stroke="#B5894B" stroke-width="2" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <div class="content">
+    <!-- Logo -->
+    <div class="logo-container">
+      <svg viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" stroke="#1C4532" stroke-width="1.5" fill="none"/>
+        <circle cx="20" cy="20" r="15" stroke="#1C4532" stroke-width="0.5" fill="none" opacity="0.5"/>
+        <path d="M20 32 L20 22" stroke="#1C4532" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M20 22 Q14 18 10 12" stroke="#1C4532" stroke-width="1" fill="none"/>
+        <path d="M20 22 Q26 18 30 12" stroke="#1C4532" stroke-width="1" fill="none"/>
+        <path d="M20 22 L20 10" stroke="#1C4532" stroke-width="1"/>
+        <path d="M20 32 Q14 34 10 36" stroke="#1C4532" stroke-width="0.75" fill="none" opacity="0.6"/>
+        <path d="M20 32 Q26 34 30 36" stroke="#1C4532" stroke-width="0.75" fill="none" opacity="0.6"/>
+      </svg>
+    </div>
+
+    <!-- Brand name -->
+    <h1 class="brand-name">Entmoot</h1>
+
+    <!-- Tagline -->
+    <p class="tagline">Stop Managing Your Family. Start Leading Them.</p>
+
+    <!-- Description -->
+    <p class="description">
+      The only goal planning platform built for families first.
+      Connect daily tasks to long-term dreams.
+    </p>
+
+    <!-- Price badge -->
+    <div class="price-badge">
+      <span class="price-old">$499</span>
+      <span class="price-new">$249</span>
+      <span class="price-label">Lifetime</span>
+    </div>
+  </div>
+
+  <!-- Bottom accent -->
+  <div class="bottom-accent">
+    <div class="accent-line"></div>
+    <div class="accent-diamond"></div>
+    <div class="accent-line"></div>
+  </div>
+</body>
+</html>

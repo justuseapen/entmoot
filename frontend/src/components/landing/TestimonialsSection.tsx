@@ -1,333 +1,187 @@
-import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Users, Star, Heart, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { AnimatedSection } from "./AnimatedSection";
+import { HERITAGE_COLORS } from "./design-system";
+import { STRIPE_PAYMENT_LINK, PRICE_DISPLAY } from "@/config/pricing";
 
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
-
-// Testimonial data
-const testimonials = [
-  {
-    quote:
-      "My 8-year-old now reminds ME about morning planning! He loves checking off his 'quests' and watching his streak grow. It's transformed our chaotic mornings into something we actually look forward to.",
-    author: "Marcus T.",
-    role: "Dad of 2",
-    duration: "Using Entmoot for 4 months",
-    initials: "MT",
-    color: LANDING_COLORS.forestGreen,
-  },
-  {
-    quote:
-      "As a blended family, coordinating between two households was a nightmare. Entmoot gives everyone visibility without the awkward group texts. Both houses feel like one team now.",
-    author: "Jennifer & David K.",
-    role: "Blended family of 6",
-    duration: "Using Entmoot for 8 months",
-    initials: "JD",
-    color: LANDING_COLORS.skyBlue,
-  },
-  {
-    quote:
-      "I was skeptical a planning app could engage my teenager. Then she showed me her goal hierarchy connecting her weekly study goals to her dream college. Mind. Blown.",
-    author: "Priya S.",
-    role: "Mom of a 16-year-old",
-    duration: "Using Entmoot for 6 months",
-    initials: "PS",
-    color: LANDING_COLORS.sunsetOrange,
-  },
-];
-
-// Blocky/pixelated avatar component
-function BlockyAvatar({
-  initials,
-  color,
+// Founding member benefit item
+function BenefitItem({
+  icon: Icon,
+  title,
+  description,
 }: {
-  initials: string;
-  color: string;
+  icon: typeof Users;
+  title: string;
+  description: string;
 }) {
   return (
-    <div
-      className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg sm:h-20 sm:w-20"
-      style={{
-        backgroundColor: color,
-        // Blocky/pixelated border effect
-        boxShadow: `
-          inset 2px 2px 0 0 rgba(255,255,255,0.3),
-          inset -2px -2px 0 0 rgba(0,0,0,0.2),
-          0 4px 8px rgba(0,0,0,0.15)
-        `,
-      }}
-    >
-      {/* Pixelated corner accents */}
+    <div className="flex flex-col items-center text-center">
       <div
-        className="absolute top-0 left-0 h-2 w-2"
-        style={{ backgroundColor: "rgba(255,255,255,0.4)" }}
-      />
-      <div
-        className="absolute right-0 bottom-0 h-2 w-2"
-        style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-      />
-      <span className="text-xl font-bold text-white sm:text-2xl">
-        {initials}
-      </span>
-    </div>
-  );
-}
-
-// Star rating component
-function StarRating({ rating = 5 }: { rating?: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          className="h-4 w-4 sm:h-5 sm:w-5"
-          style={{
-            color: i < rating ? LANDING_COLORS.warmGold : "#E5E7EB",
-            fill: i < rating ? LANDING_COLORS.warmGold : "none",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Testimonial card component
-function TestimonialCard({
-  quote,
-  author,
-  role,
-  duration,
-  initials,
-  color,
-  isActive,
-}: {
-  quote: string;
-  author: string;
-  role: string;
-  duration: string;
-  initials: string;
-  color: string;
-  isActive: boolean;
-}) {
-  return (
-    <div
-      className={`flex w-full flex-shrink-0 flex-col items-center px-4 transition-opacity duration-500 ${
-        isActive ? "opacity-100" : "pointer-events-none opacity-0"
-      }`}
-    >
-      <div
-        className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg sm:p-8"
+        className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
         style={{
-          // Subtle blocky border effect
-          boxShadow: `
-            inset 2px 2px 0 0 rgba(255,255,255,0.8),
-            inset -1px -1px 0 0 rgba(0,0,0,0.05),
-            0 8px 24px rgba(0,0,0,0.1)
-          `,
+          backgroundColor: `${HERITAGE_COLORS.deepForest}10`,
+          color: HERITAGE_COLORS.deepForest,
         }}
       >
-        {/* Star rating */}
-        <div className="mb-4 flex justify-center">
-          <StarRating />
-        </div>
-
-        {/* Quote */}
-        <blockquote
-          className="mb-6 text-center text-base leading-relaxed sm:text-lg"
-          style={{ color: LANDING_COLORS.earthBrown }}
-        >
-          "{quote}"
-        </blockquote>
-
-        {/* Author info */}
-        <div className="flex flex-col items-center gap-3">
-          <BlockyAvatar initials={initials} color={color} />
-          <div className="text-center">
-            <p
-              className="text-base font-semibold sm:text-lg"
-              style={{ color: LANDING_COLORS.darkForest }}
-            >
-              {author}
-            </p>
-            <p className="text-sm" style={{ color: LANDING_COLORS.earthBrown }}>
-              {role}
-            </p>
-            <p
-              className="mt-1 text-xs"
-              style={{ color: LANDING_COLORS.leafGreen }}
-            >
-              {duration}
-            </p>
-          </div>
-        </div>
+        <Icon className="h-6 w-6" />
       </div>
+      <h3
+        className="mb-2 text-lg font-semibold"
+        style={{ color: HERITAGE_COLORS.charcoal }}
+      >
+        {title}
+      </h3>
+      <p
+        className="text-sm leading-relaxed"
+        style={{ color: HERITAGE_COLORS.sepia }}
+      >
+        {description}
+      </p>
     </div>
   );
 }
 
-// Carousel navigation dots
-function CarouselDots({
-  total,
-  current,
-  onSelect,
-}: {
-  total: number;
-  current: number;
-  onSelect: (index: number) => void;
-}) {
+// Decorative tree ring element
+function TreeRing({ className = "" }: { className?: string }) {
   return (
-    <div className="mt-6 flex justify-center gap-2">
-      {[...Array(total)].map((_, i) => (
-        <button
-          key={i}
-          onClick={() => onSelect(i)}
-          className="h-3 w-3 rounded-full transition-all duration-300"
-          style={{
-            backgroundColor:
-              i === current ? LANDING_COLORS.forestGreen : "#E5E7EB",
-            transform: i === current ? "scale(1.2)" : "scale(1)",
-          }}
-          aria-label={`Go to testimonial ${i + 1}`}
-        />
-      ))}
+    <div className={`pointer-events-none select-none ${className}`} aria-hidden="true">
+      <svg
+        viewBox="0 0 100 100"
+        fill="none"
+        className="h-full w-full"
+        style={{ color: HERITAGE_COLORS.antiqueBrass }}
+      >
+        <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2" />
+        <circle cx="50" cy="50" r="35" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.15" />
+        <circle cx="50" cy="50" r="25" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.1" />
+        <circle cx="50" cy="50" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.05" />
+      </svg>
     </div>
-  );
-}
-
-// Navigation arrow button
-function NavArrow({
-  direction,
-  onClick,
-}: {
-  direction: "prev" | "next";
-  onClick: () => void;
-}) {
-  const Icon = direction === "prev" ? ChevronLeft : ChevronRight;
-
-  return (
-    <button
-      onClick={onClick}
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:shadow-lg sm:h-12 sm:w-12"
-      style={{
-        color: LANDING_COLORS.forestGreen,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = LANDING_COLORS.forestGreen;
-        e.currentTarget.style.color = "white";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "white";
-        e.currentTarget.style.color = LANDING_COLORS.forestGreen;
-      }}
-      aria-label={
-        direction === "prev" ? "Previous testimonial" : "Next testimonial"
-      }
-    >
-      <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-    </button>
   );
 }
 
 export function TestimonialsSection() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  }, []);
-
-  const goToPrev = useCallback(() => {
-    setCurrentIndex(
-      (prev) => (prev - 1 + testimonials.length) % testimonials.length
-    );
-  }, []);
-
-  const goToIndex = useCallback((index: number) => {
-    setCurrentIndex(index);
-  }, []);
-
-  // Auto-advance every 5 seconds, pause on hover
-  useEffect(() => {
-    if (isPaused) return;
-
-    const timer = setInterval(() => {
-      goToNext();
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [isPaused, goToNext]);
+  const benefits = [
+    {
+      icon: Star,
+      title: "Shape the Future",
+      description:
+        "Your feedback directly influences which features we build next. Founding families have a voice in our roadmap.",
+    },
+    {
+      icon: Users,
+      title: "Exclusive Community",
+      description:
+        "Join a private community of intentional families. Share strategies, celebrate wins, and grow together.",
+    },
+    {
+      icon: Heart,
+      title: "Lifetime Recognition",
+      description:
+        "Founding Family badge on your profile forever. You believed in us from the beginning—we won't forget.",
+    },
+  ];
 
   return (
     <AnimatedSection
-      className="py-16 sm:py-20 lg:py-24"
-      style={{ backgroundColor: LANDING_COLORS.creamWhite }}
+      className="relative overflow-hidden py-16 sm:py-20 lg:py-24"
+      style={{ backgroundColor: HERITAGE_COLORS.cream }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section headline */}
-        <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
-          <h2
-            className="text-3xl font-bold sm:text-4xl lg:text-5xl"
-            style={{ color: LANDING_COLORS.darkForest }}
+      {/* Decorative tree rings */}
+      <TreeRing className="absolute -left-12 top-1/4 h-48 w-48 opacity-50" />
+      <TreeRing className="absolute -right-8 bottom-1/4 h-32 w-32 opacity-30" />
+
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div className="mx-auto mb-12 max-w-2xl text-center lg:mb-16">
+          <p
+            className="mb-3 text-sm font-medium uppercase tracking-wider"
+            style={{ color: HERITAGE_COLORS.antiqueGold }}
           >
-            Tales from Fellow Adventurers
+            Be Part of Something Special
+          </p>
+          <h2
+            className="mb-4 text-3xl font-bold sm:text-4xl lg:text-5xl"
+            style={{
+              color: HERITAGE_COLORS.charcoal,
+              fontFamily: "'Georgia', serif",
+            }}
+          >
+            We're Looking for Our First Families
           </h2>
+          <p
+            className="text-lg leading-relaxed"
+            style={{ color: HERITAGE_COLORS.sepia }}
+          >
+            Every great product starts with believers. As a Founding Family, you'll
+            help us build the family planning platform you've always wanted—and
+            your story could inspire thousands of families to come.
+          </p>
         </div>
 
-        {/* Carousel container */}
+        {/* Benefits grid */}
+        <div className="mb-12 grid gap-8 sm:grid-cols-3 lg:mb-16">
+          {benefits.map((benefit) => (
+            <BenefitItem key={benefit.title} {...benefit} />
+          ))}
+        </div>
+
+        {/* CTA Card */}
         <div
-          className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
+          className="mx-auto max-w-2xl rounded-2xl border p-8 text-center sm:p-10"
+          style={{
+            backgroundColor: HERITAGE_COLORS.parchment,
+            borderColor: `${HERITAGE_COLORS.antiqueBrass}30`,
+          }}
         >
-          {/* Navigation arrows - hidden on mobile, visible on tablet+ */}
-          <div className="pointer-events-none absolute inset-0 hidden items-center justify-between px-2 sm:flex lg:px-4">
-            <div className="pointer-events-auto">
-              <NavArrow direction="prev" onClick={goToPrev} />
-            </div>
-            <div className="pointer-events-auto">
-              <NavArrow direction="next" onClick={goToNext} />
-            </div>
-          </div>
+          <p
+            className="mb-2 text-sm font-medium"
+            style={{ color: HERITAGE_COLORS.antiqueGold }}
+          >
+            Limited to 100 Founding Families
+          </p>
+          <h3
+            className="mb-4 text-2xl font-bold sm:text-3xl"
+            style={{ color: HERITAGE_COLORS.charcoal }}
+          >
+            Will Your Family Be One of Them?
+          </h3>
+          <p
+            className="mb-6 text-base leading-relaxed"
+            style={{ color: HERITAGE_COLORS.sepia }}
+          >
+            Join the founding families who are building intentional family cultures.
+            Share your journey, and your testimonial could help another family
+            transform their daily chaos into lasting memories.
+          </p>
 
-          {/* Testimonial cards container */}
-          <div className="relative mx-auto max-w-3xl overflow-hidden">
-            <div className="relative h-[420px] sm:h-[380px]">
-              {testimonials.map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <TestimonialCard
-                    {...testimonial}
-                    isActive={index === currentIndex}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <Button
+            asChild
+            size="lg"
+            className="group gap-2 rounded-lg px-8 py-6 text-base font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg"
+            style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
+          >
+            <a href={STRIPE_PAYMENT_LINK}>
+              Become a Founding Family
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </a>
+          </Button>
 
-          {/* Navigation dots */}
-          <CarouselDots
-            total={testimonials.length}
-            current={currentIndex}
-            onSelect={goToIndex}
-          />
-
-          {/* Mobile navigation arrows */}
-          <div className="mt-4 flex justify-center gap-4 sm:hidden">
-            <NavArrow direction="prev" onClick={goToPrev} />
-            <NavArrow direction="next" onClick={goToNext} />
-          </div>
+          <p
+            className="mt-4 text-xs"
+            style={{ color: HERITAGE_COLORS.sepia, opacity: 0.7 }}
+          >
+            {PRICE_DISPLAY} lifetime · No subscriptions · Help shape the product
+          </p>
         </div>
+
+        {/* Future testimonials placeholder note - visible to help with content strategy */}
+        <p
+          className="mt-8 text-center text-xs italic"
+          style={{ color: HERITAGE_COLORS.sepia, opacity: 0.5 }}
+        >
+          Real testimonials from founding families coming soon
+        </p>
       </div>
     </AnimatedSection>
   );

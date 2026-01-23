@@ -1,10 +1,10 @@
 import { Helmet } from "react-helmet-async";
+import { FOUNDING_FAMILY_PRICE, PRICE_DISPLAY } from "@/config/pricing";
 
 const SEO_CONFIG = {
   title:
     "Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading",
-  description:
-    "The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for $149.",
+  description: `The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for ${PRICE_DISPLAY}.`,
   url: "https://entmoot.app",
   image: "/og-image.png",
   siteName: "Entmoot",
@@ -22,7 +22,7 @@ const softwareApplicationSchema = {
     "Family goal planning platform with AI coaching, multi-scale reviews (daily to annual), gamification, and COPPA compliance.",
   offers: {
     "@type": "Offer",
-    price: "149",
+    price: FOUNDING_FAMILY_PRICE.toString(),
     priceCurrency: "USD",
     priceValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -129,7 +129,7 @@ export function LandingPageSEO() {
       />
 
       {/* Pricing specific meta */}
-      <meta name="product:price:amount" content="149" />
+      <meta name="product:price:amount" content={FOUNDING_FAMILY_PRICE.toString()} />
       <meta name="product:price:currency" content="USD" />
 
       {/* JSON-LD Structured Data */}

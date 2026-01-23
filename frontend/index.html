@@ -2,27 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/logo-medallion.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1C4532" />
 
     <!-- Primary Meta Tags (defaults, overridden by react-helmet-async) -->
-    <title>Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together</title>
-    <meta name="title" content="Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together" />
-    <meta name="description" content="Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5." />
+    <title>Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading</title>
+    <meta name="title" content="Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading" />
+    <meta name="description" content="The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for $249." />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://entmoot.app/" />
-    <meta property="og:title" content="Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together" />
-    <meta property="og:description" content="Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5." />
+    <meta property="og:title" content="Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading" />
+    <meta property="og:description" content="The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for $249." />
     <meta property="og:image" content="https://entmoot.app/og-image.png" />
     <meta property="og:site_name" content="Entmoot" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://entmoot.app/" />
-    <meta name="twitter:title" content="Entmoot - Family Goal Planning Made Fun | Build Your Adventure Together" />
-    <meta name="twitter:description" content="Transform family chaos into epic adventures. Entmoot helps families set SMART goals, plan daily quests, celebrate wins, and grow together. Free for families up to 5." />
+    <meta name="twitter:title" content="Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading" />
+    <meta name="twitter:description" content="The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for $249." />
     <meta name="twitter:image" content="https://entmoot.app/og-image.png" />
     <meta name="twitter:site" content="@entmootapp" />
 
@@ -30,6 +32,35 @@
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <link rel="canonical" href="https://entmoot.app/" />
+
+    <!-- Google Analytics 4 -->
+    <script>
+      (function() {
+        var gaId = '%VITE_GA_MEASUREMENT_ID%';
+
+        // Only load GA if measurement ID is configured
+        if (!gaId || gaId === '%' + 'VITE_GA_MEASUREMENT_ID' + '%') {
+          console.log('Google Analytics disabled: VITE_GA_MEASUREMENT_ID not configured');
+          return;
+        }
+
+        // Create gtag script
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+        document.head.appendChild(script);
+
+        // Initialize dataLayer and gtag
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId, {
+          send_page_view: true,
+          cookie_flags: 'SameSite=None;Secure'
+        });
+        window.gtag = gtag;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

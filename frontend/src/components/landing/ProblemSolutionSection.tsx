@@ -1,36 +1,25 @@
 import { Check, X } from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
-
-// Landing page design system colors
-const LANDING_COLORS = {
-  forestGreen: "#2D5A27",
-  leafGreen: "#7CB342",
-  skyBlue: "#64B5F6",
-  warmGold: "#FFD54F",
-  earthBrown: "#795548",
-  creamWhite: "#FFF8E7",
-  sunsetOrange: "#FF7043",
-  darkForest: "#1B3A1A",
-} as const;
+import { HERITAGE_COLORS } from "./design-system";
 
 // Pain points for "Without Entmoot" column
 const painPoints = [
-  { emoji: "🐕", text: '"Did anyone feed the dog?"' },
-  { emoji: "⚽", text: '"I forgot about soccer!"' },
-  { emoji: "👵", text: '"Who\'s picking up grandma?"' },
-  { emoji: "😔", text: '"We never do anything fun"' },
+  { text: '"Did anyone feed the dog?"' },
+  { text: '"I forgot about soccer practice!"' },
+  { text: '"Who\'s picking up grandma?"' },
+  { text: '"We never do anything as a family"' },
 ];
 
 // Solutions for "With Entmoot" column
 const solutions = [
-  { text: "Quests assigned & tracked" },
-  { text: "Everyone sees the map" },
-  { text: "Goals connected to dreams" },
-  { text: "Celebrations built in" },
+  { text: "Clear task ownership & tracking" },
+  { text: "Shared family calendar view" },
+  { text: "Daily goals connected to big dreams" },
+  { text: "Built-in celebration rituals" },
 ];
 
-// Blocky card component with pixelated border style
-function BlockyCard({
+// Card component with heritage styling
+function ComparisonCard({
   children,
   variant,
 }: {
@@ -41,64 +30,29 @@ function BlockyCard({
 
   return (
     <div
-      className="relative overflow-hidden rounded-lg p-6"
+      className="relative rounded-xl border p-6 sm:p-8"
       style={{
-        backgroundColor: isProblem ? "#FEE2E2" : "#DCFCE7",
-        // Blocky/pixelated border effect using box-shadow
-        boxShadow: isProblem
-          ? `
-            inset 4px 4px 0 0 #FECACA,
-            inset -4px -4px 0 0 #FCA5A5,
-            4px 4px 0 0 #F87171
-          `
-          : `
-            inset 4px 4px 0 0 #BBF7D0,
-            inset -4px -4px 0 0 #86EFAC,
-            4px 4px 0 0 ${LANDING_COLORS.leafGreen}
-          `,
+        backgroundColor: isProblem
+          ? "#FEF2F2"
+          : HERITAGE_COLORS.cream,
+        borderColor: isProblem
+          ? "#FECACA"
+          : `${HERITAGE_COLORS.sageGreen}50`,
       }}
     >
-      {/* Decorative pixelated corner accents */}
-      <div
-        className="absolute top-0 left-0 h-2 w-2"
-        style={{
-          backgroundColor: isProblem ? "#F87171" : LANDING_COLORS.leafGreen,
-        }}
-      />
-      <div
-        className="absolute top-0 right-0 h-2 w-2"
-        style={{
-          backgroundColor: isProblem ? "#F87171" : LANDING_COLORS.leafGreen,
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 h-2 w-2"
-        style={{
-          backgroundColor: isProblem ? "#F87171" : LANDING_COLORS.leafGreen,
-        }}
-      />
-      <div
-        className="absolute right-0 bottom-0 h-2 w-2"
-        style={{
-          backgroundColor: isProblem ? "#F87171" : LANDING_COLORS.leafGreen,
-        }}
-      />
       {children}
     </div>
   );
 }
 
 // Pain point item component
-function PainPointItem({ emoji, text }: { emoji: string; text: string }) {
+function PainPointItem({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-red-100 text-xl">
-        {emoji}
+    <div className="flex items-center gap-3">
+      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+        <X className="h-4 w-4 text-red-500" />
       </div>
-      <div className="flex items-center gap-2">
-        <X className="h-5 w-5 flex-shrink-0 text-red-500" />
-        <p className="text-base font-medium text-red-800">{text}</p>
-      </div>
+      <p className="text-base font-medium text-red-800">{text}</p>
     </div>
   );
 }
@@ -108,17 +62,17 @@ function SolutionItem({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3">
       <div
-        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg"
-        style={{ backgroundColor: LANDING_COLORS.leafGreen + "30" }}
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+        style={{ backgroundColor: `${HERITAGE_COLORS.sageGreen}30` }}
       >
         <Check
-          className="h-6 w-6"
-          style={{ color: LANDING_COLORS.forestGreen }}
+          className="h-4 w-4"
+          style={{ color: HERITAGE_COLORS.deepForest }}
         />
       </div>
       <p
         className="text-base font-medium"
-        style={{ color: LANDING_COLORS.forestGreen }}
+        style={{ color: HERITAGE_COLORS.deepForest }}
       >
         {text}
       </p>
@@ -128,39 +82,49 @@ function SolutionItem({ text }: { text: string }) {
 
 export function ProblemSolutionSection() {
   return (
-    <AnimatedSection className="py-16 sm:py-20 lg:py-24">
+    <AnimatedSection
+      className="py-16 sm:py-20 lg:py-24"
+      style={{ backgroundColor: HERITAGE_COLORS.parchment }}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section headline */}
-        <h2
-          className="mb-12 text-center text-3xl font-bold sm:text-4xl lg:text-5xl"
-          style={{ color: LANDING_COLORS.darkForest }}
-        >
-          Sound Familiar?
-        </h2>
+        <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
+          <h2
+            className="text-3xl font-bold sm:text-4xl lg:text-5xl"
+            style={{
+              color: HERITAGE_COLORS.charcoal,
+              fontFamily: "'Georgia', serif",
+            }}
+          >
+            Sound Familiar?
+          </h2>
+          <p
+            className="mt-4 text-lg"
+            style={{ color: HERITAGE_COLORS.sepia }}
+          >
+            Most families struggle with the same challenges
+          </p>
+        </div>
 
         {/* Two-column comparison layout */}
         <div className="grid gap-8 md:grid-cols-2 lg:gap-12">
           {/* Without Entmoot column */}
-          <BlockyCard variant="problem">
-            <h3 className="mb-6 text-center text-xl font-bold text-red-700 sm:text-2xl">
+          <ComparisonCard variant="problem">
+            <h3 className="mb-6 text-center text-xl font-semibold text-red-700 sm:text-2xl">
               Without Entmoot
             </h3>
             <div className="space-y-4">
               {painPoints.map((point, index) => (
-                <PainPointItem
-                  key={index}
-                  emoji={point.emoji}
-                  text={point.text}
-                />
+                <PainPointItem key={index} text={point.text} />
               ))}
             </div>
-          </BlockyCard>
+          </ComparisonCard>
 
           {/* With Entmoot column */}
-          <BlockyCard variant="solution">
+          <ComparisonCard variant="solution">
             <h3
-              className="mb-6 text-center text-xl font-bold sm:text-2xl"
-              style={{ color: LANDING_COLORS.forestGreen }}
+              className="mb-6 text-center text-xl font-semibold sm:text-2xl"
+              style={{ color: HERITAGE_COLORS.deepForest }}
             >
               With Entmoot
             </h3>
@@ -169,17 +133,20 @@ export function ProblemSolutionSection() {
                 <SolutionItem key={index} text={solution.text} />
               ))}
             </div>
-          </BlockyCard>
+          </ComparisonCard>
         </div>
 
         {/* Transition text */}
         <div className="mx-auto mt-12 max-w-3xl text-center lg:mt-16">
           <p
             className="text-lg font-medium italic sm:text-xl lg:text-2xl"
-            style={{ color: LANDING_COLORS.earthBrown }}
+            style={{
+              color: HERITAGE_COLORS.sepia,
+              fontFamily: "'Georgia', serif",
+            }}
           >
-            "Every family deserves to feel like a team on an epic quest—not a
-            group of strangers sharing a calendar."
+            "Every family deserves to feel like a team working toward shared
+            dreams—not a group of strangers sharing a roof."
           </p>
         </div>
       </div>
