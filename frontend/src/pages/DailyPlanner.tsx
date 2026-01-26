@@ -433,56 +433,65 @@ export function DailyPlanner() {
                 goals?.filter((g) => g.time_scale !== "daily") || [];
               return (
                 <div key={index} className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
+                  <div className="flex items-start gap-3">
+                    <span className="text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
                       {index + 1}
                     </span>
-                    <MentionInput
-                      multiline={false}
-                      placeholder={`Outcome ${index + 1}`}
-                      value={priority.title}
-                      onChange={(val) => handlePriorityChange(index, val)}
-                      onBlur={handlePriorityBlur}
-                      className="flex-1"
-                    />
-                    <Select
-                      value={priority.goal_id?.toString() || ""}
-                      onValueChange={(value) =>
-                        handleLinkPriorityToGoal(
-                          index,
-                          value ? parseInt(value) : null
-                        )
-                      }
-                    >
-                      <SelectTrigger
-                        className="h-10 w-11 shrink-0 px-2"
-                        aria-label="Link to goal"
+                    <div className="flex-1 space-y-2">
+                      <MentionInput
+                        multiline={false}
+                        placeholder={`Outcome ${index + 1}`}
+                        value={priority.title}
+                        onChange={(val) => handlePriorityChange(index, val)}
+                        onBlur={handlePriorityBlur}
+                        className="w-full"
+                      />
+                      <Select
+                        value={priority.goal_id?.toString() || ""}
+                        onValueChange={(value) =>
+                          handleLinkPriorityToGoal(
+                            index,
+                            value ? parseInt(value) : null
+                          )
+                        }
                       >
-                        <Link2 className="h-4 w-4" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredGoals.length > 0 ? (
-                          filteredGoals.map((goal) => (
-                            <SelectItem
-                              key={goal.id}
-                              value={goal.id.toString()}
-                            >
-                              <span className="truncate">{goal.title}</span>
-                              <span className="text-muted-foreground ml-2 text-xs">
-                                ({getTimeScaleLabel(goal.time_scale)})
-                              </span>
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="text-muted-foreground px-2 py-1.5 text-sm">
-                            No goals available
+                        <SelectTrigger
+                          className="h-9 w-full shrink-0 text-sm"
+                          aria-label="Link to goal"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Link2 className="h-4 w-4" />
+                            <span className="text-muted-foreground text-xs">
+                              {priority.goal_id
+                                ? "Linked to goal"
+                                : "Link to goal (optional)"}
+                            </span>
                           </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {filteredGoals.length > 0 ? (
+                            filteredGoals.map((goal) => (
+                              <SelectItem
+                                key={goal.id}
+                                value={goal.id.toString()}
+                              >
+                                <span className="truncate">{goal.title}</span>
+                                <span className="text-muted-foreground ml-2 text-xs">
+                                  ({getTimeScaleLabel(goal.time_scale)})
+                                </span>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="text-muted-foreground px-2 py-1.5 text-sm">
+                              No goals available
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   {priority.goal && (
-                    <div className="ml-10 flex items-center gap-2">
+                    <div className="ml-13 flex items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
                         {getTimeScaleLabel(
                           priority.goal.time_scale as
@@ -498,6 +507,7 @@ export function DailyPlanner() {
                         type="button"
                         onClick={() => handleLinkPriorityToGoal(index, null)}
                         className="text-muted-foreground hover:text-destructive"
+                        aria-label="Remove goal link"
                       >
                         <X className="h-3 w-3" />
                       </button>
