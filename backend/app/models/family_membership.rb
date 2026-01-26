@@ -13,6 +13,7 @@ class FamilyMembership < ApplicationRecord
   }, validate: true
 
   validates :family_id, uniqueness: { scope: :user_id, message: :user_already_member }
+  validate :user_belongs_to_only_one_family, on: :create
 
   scope :for_user, ->(user) { where(user: user) }
 
@@ -30,5 +31,15 @@ class FamilyMembership < ApplicationRecord
 
   def can_manage_pets?
     admin? || adult?
+  end
+
+  private
+
+  def user_belongs_to_only_one_family
+    return unless user
+
+    if user.family_memberships.exists?
+      errors.add(:user, :already_has_family, message: "already belongs to a family")
+    end
   end
 end

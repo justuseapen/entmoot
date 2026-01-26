@@ -51,6 +51,23 @@ class User < ApplicationRecord
     families.include?(family)
   end
 
+  # Single-family convenience methods
+  def family
+    families.first
+  end
+
+  def family_membership
+    family_memberships.first
+  end
+
+  def role
+    family_membership&.role
+  end
+
+  def has_family?
+    family_memberships.exists?
+  end
+
   def total_points
     PointsService.total_points(self)
   end

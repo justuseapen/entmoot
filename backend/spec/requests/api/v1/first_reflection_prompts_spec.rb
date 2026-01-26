@@ -167,26 +167,6 @@ RSpec.describe "Api::V1::FirstReflectionPrompts" do
         end
       end
 
-      context "with specific family_id" do
-        let(:another_family) { create(:family) }
-
-        before do
-          create(:family_membership, user: user, family: another_family, role: :adult)
-        end
-
-        it "creates reflection in specified family" do
-          travel_to Time.zone.parse("2026-01-12 09:00:00 EST") do
-            post "/api/v1/users/me/first_reflection_prompt",
-                 params: valid_params.merge(family_id: another_family.id),
-                 headers: auth_headers(user)
-
-            expect(response).to have_http_status(:created)
-            reflection = Reflection.last
-            expect(reflection.family).to eq(another_family)
-          end
-        end
-      end
-
       context "when user has no family" do
         let(:solo_user) { create(:user) }
 

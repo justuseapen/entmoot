@@ -114,6 +114,22 @@ RSpec.describe "Api::V1::Families" do
         expect(json_response["errors"]).to include("Name can't be blank")
       end
     end
+
+    context "when user already belongs to a family (single family enforcement)" do
+      before do
+        existing_family = create(:family)
+        create(:family_membership, user: user, family: existing_family)
+      end
+
+      it "prevents creating a second family" do
+        expect do
+          post "/api/v1/families", params: valid_params, headers: auth_headers(user)
+        end.not_to change(Family, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response["error"]).to eq("You already belong to a family.")
+      end
+    end
   end
 
   describe "PATCH /api/v1/families/:id" do

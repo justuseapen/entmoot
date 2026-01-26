@@ -13,6 +13,25 @@ RSpec.describe FamilyMembership do
     end
   end
 
+  describe "single family enforcement" do
+    let(:user) { create(:user) }
+    let(:family1) { create(:family) }
+    let(:family2) { create(:family) }
+
+    it "allows user to join their first family" do
+      membership = build(:family_membership, user: user, family: family1)
+      expect(membership).to be_valid
+    end
+
+    it "prevents user from joining a second family" do
+      create(:family_membership, user: user, family: family1)
+      membership = build(:family_membership, user: user, family: family2)
+
+      expect(membership).not_to be_valid
+      expect(membership.errors[:user]).to include("already belongs to a family")
+    end
+  end
+
   describe "associations" do
     it { is_expected.to belong_to(:family) }
     it { is_expected.to belong_to(:user) }

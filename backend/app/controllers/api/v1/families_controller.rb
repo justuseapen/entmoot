@@ -16,6 +16,10 @@ module Api
       end
 
       def create
+        if current_user.has_family?
+          return render_error("You already belong to a family.", status: :unprocessable_content)
+        end
+
         @family = Family.new(family_params)
         authorize @family
 

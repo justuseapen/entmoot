@@ -48,20 +48,6 @@ RSpec.describe "Api::V1::Habits" do
         expect(habits.first["id"]).to eq(active_habit.id)
       end
 
-      it "excludes habits from other families" do
-        other_family = create(:family)
-        create(:family_membership, :adult, family: other_family, user: user)
-        create(:habit, user: user, family: other_family, name: "Other Family", position: 1)
-        this_family_habit = create(:habit, user: user, family: family, name: "This Family", position: 1)
-
-        get "/api/v1/families/#{family.id}/habits", headers: auth_headers(user)
-
-        expect(response).to have_http_status(:ok)
-        habits = json_response["habits"]
-        expect(habits.length).to eq(1)
-        expect(habits.first["id"]).to eq(this_family_habit.id)
-      end
-
       it "excludes habits from other users" do
         other_user = create(:user)
         create(:family_membership, :adult, family: family, user: other_user)

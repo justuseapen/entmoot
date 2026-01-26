@@ -846,13 +846,6 @@ export function Dashboard() {
                       variant="outline"
                       className="w-full justify-start"
                     >
-                      <Link to="/families">Manage Families</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full justify-start"
-                    >
                       <Link to="/settings/notifications">
                         Notification Settings
                       </Link>
@@ -862,17 +855,6 @@ export function Dashboard() {
               </div>
             </div>
 
-            {/* Select Family Prompt */}
-            {!currentFamily && families && families.length > 0 && (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">
-                    Select a family from the switcher in the header to see your
-                    dashboard.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
           </div>
         )}
       </div>

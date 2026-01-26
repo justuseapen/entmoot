@@ -10,7 +10,7 @@ class FamilyPolicy < ApplicationPolicy
   end
 
   def create?
-    true
+    !user.has_family?
   end
 
   def update?

@@ -17,7 +17,6 @@ import { logout as logoutApi } from "@/lib/auth";
 import { Sidebar } from "./Sidebar";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { MobileNav } from "./MobileNav";
-import { FamilySwitcher } from "./FamilySwitcher";
 import { NotificationBell } from "./NotificationBell";
 import { MentionIndicator } from "./MentionIndicator";
 import { GuidedTour } from "./GuidedTour";
@@ -197,11 +196,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
           {/* Header Actions */}
           <div className="flex items-center gap-2">
-            {/* Family Switcher */}
-            <div className="hidden sm:block">
-              <FamilySwitcher />
-            </div>
-
             {/* Mention Indicator */}
             <MentionIndicator />
 

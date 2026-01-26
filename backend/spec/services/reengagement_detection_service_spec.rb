@@ -127,26 +127,6 @@ RSpec.describe ReengagementDetectionService do
       end
     end
 
-    context "when user belongs to multiple families" do
-      let(:family2) { create(:family, timezone: timezone) }
-
-      before do
-        create(:family_membership, user: user, family: family2, role: :adult)
-      end
-
-      around do |example|
-        travel_to Time.find_zone(timezone).local(2026, 1, 13, 14, 0, 0) do
-          example.run
-        end
-      end
-
-      it "only adds the user once even if missed in multiple families" do
-        candidates = described_class.detect_missed_checkins
-
-        expect(candidates.length).to eq(1)
-        expect(candidates.first.user).to eq(user)
-      end
-    end
   end
 
   describe ".detect_missed_reflections" do
@@ -485,57 +465,70 @@ RSpec.describe ReengagementDetectionService do
     end
 
     context "with different timezones" do
+      let(:utc_user) do
+        create(:user).tap do |u|
+          create(:notification_preference, user: u,
+                                           morning_planning: true,
+                                           reengagement_enabled: true,
+                                           quiet_hours_start: "23:00",
+                                           quiet_hours_end: "06:00")
+        end
+      end
+      let(:pacific_user) do
+        create(:user).tap do |u|
+          create(:notification_preference, user: u,
+                                           morning_planning: true,
+                                           reengagement_enabled: true,
+                                           quiet_hours_start: "23:00",
+                                           quiet_hours_end: "06:00")
+        end
+      end
       let(:utc_family) { create(:family, timezone: "UTC") }
       let(:pacific_family) { create(:family, timezone: "America/Los_Angeles") }
 
       before do
-        create(:family_membership, user: user, family: utc_family, role: :adult)
-        create(:family_membership, user: user, family: pacific_family, role: :adult)
+        create(:family_membership, user: utc_user, family: utc_family, role: :adult)
+        create(:family_membership, user: pacific_user, family: pacific_family, role: :adult)
       end
 
       it "checks deadline in each family's timezone" do
         # 1pm UTC = 5am Pacific
         travel_to Time.utc(2026, 1, 13, 13, 0, 0) do
           # UTC is past noon, Pacific is not
-          expect(described_class.missed_checkin_for_family?(user, utc_family)).to be true
-          expect(described_class.missed_checkin_for_family?(user, pacific_family)).to be false
+          expect(described_class.missed_checkin_for_family?(utc_user, utc_family)).to be true
+          expect(described_class.missed_checkin_for_family?(pacific_user, pacific_family)).to be false
         end
       end
     end
   end
 
   describe ".missed_reflection_for_family?" do
-    let!(:user) do
-      create(:user).tap do |u|
-        create(:family_membership, user: u, family: family, role: :admin)
-        # Set quiet hours to 23:00-06:00 to avoid overlapping with 22:30 test time
-        create(:notification_preference, user: u,
-                                         morning_planning: true,
-                                         evening_reflection: true,
-                                         reengagement_enabled: true,
-                                         quiet_hours_start: "23:00",
-                                         quiet_hours_end: "06:00")
-      end
-    end
-
     context "with different timezones" do
       let(:utc_family) { create(:family, timezone: "UTC") }
-
-      before do
-        create(:family_membership, user: user, family: utc_family, role: :adult)
+      let(:utc_user) do
+        create(:user).tap do |u|
+          create(:family_membership, user: u, family: utc_family, role: :admin)
+          # Set quiet hours to 23:00-06:00 to avoid overlapping with 22:30 test time
+          create(:notification_preference, user: u,
+                                           morning_planning: true,
+                                           evening_reflection: true,
+                                           reengagement_enabled: true,
+                                           quiet_hours_start: "23:00",
+                                           quiet_hours_end: "06:00")
+        end
       end
 
       it "checks deadline in family's timezone" do
         # Create daily plan for today in UTC - must be Jan 13, 2026
-        create(:daily_plan, user: user, family: utc_family, date: Date.new(2026, 1, 13))
+        create(:daily_plan, user: utc_user, family: utc_family, date: Date.new(2026, 1, 13))
 
         travel_to Time.utc(2026, 1, 13, 22, 30, 0) do
-          expect(described_class.missed_reflection_for_family?(user, utc_family)).to be true
+          expect(described_class.missed_reflection_for_family?(utc_user, utc_family)).to be true
         end
 
         # Before 10pm UTC, should not trigger
         travel_to Time.utc(2026, 1, 13, 21, 30, 0) do
-          expect(described_class.missed_reflection_for_family?(user, utc_family)).to be false
+          expect(described_class.missed_reflection_for_family?(utc_user, utc_family)).to be false
         end
       end
     end

@@ -36,6 +36,8 @@ en:
           attributes:
             family_id:
               user_already_member: "user is already a member"
+            user:
+              already_has_family: "already belongs to a family"
         pet:
           attributes:
             name:

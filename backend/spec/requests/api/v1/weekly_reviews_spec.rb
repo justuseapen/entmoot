@@ -156,12 +156,13 @@ RSpec.describe "Api::V1::WeeklyReviews" do
     end
 
     context "when family uses Sunday as week start" do
+      let(:sunday_user) { create(:user) }
       let(:family_sunday) { create(:family, timezone: "America/New_York", settings: { "week_start_day" => 0 }) }
 
-      before { create(:family_membership, :adult, family: family_sunday, user: user) }
+      before { create(:family_membership, :adult, family: family_sunday, user: sunday_user) }
 
       it "uses Sunday as week start date" do
-        get "/api/v1/families/#{family_sunday.id}/weekly_reviews/current", headers: auth_headers(user)
+        get "/api/v1/families/#{family_sunday.id}/weekly_reviews/current", headers: auth_headers(sunday_user)
 
         expect(response).to have_http_status(:ok)
         week_start = Date.parse(json_response["week_start_date"])

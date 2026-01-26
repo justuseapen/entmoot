@@ -215,17 +215,19 @@ RSpec.describe "Api::V1::Invitations" do
         expect(json_response["family"]["id"]).to eq(family.id)
       end
 
-      context "when already a member" do
+      context "when user already belongs to a family (single family enforcement)" do
+        let(:other_family) { create(:family) }
+
         before do
-          create(:family_membership, family: family, user: invitee)
+          create(:family_membership, family: other_family, user: invitee)
         end
 
-        it "returns 422" do
+        it "prevents accepting invitation" do
           post "/api/v1/invitations/#{invitation.token}/accept",
                headers: auth_headers(invitee)
 
           expect(response).to have_http_status(:unprocessable_content)
-          expect(json_response["error"]).to include("already a member")
+          expect(json_response["error"]).to eq("You already belong to a family.")
         end
       end
     end
