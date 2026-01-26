@@ -23,7 +23,8 @@
       "icon": "./assets/icon.png",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"],
-        "MinimumOSVersion": "14.0"
+        "MinimumOSVersion": "14.0",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -42,8 +43,9 @@
     },
     "extra": {
       "releaseChannel": "development",
+      "router": {},
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "9577d984-980d-4d9b-af9d-21c9dd456c21"
       }
     },
     "plugins": [
@@ -58,6 +60,13 @@
       ],
       "expo-router",
       "expo-localization"
-    ]
+    ],
+    "owner": "justuseapen",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9577d984-980d-4d9b-af9d-21c9dd456c21"
+    }
   }
 }
