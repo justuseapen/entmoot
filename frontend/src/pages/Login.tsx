@@ -52,7 +52,7 @@ export function Login() {
     setLoading(true);
     try {
       const response = await login(data);
-      setAuth(response.user);
+      setAuth(response.user, response.token);
       navigate(from, { replace: true });
     } catch (err) {
       const { message, suggestion } = getErrorMessage(err);

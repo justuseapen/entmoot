@@ -25,16 +25,32 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : "/api/v1";
 
+// Get the auth token from localStorage
+function getAuthToken(): string | null {
+  try {
+    const authData = localStorage.getItem("entmoot-auth");
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      return parsed.state?.token || null;
+    }
+  } catch (e) {
+    console.error("Error reading auth token:", e);
+  }
+  return null;
+}
+
 export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
   const { headers, ...restOptions } = options || {};
+  const token = getAuthToken();
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...restOptions,
-    credentials: "include", // Include cookies for session auth
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
   });

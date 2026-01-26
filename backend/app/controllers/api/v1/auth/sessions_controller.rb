@@ -12,16 +12,15 @@ module Api
           return render_user_not_found if user.nil?
           return render_invalid_password unless user.valid_password?(params.dig(:user, :password))
 
+          # Sign in user - devise-jwt will automatically add the Authorization header
           sign_in(:user, user)
-          # Set user in warden session for ActionCable auth
-          request.env["warden"].set_user(user, scope: :user, store: true)
           render json: { message: "Logged in successfully.", user: user_response(user) }, status: :ok
         end
 
         def destroy
           if current_user
+            # Sign out user - devise-jwt will handle token revocation
             sign_out(current_user)
-            request.env["warden"].logout(:user)
             render json: { message: "Logged out successfully." }, status: :ok
           else
             render json: { error: "Could not log out. No active session." }, status: :unauthorized

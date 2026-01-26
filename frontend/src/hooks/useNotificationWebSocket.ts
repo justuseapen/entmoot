@@ -12,11 +12,11 @@ interface WebSocketMessage {
 export type NotificationCallback = (notification: Notification) => void;
 
 // ActionCable WebSocket hook for real-time notifications
-// Uses session cookies for auth (set during login) - no token in URL needed
+// Uses JWT token in query parameter for authentication
 export function useNotificationWebSocket(
   onNotification?: NotificationCallback
 ) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, token } = useAuthStore();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -68,12 +68,12 @@ export function useNotificationWebSocket(
       }
 
       // Determine WebSocket URL based on environment
-      // Auth is handled via session cookies (set during login), no token needed in URL
+      // Auth is handled via JWT token in query parameter
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = import.meta.env.DEV
         ? "localhost:3000"
         : window.location.host;
-      const wsUrl = `${wsProtocol}//${wsHost}/cable`;
+      const wsUrl = `${wsProtocol}//${wsHost}/cable?token=${encodeURIComponent(token || "")}`;
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -176,5 +176,5 @@ export function useNotificationWebSocket(
         wsRef.current = null;
       }
     };
-  }, [isAuthenticated, queryClient]);
+  }, [isAuthenticated, token, queryClient]);
 }

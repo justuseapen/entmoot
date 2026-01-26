@@ -1,5 +1,9 @@
 import { apiFetch } from "./api";
 
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : "/api/v1";
+
 export interface User {
   id: number;
   email: string;
@@ -15,6 +19,7 @@ export interface User {
 export interface AuthResponse {
   message: string;
   user: User;
+  token: string;
 }
 
 export interface RegisterData {
@@ -35,17 +40,49 @@ export interface ApiError {
 }
 
 export async function register(data: RegisterData): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/register", {
+  const response = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ user: data }),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Registration failed");
+  }
+
+  const result = await response.json();
+  const token = response.headers.get("Authorization")?.replace("Bearer ", "") || "";
+
+  return {
+    ...result,
+    token,
+  };
 }
 
 export async function login(data: LoginData): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/login", {
+  const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ user: data }),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Login failed");
+  }
+
+  const result = await response.json();
+  const token = response.headers.get("Authorization")?.replace("Bearer ", "") || "";
+
+  return {
+    ...result,
+    token,
+  };
 }
 
 export async function logout(): Promise<void> {

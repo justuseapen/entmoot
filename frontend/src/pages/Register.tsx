@@ -61,7 +61,7 @@ export function Register() {
     setLoading(true);
     try {
       const response = await registerUser(data);
-      setAuth(response.user);
+      setAuth(response.user, response.token);
       // Redirect to onboarding for new users
       navigate("/onboarding", { replace: true });
     } catch (err) {

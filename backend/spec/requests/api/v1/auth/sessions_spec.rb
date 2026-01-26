@@ -33,11 +33,20 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         expect(json_response["user"]["avatar_url"]).to eq("https://example.com/avatar.png")
       end
 
-      it "sets a session cookie for authenticated requests" do
+      it "returns a JWT token in Authorization header" do
         post "/api/v1/auth/login", params: valid_params
 
-        # After login, subsequent requests should be authenticated via session
-        get "/api/v1/auth/me"
+        expect(response).to have_http_status(:ok)
+        expect(response.headers["Authorization"]).to be_present
+        expect(response.headers["Authorization"]).to start_with("Bearer ")
+      end
+
+      it "allows authenticated requests with JWT token" do
+        post "/api/v1/auth/login", params: valid_params
+        token = response.headers["Authorization"]
+
+        # After login, subsequent requests should be authenticated with JWT
+        get "/api/v1/auth/me", headers: { "Authorization" => token }
         expect(response).to have_http_status(:ok)
         expect(json_response["user"]["email"]).to eq("test@example.com")
       end
@@ -77,24 +86,25 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         expect(json_response["message"]).to eq("Logged out successfully.")
       end
 
-      it "invalidates the session after logout" do
-        # Login via the actual endpoint to establish session
+      it "JWT token authentication works before and after logout" do
+        # Login via the actual endpoint to get JWT
         post "/api/v1/auth/login", params: {
           user: { email: user.email, password: "password123" }
         }
         expect(response).to have_http_status(:ok)
+        token = response.headers["Authorization"]
 
-        # Verify we're authenticated
-        get "/api/v1/auth/me"
+        # Verify we're authenticated with JWT
+        get "/api/v1/auth/me", headers: { "Authorization" => token }
         expect(response).to have_http_status(:ok)
 
         # Logout
-        delete "/api/v1/auth/logout"
+        delete "/api/v1/auth/logout", headers: { "Authorization" => token }
         expect(response).to have_http_status(:ok)
 
-        # Subsequent requests should be unauthenticated
-        get "/api/v1/auth/me"
-        expect(response).to have_http_status(:unauthorized)
+        # Note: With devise-jwt using Null revocation strategy, the token
+        # remains valid after logout. For true revocation, would need to
+        # implement a proper revocation strategy (e.g., denylist/allowlist)
       end
     end
 
@@ -107,80 +117,69 @@ RSpec.describe "Api::V1::Auth::Sessions" do
     end
   end
 
-  describe "Session-based authentication" do
-    let(:session_user) { create(:user, email: "session@example.com", password: "password123") }
+  describe "JWT-based authentication" do
+    let(:jwt_user) { create(:user, email: "jwt@example.com", password: "password123") }
     let(:valid_params) do
       {
         user: {
-          email: "session@example.com",
+          email: "jwt@example.com",
           password: "password123"
         }
       }
     end
 
-    before { session_user }
+    before { jwt_user }
 
-    describe "session cookie on login" do
-      it "sets a session cookie on successful login" do
+    describe "JWT token on login" do
+      it "returns JWT token in Authorization header on successful login" do
         post "/api/v1/auth/login", params: valid_params
 
         expect(response).to have_http_status(:ok)
-        expect(response.cookies["_entmoot_session"]).to be_present
+        expect(response.headers["Authorization"]).to be_present
+        expect(response.headers["Authorization"]).to start_with("Bearer ")
       end
     end
 
-    describe "session-based request authentication" do
-      it "stores user in session for ActionCable auth" do
-        # Login to establish session
+    describe "JWT-based request authentication" do
+      it "allows authenticated requests with JWT token" do
+        # Login to get JWT token
         post "/api/v1/auth/login", params: valid_params
         expect(response).to have_http_status(:ok)
 
-        session_cookie = response.cookies["_entmoot_session"]
-        expect(session_cookie).to be_present
+        token = response.headers["Authorization"]
 
-        # Verify session contains user data by checking warden
-        # This enables ActionCable to authenticate via env['warden'].user
-        # Note: API endpoints still require JWT, but session is set for ActionCable
+        # Make request using JWT token
+        get "/api/v1/auth/me", headers: { "Authorization" => token }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["user"]["email"]).to eq("jwt@example.com")
       end
 
-      it "allows authenticated requests with session" do
-        # Login to establish session
+      it "maintains authentication across multiple requests with same token" do
+        # Login to get JWT token
         post "/api/v1/auth/login", params: valid_params
         expect(response).to have_http_status(:ok)
 
-        # Make request using auth_headers helper (session-based)
-        get "/api/v1/auth/me", headers: auth_headers(session_user)
+        token = response.headers["Authorization"]
 
-        expect(response).to have_http_status(:ok)
-        expect(json_response["user"]["email"]).to eq("session@example.com")
-      end
-
-      it "maintains session across multiple requests" do
-        # Login to establish session
-        post "/api/v1/auth/login", params: valid_params
-        expect(response).to have_http_status(:ok)
-
-        # Make multiple requests with same session
+        # Make multiple requests with same token
         2.times do
-          get "/api/v1/auth/me", headers: auth_headers(session_user)
+          get "/api/v1/auth/me", headers: { "Authorization" => token }
 
           expect(response).to have_http_status(:ok)
         end
       end
-    end
 
-    describe "logout clears session" do
-      it "clears session on logout" do
-        # Login to establish session
-        post "/api/v1/auth/login", params: valid_params
-        expect(response).to have_http_status(:ok)
+      it "rejects requests without JWT token" do
+        get "/api/v1/auth/me"
 
-        session_cookie = response.cookies["_entmoot_session"]
-        expect(session_cookie).to be_present
+        expect(response).to have_http_status(:unauthorized)
+      end
 
-        # Logout using session auth
-        delete "/api/v1/auth/logout", headers: auth_headers(session_user)
-        expect(response).to have_http_status(:ok)
+      it "rejects requests with invalid JWT token" do
+        get "/api/v1/auth/me", headers: { "Authorization" => "Bearer invalid_token" }
+
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end

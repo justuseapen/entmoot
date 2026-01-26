@@ -1,19 +1,35 @@
 # frozen_string_literal: true
 
 module AuthHelpers
-  # Signs in a user via session-based auth and returns headers with session cookie
-  # For session-based auth, we need to actually sign in the user and get the session cookie
-  def sign_in_user(user)
-    post "/api/v1/auth/login", params: { user: { email: user.email, password: user.password || "password123" } }
-    # The session cookie will be stored in the response and used in subsequent requests
+  # Generate a JWT token for testing
+  def generate_jwt_token(user)
+    secret_key = ENV.fetch("DEVISE_JWT_SECRET_KEY") do
+      Rails.application.credentials.devise_jwt_secret_key ||
+        Rails.application.secret_key_base
+    end
+
+    payload = {
+      sub: user.id.to_s,
+      scp: "user",
+      iat: Time.now.to_i,
+      exp: (Time.now + 24.hours).to_i,
+      jti: SecureRandom.uuid
+    }
+
+    JWT.encode(payload, secret_key, "HS256")
   end
 
-  # Alternative: Use Warden's test helpers to sign in directly
+  # Returns headers with JWT Bearer token for authenticated requests
   def auth_headers(user)
-    # For session-based auth in tests, we use Warden's test helper
-    # This sets up the session directly without going through the login flow
-    login_as(user, scope: :user)
-    {} # No special headers needed for session auth
+    token = generate_jwt_token(user)
+    { "Authorization" => "Bearer #{token}" }
+  end
+
+  # Signs in a user via the login endpoint and extracts the JWT token from response
+  def sign_in_user(user)
+    post "/api/v1/auth/login", params: { user: { email: user.email, password: user.password || "password123" } }
+    token = response.headers["Authorization"]&.gsub("Bearer ", "")
+    { "Authorization" => "Bearer #{token}" }
   end
 
   def json_response
@@ -23,9 +39,4 @@ end
 
 RSpec.configure do |config|
   config.include AuthHelpers, type: :request
-  config.include Warden::Test::Helpers
-
-  config.after(type: :request) do
-    Warden.test_reset!
-  end
 end

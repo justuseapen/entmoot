@@ -43,14 +43,10 @@ module Backend
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    # Add session and cookie middleware for session-based authentication
-    # Required for cross-origin session support with frontend
+    # Add minimal session middleware required for devise-jwt
+    # JWT tokens are sent via Authorization header, but devise requires session support
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore,
-                          key: "_entmoot_session",
-                          domain: :all,
-                          same_site: :none,
-                          secure: Rails.env.production?
+    config.middleware.use ActionDispatch::Session::CookieStore, key: "_entmoot_session"
 
     # Use Sidekiq for background job processing
     config.active_job.queue_adapter = :sidekiq
