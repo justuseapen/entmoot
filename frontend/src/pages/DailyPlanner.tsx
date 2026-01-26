@@ -1,9 +1,13 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MentionInput } from "@/components/ui/mention-input";
-import { useTodaysPlan, useUpdateDailyPlan } from "@/hooks/useDailyPlans";
+import {
+  useTodaysPlan,
+  useDailyPlans,
+  useUpdateDailyPlan,
+} from "@/hooks/useDailyPlans";
 import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
 import { useHabits } from "@/hooks/useHabits";
@@ -38,15 +42,39 @@ import { getTimeScaleLabel } from "@/lib/goals";
 
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const familyId = parseInt(id || "0");
   const { celebrateFirstAction } = useCelebration();
 
-  // Fetch data
+  // Check if a specific date was requested
+  const requestedDate = searchParams.get("date");
+
+  // Fetch data - use today's plan if no date specified, otherwise fetch all plans
   const {
-    data: plan,
-    isLoading: loadingPlan,
-    error: planError,
+    data: todayPlan,
+    isLoading: loadingTodayPlan,
+    error: todayPlanError,
   } = useTodaysPlan(familyId);
+  const {
+    data: allPlans,
+    isLoading: loadingAllPlans,
+  } = useDailyPlans(familyId, undefined);
+
+  // Determine which plan to display
+  const plan = useMemo(() => {
+    if (requestedDate && allPlans) {
+      return allPlans.find((p) => p.date === requestedDate);
+    }
+    return todayPlan;
+  }, [requestedDate, allPlans, todayPlan]);
+
+  const isLoading = requestedDate ? loadingAllPlans : loadingTodayPlan;
+  const planError = requestedDate ? undefined : todayPlanError;
+
+  // Check if viewing a historical date (read-only mode)
+  const isHistoricalView = requestedDate !== null;
+  const isToday = plan?.date === new Date().toISOString().split("T")[0];
+
   const { data: family, isLoading: loadingFamily } = useFamily(familyId);
   const { data: goals } = useGoals(familyId);
   const { data: habits } = useHabits(familyId);
@@ -336,7 +364,7 @@ export function DailyPlanner() {
   };
 
   // Loading and error states
-  if (loadingPlan || loadingFamily) {
+  if (isLoading || loadingFamily) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-muted-foreground">Loading your daily plan...</div>
@@ -366,12 +394,49 @@ export function DailyPlanner() {
             {family?.name}
           </p>
           <h1 className="mt-1 text-3xl font-bold text-gray-900">
-            {formatTodayDate()}
+            {plan?.date
+              ? new Date(plan.date + "T00:00:00").toLocaleDateString(
+                  undefined,
+                  {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year:
+                      new Date(plan.date).getFullYear() !==
+                      new Date().getFullYear()
+                        ? "numeric"
+                        : undefined,
+                  }
+                )
+              : formatTodayDate()}
           </h1>
           <p className="text-muted-foreground mt-2">Daily Focus Card</p>
         </div>
 
-        {/* Save Status Bar */}
+        {/* Historical View Banner */}
+        {isHistoricalView && !isToday && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-amber-600" />
+                <span className="font-medium text-amber-900">
+                  Viewing historical plan
+                </span>
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/families/${familyId}/planner`}>
+                  View Today&apos;s Plan
+                </Link>
+              </Button>
+            </div>
+            <p className="text-muted-foreground mt-2 text-sm text-amber-700">
+              This is a read-only view of a past daily plan.
+            </p>
+          </div>
+        )}
+
+        {/* Save Status Bar - Only show for current/today's plans */}
+        {!isHistoricalView || isToday ? (
         <div className="mb-6 flex items-center justify-between rounded-lg border bg-white p-3 shadow-sm">
           <div className="flex items-center gap-2">
             {saveStatus === "saving" && (
@@ -411,6 +476,7 @@ export function DailyPlanner() {
             Save
           </Button>
         </div>
+        ) : null}
 
         {/* Tip for first daily plan */}
         <StandaloneTip tipType="first_daily_plan" className="mb-4" />
@@ -445,6 +511,7 @@ export function DailyPlanner() {
                         onChange={(val) => handlePriorityChange(index, val)}
                         onBlur={handlePriorityBlur}
                         className="w-full"
+                        disabled={isHistoricalView && !isToday}
                       />
                       <Select
                         value={priority.goal_id?.toString() || ""}
@@ -454,6 +521,7 @@ export function DailyPlanner() {
                             value ? parseInt(value) : null
                           )
                         }
+                        disabled={isHistoricalView && !isToday}
                       >
                         <SelectTrigger
                           className="h-9 w-full shrink-0 text-sm"
@@ -554,6 +622,7 @@ export function DailyPlanner() {
                             checked === true
                           )
                         }
+                        disabled={isHistoricalView && !isToday}
                       />
                       <span
                         className={`text-sm ${isCompleted ? "text-muted-foreground line-through" : ""}`}
@@ -587,6 +656,7 @@ export function DailyPlanner() {
                 onChange={handleShutdownShippedChange}
                 onBlur={handleShutdownShippedBlur}
                 className="mt-1.5 min-h-[80px]"
+                disabled={isHistoricalView && !isToday}
               />
             </div>
             <div>
@@ -599,6 +669,7 @@ export function DailyPlanner() {
                 onChange={handleShutdownBlockedChange}
                 onBlur={handleShutdownBlockedBlur}
                 className="mt-1.5 min-h-[80px]"
+                disabled={isHistoricalView && !isToday}
               />
             </div>
           </CardContent>
