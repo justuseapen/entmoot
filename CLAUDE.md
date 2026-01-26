@@ -103,3 +103,20 @@ PATH="$HOME/.asdf/shims:$PATH" npx shadcn@latest add <component>  # Add shadcn c
 - **Anthropic gem:** Uses Faraday errors, not custom error classes
 - **Rack::Attack:** Rate limiting configured in initializer, middleware in `config/application.rb`
 - **Factory Bot:** Set auto-generated attributes (token, expires_at) to avoid nil issues with `build`
+
+## CORS Configuration
+
+CORS is configured in `config/initializers/cors.rb` using the `rack-cors` gem.
+
+- **Environment variable:** `CORS_ORIGINS` controls allowed origins
+- **Default (dev):** `http://localhost:5173`
+- **Multiple origins:** Comma-separated (e.g., `https://app.example.com,https://www.example.com`)
+- **Tests:** `spec/requests/cors_spec.rb` validates CORS headers on all endpoint types
+
+**Common CORS issues:**
+1. Missing `https://` prefix in `CORS_ORIGINS`
+2. Trailing slash in origin (should NOT have one)
+3. www vs non-www mismatch
+4. Forgetting to restart the server after changing `CORS_ORIGINS`
+
+**To debug CORS in production:** Check that `CORS_ORIGINS` is set correctly and matches the exact origin shown in browser DevTools Network tab.

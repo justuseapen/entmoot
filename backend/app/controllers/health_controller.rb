@@ -13,12 +13,21 @@ class HealthController < ApplicationController
 
     all_healthy = checks.values.all? { |check| check[:healthy] }
 
+    # Debug CORS - log Origin header received by Rails
+    origin_header = request.headers["Origin"]
+    cors_origins = ENV.fetch("CORS_ORIGINS", "not set")
+    Rails.logger.info "[CORS DEBUG] Origin header: #{origin_header.inspect}, CORS_ORIGINS env: #{cors_origins}"
+
     response = {
       status: all_healthy ? "ok" : "degraded",
       timestamp: Time.current.iso8601,
       environment: Rails.env,
       version: ENV.fetch("APP_VERSION", "unknown"),
-      checks: checks
+      checks: checks,
+      debug: {
+        origin_received: origin_header,
+        cors_origins_configured: cors_origins
+      }
     }
 
     render json: response, status: all_healthy ? :ok : :service_unavailable
