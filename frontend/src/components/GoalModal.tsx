@@ -586,7 +586,9 @@ export function GoalModal({
             Trackable Goal
           </Label>
           <p className="text-muted-foreground text-sm">
-            Mark this goal if its progress can be automatically tracked via external integrations (e.g., Plaid for finances, Chess.com for ratings, fitness apps for workouts).
+            Mark this goal if its progress can be automatically tracked via
+            external integrations (e.g., Plaid for finances, Chess.com for
+            ratings, fitness apps for workouts).
           </p>
         </div>
       </div>

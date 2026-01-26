@@ -36,7 +36,10 @@ import {
   goalKeys,
 } from "@/hooks/useGoals";
 import { useQueryClient } from "@tanstack/react-query";
-import { updateGoal as updateGoalApi, type Goal as GoalType } from "@/lib/goals";
+import {
+  updateGoal as updateGoalApi,
+  type Goal as GoalType,
+} from "@/lib/goals";
 import {
   type Goal,
   type GoalUser,
@@ -531,6 +534,50 @@ export function GoalDetailView({
                         </p>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Trackability Section */}
+              {goal.trackability_assessed_at && goal.trackable && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">
+                        Auto-Tracking Available
+                      </CardTitle>
+                      <Badge className="bg-emerald-100 text-emerald-800">
+                        Trackable
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      This goal&apos;s progress can be automatically measured
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {goal.trackability_assessment?.reason && (
+                      <p className="text-muted-foreground text-sm">
+                        {goal.trackability_assessment.reason}
+                      </p>
+                    )}
+                    {goal.trackability_assessment?.potential_integrations &&
+                      goal.trackability_assessment.potential_integrations
+                        .length > 0 && (
+                        <div>
+                          <p className="mb-2 text-sm font-medium">
+                            Potential Integrations:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {goal.trackability_assessment.potential_integrations.map(
+                              (integration) => (
+                                <Badge key={integration} variant="secondary">
+                                  {integration}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
                   </CardContent>
                 </Card>
               )}

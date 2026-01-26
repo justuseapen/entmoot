@@ -81,6 +81,22 @@ module Api
         }
       end
 
+      def assess_trackability
+        authorize @family, :assess_trackability?, policy_class: GoalPolicy
+
+        force_reassess = ActiveModel::Type::Boolean.new.cast(params[:force_reassess])
+
+        BatchTrackabilityAssessmentJob.perform_later(
+          family_id: @family.id,
+          user_id: current_user.id,
+          force_reassess: force_reassess
+        )
+
+        render json: {
+          message: "Trackability assessment started. You'll be notified when complete."
+        }, status: :accepted
+      end
+
       def update_positions
         authorize @family, :update_positions?, policy_class: GoalPolicy
 
@@ -187,7 +203,9 @@ module Api
           family_id: goal.family_id, created_at: goal.created_at, updated_at: goal.updated_at,
           is_draft: goal.is_draft, children_count: goal.children_count,
           draft_children_count: goal.draft_children_count, aggregated_progress: goal.aggregated_progress,
-          position: goal.position, trackable: goal.trackable
+          position: goal.position, trackable: goal.trackable,
+          trackability_assessment: goal.trackability_assessment,
+          trackability_assessed_at: goal.trackability_assessed_at
         }
       end
 

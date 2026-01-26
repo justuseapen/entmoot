@@ -127,11 +127,28 @@ class Goal < ApplicationRecord
   after_commit :schedule_calendar_sync, on: %i[create update], if: :should_sync_to_calendar?
   # GitHub issue creation for trackable goals
   after_commit :create_trackable_goal_issue, on: %i[create update], if: :should_create_github_issue?
+  # Automatic trackability assessment
+  after_commit :schedule_trackability_assessment, on: %i[create update], if: :should_assess_trackability?
 
   private
 
   def should_create_github_issue?
     trackable? && saved_change_to_trackable? && trackable_previously_was == false
+  end
+
+  def should_assess_trackability?
+    # Skip draft goals to avoid unnecessary API calls
+    return false if is_draft?
+
+    # Assess on create if never assessed
+    return true if trackability_assessed_at.nil?
+
+    # Re-assess if title or description changed
+    saved_change_to_title? || saved_change_to_description?
+  end
+
+  def schedule_trackability_assessment
+    GoalTrackabilityAssessmentJob.perform_later(id)
   end
 
   def create_trackable_goal_issue

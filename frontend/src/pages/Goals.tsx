@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -33,9 +34,10 @@ import {
   type GoalStatus,
   timeScaleOptions,
   statusOptions,
+  assessFamilyGoalsTrackability,
 } from "@/lib/goals";
 import type { GoalSuggestion } from "@/lib/firstGoalPrompt";
-import { TreePine, Sparkles, Upload, AtSign } from "lucide-react";
+import { TreePine, Sparkles, Upload, AtSign, Wand2 } from "lucide-react";
 import { StandaloneTip } from "@/components/TipTooltip";
 import { EmptyState } from "@/components/EmptyState";
 
@@ -76,6 +78,9 @@ export function Goals() {
 
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false);
+
+  // Trackability assessment state
+  const [isAssessingTrackability, setIsAssessingTrackability] = useState(false);
 
   // Fetch data
   const {
@@ -240,6 +245,18 @@ export function Goals() {
     setFirstGoalId(null);
   };
 
+  const handleAssessTrackability = async () => {
+    setIsAssessingTrackability(true);
+    try {
+      const result = await assessFamilyGoalsTrackability(familyId);
+      toast.success(result.message);
+    } catch {
+      toast.error("Failed to start trackability assessment. Please try again.");
+    } finally {
+      setIsAssessingTrackability(false);
+    }
+  };
+
   const hasActiveFilters =
     filters.time_scale ||
     filters.status ||
@@ -297,6 +314,17 @@ export function Goals() {
             </Button>
             {canManageGoals && (
               <>
+                <Button
+                  variant="outline"
+                  onClick={handleAssessTrackability}
+                  disabled={isAssessingTrackability}
+                  title="Use AI to analyze which goals can be automatically tracked via external integrations"
+                >
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  {isAssessingTrackability
+                    ? "Assessing..."
+                    : "Assess Trackability"}
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => setShowImportModal(true)}

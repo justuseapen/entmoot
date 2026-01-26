@@ -35,6 +35,7 @@ Rails.application.routes.draw do
         resources :goals, only: %i[index show create update destroy] do
           collection do
             post "update_positions"
+            post "assess_trackability"
           end
           member do
             post "refine"

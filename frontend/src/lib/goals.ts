@@ -8,6 +8,13 @@ export interface GoalUser {
   avatar_url: string | null;
 }
 
+// Stored trackability assessment (from AI analysis)
+export interface StoredTrackabilityAssessment {
+  reason: string;
+  potential_integrations: string[];
+  assessed_version: number;
+}
+
 // Goal type
 export interface Goal {
   id: number;
@@ -40,6 +47,9 @@ export interface Goal {
   position: number | null;
   // Trackable goals (can be auto-tracked via external integrations)
   trackable: boolean;
+  // AI trackability assessment details
+  trackability_assessment: StoredTrackabilityAssessment | null;
+  trackability_assessed_at: string | null;
 }
 
 // Enums
@@ -358,6 +368,20 @@ export async function updateGoalPositions(
     {
       method: "POST",
       body: JSON.stringify({ positions }),
+    }
+  );
+}
+
+// Batch trackability assessment API
+export async function assessFamilyGoalsTrackability(
+  familyId: number,
+  forceReassess: boolean = false
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(
+    `/families/${familyId}/goals/assess_trackability`,
+    {
+      method: "POST",
+      body: JSON.stringify({ force_reassess: forceReassess }),
     }
   );
 }

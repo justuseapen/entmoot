@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { TrackabilityBadge } from "@/components/TrackabilityBadge";
 import {
   type Goal,
   formatDueDate,
@@ -95,6 +96,11 @@ export function GoalCard({
             <Badge variant={getStatusBadgeVariant(goal.status)}>
               {getStatusLabel(goal.status)}
             </Badge>
+            <TrackabilityBadge
+              trackable={goal.trackable}
+              assessment={goal.trackability_assessment}
+              assessedAt={goal.trackability_assessed_at}
+            />
           </div>
         </div>
       </CardHeader>
