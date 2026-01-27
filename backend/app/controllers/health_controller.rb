@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/api"
+
 class HealthController < ApplicationController
   # GET /health
   # Returns detailed health status of all services.
