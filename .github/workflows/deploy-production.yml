@@ -190,6 +190,22 @@ jobs:
           echo "healthy=false" >> $GITHUB_OUTPUT
           exit 1
 
+      - name: Update Sidekiq container
+        if: success()
+        run: |
+          echo "Updating Sidekiq container to match new deployment..."
+
+          # Set up SSH key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.COOLIFY_SSH_KEY }}" > ~/.ssh/coolify_key
+          chmod 600 ~/.ssh/coolify_key
+
+          # Run the update script on the server
+          ssh -i ~/.ssh/coolify_key -o StrictHostKeyChecking=no cloud@${{ secrets.COOLIFY_HOST }} \
+            "sudo /data/coolify/applications/e4s0sw4kg8kw0kcogc8o0o8w/update-sidekiq.sh"
+
+          echo "Sidekiq container updated successfully"
+
       - name: Create deployment tag
         if: success()
         run: |
