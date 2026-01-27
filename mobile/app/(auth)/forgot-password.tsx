@@ -45,7 +45,7 @@ export default function ForgotPasswordScreen() {
     try {
       await apiFetch("/auth/password", {
         method: "POST",
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ user: { email: email.trim() } }),
       });
 
       Alert.alert(

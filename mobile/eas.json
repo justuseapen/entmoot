@@ -21,7 +21,7 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "API_URL": "https://staging-api.entmoot.app"
+        "API_URL": "https://api.entmoot.app"
       },
       "channel": "preview"
     },
