@@ -39,7 +39,7 @@ These placeholders MUST be filled in before publishing:
 | `/content/blog/multi-scale-planning.md` | 491 | `Justus Eapen is the founder of Entmoot...` | Founder's full name |
 | `/content/blog/introducing-entmoot.md` | 9 | `Justus Eapen, Founder of Entmoot` | Founder's full name |
 | `/content/blog/introducing-entmoot.md` | 457 | `Justus Eapen` | Founder's full name |
-| `/content/blog/introducing-entmoot.md` | 460 | `[founder@entmoot.app]` | Founder's email address |
+| `/content/blog/introducing-entmoot.md` | 460 | `justus@entmoot.app` | Founder's email address |
 | `/content/LAUNCH_DAY_POSTS.md` | 198 | `I'm Justus Eapen, creator of Entmoot` | Founder's full name |
 | `/content/LAUNCH_DAY_POSTS.md` | 566 | `Justus Eapen` | Founder's full name |
 | `/content/emails/01-welcome.md` | 79 | `Justus Eapen` | Founder's full name |
@@ -47,7 +47,7 @@ These placeholders MUST be filled in before publishing:
 | `/content/emails/03-ai-goal-coaching.md` | 160 | `Justus Eapen` | Founder's full name |
 | `/content/emails/04-weekly-review.md` | 182 | `Justus Eapen` | Founder's full name |
 | `/content/emails/05-founding-family-perks.md` | 11 | `Justus Eapen, Founder of Entmoot` | Founder's full name |
-| `/content/emails/05-founding-family-perks.md` | 12 | `[founder-email]@entmoot.app` | Founder's email prefix |
+| `/content/emails/05-founding-family-perks.md` | 12 | `justus@entmoot.app` | Founder's email prefix |
 | `/content/emails/05-founding-family-perks.md` | 205, 475, 518 | `Justus Eapen` | Founder's full name |
 | `/marketing/landing-page-copy.md` | 450 | `Hi, I'm Justus Eapen` | Founder's full name |
 | `/marketing/landing-page-copy.md` | 460 | `-- Justus Eapen` | Founder's full name |
@@ -162,7 +162,7 @@ These are INTENTIONALLY left as placeholders because they represent personalizat
 ### Immediate (Before Feb 1, 2026)
 
 1. **Add Founder Name** - Replace all `Justus Eapen` placeholders with actual name
-2. **Set Founder Email** - Replace `[founder@entmoot.app]` and `[founder-email]` with actual email
+2. **Set Founder Email** - Replace `justus@entmoot.app` and `justus` with actual email
 3. **Prepare Product Hunt** - Get Product Hunt launch page URL ready
 4. **Verify Website** - Confirm https://entmoot.app is live
 

@@ -457,7 +457,7 @@ Thanks for reading. Here's to planning that actually works.
 Justus Eapen
 Founder, Entmoot
 
-*P.S. Have questions? Hit reply or email me directly at [founder@entmoot.app]. I read and respond to every message.*
+*P.S. Have questions? Hit reply or email me directly at justus@entmoot.app. I read and respond to every message.*
 
 ---
 

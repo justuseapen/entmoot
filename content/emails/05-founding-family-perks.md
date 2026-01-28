@@ -9,7 +9,7 @@
 ## Email Content
 
 **From**: Justus Eapen, Founder of Entmoot
-**Reply-To**: [founder-email]@entmoot.app
+**Reply-To**: justus@entmoot.app
 
 ---
 
