@@ -14,7 +14,7 @@ RSpec.describe OnboardingMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Welcome to Entmoot! Let's get your family organized")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -40,7 +40,7 @@ RSpec.describe OnboardingMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Have you tried morning planning? Start your day with intention")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -68,7 +68,7 @@ RSpec.describe OnboardingMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Meet your AI coach - Get personalized goal guidance")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -97,7 +97,7 @@ RSpec.describe OnboardingMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Time for your first weekly review! Celebrate your wins")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -126,7 +126,7 @@ RSpec.describe OnboardingMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("How's it going? We'd love your feedback")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do

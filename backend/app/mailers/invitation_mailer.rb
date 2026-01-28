@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class InvitationMailer < ApplicationMailer
-  default from: "Entmoot <hello@entmoot.app>"
+  default from: "Entmoot <hello@mail.entmoot.app>"
 
   def send_invitation(invitation)
     @invitation = invitation

@@ -2,7 +2,7 @@
 
 # rubocop:disable Rails/I18nLocaleTexts
 class OnboardingMailer < ApplicationMailer
-  default from: "Entmoot <hello@entmoot.app>"
+  default from: "Entmoot <hello@mail.entmoot.app>"
 
   # Day 1: Welcome + getting started recap
   def welcome(user)

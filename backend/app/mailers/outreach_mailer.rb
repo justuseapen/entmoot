@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OutreachMailer < ApplicationMailer
-  default from: "Entmoot <hello@entmoot.app>"
+  default from: "Entmoot <hello@mail.entmoot.app>"
 
   def re_engagement(user, family, message)
     @user = user

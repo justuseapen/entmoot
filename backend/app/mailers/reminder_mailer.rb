@@ -2,7 +2,7 @@
 
 # rubocop:disable Rails/I18nLocaleTexts
 class ReminderMailer < ApplicationMailer
-  default from: "Entmoot <reminders@entmoot.app>"
+  default from: "Entmoot <reminders@mail.entmoot.app>"
 
   def morning_planning(user, family)
     @user = user

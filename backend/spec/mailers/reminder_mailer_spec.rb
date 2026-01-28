@@ -14,7 +14,7 @@ RSpec.describe ReminderMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Time for Morning Planning - What are your top priorities today?")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["reminders@entmoot.app"])
+      expect(mail.from).to eq(["reminders@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -41,7 +41,7 @@ RSpec.describe ReminderMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Evening Reflection - Take a moment to reflect on your day")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["reminders@entmoot.app"])
+      expect(mail.from).to eq(["reminders@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -68,7 +68,7 @@ RSpec.describe ReminderMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Weekly Review Time - Celebrate wins and plan ahead!")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["reminders@entmoot.app"])
+      expect(mail.from).to eq(["reminders@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do
@@ -96,7 +96,7 @@ RSpec.describe ReminderMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Goal Check-in: Learn Ruby on Rails")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["reminders@entmoot.app"])
+      expect(mail.from).to eq(["reminders@mail.entmoot.app"])
     end
 
     it "renders the body with user name" do

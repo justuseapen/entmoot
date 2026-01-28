@@ -13,7 +13,7 @@ RSpec.describe InvitationMailer do
     it "renders the headers" do
       expect(mail.subject).to eq("John Smith invited you to join Smith Family on Entmoot")
       expect(mail.to).to eq(["jane@example.com"])
-      expect(mail.from).to eq(["hello@entmoot.app"])
+      expect(mail.from).to eq(["hello@mail.entmoot.app"])
     end
 
     it "includes the family name" do

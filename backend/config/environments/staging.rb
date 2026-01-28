@@ -52,7 +52,7 @@ Rails.application.configure do
     protocol: "https"
   }
   config.action_mailer.default_options = {
-    from: ENV.fetch("MAILER_FROM", "staging@entmoot.app")
+    from: ENV.fetch("MAILER_FROM", "staging@mail.entmoot.app")
   }
 
   # Enable locale fallbacks for I18n.
