@@ -206,7 +206,7 @@ module Api
 
       def frontend_url
         if Rails.env.production?
-          "https://app.entmoot.app"
+          "https://entmoot.app"
         else
           "http://localhost:5173"
         end
