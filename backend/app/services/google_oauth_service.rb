@@ -3,7 +3,11 @@
 class GoogleOAuthService
   AUTHORIZATION_URI = "https://accounts.google.com/o/oauth2/auth"
   TOKEN_URI = "https://oauth2.googleapis.com/token"
-  SCOPE = "https://www.googleapis.com/auth/calendar"
+  SCOPES = [
+    "https://www.googleapis.com/auth/calendar.events",
+    "https://www.googleapis.com/auth/calendar.calendarlist.readonly"
+  ].freeze
+  SCOPE = SCOPES.join(" ")
 
   class Error < StandardError; end
   class ConfigurationError < Error; end
