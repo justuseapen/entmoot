@@ -13,44 +13,62 @@ import { PRICE_DISPLAY, REGULAR_PRICE_DISPLAY } from "@/config/pricing";
 const faqItems = [
   {
     id: "faq-1",
-    question: "What exactly do I get with the Founding Family Edition?",
-    answer: `You get lifetime access to Entmoot for a one-time payment of ${PRICE_DISPLAY} (normally ${REGULAR_PRICE_DISPLAY}). This includes unlimited family members, AI goal coaching powered by Claude, all badge collections, multi-scale reviews from daily to annual, calendar sync with Google/Apple/Outlook, COPPA compliance for kids, and all future updates. No monthly fees, ever.`,
+    question: "Is this really based on Cal Newport's system?",
+    answer:
+      "Yes! The founder was inspired by Cal Newport's multi-scale planning philosophy from his books and Study Hacks blog. Entmoot adapts these proven productivity frameworks (time blocking, weekly reviews, quarterly planning, annual strategic planning) for family life. If you use these systems at work and want them at home, Entmoot is for you.",
   },
   {
     id: "faq-2",
-    question: "Is there really no subscription? What's the catch?",
+    question: "What makes Entmoot different from Cozi or FamilyWall?",
     answer:
-      "No catch! We're offering this Founding Family deal to get early adopters who will help us shape the product with feedback. Once we hit 500 families, this offer ends and we'll move to a subscription model. You'll be grandfathered in with lifetime access.",
+      "Cozi and FamilyWall are great for coordination (calendars, tasks, lists). Entmoot is for transformation. We add strategic planning, goal setting with AI coaching, weekly reviews, and multi-scale planning. Think of it as the layer above daily coordination—the 'why' behind the 'what.'",
+  },
+  {
+    id: "faq-3",
+    question: "What exactly do I get with the Founding Family Edition?",
+    answer: `You get lifetime access to Entmoot for a one-time payment of ${PRICE_DISPLAY} (regular price: ${REGULAR_PRICE_DISPLAY}). This includes unlimited family members, AI goal coaching, all badge collections, multi-scale reviews from daily to annual, calendar sync with Google/Apple/Outlook, COPPA compliance for kids, and all future updates. No monthly fees, ever.`,
   },
   {
     id: "faq-4",
-    question: "Is Entmoot safe for kids?",
+    question: "Will my family actually use it?",
     answer:
-      "Yes! Entmoot is designed with family safety as a top priority. We're fully COPPA compliant for children under 13. Our role-based permissions system lets parents control exactly what each family member can see and do. Children and teens have age-appropriate access, while admins maintain full control over family settings and data.",
+      "Great question. Entmoot works best when at least one adult is the 'champion' who drives adoption. Our onboarding, gamification, and weekly review structure help build habits. Kids especially love the badges and streaks. We also provide tips for getting family buy-in.",
   },
   {
     id: "faq-5",
-    question: "Can grandparents or babysitters join?",
+    question: "How much time does it take?",
     answer:
-      "Absolutely! You can invite extended family, caregivers, or anyone who helps with your family as Observers. Observers can view family goals and activities without being able to modify anything. It's perfect for keeping everyone in the loop while maintaining control over who can make changes.",
+      "15 minutes per week minimum for the weekly review. Plus 5-10 minutes daily for planning and check-ins. Less time than you spend scrolling Instagram—and way more valuable.",
   },
   {
     id: "faq-6",
-    question: "What happens to my data?",
+    question: "What if I'm already using other tools?",
     answer:
-      "Your data belongs to you, always. We never sell your personal information to third parties. You can export all your data anytime from your account settings. We use industry-standard encryption to protect your information, and our servers are hosted securely in the United States.",
+      "Many families keep using Cozi or Google Calendar for scheduling and add Entmoot for strategic planning. They're complementary. Over time, some families consolidate everything into Entmoot.",
   },
   {
     id: "faq-7",
-    question: "Do I need to download an app?",
+    question: "Is this just for big families?",
     answer:
-      "Entmoot is web-based, so you can access it from any browser on your phone, tablet, or computer. No downloads required to get started! That said, we're working on native iOS and Android apps that will offer push notifications and offline access. They're coming soon!",
+      "No! Entmoot works for any family structure: nuclear, blended, single-parent, couples without kids, empty-nesters. If you want to be intentional about your life together, Entmoot is for you.",
   },
   {
     id: "faq-8",
-    question: "What if my family doesn't stick with it?",
+    question: "What's the catch with lifetime access?",
     answer:
-      "We've designed Entmoot with built-in motivation! Our gamification features like streaks, badges, and family leaderboards make planning fun rather than a chore. Kids especially love earning rewards.",
+      "No catch. We're offering lifetime access to Founding Families because we want committed early adopters who'll help us build the product. Once we reach 100 families, this offer closes forever.",
+  },
+  {
+    id: "faq-9",
+    question: "What if I don't like it?",
+    answer:
+      "30-day money-back guarantee, no questions asked. But based on our internal testing, we're confident you'll see results in the first two weeks.",
+  },
+  {
+    id: "faq-10",
+    question: "Is my family's data private?",
+    answer:
+      "Absolutely. Your goals, reflections, and planning data are encrypted and private. We never sell data to advertisers. We make money from subscriptions, not your information.",
   },
 ];
 

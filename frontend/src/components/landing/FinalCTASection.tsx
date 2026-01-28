@@ -93,10 +93,10 @@ export function FinalCTASection() {
           className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
           style={{ fontFamily: "'Georgia', serif" }}
         >
-          In 10 Years, Will Your Kids Remember{" "}
+          Ready to Transform Your Family?{" "}
           <br className="hidden sm:inline" />
           <span style={{ color: HERITAGE_COLORS.antiqueGold }}>
-            Family Meetings or Family Adventures?
+            Join 100 Pioneering Families
           </span>
         </h2>
 
@@ -105,7 +105,7 @@ export function FinalCTASection() {
           className="mx-auto mb-10 max-w-xl text-lg sm:text-xl"
           style={{ color: `${HERITAGE_COLORS.parchment}CC` }}
         >
-          Start building lasting family memories today.
+          Building the future of intentional family planning together.
         </p>
 
         {/* Large CTA button */}

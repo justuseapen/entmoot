@@ -210,13 +210,13 @@ export function HeroSection() {
             className="h-2 w-2 animate-pulse rounded-full"
             style={{ backgroundColor: HERITAGE_COLORS.antiqueGold }}
           />
-          Founding Family Launch
+          Join 100 Founding Families
         </div>
 
         {/* Decorative branch above headline */}
         <BranchAccent className="mb-4 h-8 w-32 opacity-60" />
 
-        {/* Headline */}
+        {/* Headline - Cal Newport Angle */}
         <h1
           className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           style={{
@@ -224,9 +224,10 @@ export function HeroSection() {
             fontFamily: "'Georgia', serif",
           }}
         >
-          Stop Managing Your Family. <br className="hidden sm:inline" />
+          Cal Newport's Multi-Scale Planning,{" "}
+          <br className="hidden sm:inline" />
           <span style={{ color: HERITAGE_COLORS.deepForest }}>
-            Start Leading Them.
+            But for Families
           </span>
         </h1>
 
@@ -235,10 +236,9 @@ export function HeroSection() {
           className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed sm:text-xl"
           style={{ color: HERITAGE_COLORS.sepia }}
         >
-          Most families plan day-to-day. Yours will plan
-          generation-to-generation. The only goal platform built for families
-          first—connecting your child's daily tasks to your family's greatest
-          dreams.
+          You time-block your workday. You plan quarterly. What if your family
+          had the same system? Entmoot brings strategic planning frameworks to
+          family life.
         </p>
 
         {/* Price badge */}
@@ -269,22 +269,37 @@ export function HeroSection() {
           </span>
         </div>
 
-        {/* Single CTA button */}
-        <Button
-          asChild
-          size="lg"
-          className="gap-2 rounded-lg px-10 py-7 text-lg font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
-          style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
-        >
-          <a href={STRIPE_PAYMENT_LINK}>Claim Your Founding Family Spot</a>
-        </Button>
+        {/* CTA buttons */}
+        <div className="flex flex-col items-center gap-4 sm:flex-row">
+          <Button
+            asChild
+            size="lg"
+            className="gap-2 rounded-lg px-10 py-7 text-lg font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
+            style={{ backgroundColor: HERITAGE_COLORS.deepForest }}
+          >
+            <a href={STRIPE_PAYMENT_LINK}>Join 100 Founding Families</a>
+          </Button>
+          <a
+            href="#how-it-works"
+            className="text-sm font-medium transition-colors hover:opacity-70"
+            style={{ color: HERITAGE_COLORS.sepia }}
+            onClick={(e) => {
+              e.preventDefault();
+              document
+                .getElementById("how-it-works")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            How It Works
+          </a>
+        </div>
 
         {/* Trust indicators */}
         <p
           className="mt-6 text-sm"
           style={{ color: HERITAGE_COLORS.sepia, opacity: 0.8 }}
         >
-          One-time payment · Lifetime access · No subscriptions ever
+          One-time payment · Lifetime access · Save $1,200+ vs. subscriptions
         </p>
 
         {/* Decorative branch below CTA */}

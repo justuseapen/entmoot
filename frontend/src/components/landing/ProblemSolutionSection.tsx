@@ -2,20 +2,20 @@ import { Check, X } from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
 import { HERITAGE_COLORS } from "./design-system";
 
-// Pain points for "Without Entmoot" column
-const painPoints = [
-  { text: '"Did anyone feed the dog?"' },
-  { text: '"I forgot about soccer practice!"' },
-  { text: '"Who\'s picking up grandma?"' },
-  { text: '"We never do anything as a family"' },
+// Pain points for "At Work" column
+const workFeatures = [
+  { text: "Time blocking your calendar" },
+  { text: "Weekly reviews and planning" },
+  { text: "Quarterly goals and OKRs" },
+  { text: "Annual strategic planning" },
 ];
 
-// Solutions for "With Entmoot" column
-const solutions = [
-  { text: "Clear task ownership & tracking" },
-  { text: "Shared family calendar view" },
-  { text: "Daily goals connected to big dreams" },
-  { text: "Built-in celebration rituals" },
+// Pain points for "At Home" column - showing the gap
+const homeProblems = [
+  { text: "Reactive scheduling chaos" },
+  { text: "No time to reflect together" },
+  { text: "Vague or forgotten goals" },
+  { text: "Just surviving, not thriving" },
 ];
 
 // Card component with heritage styling
@@ -92,38 +92,39 @@ export function ProblemSolutionSection() {
               fontFamily: "'Georgia', serif",
             }}
           >
-            Sound Familiar?
+            You Plan Your Work Life. What About Your Family?
           </h2>
           <p className="mt-4 text-lg" style={{ color: HERITAGE_COLORS.sepia }}>
-            Most families struggle with the same challenges
+            You know the frameworks work. Why doesn't your family have the same
+            system?
           </p>
         </div>
 
         {/* Two-column comparison layout */}
         <div className="grid gap-8 md:grid-cols-2 lg:gap-12">
-          {/* Without Entmoot column */}
-          <ComparisonCard variant="problem">
-            <h3 className="mb-6 text-center text-xl font-semibold text-red-700 sm:text-2xl">
-              Without Entmoot
-            </h3>
-            <div className="space-y-4">
-              {painPoints.map((point, index) => (
-                <PainPointItem key={index} text={point.text} />
-              ))}
-            </div>
-          </ComparisonCard>
-
-          {/* With Entmoot column */}
+          {/* At Work column */}
           <ComparisonCard variant="solution">
             <h3
               className="mb-6 text-center text-xl font-semibold sm:text-2xl"
               style={{ color: HERITAGE_COLORS.deepForest }}
             >
-              With Entmoot
+              At Work
             </h3>
             <div className="space-y-4">
-              {solutions.map((solution, index) => (
-                <SolutionItem key={index} text={solution.text} />
+              {workFeatures.map((item, index) => (
+                <SolutionItem key={index} text={item.text} />
+              ))}
+            </div>
+          </ComparisonCard>
+
+          {/* At Home column */}
+          <ComparisonCard variant="problem">
+            <h3 className="mb-6 text-center text-xl font-semibold text-red-700 sm:text-2xl">
+              At Home
+            </h3>
+            <div className="space-y-4">
+              {homeProblems.map((point, index) => (
+                <PainPointItem key={index} text={point.text} />
               ))}
             </div>
           </ComparisonCard>
@@ -138,8 +139,8 @@ export function ProblemSolutionSection() {
               fontFamily: "'Georgia', serif",
             }}
           >
-            "Every family deserves to feel like a team working toward shared
-            dreams—not a group of strangers sharing a roof."
+            "Most family apps are just digital calendars. Entmoot is the layer
+            above—the 'why' behind the 'what.'"
           </p>
         </div>
       </div>

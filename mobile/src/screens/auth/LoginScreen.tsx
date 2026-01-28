@@ -80,9 +80,9 @@ export function LoginScreen({ navigation }: Props) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>Entmoot</Text>
-          <Text style={styles.tagline}>Build Your Family&apos;s Adventure</Text>
+        <View style={styles.header} accessible={true} accessibilityRole="header">
+          <Text style={styles.logo} accessibilityRole="text">Entmoot</Text>
+          <Text style={styles.tagline} accessibilityRole="text">Build Your Family&apos;s Adventure</Text>
         </View>
 
         <View style={styles.form}>
@@ -92,7 +92,7 @@ export function LoginScreen({ navigation }: Props) {
           </Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label} nativeID="email-label">Email</Text>
             <TextInput
               style={[styles.input, errors.email && styles.inputError]}
               placeholder="your@email.com"
@@ -109,14 +109,19 @@ export function LoginScreen({ navigation }: Props) {
               autoComplete="email"
               autoCorrect={false}
               editable={!isLoading}
+              accessibilityLabel="Email address"
+              accessibilityHint="Enter your email address to sign in"
+              accessibilityLabelledBy="email-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="login-email-input"
             />
             {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
+              <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{errors.email}</Text>
             )}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label} nativeID="password-label">Password</Text>
             <TextInput
               style={[styles.input, errors.password && styles.inputError]}
               placeholder="Enter your password"
@@ -131,9 +136,14 @@ export function LoginScreen({ navigation }: Props) {
               secureTextEntry
               autoComplete="password"
               editable={!isLoading}
+              accessibilityLabel="Password"
+              accessibilityHint="Enter your password to sign in"
+              accessibilityLabelledBy="password-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="login-password-input"
             />
             {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
+              <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{errors.password}</Text>
             )}
           </View>
 
@@ -141,6 +151,11 @@ export function LoginScreen({ navigation }: Props) {
             style={styles.forgotPassword}
             onPress={() => navigation.navigate("ForgotPassword")}
             disabled={isLoading}
+            accessibilityRole="link"
+            accessibilityLabel="Forgot Password"
+            accessibilityHint="Navigate to password reset page"
+            accessibilityState={{ disabled: isLoading }}
+            testID="login-forgot-password-link"
           >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
@@ -149,20 +164,30 @@ export function LoginScreen({ navigation }: Props) {
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleLogin}
             disabled={isLoading}
+            accessibilityRole="button"
+            accessibilityLabel={isLoading ? "Signing in" : "Sign In"}
+            accessibilityHint="Sign in to your account"
+            accessibilityState={{ disabled: isLoading, busy: isLoading }}
+            testID="login-submit-button"
           >
             {isLoading ? (
-              <ActivityIndicator color={COLORS.creamWhite} />
+              <ActivityIndicator color={COLORS.creamWhite} accessibilityLabel="Loading" />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
+        <View style={styles.footer} accessible={true} accessibilityRole="text">
           <Text style={styles.footerText}>Don&apos;t have an account?</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Register")}
             disabled={isLoading}
+            accessibilityRole="link"
+            accessibilityLabel="Create Account"
+            accessibilityHint="Navigate to account registration page"
+            accessibilityState={{ disabled: isLoading }}
+            testID="login-register-link"
           >
             <Text style={styles.footerLink}>Create Account</Text>
           </TouchableOpacity>
@@ -227,6 +252,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.darkForest,
     backgroundColor: "#FFFFFF",
+    minHeight: 44, // iOS HIG touch target compliance
   },
   inputError: {
     borderColor: COLORS.errorRed,
@@ -239,6 +265,8 @@ const styles = StyleSheet.create({
   forgotPassword: {
     alignSelf: "flex-end",
     marginBottom: 24,
+    minHeight: 44, // iOS HIG touch target compliance
+    justifyContent: "center",
   },
   forgotPasswordText: {
     color: COLORS.forestGreen,
@@ -250,6 +278,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
+    minHeight: 48, // iOS HIG touch target compliance (larger for primary action)
   },
   buttonDisabled: {
     opacity: 0.7,

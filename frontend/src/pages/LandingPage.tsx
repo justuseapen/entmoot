@@ -5,6 +5,7 @@ import { LandingPageSEO } from "@/components/landing/LandingPageSEO";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
+import { CalNewportSection } from "@/components/landing/CalNewportSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -39,6 +40,9 @@ export function LandingPage() {
 
         {/* Problem/Solution Section */}
         <ProblemSolutionSection />
+
+        {/* Cal Newport Connection Section */}
+        <CalNewportSection />
 
         {/* Features Section */}
         <FeaturesSection />

@@ -1,44 +1,51 @@
-import { Target, Map, Sun, Moon, Trophy, Users } from "lucide-react";
+import {
+  Target,
+  Calendar,
+  CalendarDays,
+  CalendarRange,
+  Sparkles,
+  Trophy,
+} from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
 import { HERITAGE_COLORS } from "./design-system";
 
-// Feature data with icons, titles, and descriptions
+// Feature data with icons, titles, and descriptions - Cal Newport multi-scale focus
 const features = [
   {
     icon: Target,
-    title: "SMART Quest Builder",
+    title: "AI Goal Coach",
     description:
-      "AI-powered goal creation helps you set Specific, Measurable, Achievable, Relevant, and Time-bound goals that actually stick.",
+      "Stop setting vague goals like 'get healthy.' Our AI coach guides you to SMART goals you'll actually achieve—then tracks progress and celebrates wins.",
   },
   {
-    icon: Map,
-    title: "Goal Hierarchy Map",
+    icon: Calendar,
+    title: "Daily Planning",
     description:
-      "See how daily tasks connect to weekly goals, and how weekly goals build toward your family's biggest dreams.",
+      "Start each day with intention. Connect today's tasks to this week's priorities. Everyone knows exactly what to focus on.",
   },
   {
-    icon: Sun,
-    title: "Morning Planning Ritual",
+    icon: CalendarDays,
+    title: "Weekly Family Reviews",
     description:
-      "Start each day with intention. Set your top priorities and align the family in just 5 minutes.",
+      "Stay aligned with 15-minute weekly check-ins. Reflect on wins, challenges, and lessons learned. Strengthen connection even when life gets busy.",
   },
   {
-    icon: Moon,
-    title: "Evening Reflection",
+    icon: CalendarRange,
+    title: "Multi-Scale Planning",
     description:
-      "End the day with gratitude. Celebrate wins, learn from challenges, and prepare for tomorrow.",
+      "Connect daily tasks to weekly goals to quarterly milestones to annual vision. Purpose in every action. No more busy-ness without meaning.",
   },
   {
     icon: Trophy,
-    title: "Family Leaderboard",
+    title: "Gamification & Motivation",
     description:
-      "Earn points, unlock badges, and maintain streaks. Turn everyday tasks into epic achievements.",
+      "Earn badges, maintain streaks, and climb the family leaderboard. Kids especially love turning progress into achievements.",
   },
   {
-    icon: Users,
-    title: "Role-Based Permissions",
+    icon: Sparkles,
+    title: "Quarterly & Annual Reviews",
     description:
-      "Age-appropriate access for everyone. Adults manage, teens contribute, kids participate safely.",
+      "Deep retrospectives every 90 days. Reflect on the big picture, course-correct, and set your vision for the next phase.",
   },
 ];
 

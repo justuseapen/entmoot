@@ -204,10 +204,14 @@ export function AddPriorityModal({
         <BottomSheetView style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Add Priority</Text>
+            <Text style={styles.headerTitle} accessibilityRole="header">Add Priority</Text>
             <TouchableOpacity
               onPress={handleClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              accessibilityHint="Close the add priority modal"
+              style={styles.closeButton}
             >
               <Ionicons name="close" size={24} color={COLORS.textSecondary} />
             </TouchableOpacity>
@@ -215,15 +219,15 @@ export function AddPriorityModal({
 
           {/* Error message */}
           {error && (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={16} color={COLORS.error} />
+            <View style={styles.errorContainer} accessibilityRole="alert" accessibilityLiveRegion="polite">
+              <Ionicons name="alert-circle" size={16} color={COLORS.error} accessibilityLabel="Error" />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
 
           {/* Title input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Title *</Text>
+            <Text style={styles.label} nativeID="priority-title-label">Title *</Text>
             <TextInput
               ref={titleInputRef}
               style={styles.input}
@@ -237,16 +241,24 @@ export function AddPriorityModal({
               autoFocus
               returnKeyType="next"
               maxLength={200}
+              accessibilityLabel="Priority title"
+              accessibilityHint="Enter a title for your priority"
+              accessibilityLabelledBy="priority-title-label"
+              testID="add-priority-title-input"
             />
           </View>
 
           {/* Goal picker */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Link to Goal (Optional)</Text>
+            <Text style={styles.label} accessibilityRole="text">Link to Goal (Optional)</Text>
             <TouchableOpacity
               style={styles.goalPicker}
               onPress={toggleGoalPicker}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={selectedGoal ? `Selected goal: ${selectedGoal.title}` : "Select a goal"}
+              accessibilityHint="Open goal picker to link this priority to a goal"
+              testID="add-priority-goal-picker"
             >
               {selectedGoal ? (
                 <View style={styles.selectedGoalContainer}>
@@ -262,6 +274,10 @@ export function AddPriorityModal({
                   <TouchableOpacity
                     onPress={() => handleSelectGoal(null)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remove selected goal"
+                    accessibilityHint="Unlink this priority from the selected goal"
+                    style={styles.clearGoalButton}
                   >
                     <Ionicons
                       name="close-circle"
@@ -316,6 +332,9 @@ export function AddPriorityModal({
                       ]}
                       onPress={() => handleSelectGoal(goal)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${goal.title}, ${goal.time_scale}, ${goal.progress}% complete`}
+                      accessibilityState={{ selected: selectedGoalId === goal.id }}
                     >
                       <Ionicons
                         name={
@@ -366,9 +385,14 @@ export function AddPriorityModal({
             onPress={handleAddPriority}
             disabled={!title.trim() || isSaving}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isSaving ? "Adding priority" : "Add Priority"}
+            accessibilityHint="Save this priority to your daily plan"
+            accessibilityState={{ disabled: !title.trim() || isSaving, busy: isSaving }}
+            testID="add-priority-submit-button"
           >
             {isSaving ? (
-              <ActivityIndicator color={COLORS.textOnPrimary} size="small" />
+              <ActivityIndicator color={COLORS.textOnPrimary} size="small" accessibilityLabel="Loading" />
             ) : (
               <>
                 <Ionicons
@@ -415,6 +439,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
   },
+  closeButton: {
+    minWidth: 44, // iOS HIG touch target compliance
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   // Error
   errorContainer: {
@@ -452,6 +482,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     borderWidth: 1,
     borderColor: COLORS.border,
+    minHeight: 44, // iOS HIG touch target compliance
   },
 
   // Goal picker
@@ -462,6 +493,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
+    minHeight: 44, // iOS HIG touch target compliance
+  },
+  clearGoalButton: {
+    minWidth: 44, // iOS HIG touch target compliance
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   goalPickerPlaceholder: {
     flexDirection: "row",
@@ -504,6 +542,7 @@ const styles = StyleSheet.create({
     gap: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.surface,
+    minHeight: 44, // iOS HIG touch target compliance
   },
   goalOptionSelected: {
     backgroundColor: COLORS.primary + "10",
@@ -554,6 +593,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     marginTop: "auto",
+    minHeight: 48, // iOS HIG touch target compliance (larger for primary action)
   },
   addButtonDisabled: {
     backgroundColor: COLORS.border,

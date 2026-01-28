@@ -65,19 +65,23 @@ export function ForgotPasswordScreen({ navigation }: Props) {
 
   if (isSuccess) {
     return (
-      <View style={styles.container}>
-        <View style={styles.successContainer}>
-          <View style={styles.successIcon}>
+      <View style={styles.container} accessibilityRole="none">
+        <View style={styles.successContainer} accessible={true} accessibilityRole="alert">
+          <View style={styles.successIcon} accessibilityLabel="Success">
             <Text style={styles.successIconText}>✓</Text>
           </View>
-          <Text style={styles.successTitle}>Check Your Email</Text>
-          <Text style={styles.successMessage}>
+          <Text style={styles.successTitle} accessibilityRole="header">Check Your Email</Text>
+          <Text style={styles.successMessage} accessibilityRole="text">
             If an account exists for {email}, we&apos;ve sent password reset
             instructions to that email address.
           </Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate("Login")}
+            accessibilityRole="button"
+            accessibilityLabel="Back to Sign In"
+            accessibilityHint="Return to the sign in page"
+            testID="forgot-password-back-to-login"
           >
             <Text style={styles.buttonText}>Back to Sign In</Text>
           </TouchableOpacity>
@@ -95,20 +99,20 @@ export function ForgotPasswordScreen({ navigation }: Props) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>Entmoot</Text>
-          <Text style={styles.tagline}>Build Your Family&apos;s Adventure</Text>
+        <View style={styles.header} accessible={true} accessibilityRole="header">
+          <Text style={styles.logo} accessibilityRole="text">Entmoot</Text>
+          <Text style={styles.tagline} accessibilityRole="text">Build Your Family&apos;s Adventure</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.title}>Forgot Password?</Text>
-          <Text style={styles.subtitle}>
+          <Text style={styles.title} accessibilityRole="header">Forgot Password?</Text>
+          <Text style={styles.subtitle} accessibilityRole="text">
             No worries! Enter your email and we&apos;ll send you reset
             instructions.
           </Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label} nativeID="forgot-email-label">Email</Text>
             <TextInput
               style={[styles.input, error && styles.inputError]}
               placeholder="your@email.com"
@@ -123,28 +127,43 @@ export function ForgotPasswordScreen({ navigation }: Props) {
               autoComplete="email"
               autoCorrect={false}
               editable={!isLoading}
+              accessibilityLabel="Email address"
+              accessibilityHint="Enter the email address associated with your account"
+              accessibilityLabelledBy="forgot-email-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="forgot-password-email-input"
             />
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error && <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{error}</Text>}
           </View>
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleResetPassword}
             disabled={isLoading}
+            accessibilityRole="button"
+            accessibilityLabel={isLoading ? "Sending reset link" : "Send Reset Link"}
+            accessibilityHint="Send password reset instructions to your email"
+            accessibilityState={{ disabled: isLoading, busy: isLoading }}
+            testID="forgot-password-submit-button"
           >
             {isLoading ? (
-              <ActivityIndicator color={COLORS.creamWhite} />
+              <ActivityIndicator color={COLORS.creamWhite} accessibilityLabel="Loading" />
             ) : (
               <Text style={styles.buttonText}>Send Reset Link</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
+        <View style={styles.footer} accessible={true} accessibilityRole="text">
           <Text style={styles.footerText}>Remember your password?</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Login")}
             disabled={isLoading}
+            accessibilityRole="link"
+            accessibilityLabel="Sign In"
+            accessibilityHint="Navigate to sign in page"
+            accessibilityState={{ disabled: isLoading }}
+            testID="forgot-password-login-link"
           >
             <Text style={styles.footerLink}>Sign In</Text>
           </TouchableOpacity>
@@ -210,6 +229,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.darkForest,
     backgroundColor: "#FFFFFF",
+    minHeight: 44, // iOS HIG touch target compliance
   },
   inputError: {
     borderColor: COLORS.errorRed,
@@ -224,6 +244,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
+    minHeight: 48, // iOS HIG touch target compliance (larger for primary action)
   },
   buttonDisabled: {
     opacity: 0.7,

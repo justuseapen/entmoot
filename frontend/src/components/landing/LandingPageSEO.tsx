@@ -3,8 +3,8 @@ import { FOUNDING_FAMILY_PRICE, PRICE_DISPLAY } from "@/config/pricing";
 
 const SEO_CONFIG = {
   title:
-    "Entmoot - Family Goal Planning Platform | Stop Managing, Start Leading",
-  description: `The only goal planning platform built for families first. Connect daily tasks to long-term dreams with AI coaching, multi-scale reviews, and gamification. Get lifetime access for ${PRICE_DISPLAY}.`,
+    "Entmoot - Cal Newport's Multi-Scale Planning for Families | Founding Families",
+  description: `You time-block your workday. You plan quarterly. What if your family had the same system? Entmoot brings Cal Newport's multi-scale planning to family life. AI coaching, weekly reviews, and quarterly planning. Get lifetime access for ${PRICE_DISPLAY}.`,
   url: "https://entmoot.app",
   image: "/og-image.png",
   siteName: "Entmoot",
@@ -125,7 +125,7 @@ export function LandingPageSEO() {
       <meta name="author" content="Entmoot" />
       <meta
         name="keywords"
-        content="family goals, family goal setting app, family planner app, SMART goals for kids, family goal tracking, family organizer, daily planner, weekly review, family planning platform, gamification for families, COPPA compliant, family productivity"
+        content="Cal Newport planning for families, multi-scale planning families, time blocking for families, family goal setting app, GTD for families, deep work parents, family weekly review, family retrospective tool, productivity system families, intentional parenting app, family planner, quarterly family planning"
       />
 
       {/* Pricing specific meta */}

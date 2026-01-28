@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   TouchableOpacityProps,
+  AccessibilityRole,
 } from "react-native";
 import { COLORS } from "@/theme/colors";
 
@@ -20,6 +21,12 @@ interface ButtonProps extends TouchableOpacityProps {
   disabled?: boolean;
   fullWidth?: boolean;
   children: React.ReactNode;
+  /** Accessibility label for screen readers - defaults to children text if string */
+  accessibilityLabel?: string;
+  /** Accessibility hint describing what happens when the button is pressed */
+  accessibilityHint?: string;
+  /** Test ID for E2E testing */
+  testID?: string;
 }
 
 export function Button({
@@ -30,6 +37,9 @@ export function Button({
   fullWidth = false,
   children,
   style,
+  accessibilityLabel,
+  accessibilityHint,
+  testID,
   ...rest
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -54,15 +64,35 @@ export function Button({
       ? COLORS.textOnPrimary
       : COLORS.primary;
 
+  // Derive accessibility label from children if not provided
+  const derivedAccessibilityLabel =
+    accessibilityLabel ||
+    (typeof children === "string" ? children : undefined);
+
+  // Build accessibility state
+  const accessibilityState = {
+    disabled: isDisabled,
+    busy: loading,
+  };
+
   return (
     <TouchableOpacity
       style={[containerStyles, style]}
       disabled={isDisabled}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={derivedAccessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
+      testID={testID}
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={spinnerColor} />
+        <ActivityIndicator
+          size="small"
+          color={spinnerColor}
+          accessibilityLabel="Loading"
+        />
       ) : (
         <Text style={textStyles}>{children}</Text>
       )}
@@ -100,19 +130,22 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 
-  // Size containers
+  // Size containers - minimum 44px height for iOS HIG touch target compliance
   smallContainer: {
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
+    minHeight: 44,
   },
   mediumContainer: {
     paddingVertical: 12,
     paddingHorizontal: 24,
+    minHeight: 44,
   },
   largeContainer: {
     paddingVertical: 16,
     paddingHorizontal: 32,
+    minHeight: 48,
   },
 
   // Base text

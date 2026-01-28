@@ -65,6 +65,7 @@ export function MainTabNavigator() {
         options={{
           title: "Home",
           tabBarLabel: "Home",
+          tabBarAccessibilityLabel: "Home tab",
         }}
       />
       <Tab.Screen
@@ -73,6 +74,7 @@ export function MainTabNavigator() {
         options={{
           title: "Goals",
           tabBarLabel: "Goals",
+          tabBarAccessibilityLabel: "Goals tab",
         }}
       />
       <Tab.Screen
@@ -81,6 +83,7 @@ export function MainTabNavigator() {
         options={{
           title: "Daily",
           tabBarLabel: "Daily",
+          tabBarAccessibilityLabel: "Daily planner tab",
         }}
       />
       <Tab.Screen
@@ -89,6 +92,7 @@ export function MainTabNavigator() {
         options={{
           title: "Family",
           tabBarLabel: "Family",
+          tabBarAccessibilityLabel: "Family tab",
         }}
       />
       <Tab.Screen
@@ -97,6 +101,7 @@ export function MainTabNavigator() {
         options={{
           title: "Settings",
           tabBarLabel: "Settings",
+          tabBarAccessibilityLabel: "Settings tab",
         }}
       />
     </Tab.Navigator>

@@ -183,8 +183,13 @@ export function ErrorMessage({
   // Inline variant - minimal, single line
   if (variant === "inline") {
     return (
-      <View style={[styles.inlineContainer, style]}>
-        <Ionicons name={iconName} size={16} color={COLORS.error} />
+      <View
+        style={[styles.inlineContainer, style]}
+        accessible={true}
+        accessibilityRole="alert"
+        accessibilityLiveRegion="polite"
+      >
+        <Ionicons name={iconName} size={16} color={COLORS.error} accessibilityLabel="Error" />
         <Text style={styles.inlineText} numberOfLines={2}>
           {errorMessage}
         </Text>
@@ -193,6 +198,11 @@ export function ErrorMessage({
             onPress={onRetry}
             disabled={isRetrying}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={isRetrying ? "Retrying" : "Retry"}
+            accessibilityHint="Attempt the action again"
+            accessibilityState={{ disabled: isRetrying, busy: isRetrying }}
+            style={styles.inlineRetryButton}
           >
             <Text style={[styles.inlineRetry, isRetrying && styles.retryDisabled]}>
               {isRetrying ? "Retrying..." : "Retry"}
@@ -206,14 +216,19 @@ export function ErrorMessage({
   // Card variant - contained in a card with border
   if (variant === "card") {
     return (
-      <View style={[styles.cardContainer, style]}>
+      <View
+        style={[styles.cardContainer, style]}
+        accessible={true}
+        accessibilityRole="alert"
+        accessibilityLiveRegion="polite"
+      >
         <View style={styles.cardContent}>
           <View style={styles.cardIconContainer}>
-            <Ionicons name={iconName} size={24} color={COLORS.error} />
+            <Ionicons name={iconName} size={24} color={COLORS.error} accessibilityLabel="Error" />
           </View>
           <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>{title}</Text>
-            <Text style={styles.cardMessage} numberOfLines={3}>
+            <Text style={styles.cardTitle} accessibilityRole="text">{title}</Text>
+            <Text style={styles.cardMessage} numberOfLines={3} accessibilityRole="text">
               {errorMessage}
             </Text>
           </View>
@@ -224,6 +239,10 @@ export function ErrorMessage({
             onPress={onRetry}
             disabled={isRetrying}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={isRetrying ? "Retrying" : "Try Again"}
+            accessibilityHint="Attempt the action again"
+            accessibilityState={{ disabled: isRetrying, busy: isRetrying }}
           >
             <Ionicons
               name="refresh"
@@ -252,17 +271,22 @@ export function ErrorMessage({
   ];
 
   return (
-    <View style={containerStyle}>
+    <View
+      style={containerStyle}
+      accessible={true}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+    >
       {/* Icon */}
       <View style={styles.iconContainer}>
-        <Ionicons name={iconName} size={48} color={COLORS.error} />
+        <Ionicons name={iconName} size={48} color={COLORS.error} accessibilityLabel="Error" />
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title} accessibilityRole="header">{title}</Text>
 
       {/* Message */}
-      <Text style={styles.message}>{errorMessage}</Text>
+      <Text style={styles.message} accessibilityRole="text">{errorMessage}</Text>
 
       {/* Retry Button */}
       {showRetry && onRetry && (
@@ -271,6 +295,10 @@ export function ErrorMessage({
           onPress={onRetry}
           disabled={isRetrying}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={isRetrying ? "Retrying" : "Try Again"}
+          accessibilityHint="Attempt the action again"
+          accessibilityState={{ disabled: isRetrying, busy: isRetrying }}
         >
           <Ionicons
             name={isRetrying ? "hourglass-outline" : "refresh"}
@@ -336,6 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
     minWidth: 140,
+    minHeight: 44, // iOS HIG touch target compliance
   },
   retryButtonDisabled: {
     backgroundColor: COLORS.surfaceVariant,
@@ -374,6 +403,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: COLORS.primary,
+  },
+  inlineRetryButton: {
+    minHeight: 44, // iOS HIG touch target compliance
+    justifyContent: "center",
   },
   retryDisabled: {
     color: COLORS.textTertiary,
@@ -423,6 +456,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     backgroundColor: COLORS.surfaceVariant + "50",
+    minHeight: 44, // iOS HIG touch target compliance
   },
   cardRetryText: {
     fontSize: 14,

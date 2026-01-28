@@ -10,12 +10,15 @@ export const STRIPE_PAYMENT_LINK =
   "https://buy.stripe.com/5kQdR98CTdRQ88f5rkcZa00";
 
 // Pricing
-export const FOUNDING_FAMILY_PRICE = 249;
-export const REGULAR_PRICE = 499;
+export const FOUNDING_FAMILY_PRICE = 299;
+export const REGULAR_PRICE = 155.88; // Annual subscription price for comparison
+export const MONTHLY_PRICE = 12.99;
 
 // Formatted strings for display
 export const PRICE_DISPLAY = `$${FOUNDING_FAMILY_PRICE}`;
-export const REGULAR_PRICE_DISPLAY = `$${REGULAR_PRICE}`;
+export const REGULAR_PRICE_DISPLAY = `$12.99/mo`;
+export const MONTHLY_PRICE_DISPLAY = `$${MONTHLY_PRICE}/mo`;
+export const TEN_YEAR_SAVINGS = "$1,200+";
 
 // Price comparison for marketing
 export const PRICE_COMPARISON = {

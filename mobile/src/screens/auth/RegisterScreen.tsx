@@ -112,9 +112,9 @@ export function RegisterScreen({ navigation }: Props) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>Entmoot</Text>
-          <Text style={styles.tagline}>Build Your Family&apos;s Adventure</Text>
+        <View style={styles.header} accessible={true} accessibilityRole="header">
+          <Text style={styles.logo} accessibilityRole="text">Entmoot</Text>
+          <Text style={styles.tagline} accessibilityRole="text">Build Your Family&apos;s Adventure</Text>
         </View>
 
         <View style={styles.form}>
@@ -122,7 +122,7 @@ export function RegisterScreen({ navigation }: Props) {
           <Text style={styles.subtitle}>Start your family adventure today</Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label} nativeID="name-label">Name</Text>
             <TextInput
               style={[styles.input, errors.name && styles.inputError]}
               placeholder="Your name"
@@ -135,12 +135,17 @@ export function RegisterScreen({ navigation }: Props) {
               autoCapitalize="words"
               autoComplete="name"
               editable={!isLoading}
+              accessibilityLabel="Name"
+              accessibilityHint="Enter your full name"
+              accessibilityLabelledBy="name-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="register-name-input"
             />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+            {errors.name && <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{errors.name}</Text>}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label} nativeID="register-email-label">Email</Text>
             <TextInput
               style={[styles.input, errors.email && styles.inputError]}
               placeholder="your@email.com"
@@ -155,14 +160,19 @@ export function RegisterScreen({ navigation }: Props) {
               autoComplete="email"
               autoCorrect={false}
               editable={!isLoading}
+              accessibilityLabel="Email address"
+              accessibilityHint="Enter your email address for your account"
+              accessibilityLabelledBy="register-email-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="register-email-input"
             />
             {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
+              <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{errors.email}</Text>
             )}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label} nativeID="register-password-label">Password</Text>
             <TextInput
               style={[styles.input, errors.password && styles.inputError]}
               placeholder="Create a password"
@@ -175,14 +185,19 @@ export function RegisterScreen({ navigation }: Props) {
               secureTextEntry
               autoComplete="password-new"
               editable={!isLoading}
+              accessibilityLabel="Password"
+              accessibilityHint="Create a password with at least 6 characters"
+              accessibilityLabelledBy="register-password-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="register-password-input"
             />
             {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
+              <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">{errors.password}</Text>
             )}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
+            <Text style={styles.label} nativeID="register-confirm-password-label">Confirm Password</Text>
             <TextInput
               style={[
                 styles.input,
@@ -198,9 +213,14 @@ export function RegisterScreen({ navigation }: Props) {
               secureTextEntry
               autoComplete="password-new"
               editable={!isLoading}
+              accessibilityLabel="Confirm Password"
+              accessibilityHint="Re-enter your password to confirm"
+              accessibilityLabelledBy="register-confirm-password-label"
+              accessibilityState={{ disabled: isLoading }}
+              testID="register-confirm-password-input"
             />
             {errors.passwordConfirmation && (
-              <Text style={styles.errorText}>
+              <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="polite">
                 {errors.passwordConfirmation}
               </Text>
             )}
@@ -210,25 +230,35 @@ export function RegisterScreen({ navigation }: Props) {
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleRegister}
             disabled={isLoading}
+            accessibilityRole="button"
+            accessibilityLabel={isLoading ? "Creating account" : "Create Account"}
+            accessibilityHint="Create your new Entmoot account"
+            accessibilityState={{ disabled: isLoading, busy: isLoading }}
+            testID="register-submit-button"
           >
             {isLoading ? (
-              <ActivityIndicator color={COLORS.creamWhite} />
+              <ActivityIndicator color={COLORS.creamWhite} accessibilityLabel="Loading" />
             ) : (
               <Text style={styles.buttonText}>Create Account</Text>
             )}
           </TouchableOpacity>
 
-          <Text style={styles.termsText}>
+          <Text style={styles.termsText} accessibilityRole="text">
             By creating an account, you agree to our Terms of Service and
             Privacy Policy.
           </Text>
         </View>
 
-        <View style={styles.footer}>
+        <View style={styles.footer} accessible={true} accessibilityRole="text">
           <Text style={styles.footerText}>Already have an account?</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Login")}
             disabled={isLoading}
+            accessibilityRole="link"
+            accessibilityLabel="Sign In"
+            accessibilityHint="Navigate to sign in page"
+            accessibilityState={{ disabled: isLoading }}
+            testID="register-login-link"
           >
             <Text style={styles.footerLink}>Sign In</Text>
           </TouchableOpacity>
@@ -293,6 +323,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.darkForest,
     backgroundColor: "#FFFFFF",
+    minHeight: 44, // iOS HIG touch target compliance
   },
   inputError: {
     borderColor: COLORS.errorRed,
@@ -309,6 +340,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
     marginBottom: 16,
+    minHeight: 48, // iOS HIG touch target compliance (larger for primary action)
   },
   buttonDisabled: {
     opacity: 0.7,

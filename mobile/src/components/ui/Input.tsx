@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import {
   View,
   TextInput,
@@ -14,6 +14,12 @@ interface InputProps extends TextInputProps {
   error?: string;
   helperText?: string;
   containerStyle?: ViewStyle;
+  /** Accessibility label for screen readers - defaults to label prop if provided */
+  accessibilityLabel?: string;
+  /** Accessibility hint describing the input's purpose */
+  accessibilityHint?: string;
+  /** Test ID for E2E testing */
+  testID?: string;
 }
 
 export function Input({
@@ -22,21 +28,61 @@ export function Input({
   helperText,
   containerStyle,
   style,
+  accessibilityLabel,
+  accessibilityHint,
+  testID,
   ...rest
 }: InputProps) {
   const hasError = Boolean(error);
+  const inputId = useId();
+
+  // Derive accessibility label from label prop if not explicitly provided
+  const derivedAccessibilityLabel = accessibilityLabel || label;
+
+  // Build accessibility state
+  const accessibilityState = {
+    disabled: rest.editable === false,
+  };
+
+  // Combine hint with error for screen reader announcement
+  const combinedHint = hasError
+    ? `Error: ${error}${accessibilityHint ? `. ${accessibilityHint}` : ""}`
+    : accessibilityHint;
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text
+          style={styles.label}
+          nativeID={`${inputId}-label`}
+          accessibilityRole="text"
+        >
+          {label}
+        </Text>
+      )}
       <TextInput
         style={[styles.input, hasError && styles.inputError, style]}
         placeholderTextColor={COLORS.textTertiary}
+        accessibilityLabel={derivedAccessibilityLabel}
+        accessibilityHint={combinedHint}
+        accessibilityState={accessibilityState}
+        accessibilityLabelledBy={label ? `${inputId}-label` : undefined}
+        testID={testID}
         {...rest}
       />
-      {hasError && <Text style={styles.errorText}>{error}</Text>}
+      {hasError && (
+        <Text
+          style={styles.errorText}
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+        >
+          {error}
+        </Text>
+      )}
       {!hasError && helperText && (
-        <Text style={styles.helperText}>{helperText}</Text>
+        <Text style={styles.helperText} accessibilityRole="text">
+          {helperText}
+        </Text>
       )}
     </View>
   );
@@ -61,6 +107,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: COLORS.text,
+    minHeight: 44, // iOS HIG touch target compliance
   },
   inputError: {
     borderColor: COLORS.error,

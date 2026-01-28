@@ -1,30 +1,30 @@
-import { Home, Map, Heart, ArrowRight } from "lucide-react";
+import { Target, Calendar, RefreshCw, ArrowRight } from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
 import { HERITAGE_COLORS } from "./design-system";
 import { STRIPE_PAYMENT_LINK } from "@/config/pricing";
 
-// Step data with heritage-appropriate titles
+// Step data aligned with multi-scale planning methodology
 const steps = [
   {
-    icon: Home,
+    icon: Target,
     number: 1,
-    title: "Build Your Family",
+    title: "Set Goals Together",
     description:
-      "Create your family, invite members, and set everyone's roles. From toddlers to grandparents, everyone has a place.",
+      "Use our AI coach to create SMART family goals—health, finances, relationships, fun, personal growth. Everyone rallies behind a shared vision.",
   },
   {
-    icon: Map,
+    icon: Calendar,
     number: 2,
-    title: "Set Your Goals",
+    title: "Plan Your Week",
     description:
-      "Set your first goals using our SMART builder. Let AI help you create goals that are clear, achievable, and meaningful.",
+      "Sunday night, set weekly intentions. Connect daily tasks to bigger goals so everyone knows 'why' they're doing what they're doing.",
   },
   {
-    icon: Heart,
+    icon: RefreshCw,
     number: 3,
-    title: "Grow Together",
+    title: "Review & Celebrate",
     description:
-      "Start your morning planning ritual, track progress, and celebrate wins together. Your intentional family journey begins.",
+      "Weekly retrospectives keep your family aligned. Monthly and quarterly reviews help you course-correct. Annual planning sets next year's vision.",
   },
 ];
 
