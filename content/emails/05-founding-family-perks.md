@@ -8,7 +8,7 @@
 
 ## Email Content
 
-**From**: [Founder Name], Founder of Entmoot
+**From**: Justus Eapen, Founder of Entmoot
 **Reply-To**: [founder-email]@entmoot.app
 
 ---
@@ -202,7 +202,7 @@ But I bet you will see value. And when you do, the Founding Family offer will be
 
 Thanks for being here,
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. Have questions about Founding Families? Hit reply. I personally read and respond to every email.
@@ -472,7 +472,7 @@ Here's what happens next:
 
 Thank you for believing in Entmoot. We won't let you down.
 
-[Founder Name]
+Justus Eapen
 ```
 
 **In-app notification**:
@@ -515,7 +515,7 @@ I'd love to hear:
 
 Hit reply - I read and respond to every message.
 
-[Founder Name]
+Justus Eapen
 ```
 
 ---

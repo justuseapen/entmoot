@@ -326,7 +326,7 @@ Target audience: Productivity enthusiasts (like your readers) who plan their wor
 I wrote [link to flagship content] that your audience might find valuable. Would you be open to a guest post / podcast interview / collaboration?
 
 Thanks for considering,
-[Founder Name]"
+Justus Eapen"
 
 ---
 

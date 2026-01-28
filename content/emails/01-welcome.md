@@ -76,7 +76,7 @@ You've got this. One day, one plan, one goal at a time.
 
 Welcome to the family.
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. If you run into any issues during setup, this 2-minute video walks through the basics: [link to onboarding video]

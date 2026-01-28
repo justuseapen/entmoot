@@ -6,7 +6,7 @@
 
 **Published**: [Launch date]
 
-**Author**: [Founder Name], Founder of Entmoot
+**Author**: Justus Eapen, Founder of Entmoot
 
 **Primary Keywords**: multi-scale planning families, Cal Newport family planning, time blocking for families, family productivity system
 
@@ -552,7 +552,7 @@ Or if you want to join our founding community:
 
 **About the Author**
 
-[Founder Name] is the founder of Entmoot, a family planning platform built on multi-scale planning principles. After years of using Cal Newport's frameworks professionally while watching his family life remain chaotic, he built the tool he wished existed: multi-scale planning designed from the ground up for families. He lives with his partner and three children, who all participate in weekly family reviews (with varying degrees of enthusiasm).
+Justus Eapen is the founder of Entmoot, a family planning platform built on multi-scale planning principles. After years of using Cal Newport's frameworks professionally while watching his family life remain chaotic, he built the tool he wished existed: multi-scale planning designed from the ground up for families. He lives with his partner and three children, who all participate in weekly family reviews (with varying degrees of enthusiasm).
 
 ---
 

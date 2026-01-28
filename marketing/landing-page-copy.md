@@ -447,7 +447,7 @@ Side-by-side comparison showing personal productivity planner vs. Entmoot family
 Why We Built Entmoot
 
 **Body Copy:**
-Hi, I'm [Founder Name]. I'm a parent who struggled with the same problem you do: staying intentional when life is chaotic.
+Hi, I'm Justus Eapen. I'm a parent who struggled with the same problem you do: staying intentional when life is chaotic.
 
 I tried Cozi, Google Calendar, Notion, bullet journals—everything. They helped me remember appointments, but they didn't help me answer: "Are we becoming the family we want to be?"
 
@@ -457,7 +457,7 @@ We're not a venture-backed startup chasing hyper-growth. We're a small, sustaina
 
 If you're ready to move from reactive to intentional, I'd be honored to have you as a Founding Family.
 
-— [Founder Name]
+— Justus Eapen
 
 **CTA:** Join the Founding Families
 
@@ -642,7 +642,7 @@ Reply to this email or message us in Slack. We respond fast.
 
 Thanks for believing in what we're building. Your family's transformation starts March 1.
 
-— [Founder Name]
+— Justus Eapen
 Founder, Entmoot
 
 P.S. Invite your partner/spouse to join Slack too! Everyone in your family is welcome.
@@ -686,7 +686,7 @@ Reply here or message us in Slack.
 
 See you March 1!
 
-— [Founder Name]
+— Justus Eapen
 
 ---
 
@@ -723,7 +723,7 @@ Complete one weekly review in the next 7 days and earn your "Review Starter" bad
 
 Let's do this. Your family's transformation starts today.
 
-— [Founder Name]
+— Justus Eapen
 
 P.S. Share a screenshot on social media with #EntmootFounding and tag us @entmootapp!
 

@@ -98,7 +98,7 @@ For now, try that 5-minute daily routine tomorrow. You've got this.
 
 Keep going,
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. Stuck on what tasks to add? Here's a starter template for families: [link to daily task templates]

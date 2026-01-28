@@ -195,7 +195,7 @@ Entmoot connects daily tasks to long-term goals through multi-scale planning. AI
 ```
 Hey Product Hunt!
 
-I'm [Founder Name], creator of Entmoot. Thanks for checking us out today.
+I'm Justus Eapen, creator of Entmoot. Thanks for checking us out today.
 
 **The origin story:**
 
@@ -563,7 +563,7 @@ If you want to support our launch, we'd be incredibly grateful for your upvote a
 
 Thanks for believing in this vision. Can't wait to see how Entmoot helps your family.
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. Questions? Hit reply - I read every email personally during launch week.
@@ -708,7 +708,7 @@ Entmoot: Multi-scale planning for families. Connect daily tasks to yearly goals 
 All posts are ready to copy-paste. Replace [LINK] placeholders with actual URLs:
 - [LINK to Product Hunt] → Your Product Hunt launch page
 - [LINK to website] → https://entmoot.app or your actual domain
-- [Founder Name] → Your actual name
+- Justus Eapen → Your actual name
 - [First Name] → Personalization merge tag in email platform
 - [X spots remaining] → Update number dynamically
 

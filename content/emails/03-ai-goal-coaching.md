@@ -157,7 +157,7 @@ Give it a try today. Start vague, end specific.
 
 You've got this,
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. The AI isn't magic. It's just asking the questions a good coach would ask. But sometimes we all need that push to think more clearly about our goals.

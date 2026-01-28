@@ -35,24 +35,24 @@ These placeholders MUST be filled in before publishing:
 
 | File | Line | Placeholder | Needs |
 |------|------|-------------|-------|
-| `/content/blog/multi-scale-planning.md` | 9 | `[Founder Name], Founder of Entmoot` | Founder's full name |
-| `/content/blog/multi-scale-planning.md` | 491 | `[Founder Name] is the founder of Entmoot...` | Founder's full name |
-| `/content/blog/introducing-entmoot.md` | 9 | `[Founder Name], Founder of Entmoot` | Founder's full name |
-| `/content/blog/introducing-entmoot.md` | 457 | `[Founder Name]` | Founder's full name |
+| `/content/blog/multi-scale-planning.md` | 9 | `Justus Eapen, Founder of Entmoot` | Founder's full name |
+| `/content/blog/multi-scale-planning.md` | 491 | `Justus Eapen is the founder of Entmoot...` | Founder's full name |
+| `/content/blog/introducing-entmoot.md` | 9 | `Justus Eapen, Founder of Entmoot` | Founder's full name |
+| `/content/blog/introducing-entmoot.md` | 457 | `Justus Eapen` | Founder's full name |
 | `/content/blog/introducing-entmoot.md` | 460 | `[founder@entmoot.app]` | Founder's email address |
-| `/content/LAUNCH_DAY_POSTS.md` | 198 | `I'm [Founder Name], creator of Entmoot` | Founder's full name |
-| `/content/LAUNCH_DAY_POSTS.md` | 566 | `[Founder Name]` | Founder's full name |
-| `/content/emails/01-welcome.md` | 79 | `[Founder Name]` | Founder's full name |
-| `/content/emails/02-first-daily-plan.md` | 101 | `[Founder Name]` | Founder's full name |
-| `/content/emails/03-ai-goal-coaching.md` | 160 | `[Founder Name]` | Founder's full name |
-| `/content/emails/04-weekly-review.md` | 182 | `[Founder Name]` | Founder's full name |
-| `/content/emails/05-founding-family-perks.md` | 11 | `[Founder Name], Founder of Entmoot` | Founder's full name |
+| `/content/LAUNCH_DAY_POSTS.md` | 198 | `I'm Justus Eapen, creator of Entmoot` | Founder's full name |
+| `/content/LAUNCH_DAY_POSTS.md` | 566 | `Justus Eapen` | Founder's full name |
+| `/content/emails/01-welcome.md` | 79 | `Justus Eapen` | Founder's full name |
+| `/content/emails/02-first-daily-plan.md` | 101 | `Justus Eapen` | Founder's full name |
+| `/content/emails/03-ai-goal-coaching.md` | 160 | `Justus Eapen` | Founder's full name |
+| `/content/emails/04-weekly-review.md` | 182 | `Justus Eapen` | Founder's full name |
+| `/content/emails/05-founding-family-perks.md` | 11 | `Justus Eapen, Founder of Entmoot` | Founder's full name |
 | `/content/emails/05-founding-family-perks.md` | 12 | `[founder-email]@entmoot.app` | Founder's email prefix |
-| `/content/emails/05-founding-family-perks.md` | 205, 475, 518 | `[Founder Name]` | Founder's full name |
-| `/marketing/landing-page-copy.md` | 450 | `Hi, I'm [Founder Name]` | Founder's full name |
-| `/marketing/landing-page-copy.md` | 460 | `-- [Founder Name]` | Founder's full name |
-| `/marketing/landing-page-copy.md` | 645, 689, 726 | `[Founder Name]` | Founder's full name |
-| `/marketing/cal-newport-positioning.md` | 329 | `[Founder Name]` | Founder's full name |
+| `/content/emails/05-founding-family-perks.md` | 205, 475, 518 | `Justus Eapen` | Founder's full name |
+| `/marketing/landing-page-copy.md` | 450 | `Hi, I'm Justus Eapen` | Founder's full name |
+| `/marketing/landing-page-copy.md` | 460 | `-- Justus Eapen` | Founder's full name |
+| `/marketing/landing-page-copy.md` | 645, 689, 726 | `Justus Eapen` | Founder's full name |
+| `/marketing/cal-newport-positioning.md` | 329 | `Justus Eapen` | Founder's full name |
 
 ### Critical - External Links (Before Launch)
 
@@ -161,7 +161,7 @@ These are INTENTIONALLY left as placeholders because they represent personalizat
 
 ### Immediate (Before Feb 1, 2026)
 
-1. **Add Founder Name** - Replace all `[Founder Name]` placeholders with actual name
+1. **Add Founder Name** - Replace all `Justus Eapen` placeholders with actual name
 2. **Set Founder Email** - Replace `[founder@entmoot.app]` and `[founder-email]` with actual email
 3. **Prepare Product Hunt** - Get Product Hunt launch page URL ready
 4. **Verify Website** - Confirm https://entmoot.app is live

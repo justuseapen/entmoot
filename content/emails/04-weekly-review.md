@@ -179,7 +179,7 @@ And that's the point.
 
 Keep going,
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 P.S. Next email: I'll explain how multi-scale planning connects your daily tasks to quarterly goals. That's when everything clicks.

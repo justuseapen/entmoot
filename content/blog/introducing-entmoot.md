@@ -6,7 +6,7 @@
 
 **Published**: Feb 1, 2026
 
-**Author**: [Founder Name], Founder of Entmoot
+**Author**: Justus Eapen, Founder of Entmoot
 
 ---
 
@@ -454,7 +454,7 @@ If it helps your family like it's helped mine, we've succeeded.
 
 Thanks for reading. Here's to planning that actually works.
 
-[Founder Name]
+Justus Eapen
 Founder, Entmoot
 
 *P.S. Have questions? Hit reply or email me directly at [founder@entmoot.app]. I read and respond to every message.*

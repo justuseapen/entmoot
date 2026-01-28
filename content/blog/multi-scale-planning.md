@@ -6,7 +6,7 @@
 
 **Published**: Feb 1, 2026
 
-**Author**: [Founder Name], Founder of Entmoot
+**Author**: Justus Eapen, Founder of Entmoot
 
 ---
 
@@ -488,7 +488,7 @@ That's multi-scale planning.
 
 **About the Author**
 
-[Founder Name] is the founder of Entmoot, a family planning platform built on multi-scale planning principles. As a parent of three, he created this framework out of necessity when traditional planning tools failed his family. He's passionate about helping families move from chaos to clarity through better systems.
+Justus Eapen is the founder of Entmoot, a family planning platform built on multi-scale planning principles. As a parent of three, he created this framework out of necessity when traditional planning tools failed his family. He's passionate about helping families move from chaos to clarity through better systems.
 
 ---
 
