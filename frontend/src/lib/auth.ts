@@ -54,7 +54,8 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
   }
 
   const result = await response.json();
-  const token = response.headers.get("Authorization")?.replace("Bearer ", "") || "";
+  const token =
+    response.headers.get("Authorization")?.replace("Bearer ", "") || "";
 
   return {
     ...result,
@@ -77,7 +78,8 @@ export async function login(data: LoginData): Promise<AuthResponse> {
   }
 
   const result = await response.json();
-  const token = response.headers.get("Authorization")?.replace("Bearer ", "") || "";
+  const token =
+    response.headers.get("Authorization")?.replace("Bearer ", "") || "";
 
   return {
     ...result,

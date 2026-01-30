@@ -17,9 +17,6 @@ import { logout as logoutApi } from "@/lib/auth";
 import { Sidebar } from "./Sidebar";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { MobileNav } from "./MobileNav";
-import { NotificationBell } from "./NotificationBell";
-import { MentionIndicator } from "./MentionIndicator";
-import { GuidedTour } from "./GuidedTour";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -73,24 +70,6 @@ function UserIcon({ className }: { className?: string }) {
     >
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function BellIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }
@@ -149,7 +128,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r bg-white md:block">
         <div className="flex h-16 items-center border-b px-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to="/families" className="flex items-center gap-2">
             <span className="text-xl font-bold text-blue-600">Entmoot</span>
           </Link>
         </div>
@@ -171,7 +150,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             <SheetContent side="left" className="w-64 p-0">
               <div className="flex h-16 items-center border-b px-4">
                 <Link
-                  to="/dashboard"
+                  to="/families"
                   className="flex items-center gap-2"
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -196,12 +175,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
           {/* Header Actions */}
           <div className="flex items-center gap-2">
-            {/* Mention Indicator */}
-            <MentionIndicator />
-
-            {/* Notification Bell */}
-            <NotificationBell />
-
             {/* User Avatar Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -237,15 +210,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                     Profile
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/settings/notifications"
-                    className="flex items-center gap-2"
-                  >
-                    <BellIcon className="h-4 w-4" />
-                    Notification Settings
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={openFeedback}
                   className="flex items-center gap-2"
@@ -273,9 +237,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <MobileNav />
-
-      {/* Guided Tour */}
-      <GuidedTour />
 
       {/* HeyDev feedback widget is loaded via index.html when VITE_HEYDEV_API_KEY is configured */}
     </div>
