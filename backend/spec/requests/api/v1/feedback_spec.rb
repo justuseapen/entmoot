@@ -258,7 +258,7 @@ RSpec.describe "Api::V1::Feedback" do
 
       context "when user has meaningful activity and is eligible" do
         before do
-          create(:goal, family: family, creator: user)
+          create(:daily_plan, family: family, user: user)
         end
 
         it "returns eligible for NPS" do
@@ -272,7 +272,7 @@ RSpec.describe "Api::V1::Feedback" do
 
       context "when user was recently prompted for NPS" do
         before do
-          create(:goal, family: family, creator: user)
+          create(:daily_plan, family: family, user: user)
           user.update(last_nps_prompt_date: 30.days.ago)
         end
 
