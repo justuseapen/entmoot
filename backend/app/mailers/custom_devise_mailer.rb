@@ -2,10 +2,11 @@
 
 class CustomDeviseMailer < Devise::Mailer
   include Devise::Controllers::UrlHelpers
+
   default from: "Entmoot <hello@mail.entmoot.app>",
           template_path: "devise/mailer"
 
-  def reset_password_instructions(record, token, opts = {})
+  def reset_password_instructions(record, token, _opts = {})
     @token = token
     @resource = record
     @reset_password_url = "#{frontend_url}/reset-password?reset_password_token=#{token}"

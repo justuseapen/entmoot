@@ -57,8 +57,8 @@ export interface TopPriority {
   id?: number;
   title: string;
   priority_order: number;
-  goal_id: number | null;
-  goal: GoalSummary | null;
+  goal_id?: number | null;
+  goal?: GoalSummary | null;
   completed?: boolean;
   _destroy?: boolean;
 }

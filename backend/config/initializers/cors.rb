@@ -31,6 +31,4 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 
 # Log configured origins in development for debugging
-if Rails.env.development?
-  Rails.logger.info "CORS configured for origins: #{cors_origins.inspect}"
-end
+Rails.logger.info "CORS configured for origins: #{cors_origins.inspect}" if Rails.env.development?

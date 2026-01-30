@@ -93,8 +93,7 @@ export function FinalCTASection() {
           className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
           style={{ fontFamily: "'Georgia', serif" }}
         >
-          Ready to Transform Your Family?{" "}
-          <br className="hidden sm:inline" />
+          Ready to Transform Your Family? <br className="hidden sm:inline" />
           <span style={{ color: HERITAGE_COLORS.antiqueGold }}>
             Join 100 Pioneering Families
           </span>

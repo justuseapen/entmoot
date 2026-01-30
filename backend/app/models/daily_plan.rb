@@ -1,18 +1,12 @@
 # frozen_string_literal: true
 
 class DailyPlan < ApplicationRecord
-  include Mentionable
-
   belongs_to :user
   belongs_to :family
 
   has_many :daily_tasks, -> { order(:position) }, dependent: :destroy, inverse_of: :daily_plan
   has_many :top_priorities, -> { order(:priority_order) }, dependent: :destroy, inverse_of: :daily_plan
-  has_many :reflections, dependent: :destroy
   has_many :habit_completions, dependent: :destroy
-
-  # Mentions association is provided by the Mentionable concern
-  mentionable_fields :shutdown_shipped, :shutdown_blocked
 
   validates :date, presence: true
   validates :date, uniqueness: { scope: %i[user_id family_id], message: :already_exists_for_date }
@@ -34,9 +28,6 @@ class DailyPlan < ApplicationRecord
   end
 
   scope :for_date, ->(date) { where(date: date) }
-  scope :mentioned_by, lambda { |user_id|
-    joins(:mentions).where(mentions: { mentioned_user_id: user_id }).distinct if user_id.present?
-  }
 
   def self.find_or_create_for_today(user:, family:)
     today = Time.find_zone(family.timezone)&.today || Time.zone.today

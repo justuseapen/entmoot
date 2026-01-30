@@ -8,17 +8,9 @@ interface BreadcrumbItem {
 
 // Map routes to their breadcrumb labels
 const routeLabels: Record<string, string> = {
-  dashboard: "Dashboard",
   families: "Families",
-  goals: "Goals",
-  tree: "Tree View",
   planner: "Daily Planner",
-  reflection: "Evening Reflection",
-  "weekly-review": "Weekly Review",
-  leaderboard: "Leaderboard",
-  settings: "Settings",
-  notifications: "Notifications",
-  points: "Points",
+  profile: "Profile",
 };
 
 function ChevronRight({ className }: { className?: string }) {

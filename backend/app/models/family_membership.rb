@@ -38,8 +38,8 @@ class FamilyMembership < ApplicationRecord
   def user_belongs_to_only_one_family
     return unless user
 
-    if user.family_memberships.exists?
-      errors.add(:user, :already_has_family, message: "already belongs to a family")
-    end
+    return unless user.family_memberships.exists?
+
+    errors.add(:user, :already_has_family, message: "already belongs to a family")
   end
 end

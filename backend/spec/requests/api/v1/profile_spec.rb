@@ -177,7 +177,6 @@ RSpec.describe "Api::V1::Profile" do
         family = create(:family)
         create(:family_membership, user: user, family: family)
         create(:daily_plan, user: user, family: family)
-        create(:streak, user: user)
         create(:notification, user: user)
 
         delete "/api/v1/users/me", params: { password: "password123" }, headers: headers, as: :json
@@ -185,7 +184,6 @@ RSpec.describe "Api::V1::Profile" do
         expect(response).to have_http_status(:ok)
         expect(FamilyMembership.where(user_id: user.id)).to be_empty
         expect(DailyPlan.where(user_id: user.id)).to be_empty
-        expect(Streak.where(user_id: user.id)).to be_empty
         expect(Notification.where(user_id: user.id)).to be_empty
       end
     end
@@ -226,17 +224,6 @@ RSpec.describe "Api::V1::Profile" do
         expect(json["families"][0]["family_name"]).to eq(family.name)
       end
 
-      it "includes goals" do
-        goal = create(:goal, creator: user, family: family)
-
-        get "/api/v1/users/me/export", headers: headers, as: :json
-
-        json = response.parsed_body
-        expect(json["goals"]).to be_an(Array)
-        expect(json["goals"].length).to eq(1)
-        expect(json["goals"][0]["title"]).to eq(goal.title)
-      end
-
       it "includes daily plans with tasks and priorities" do
         plan = create(:daily_plan, user: user, family: family)
         create(:daily_task, daily_plan: plan, title: "Test Task")
@@ -248,38 +235,6 @@ RSpec.describe "Api::V1::Profile" do
         expect(json["daily_plans"]).to be_an(Array)
         expect(json["daily_plans"][0]["tasks"][0]["title"]).to eq("Test Task")
         expect(json["daily_plans"][0]["priorities"][0]["title"]).to eq("Test Priority")
-      end
-
-      it "includes streaks" do
-        create(:streak, user: user, streak_type: :daily_planning, current_count: 5)
-
-        get "/api/v1/users/me/export", headers: headers, as: :json
-
-        json = response.parsed_body
-        expect(json["streaks"]).to be_an(Array)
-        expect(json["streaks"][0]["streak_type"]).to eq("daily_planning")
-        expect(json["streaks"][0]["current_count"]).to eq(5)
-      end
-
-      it "includes badges" do
-        badge = create(:badge)
-        create(:user_badge, user: user, badge: badge)
-
-        get "/api/v1/users/me/export", headers: headers, as: :json
-
-        json = response.parsed_body
-        expect(json["badges"]).to be_an(Array)
-        expect(json["badges"][0]["badge_name"]).to eq(badge.name)
-      end
-
-      it "includes points summary" do
-        create(:points_ledger_entry, user: user, points: 100, activity_type: "complete_task")
-
-        get "/api/v1/users/me/export", headers: headers, as: :json
-
-        json = response.parsed_body
-        expect(json["points"]["total"]).to eq(100)
-        expect(json["points"]["entries"]).to be_an(Array)
       end
 
       it "includes notification preferences" do

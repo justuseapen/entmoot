@@ -5,42 +5,6 @@ require "rails_helper"
 RSpec.describe TopPriority do
   describe "associations" do
     it { is_expected.to belong_to(:daily_plan) }
-    it { is_expected.to belong_to(:goal).optional }
-    it { is_expected.to have_many(:mentions).dependent(:destroy) }
-  end
-
-  describe "Mentionable concern" do
-    let(:family) { create(:family) }
-    let(:user) { create(:user, name: "Alice Smith") }
-    let(:bob) { create(:user, name: "Bob Jones") }
-    let(:daily_plan) { create(:daily_plan, user: user, family: family) }
-
-    before do
-      create(:family_membership, family: family, user: user, role: :admin)
-      create(:family_membership, family: family, user: bob, role: :adult)
-    end
-
-    it "defines mentionable_fields as :title" do
-      expect(described_class.mentionable_text_fields).to eq([:title])
-    end
-
-    it "creates mentions when saving with @mentions in title" do
-      priority = described_class.create!(
-        daily_plan: daily_plan,
-        title: "Work with @bob on project",
-        priority_order: 1
-      )
-
-      expect(priority.mentions.count).to eq(1)
-      expect(priority.mentions.first.mentioned_user).to eq(bob)
-      expect(priority.mentions.first.user).to eq(user)
-      expect(priority.mentions.first.text_field).to eq("title")
-    end
-
-    it "gets family_id through daily_plan association" do
-      priority = create(:top_priority, daily_plan: daily_plan)
-      expect(priority.send(:mentionable_family_id)).to eq(family.id)
-    end
   end
 
   describe "validations" do

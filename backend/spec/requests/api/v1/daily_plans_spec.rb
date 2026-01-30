@@ -31,33 +31,6 @@ RSpec.describe "Api::V1::DailyPlans" do
         dates = json_response["daily_plans"].pluck("date")
         expect(dates).to eq(dates.sort.reverse)
       end
-
-      it "filters by mentioned_by" do
-        mentioned_user = create(:user)
-        create(:family_membership, :adult, family: family, user: mentioned_user)
-
-        mentioned_plan = create(:daily_plan, user: user, family: family, date: Date.current)
-        create(:mention, user: user, mentioned_user: mentioned_user, mentionable: mentioned_plan,
-                         text_field: "intention")
-        create(:daily_plan, user: user, family: family, date: Date.current - 1.day)
-
-        get "/api/v1/families/#{family.id}/daily_plans",
-            params: { mentioned_by: mentioned_user.id },
-            headers: auth_headers(user)
-
-        expect(json_response["daily_plans"].length).to eq(1)
-        expect(json_response["daily_plans"].first["id"]).to eq(mentioned_plan.id)
-      end
-
-      it "returns empty array when no mentions match" do
-        create(:daily_plan, user: user, family: family, date: Date.current)
-
-        get "/api/v1/families/#{family.id}/daily_plans",
-            params: { mentioned_by: user.id },
-            headers: auth_headers(user)
-
-        expect(json_response["daily_plans"]).to eq([])
-      end
     end
 
     context "when user is not a family member" do
@@ -163,19 +136,6 @@ RSpec.describe "Api::V1::DailyPlans" do
         expect(json_response["yesterday_incomplete_tasks"].length).to eq(1)
         expect(json_response["yesterday_incomplete_tasks"].first["id"]).to eq(incomplete_task.id)
         expect(json_response["yesterday_incomplete_tasks"].first["title"]).to eq("Unfinished task")
-      end
-
-      it "includes linked goal information in tasks" do
-        today = Time.find_zone("America/New_York").today
-        plan = create(:daily_plan, user: user, family: family, date: today)
-        goal = create(:goal, :daily, family: family, creator: user, title: "Exercise daily")
-        create(:daily_task, daily_plan: plan, title: "Go for a run", goal: goal)
-
-        get "/api/v1/families/#{family.id}/daily_plans/today", headers: auth_headers(user)
-
-        task_response = json_response["daily_tasks"].first
-        expect(task_response["goal"]["id"]).to eq(goal.id)
-        expect(task_response["goal"]["title"]).to eq("Exercise daily")
       end
     end
 
@@ -323,26 +283,6 @@ RSpec.describe "Api::V1::DailyPlans" do
         expect(tasks.last["title"]).to eq("First")
       end
 
-      it "links tasks to goals" do
-        goal = create(:goal, :daily, family: family, creator: user)
-        task = create(:daily_task, daily_plan: daily_plan)
-
-        patch "/api/v1/families/#{family.id}/daily_plans/#{daily_plan.id}",
-              params: {
-                daily_plan: {
-                  daily_tasks_attributes: [
-                    { id: task.id, goal_id: goal.id }
-                  ]
-                }
-              },
-              headers: auth_headers(user)
-
-        expect(response).to have_http_status(:ok)
-        task_response = json_response["daily_plan"]["daily_tasks"].first
-        expect(task_response["goal_id"]).to eq(goal.id)
-        expect(task_response["goal"]["title"]).to eq(goal.title)
-      end
-
       it "adds top priorities" do
         patch "/api/v1/families/#{family.id}/daily_plans/#{daily_plan.id}",
               params: {
@@ -409,25 +349,6 @@ RSpec.describe "Api::V1::DailyPlans" do
 
         expect(response).to have_http_status(:ok)
         expect(json_response["daily_plan"]["top_priorities"]).to be_empty
-      end
-
-      it "links priorities to goals" do
-        goal = create(:goal, :weekly, family: family, creator: user)
-
-        patch "/api/v1/families/#{family.id}/daily_plans/#{daily_plan.id}",
-              params: {
-                daily_plan: {
-                  top_priorities_attributes: [
-                    { title: "Complete weekly goal", priority_order: 1, goal_id: goal.id }
-                  ]
-                }
-              },
-              headers: auth_headers(user)
-
-        expect(response).to have_http_status(:ok)
-        priority_response = json_response["daily_plan"]["top_priorities"].first
-        expect(priority_response["goal_id"]).to eq(goal.id)
-        expect(priority_response["goal"]["title"]).to eq(goal.title)
       end
     end
 

@@ -6,7 +6,6 @@ FactoryBot.define do
     title { Faker::Lorem.sentence(word_count: 3) }
     completed { false }
     sequence(:position)
-    goal { nil }
 
     trait :completed do
       completed { true }
@@ -14,10 +13,6 @@ FactoryBot.define do
 
     trait :incomplete do
       completed { false }
-    end
-
-    trait :with_goal do
-      goal { association :goal, family: daily_plan.family }
     end
 
     trait :first_position do

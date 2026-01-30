@@ -12,7 +12,7 @@ module AuthHelpers
       sub: user.id.to_s,
       scp: "user",
       iat: Time.now.to_i,
-      exp: (Time.now + 24.hours).to_i,
+      exp: 24.hours.from_now.to_i,
       jti: SecureRandom.uuid
     }
 

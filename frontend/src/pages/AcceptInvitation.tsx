@@ -17,7 +17,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { useFamilyStore } from "@/stores/family";
-import { useCelebration } from "@/components/CelebrationToast";
 import {
   acceptInvitation,
   getInvitationDetails,
@@ -65,7 +64,6 @@ export function AcceptInvitation() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { setCurrentFamily } = useFamilyStore();
-  const { celebrateFirstAction } = useCelebration();
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -166,9 +164,6 @@ export function AcceptInvitation() {
         },
       });
       setCurrentFamily(result.family);
-      if (result.is_first_action) {
-        celebrateFirstAction("first_invitation_accepted");
-      }
       setPageState("success");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
@@ -190,9 +185,6 @@ export function AcceptInvitation() {
         },
       });
       setCurrentFamily(result.family);
-      if (result.is_first_action) {
-        celebrateFirstAction("first_invitation_accepted");
-      }
       setPageState("success");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
@@ -269,8 +261,8 @@ export function AcceptInvitation() {
           </CardHeader>
           <CardFooter>
             <Button asChild className="w-full">
-              <Link to={isAuthenticated ? "/dashboard" : "/login"}>
-                {isAuthenticated ? "Go to Dashboard" : "Sign In"}
+              <Link to={isAuthenticated ? "/families" : "/login"}>
+                {isAuthenticated ? "Go to Families" : "Sign In"}
               </Link>
             </Button>
           </CardFooter>
@@ -291,7 +283,7 @@ export function AcceptInvitation() {
           </CardHeader>
           <CardFooter>
             <Button asChild className="w-full">
-              <Link to="/dashboard">Go to Dashboard</Link>
+              <Link to="/families">Go to Families</Link>
             </Button>
           </CardFooter>
         </Card>

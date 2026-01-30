@@ -2,16 +2,15 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MentionInput } from "@/components/ui/mention-input";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   useTodaysPlan,
   useDailyPlans,
   useUpdateDailyPlan,
 } from "@/hooks/useDailyPlans";
-import { useGoals } from "@/hooks/useGoals";
 import { useFamily } from "@/hooks/useFamilies";
 import { useHabits } from "@/hooks/useHabits";
-import { useCelebration } from "@/components/CelebrationToast";
 import {
   formatTodayDate,
   type TopPriority,
@@ -19,32 +18,13 @@ import {
   type HabitCompletion,
   type HabitCompletionAttributes,
 } from "@/lib/dailyPlans";
-import {
-  Target,
-  Save,
-  Loader2,
-  Check,
-  Link2,
-  X,
-  ListChecks,
-  Sunset,
-} from "lucide-react";
-import { StandaloneTip } from "@/components/TipTooltip";
-import { Badge } from "@/components/ui/badge";
+import { Target, Save, Loader2, Check, ListChecks, Sunset } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { getTimeScaleLabel } from "@/lib/goals";
 
 export function DailyPlanner() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const familyId = parseInt(id || "0");
-  const { celebrateFirstAction } = useCelebration();
 
   // Check if a specific date was requested
   const requestedDate = searchParams.get("date");
@@ -55,10 +35,10 @@ export function DailyPlanner() {
     isLoading: loadingTodayPlan,
     error: todayPlanError,
   } = useTodaysPlan(familyId);
-  const {
-    data: allPlans,
-    isLoading: loadingAllPlans,
-  } = useDailyPlans(familyId, undefined);
+  const { data: allPlans, isLoading: loadingAllPlans } = useDailyPlans(
+    familyId,
+    undefined
+  );
 
   // Determine which plan to display
   const plan = useMemo(() => {
@@ -76,7 +56,6 @@ export function DailyPlanner() {
   const isToday = plan?.date === new Date().toISOString().split("T")[0];
 
   const { data: family, isLoading: loadingFamily } = useFamily(familyId);
-  const { data: goals } = useGoals(familyId);
   const { data: habits } = useHabits(familyId);
   const updatePlan = useUpdateDailyPlan(familyId);
 
@@ -176,7 +155,6 @@ export function DailyPlanner() {
               id: priority.id,
               title: priority.title,
               priority_order: priority.priority_order,
-              goal_id: priority.goal_id,
               _destroy: priority._destroy,
             });
           }
@@ -192,7 +170,7 @@ export function DailyPlanner() {
         }));
 
       try {
-        const result = await updatePlan.mutateAsync({
+        await updatePlan.mutateAsync({
           planId: plan.id,
           data: {
             intention: intentionToSave,
@@ -214,11 +192,6 @@ export function DailyPlanner() {
         saveStatusTimeoutRef.current = setTimeout(() => {
           setSaveStatus("idle");
         }, 2000);
-
-        // Celebrate first daily plan completion
-        if (result.is_first_action) {
-          celebrateFirstAction("first_daily_plan");
-        }
       } catch (error) {
         console.error("Failed to save changes:", error);
         setSaveStatus("idle");
@@ -232,7 +205,6 @@ export function DailyPlanner() {
       shutdownShipped,
       shutdownBlocked,
       updatePlan,
-      celebrateFirstAction,
     ]
   );
 
@@ -251,37 +223,12 @@ export function DailyPlanner() {
     }
   };
 
-  const handleLinkPriorityToGoal = (index: number, goalId: number | null) => {
-    const currentPriorities = ensureThreePriorities();
-    const selectedGoal = goals?.find((g) => g.id === goalId);
-    const newPriorities = currentPriorities.map((p, i) =>
-      i === index
-        ? {
-            ...p,
-            goal_id: goalId,
-            goal: selectedGoal
-              ? {
-                  id: selectedGoal.id,
-                  title: selectedGoal.title,
-                  time_scale: selectedGoal.time_scale,
-                  status: selectedGoal.status,
-                }
-              : null,
-          }
-        : p
-    );
-    setLocalPriorities(newPriorities);
-    saveChanges(newPriorities);
-  };
-
   const ensureThreePriorities = useCallback((): TopPriority[] => {
     const currentPriorities = [...priorities];
     while (currentPriorities.length < 3) {
       currentPriorities.push({
         title: "",
         priority_order: currentPriorities.length + 1,
-        goal_id: null,
-        goal: null,
       });
     }
     return currentPriorities.slice(0, 3);
@@ -377,7 +324,7 @@ export function DailyPlanner() {
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50">
         <div className="text-destructive">Failed to load daily plan</div>
         <Button asChild variant="outline">
-          <Link to="/dashboard">Back to Dashboard</Link>
+          <Link to="/families">Back to Families</Link>
         </Button>
       </div>
     );
@@ -437,49 +384,48 @@ export function DailyPlanner() {
 
         {/* Save Status Bar - Only show for current/today's plans */}
         {!isHistoricalView || isToday ? (
-        <div className="mb-6 flex items-center justify-between rounded-lg border bg-white p-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            {saveStatus === "saving" && (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                <span className="text-sm text-blue-600">Saving...</span>
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <Check className="h-4 w-4 text-green-500" />
-                <span className="text-sm text-green-600">Saved</span>
-              </>
-            )}
-            {saveStatus === "idle" && !hasUnsavedChanges && (
-              <>
-                <Check className="h-4 w-4 text-gray-400" />
-                <span className="text-muted-foreground text-sm">
-                  All changes saved
-                </span>
-              </>
-            )}
-            {saveStatus === "idle" && hasUnsavedChanges && (
-              <>
-                <div className="h-2 w-2 rounded-full bg-amber-500" />
-                <span className="text-sm text-amber-600">Unsaved changes</span>
-              </>
-            )}
+          <div className="mb-6 flex items-center justify-between rounded-lg border bg-white p-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              {saveStatus === "saving" && (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  <span className="text-sm text-blue-600">Saving...</span>
+                </>
+              )}
+              {saveStatus === "saved" && (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-sm text-green-600">Saved</span>
+                </>
+              )}
+              {saveStatus === "idle" && !hasUnsavedChanges && (
+                <>
+                  <Check className="h-4 w-4 text-gray-400" />
+                  <span className="text-muted-foreground text-sm">
+                    All changes saved
+                  </span>
+                </>
+              )}
+              {saveStatus === "idle" && hasUnsavedChanges && (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-amber-500" />
+                  <span className="text-sm text-amber-600">
+                    Unsaved changes
+                  </span>
+                </>
+              )}
+            </div>
+            <Button
+              onClick={handleManualSave}
+              disabled={saveStatus === "saving" || !hasUnsavedChanges}
+              size="sm"
+              variant={hasUnsavedChanges ? "default" : "outline"}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save
+            </Button>
           </div>
-          <Button
-            onClick={handleManualSave}
-            disabled={saveStatus === "saving" || !hasUnsavedChanges}
-            size="sm"
-            variant={hasUnsavedChanges ? "default" : "outline"}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-        </div>
         ) : null}
-
-        {/* Tip for first daily plan */}
-        <StandaloneTip tipType="first_daily_plan" className="mb-4" />
 
         {/* Top 3 Outcomes Today */}
         <Card className="mb-6">
@@ -494,93 +440,23 @@ export function DailyPlanner() {
           </CardHeader>
           <CardContent className="space-y-4">
             {displayPriorities.map((priority, index) => {
-              // Filter goals to non-daily only
-              const filteredGoals =
-                goals?.filter((g) => g.time_scale !== "daily") || [];
               return (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <span className="text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
-                      {index + 1}
-                    </span>
-                    <div className="flex-1 space-y-2">
-                      <MentionInput
-                        multiline={false}
-                        placeholder={`Outcome ${index + 1}`}
-                        value={priority.title}
-                        onChange={(val) => handlePriorityChange(index, val)}
-                        onBlur={handlePriorityBlur}
-                        className="w-full"
-                        disabled={isHistoricalView && !isToday}
-                      />
-                      <Select
-                        value={priority.goal_id?.toString() || ""}
-                        onValueChange={(value) =>
-                          handleLinkPriorityToGoal(
-                            index,
-                            value ? parseInt(value) : null
-                          )
-                        }
-                        disabled={isHistoricalView && !isToday}
-                      >
-                        <SelectTrigger
-                          className="h-9 w-full shrink-0 text-sm"
-                          aria-label="Link to goal"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Link2 className="h-4 w-4" />
-                            <span className="text-muted-foreground text-xs">
-                              {priority.goal_id
-                                ? "Linked to goal"
-                                : "Link to goal (optional)"}
-                            </span>
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {filteredGoals.length > 0 ? (
-                            filteredGoals.map((goal) => (
-                              <SelectItem
-                                key={goal.id}
-                                value={goal.id.toString()}
-                              >
-                                <span className="truncate">{goal.title}</span>
-                                <span className="text-muted-foreground ml-2 text-xs">
-                                  ({getTimeScaleLabel(goal.time_scale)})
-                                </span>
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <div className="text-muted-foreground px-2 py-1.5 text-sm">
-                              No goals available
-                            </div>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                <div key={index} className="flex items-start gap-3">
+                  <span className="text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1">
+                    <Input
+                      placeholder={`Outcome ${index + 1}`}
+                      value={priority.title}
+                      onChange={(e) =>
+                        handlePriorityChange(index, e.target.value)
+                      }
+                      onBlur={handlePriorityBlur}
+                      className="w-full"
+                      disabled={isHistoricalView && !isToday}
+                    />
                   </div>
-                  {priority.goal && (
-                    <div className="ml-13 flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {getTimeScaleLabel(
-                          priority.goal.time_scale as
-                            | "daily"
-                            | "weekly"
-                            | "monthly"
-                            | "quarterly"
-                            | "annual"
-                        )}
-                        : {priority.goal.title}
-                      </Badge>
-                      <button
-                        type="button"
-                        onClick={() => handleLinkPriorityToGoal(index, null)}
-                        className="text-muted-foreground hover:text-destructive"
-                        aria-label="Remove goal link"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -650,10 +526,10 @@ export function DailyPlanner() {
               <label className="text-sm font-medium text-gray-700">
                 What shipped today?
               </label>
-              <MentionInput
-                placeholder="What did you accomplish? What got done? Use @name to mention family members"
+              <Textarea
+                placeholder="What did you accomplish? What got done?"
                 value={shutdownShipped}
-                onChange={handleShutdownShippedChange}
+                onChange={(e) => handleShutdownShippedChange(e.target.value)}
                 onBlur={handleShutdownShippedBlur}
                 className="mt-1.5 min-h-[80px]"
                 disabled={isHistoricalView && !isToday}
@@ -663,10 +539,10 @@ export function DailyPlanner() {
               <label className="text-sm font-medium text-gray-700">
                 What blocked me?
               </label>
-              <MentionInput
-                placeholder="What obstacles or blockers did you encounter? Use @name to mention family members"
+              <Textarea
+                placeholder="What obstacles or blockers did you encounter?"
                 value={shutdownBlocked}
-                onChange={handleShutdownBlockedChange}
+                onChange={(e) => handleShutdownBlockedChange(e.target.value)}
                 onBlur={handleShutdownBlockedBlur}
                 className="mt-1.5 min-h-[80px]"
                 disabled={isHistoricalView && !isToday}
@@ -678,20 +554,10 @@ export function DailyPlanner() {
         {/* Navigation */}
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild variant="outline">
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/families">Families</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to={`/families/${familyId}/goals`}>Goals</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link to={`/families/${familyId}/reflection`}>
-              Evening Reflection
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link to={`/families/${familyId}/weekly-review`}>
-              Weekly Review
-            </Link>
+            <Link to={`/families/${familyId}`}>Family Settings</Link>
           </Button>
         </div>
       </div>
