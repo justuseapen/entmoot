@@ -8,37 +8,6 @@ RSpec.describe DailyPlan do
     it { is_expected.to belong_to(:family) }
     it { is_expected.to have_many(:daily_tasks).dependent(:destroy) }
     it { is_expected.to have_many(:top_priorities).dependent(:destroy) }
-    it { is_expected.to have_many(:mentions).dependent(:destroy) }
-  end
-
-  describe "Mentionable concern" do
-    let(:family) { create(:family) }
-    let(:user) { create(:user, name: "Alice Smith") }
-    let(:bob) { create(:user, name: "Bob Jones") }
-
-    before do
-      create(:family_membership, family: family, user: user, role: :admin)
-      create(:family_membership, family: family, user: bob, role: :adult)
-    end
-
-    it "defines mentionable_fields as :shutdown_shipped and :shutdown_blocked" do
-      expect(described_class.mentionable_text_fields).to eq(%i[shutdown_shipped shutdown_blocked])
-    end
-
-    it "creates mentions when saving with @mentions in shutdown_shipped" do
-      plan = create(:daily_plan, user: user, family: family, shutdown_shipped: "Finished project with @bob")
-
-      expect(plan.mentions.count).to eq(1)
-      expect(plan.mentions.first.mentioned_user).to eq(bob)
-      expect(plan.mentions.first.text_field).to eq("shutdown_shipped")
-    end
-
-    it "creates mentions when saving with @mentions in shutdown_blocked" do
-      plan = create(:daily_plan, user: user, family: family, shutdown_blocked: "Waiting on @bob for review")
-
-      expect(plan.mentions.count).to eq(1)
-      expect(plan.mentions.first.text_field).to eq("shutdown_blocked")
-    end
   end
 
   describe "validations" do

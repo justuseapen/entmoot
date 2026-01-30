@@ -103,9 +103,7 @@ module Api
         user = find_or_require_user
         return unless user
 
-        if user.has_family?
-          return render_error("You already belong to a family.", status: :unprocessable_content)
-        end
+        return render_error("You already belong to a family.", status: :unprocessable_content) if user.has_family?
 
         accept_and_render(user)
       end

@@ -62,65 +62,11 @@ RSpec.describe SendOnboardingEmailsJob do
       end
     end
 
-    context "when user is eligible for day 5 email" do
-      let(:user) do
-        create(:user, created_at: 5.days.ago, onboarding_emails_sent: {
-                 "day_one" => 4.days.ago.iso8601,
-                 "day_three" => 2.days.ago.iso8601
-               })
-      end
-
-      before do
-        create(:family_membership, user: user, family: family, role: :admin)
-        create(:notification_preference, user: user, email: true)
-      end
-
-      it "sends the AI coach intro email" do
-        expect { described_class.new.perform }
-          .to have_enqueued_mail(OnboardingMailer, :ai_coach_intro)
-          .with(user)
-      end
-    end
-
-    context "when user is eligible for day 7 email" do
-      let(:user) do
-        create(:user, created_at: 7.days.ago, onboarding_emails_sent: {
-                 "day_one" => 6.days.ago.iso8601,
-                 "day_three" => 4.days.ago.iso8601,
-                 "day_five" => 2.days.ago.iso8601
-               })
-      end
-
-      before do
-        create(:family_membership, user: user, family: family, role: :admin)
-        create(:notification_preference, user: user, email: true)
-      end
-
-      it "sends the weekly review intro email" do
-        expect { described_class.new.perform }
-          .to have_enqueued_mail(OnboardingMailer, :weekly_review_intro)
-          .with(user)
-      end
-
-      context "when user has already completed weekly reviews" do
-        before do
-          create(:weekly_review, user: user, family: family)
-        end
-
-        it "skips the weekly review intro email" do
-          expect { described_class.new.perform }
-            .not_to have_enqueued_mail(OnboardingMailer, :weekly_review_intro)
-        end
-      end
-    end
-
     context "when user is eligible for day 14 email" do
       let(:user) do
         create(:user, created_at: 14.days.ago, onboarding_emails_sent: {
                  "day_one" => 13.days.ago.iso8601,
-                 "day_three" => 11.days.ago.iso8601,
-                 "day_five" => 9.days.ago.iso8601,
-                 "day_seven" => 7.days.ago.iso8601
+                 "day_three" => 11.days.ago.iso8601
                })
       end
 
@@ -194,8 +140,6 @@ RSpec.describe SendOnboardingEmailsJob do
         expect { described_class.new.perform }
           .to have_enqueued_mail(OnboardingMailer, :welcome).with(new_user)
           .and have_enqueued_mail(OnboardingMailer, :morning_planning_intro).with(existing_user)
-          .and have_enqueued_mail(OnboardingMailer, :ai_coach_intro).with(existing_user)
-          .and have_enqueued_mail(OnboardingMailer, :weekly_review_intro).with(existing_user)
       end
     end
 

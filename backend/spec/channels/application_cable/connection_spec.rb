@@ -6,34 +6,23 @@ RSpec.describe ApplicationCable::Connection, type: :channel do
   let(:user) { create(:user) }
 
   describe "#connect" do
-    context "with valid session" do
-      it "successfully connects when user is authenticated via warden" do
-        connect_with_session(user)
+    context "with valid JWT token" do
+      it "successfully connects when user is authenticated via JWT" do
+        token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
+        connect "/cable?token=#{token}"
 
         expect(connection.current_user).to eq(user)
       end
     end
 
-    context "without session" do
-      it "rejects connection when no user is authenticated" do
+    context "without token" do
+      it "rejects connection when no token is provided" do
         expect { connect "/cable" }.to have_rejected_connection
       end
 
-      it "rejects connection when warden returns nil user" do
-        connect_with_session(nil)
-
-        expect(connection.current_user).to be_nil
-      rescue ActionCable::Connection::Authorization::UnauthorizedError
-        # Expected - connection was rejected
+      it "rejects connection when token is invalid" do
+        expect { connect "/cable?token=invalid_token" }.to have_rejected_connection
       end
     end
-  end
-
-  private
-
-  def connect_with_session(user)
-    # Stub the warden env to simulate session-based authentication
-    warden = instance_double(Warden::Proxy, user: user)
-    connect "/cable", env: { "warden" => warden }
   end
 end

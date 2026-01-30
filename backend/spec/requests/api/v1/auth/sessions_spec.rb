@@ -102,7 +102,7 @@ RSpec.describe "Api::V1::Auth::Sessions" do
         delete "/api/v1/auth/logout", headers: { "Authorization" => token }
         expect(response).to have_http_status(:ok)
 
-        # Note: With devise-jwt using Null revocation strategy, the token
+        # NOTE: With devise-jwt using Null revocation strategy, the token
         # remains valid after logout. For true revocation, would need to
         # implement a proper revocation strategy (e.g., denylist/allowlist)
       end

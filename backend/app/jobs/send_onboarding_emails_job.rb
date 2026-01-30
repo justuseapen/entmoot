@@ -7,8 +7,6 @@ class SendOnboardingEmailsJob < ApplicationJob
   ONBOARDING_SCHEDULE = {
     day_one: { days: 1, email: :welcome },
     day_three: { days: 3, email: :morning_planning_intro },
-    day_five: { days: 5, email: :ai_coach_intro },
-    day_seven: { days: 7, email: :weekly_review_intro },
     day_fourteen: { days: 14, email: :two_week_check_in }
   }.freeze
   def perform
@@ -54,8 +52,6 @@ class SendOnboardingEmailsJob < ApplicationJob
     case email_key
     when :day_three
       skip_morning_planning_email?(user)
-    when :day_seven
-      skip_weekly_review_email?(user)
     else
       false
     end
@@ -64,11 +60,6 @@ class SendOnboardingEmailsJob < ApplicationJob
   def skip_morning_planning_email?(user)
     # Skip if user already has daily plans
     user.daily_plans.exists?
-  end
-
-  def skip_weekly_review_email?(user)
-    # Skip if user already has weekly reviews
-    user.weekly_reviews.exists?
   end
 
   def send_email(user, email_method)

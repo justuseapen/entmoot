@@ -14,10 +14,6 @@ RSpec.describe "CORS" do
     it "includes Access-Control-Allow-Origin header" do
       expect(response.headers["Access-Control-Allow-Origin"]).to eq(origin)
     end
-
-    it "includes Access-Control-Allow-Credentials header" do
-      expect(response.headers["Access-Control-Allow-Credentials"]).to eq("true")
-    end
   end
 
   describe "OPTIONS preflight requests" do
@@ -34,7 +30,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:ok)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
 
       it "includes Access-Control-Allow-Methods header with all expected methods" do
         allowed_methods = response.headers["Access-Control-Allow-Methods"]
@@ -51,9 +47,8 @@ RSpec.describe "CORS" do
         expect(response.headers["Access-Control-Allow-Headers"]).to be_present
       end
 
-      it "includes Access-Control-Expose-Headers with Set-Cookie and Authorization" do
+      it "includes Access-Control-Expose-Headers with Authorization" do
         expose_headers = response.headers["Access-Control-Expose-Headers"]
-        expect(expose_headers).to include("Set-Cookie")
         expect(expose_headers).to include("Authorization")
       end
     end
@@ -71,7 +66,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:ok)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
 
       it "allows POST method" do
         expect(response.headers["Access-Control-Allow-Methods"]).to include("POST")
@@ -91,7 +86,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:ok)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 
@@ -107,7 +102,7 @@ RSpec.describe "CORS" do
         expect(response.status).to be_present
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
 
     context "for API endpoints requiring authentication" do
@@ -124,7 +119,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:ok)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
 
     context "when user is not authenticated" do
@@ -134,7 +129,7 @@ RSpec.describe "CORS" do
 
       # Even unauthorized requests should have CORS headers
       # so the browser can read the error response
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 
@@ -155,7 +150,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:ok)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
 
     context "for register endpoint" do
@@ -175,7 +170,7 @@ RSpec.describe "CORS" do
              }
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 
@@ -192,7 +187,7 @@ RSpec.describe "CORS" do
         expect(response).to have_http_status(:success)
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 
@@ -215,12 +210,12 @@ RSpec.describe "CORS" do
               }
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 
   describe "origin validation" do
-    # Note: Testing multiple origins requires app restart to reload middleware.
+    # NOTE: Testing multiple origins requires app restart to reload middleware.
     # The CORS_ORIGINS env var is read at boot time.
     # These tests verify the mechanism works for the configured origin.
 
@@ -255,7 +250,7 @@ RSpec.describe "CORS" do
 
       # Critical: CORS headers must be present even on error responses
       # so the browser can read the error message
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
 
     context "when request returns 422 validation error" do
@@ -273,7 +268,7 @@ RSpec.describe "CORS" do
              }
       end
 
-      include_examples "returns CORS headers"
+      it_behaves_like "returns CORS headers"
     end
   end
 

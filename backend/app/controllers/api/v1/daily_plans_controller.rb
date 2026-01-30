@@ -11,7 +11,6 @@ module Api
 
         @daily_plans = policy_scope(DailyPlan)
                        .where(family: @family, user: current_user)
-                       .mentioned_by(params[:mentioned_by])
                        .order(date: :desc)
 
         render json: { daily_plans: @daily_plans.map { |plan| plan_summary(plan) } }
@@ -63,8 +62,8 @@ module Api
           :intention,
           :shutdown_shipped,
           :shutdown_blocked,
-          daily_tasks_attributes: %i[id title completed position goal_id assignee_id _destroy],
-          top_priorities_attributes: %i[id title priority_order goal_id completed _destroy],
+          daily_tasks_attributes: %i[id title completed position _destroy],
+          top_priorities_attributes: %i[id title priority_order completed _destroy],
           habit_completions_attributes: %i[id habit_id completed]
         )
       end
@@ -106,19 +105,7 @@ module Api
           id: task.id,
           title: task.title,
           completed: task.completed,
-          position: task.position,
-          goal_id: task.goal_id,
-          goal: task.goal ? goal_summary(task.goal) : nil,
-          assignee_id: task.assignee_id,
-          assignee: task.assignee ? user_summary(task.assignee) : nil
-        }
-      end
-
-      def user_summary(user)
-        {
-          id: user.id,
-          name: user.name,
-          avatar_url: user.avatar_url
+          position: task.position
         }
       end
 
@@ -127,18 +114,7 @@ module Api
           id: priority.id,
           title: priority.title,
           priority_order: priority.priority_order,
-          goal_id: priority.goal_id,
-          goal: priority.goal ? goal_summary(priority.goal) : nil,
           completed: priority.completed
-        }
-      end
-
-      def goal_summary(goal)
-        {
-          id: goal.id,
-          title: goal.title,
-          time_scale: goal.time_scale,
-          status: goal.status
         }
       end
 
@@ -161,26 +137,17 @@ module Api
         @daily_plan.daily_tasks.any? || @daily_plan.top_priorities.any? || @daily_plan.intention.present?
       end
 
-      def record_daily_planning_streak
-        StreakService.record_daily_planning(user: current_user, date: @daily_plan.date)
-      end
-
       def tasks_completion_state
         @daily_plan.daily_tasks.reload.to_h { |t| [t.id, t.completed] }
       end
 
       def award_task_completion_points(tasks_before)
-        @daily_plan.daily_tasks.reload.each do |task|
-          was_completed = tasks_before[task.id]
-          # Award points only if task changed from not completed to completed
-          PointsService.award_task_completion(user: current_user, task: task) if task.completed && !was_completed
-        end
+        # Points system removed - no-op
       end
 
       def handle_plan_content_update?
         return false unless plan_has_content?
 
-        record_daily_planning_streak
         track_daily_plan_activity
         current_user.record_first_action?(:daily_plan_completed)
       end

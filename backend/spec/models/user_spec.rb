@@ -51,32 +51,14 @@ RSpec.describe User do
       expect(user.onboarding_required?).to be false
     end
 
-    it "returns true when user has family but no goals" do
+    it "returns false when user has a family" do
       family = create(:family)
       create(:family_membership, user: user, family: family)
-
-      expect(user.onboarding_required?).to be true
-    end
-
-    it "returns true when user has goals but no family" do
-      # Create a goal without family context (edge case)
-      another_user = create(:user)
-      family = create(:family)
-      create(:family_membership, user: another_user, family: family)
-      create(:goal, creator: user, family: family)
-
-      expect(user.onboarding_required?).to be true
-    end
-
-    it "returns false when user has both family and goals" do
-      family = create(:family)
-      create(:family_membership, user: user, family: family)
-      create(:goal, creator: user, family: family)
 
       expect(user.onboarding_required?).to be false
     end
 
-    it "returns false when onboarding is completed even without family or goals" do
+    it "returns false when onboarding is completed even without family" do
       user.update!(onboarding_wizard_completed_at: Time.current)
       expect(user.onboarding_required?).to be false
     end
@@ -88,39 +70,39 @@ RSpec.describe User do
     describe "FIRST_ACTION_TYPES" do
       it "defines the expected action types" do
         expect(described_class::FIRST_ACTION_TYPES).to eq(
-          %w[goal_created reflection_completed daily_plan_completed invitation_accepted]
+          %w[daily_plan_completed invitation_accepted]
         )
       end
     end
 
     describe "#first_action_completed?" do
       it "returns false when action has not been completed" do
-        expect(user.first_action_completed?(:goal_created)).to be false
+        expect(user.first_action_completed?(:daily_plan_completed)).to be false
       end
 
       it "returns true when action has been completed" do
-        user.update!(first_actions: { "goal_created" => Time.current.iso8601 })
-        expect(user.first_action_completed?(:goal_created)).to be true
+        user.update!(first_actions: { "daily_plan_completed" => Time.current.iso8601 })
+        expect(user.first_action_completed?(:daily_plan_completed)).to be true
       end
 
       it "works with string keys" do
-        user.update!(first_actions: { "goal_created" => Time.current.iso8601 })
-        expect(user.first_action_completed?("goal_created")).to be true
+        user.update!(first_actions: { "daily_plan_completed" => Time.current.iso8601 })
+        expect(user.first_action_completed?("daily_plan_completed")).to be true
       end
     end
 
     describe "#record_first_action?" do
       it "records a new first action and returns true" do
-        result = user.record_first_action?(:goal_created)
+        result = user.record_first_action?(:daily_plan_completed)
 
         expect(result).to be true
-        expect(user.reload.first_actions).to have_key("goal_created")
+        expect(user.reload.first_actions).to have_key("daily_plan_completed")
       end
 
       it "returns false if action is already completed" do
-        user.update!(first_actions: { "goal_created" => Time.current.iso8601 })
+        user.update!(first_actions: { "daily_plan_completed" => Time.current.iso8601 })
 
-        result = user.record_first_action?(:goal_created)
+        result = user.record_first_action?(:daily_plan_completed)
 
         expect(result).to be false
       end
@@ -133,18 +115,18 @@ RSpec.describe User do
 
       it "stores the timestamp in ISO8601 format" do
         freeze_time do
-          user.record_first_action?(:goal_created)
+          user.record_first_action?(:daily_plan_completed)
 
-          expect(user.reload.first_actions["goal_created"]).to eq(Time.current.iso8601)
+          expect(user.reload.first_actions["daily_plan_completed"]).to eq(Time.current.iso8601)
         end
       end
 
       it "preserves existing first actions when adding a new one" do
-        user.update!(first_actions: { "goal_created" => "2026-01-01T12:00:00Z" })
-        user.record_first_action?(:reflection_completed)
+        user.update!(first_actions: { "daily_plan_completed" => "2026-01-01T12:00:00Z" })
+        user.record_first_action?(:invitation_accepted)
 
-        expect(user.reload.first_actions).to have_key("goal_created")
-        expect(user.first_actions).to have_key("reflection_completed")
+        expect(user.reload.first_actions).to have_key("daily_plan_completed")
+        expect(user.first_actions).to have_key("invitation_accepted")
       end
     end
   end
