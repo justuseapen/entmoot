@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_30_203608) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,49 +42,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "annual_reviews", force: :cascade do |t|
-    t.integer "year", null: false
+  create_table "daily_cards", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "family_id", null: false
-    t.jsonb "year_highlights", default: []
-    t.jsonb "year_challenges", default: []
-    t.text "lessons_learned"
-    t.jsonb "gratitude", default: []
-    t.string "next_year_theme"
-    t.jsonb "next_year_goals", default: []
-    t.boolean "completed", default: false, null: false
+    t.date "date", null: false
+    t.text "priority_outcomes"
+    t.text "habits"
+    t.text "tasks"
+    t.text "review_notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["family_id"], name: "index_annual_reviews_on_family_id"
-    t.index ["user_id", "family_id", "year"], name: "index_annual_reviews_unique", unique: true
-    t.index ["user_id"], name: "index_annual_reviews_on_user_id"
-  end
-
-  create_table "badges", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "description", null: false
-    t.string "icon", null: false
-    t.string "category", null: false
-    t.jsonb "criteria", default: {}, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["category"], name: "index_badges_on_category"
-    t.index ["name"], name: "index_badges_on_name", unique: true
-  end
-
-  create_table "calendar_sync_mappings", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "syncable_type", null: false
-    t.bigint "syncable_id", null: false
-    t.string "google_event_id", null: false
-    t.string "google_calendar_id", null: false
-    t.datetime "last_synced_at"
-    t.string "etag"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "google_event_id"], name: "idx_sync_mapping_event", unique: true
-    t.index ["user_id", "syncable_type", "syncable_id"], name: "idx_sync_mapping_unique", unique: true
-    t.index ["user_id"], name: "index_calendar_sync_mappings_on_user_id"
+    t.index ["date"], name: "index_daily_cards_on_date"
+    t.index ["family_id"], name: "index_daily_cards_on_family_id"
+    t.index ["user_id", "family_id", "date"], name: "index_daily_cards_on_user_id_and_family_id_and_date", unique: true
+    t.index ["user_id"], name: "index_daily_cards_on_user_id"
   end
 
   create_table "daily_plans", force: :cascade do |t|
@@ -106,14 +77,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.boolean "completed", default: false, null: false
     t.integer "position", default: 0, null: false
     t.bigint "daily_plan_id", null: false
-    t.bigint "goal_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "assignee_id"
-    t.index ["assignee_id"], name: "index_daily_tasks_on_assignee_id"
     t.index ["daily_plan_id", "position"], name: "index_daily_tasks_on_daily_plan_id_and_position"
     t.index ["daily_plan_id"], name: "index_daily_tasks_on_daily_plan_id"
-    t.index ["goal_id"], name: "index_daily_tasks_on_goal_id"
   end
 
   create_table "device_tokens", force: :cascade do |t|
@@ -172,65 +139,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["user_id"], name: "index_feedback_reports_on_user_id"
   end
 
-  create_table "goal_assignments", force: :cascade do |t|
-    t.bigint "goal_id", null: false
-    t.bigint "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["goal_id", "user_id"], name: "index_goal_assignments_on_goal_id_and_user_id", unique: true
-    t.index ["goal_id"], name: "index_goal_assignments_on_goal_id"
-    t.index ["user_id"], name: "index_goal_assignments_on_user_id"
-  end
-
-  create_table "goals", force: :cascade do |t|
-    t.string "title", null: false
-    t.text "description"
-    t.text "specific"
-    t.text "measurable"
-    t.text "achievable"
-    t.text "relevant"
-    t.text "time_bound"
-    t.integer "time_scale", default: 0, null: false
-    t.integer "status", default: 0, null: false
-    t.integer "visibility", default: 0, null: false
-    t.integer "progress", default: 0, null: false
-    t.date "due_date"
-    t.bigint "parent_id"
-    t.bigint "family_id", null: false
-    t.bigint "creator_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "is_draft", default: false, null: false
-    t.integer "position"
-    t.boolean "trackable", default: false, null: false
-    t.jsonb "trackability_assessment", default: {}
-    t.datetime "trackability_assessed_at"
-    t.index ["creator_id", "visibility"], name: "index_goals_on_creator_id_and_visibility"
-    t.index ["creator_id"], name: "index_goals_on_creator_id"
-    t.index ["family_id", "creator_id", "time_scale", "position"], name: "idx_on_family_id_creator_id_time_scale_position_03c0ba4628"
-    t.index ["family_id", "is_draft"], name: "index_goals_on_family_id_and_is_draft"
-    t.index ["family_id", "time_scale", "status"], name: "index_goals_on_family_id_and_time_scale_and_status"
-    t.index ["family_id", "visibility"], name: "index_goals_on_family_id_and_visibility"
-    t.index ["family_id"], name: "index_goals_on_family_id"
-    t.index ["parent_id"], name: "index_goals_on_parent_id"
-  end
-
-  create_table "google_calendar_credentials", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.text "access_token", null: false
-    t.text "refresh_token", null: false
-    t.datetime "token_expires_at", null: false
-    t.string "calendar_id", null: false
-    t.string "calendar_name"
-    t.string "google_email"
-    t.datetime "last_sync_at"
-    t.string "sync_status", default: "active", null: false
-    t.string "last_error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_google_calendar_credentials_on_user_id", unique: true
-  end
-
   create_table "habit_completions", force: :cascade do |t|
     t.boolean "completed", default: false, null: false
     t.bigint "habit_id", null: false
@@ -275,36 +183,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
-  end
-
-  create_table "mentions", force: :cascade do |t|
-    t.string "mentionable_type", null: false
-    t.bigint "mentionable_id", null: false
-    t.bigint "user_id", null: false
-    t.bigint "mentioned_user_id", null: false
-    t.string "text_field", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["mentionable_type", "mentionable_id", "user_id", "mentioned_user_id", "text_field"], name: "index_mentions_uniqueness", unique: true
-    t.index ["mentionable_type", "mentionable_id"], name: "index_mentions_on_mentionable_type_and_mentionable_id"
-    t.index ["mentioned_user_id"], name: "index_mentions_on_mentioned_user_id"
-    t.index ["user_id"], name: "index_mentions_on_user_id"
-  end
-
-  create_table "monthly_reviews", force: :cascade do |t|
-    t.date "month", null: false
-    t.bigint "user_id", null: false
-    t.bigint "family_id", null: false
-    t.jsonb "highlights", default: []
-    t.jsonb "challenges", default: []
-    t.text "lessons_learned"
-    t.jsonb "next_month_focus", default: []
-    t.boolean "completed", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["family_id"], name: "index_monthly_reviews_on_family_id"
-    t.index ["user_id", "family_id", "month"], name: "index_monthly_reviews_unique_month", unique: true
-    t.index ["user_id"], name: "index_monthly_reviews_on_user_id"
   end
 
   create_table "newsletter_subscriptions", force: :cascade do |t|
@@ -364,18 +242,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
-  create_table "outreach_histories", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "outreach_type", null: false
-    t.string "channel", null: false
-    t.datetime "sent_at", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "channel"], name: "index_outreach_histories_on_user_id_and_channel"
-    t.index ["user_id", "outreach_type", "sent_at"], name: "idx_on_user_id_outreach_type_sent_at_245204cf96"
-    t.index ["user_id"], name: "index_outreach_histories_on_user_id"
-  end
-
   create_table "pets", force: :cascade do |t|
     t.string "name", null: false
     t.string "pet_type"
@@ -389,61 +255,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["family_id"], name: "index_pets_on_family_id"
   end
 
-  create_table "points_ledger_entries", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.integer "points", null: false
-    t.string "activity_type", null: false
-    t.jsonb "metadata", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["activity_type"], name: "index_points_ledger_entries_on_activity_type"
-    t.index ["created_at"], name: "index_points_ledger_entries_on_created_at"
-    t.index ["user_id", "activity_type", "created_at"], name: "idx_points_user_activity_date"
-    t.index ["user_id"], name: "index_points_ledger_entries_on_user_id"
-  end
-
-  create_table "quarterly_reviews", force: :cascade do |t|
-    t.date "quarter_start_date", null: false
-    t.bigint "user_id", null: false
-    t.bigint "family_id", null: false
-    t.jsonb "achievements", default: []
-    t.jsonb "obstacles", default: []
-    t.text "insights"
-    t.jsonb "next_quarter_objectives", default: []
-    t.boolean "completed", default: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["family_id"], name: "index_quarterly_reviews_on_family_id"
-    t.index ["user_id", "family_id", "quarter_start_date"], name: "index_quarterly_reviews_unique", unique: true
-    t.index ["user_id"], name: "index_quarterly_reviews_on_user_id"
-  end
-
-  create_table "reflection_responses", force: :cascade do |t|
-    t.bigint "reflection_id", null: false
-    t.string "prompt", null: false
-    t.text "response"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["reflection_id", "prompt"], name: "index_reflection_responses_on_reflection_id_and_prompt", unique: true
-    t.index ["reflection_id"], name: "index_reflection_responses_on_reflection_id"
-  end
-
-  create_table "reflections", force: :cascade do |t|
-    t.bigint "daily_plan_id"
-    t.integer "reflection_type", default: 0, null: false
-    t.integer "mood"
-    t.integer "energy_level"
-    t.jsonb "gratitude_items", default: []
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "user_id"
-    t.bigint "family_id"
-    t.index ["daily_plan_id", "reflection_type"], name: "index_reflections_on_daily_plan_id_and_reflection_type", unique: true
-    t.index ["daily_plan_id"], name: "index_reflections_on_daily_plan_id"
-    t.index ["family_id"], name: "index_reflections_on_family_id"
-    t.index ["user_id"], name: "index_reflections_on_user_id"
-  end
-
   create_table "refresh_tokens", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "token", null: false
@@ -455,40 +266,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
   end
 
-  create_table "streaks", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.integer "streak_type", null: false
-    t.integer "current_count", default: 0, null: false
-    t.integer "longest_count", default: 0, null: false
-    t.date "last_activity_date"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "streak_type"], name: "index_streaks_unique_user_type", unique: true
-    t.index ["user_id"], name: "index_streaks_on_user_id"
-  end
-
   create_table "top_priorities", force: :cascade do |t|
     t.string "title", null: false
     t.integer "priority_order", null: false
     t.bigint "daily_plan_id", null: false
-    t.bigint "goal_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "completed", default: false, null: false
     t.index ["daily_plan_id", "priority_order"], name: "index_top_priorities_on_daily_plan_id_and_priority_order", unique: true
     t.index ["daily_plan_id"], name: "index_top_priorities_on_daily_plan_id"
-    t.index ["goal_id"], name: "index_top_priorities_on_goal_id"
-  end
-
-  create_table "user_badges", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "badge_id", null: false
-    t.datetime "earned_at", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["badge_id"], name: "index_user_badges_on_badge_id"
-    t.index ["user_id", "badge_id"], name: "index_user_badges_unique_user_badge", unique: true
-    t.index ["user_id"], name: "index_user_badges_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -532,94 +318,28 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_200000) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  create_table "weekly_reviews", force: :cascade do |t|
-    t.date "week_start_date", null: false
-    t.bigint "user_id", null: false
-    t.bigint "family_id", null: false
-    t.jsonb "wins", default: []
-    t.jsonb "challenges", default: []
-    t.jsonb "next_week_priorities", default: []
-    t.text "lessons_learned"
-    t.boolean "completed", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "source_review_completed", default: false, null: false
-    t.text "wins_shipped"
-    t.text "losses_friction"
-    t.integer "workouts_completed"
-    t.integer "workouts_planned"
-    t.integer "walks_completed"
-    t.integer "walks_planned", default: 7
-    t.integer "writing_sessions_completed"
-    t.integer "writing_sessions_planned"
-    t.integer "house_resets_completed"
-    t.integer "house_resets_planned", default: 7
-    t.boolean "meals_prepped_held"
-    t.text "metrics_notes"
-    t.boolean "daily_focus_used_every_day"
-    t.boolean "weekly_priorities_clear"
-    t.boolean "cleaning_system_held"
-    t.boolean "training_volume_sustainable"
-    t.text "system_to_adjust"
-    t.text "weekly_priorities"
-    t.text "kill_list"
-    t.boolean "workouts_blocked", default: false, null: false
-    t.boolean "monday_top_3_decided", default: false, null: false
-    t.boolean "monday_focus_card_prepped", default: false, null: false
-    t.index ["family_id"], name: "index_weekly_reviews_on_family_id"
-    t.index ["user_id", "family_id", "week_start_date"], name: "index_weekly_reviews_unique_week", unique: true
-    t.index ["user_id"], name: "index_weekly_reviews_on_user_id"
-  end
-
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "annual_reviews", "families"
-  add_foreign_key "annual_reviews", "users"
-  add_foreign_key "calendar_sync_mappings", "users"
+  add_foreign_key "daily_cards", "families"
+  add_foreign_key "daily_cards", "users"
   add_foreign_key "daily_plans", "families"
   add_foreign_key "daily_plans", "users"
   add_foreign_key "daily_tasks", "daily_plans"
-  add_foreign_key "daily_tasks", "goals"
-  add_foreign_key "daily_tasks", "users", column: "assignee_id"
   add_foreign_key "device_tokens", "users"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
   add_foreign_key "feedback_reports", "feedback_reports", column: "duplicate_of_id"
   add_foreign_key "feedback_reports", "users"
   add_foreign_key "feedback_reports", "users", column: "assigned_to_id"
-  add_foreign_key "goal_assignments", "goals"
-  add_foreign_key "goal_assignments", "users"
-  add_foreign_key "goals", "families"
-  add_foreign_key "goals", "goals", column: "parent_id"
-  add_foreign_key "goals", "users", column: "creator_id"
-  add_foreign_key "google_calendar_credentials", "users"
   add_foreign_key "habit_completions", "daily_plans"
   add_foreign_key "habit_completions", "habits"
   add_foreign_key "habits", "families"
   add_foreign_key "habits", "users"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
-  add_foreign_key "mentions", "users"
-  add_foreign_key "mentions", "users", column: "mentioned_user_id"
-  add_foreign_key "monthly_reviews", "families"
-  add_foreign_key "monthly_reviews", "users"
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "notifications", "users"
-  add_foreign_key "outreach_histories", "users"
   add_foreign_key "pets", "families"
-  add_foreign_key "points_ledger_entries", "users"
-  add_foreign_key "quarterly_reviews", "families"
-  add_foreign_key "quarterly_reviews", "users"
-  add_foreign_key "reflection_responses", "reflections"
-  add_foreign_key "reflections", "daily_plans"
-  add_foreign_key "reflections", "families"
-  add_foreign_key "reflections", "users"
   add_foreign_key "refresh_tokens", "users"
-  add_foreign_key "streaks", "users"
   add_foreign_key "top_priorities", "daily_plans"
-  add_foreign_key "top_priorities", "goals"
-  add_foreign_key "user_badges", "badges"
-  add_foreign_key "user_badges", "users"
-  add_foreign_key "weekly_reviews", "families"
-  add_foreign_key "weekly_reviews", "users"
 end
