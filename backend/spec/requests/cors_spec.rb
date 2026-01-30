@@ -111,8 +111,7 @@ RSpec.describe "CORS" do
 
       before do
         create(:family_membership, family: family, user: user, role: "adult")
-        login_as(user, scope: :user)
-        get "/api/v1/families", headers: { "Origin" => origin }
+        get "/api/v1/families", headers: { "Origin" => origin }.merge(auth_headers(user))
       end
 
       it "returns successful status" do
@@ -179,8 +178,7 @@ RSpec.describe "CORS" do
       let(:user) { create(:user) }
 
       before do
-        login_as(user, scope: :user)
-        delete "/api/v1/auth/logout", headers: { "Origin" => origin }
+        delete "/api/v1/auth/logout", headers: { "Origin" => origin }.merge(auth_headers(user))
       end
 
       it "returns successful status" do
@@ -197,7 +195,6 @@ RSpec.describe "CORS" do
 
     before do
       create(:family_membership, family: family, user: user, role: "admin")
-      login_as(user, scope: :user)
     end
 
     context "for PATCH request" do
@@ -207,7 +204,7 @@ RSpec.describe "CORS" do
               headers: {
                 "Origin" => origin,
                 "Content-Type" => "application/json"
-              }
+              }.merge(auth_headers(user))
       end
 
       it_behaves_like "returns CORS headers"

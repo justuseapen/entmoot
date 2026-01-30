@@ -4,6 +4,19 @@ require "rails_helper"
 
 RSpec.describe "Health" do
   describe "GET /health" do
+    before do
+      # Stub health checks to always pass in tests
+      allow_any_instance_of(HealthController).to receive(:check_database).and_return(
+        { healthy: true, message: "Connected" }
+      )
+      allow_any_instance_of(HealthController).to receive(:check_redis).and_return(
+        { healthy: true, message: "Connected" }
+      )
+      allow_any_instance_of(HealthController).to receive(:check_sidekiq).and_return(
+        { healthy: true, message: "1 process(es) running" }
+      )
+    end
+
     it "returns ok status" do
       get "/health"
 

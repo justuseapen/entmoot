@@ -113,10 +113,7 @@ class ProactiveFeedbackService
 
     def meaningful_activity?(user)
       # User has completed at least one of these activities
-      user.daily_plans.exists? ||
-        user.created_goals.exists? ||
-        user.reflections.exists? ||
-        user.weekly_reviews.exists?
+      user.daily_plans.exists?
     end
 
     def recently_prompted_for_nps?(user)

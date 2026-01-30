@@ -5,13 +5,7 @@ class Family < ApplicationRecord
   has_many :members, through: :family_memberships, source: :user
   has_many :invitations, dependent: :destroy
   has_many :pets, dependent: :destroy
-  has_many :goals, dependent: :destroy
   has_many :daily_plans, dependent: :destroy
-  has_many :weekly_reviews, dependent: :destroy
-  has_many :monthly_reviews, dependent: :destroy
-  has_many :quarterly_reviews, dependent: :destroy
-  has_many :annual_reviews, dependent: :destroy
-  has_many :reflections, dependent: :destroy
 
   validates :name, presence: true
   validates :timezone, presence: true
