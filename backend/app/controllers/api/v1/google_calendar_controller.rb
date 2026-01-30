@@ -3,7 +3,8 @@
 module Api
   module V1
     class GoogleCalendarController < ApplicationController
-      before_action :authenticate_user!
+      before_action :authenticate_user!, except: [:callback]
+      before_action :authenticate_user_from_state!, only: [:callback]
 
       # GET /users/me/google_calendar
       def show
@@ -26,8 +27,7 @@ module Api
 
       # GET /users/me/google_calendar/auth_url
       def auth_url
-        state = generate_oauth_state
-        session[:google_oauth_state] = state
+        state = generate_signed_state(current_user.id)
 
         url = GoogleOAuthService.authorization_url(
           state: state,
@@ -41,22 +41,19 @@ module Api
 
       # GET /users/me/google_calendar/callback
       def callback
-        validate_oauth_state!
+        # User is already authenticated via authenticate_user_from_state!
 
         tokens = GoogleOAuthService.exchange_code(
           code: params[:code],
           redirect_uri: oauth_redirect_uri
         )
 
-        # Store tokens temporarily in session for calendar selection
-        session[:google_calendar_tokens] = {
-          access_token: tokens[:access_token],
-          refresh_token: tokens[:refresh_token],
-          expires_at: tokens[:expires_at].iso8601
-        }
+        # Encrypt tokens to pass via URL (short-lived, for calendar selection)
+        encrypted_tokens = encrypt_tokens(tokens)
 
-        # Redirect to frontend calendar selection page
-        redirect_to "#{frontend_url}/settings/calendar/select", allow_other_host: true
+        # Redirect to frontend calendar selection page with encrypted tokens
+        redirect_to "#{frontend_url}/settings/calendar/select?tokens=#{CGI.escape(encrypted_tokens)}",
+                    allow_other_host: true
       rescue GoogleOAuthService::TokenExchangeError => e
         redirect_to "#{frontend_url}/settings/notifications?error=#{CGI.escape(e.message)}", allow_other_host: true
       rescue InvalidOAuthStateError => e
@@ -65,8 +62,11 @@ module Api
 
       # GET /users/me/google_calendar/calendars
       def calendars
-        tokens = session[:google_calendar_tokens]
-        return render json: { error: "No pending OAuth session" }, status: :bad_request unless tokens
+        encrypted_tokens = params[:tokens]
+        return render json: { error: "No OAuth tokens provided" }, status: :bad_request if encrypted_tokens.blank?
+
+        tokens = decrypt_tokens(encrypted_tokens)
+        return render json: { error: "Invalid or expired tokens" }, status: :bad_request unless tokens
 
         # Create temporary credential for listing calendars
         temp_credential = build_temp_credential(tokens)
@@ -78,12 +78,17 @@ module Api
         render json: { calendars: calendars }
       rescue GoogleCalendarService::AuthenticationError => e
         render json: { error: e.message }, status: :unauthorized
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage
+        render json: { error: "Invalid or expired tokens" }, status: :bad_request
       end
 
       # POST /users/me/google_calendar/connect
       def connect
-        tokens = session[:google_calendar_tokens]
-        return render json: { error: "No pending OAuth session" }, status: :bad_request unless tokens
+        encrypted_tokens = params[:tokens]
+        return render json: { error: "No OAuth tokens provided" }, status: :bad_request if encrypted_tokens.blank?
+
+        tokens = decrypt_tokens(encrypted_tokens)
+        return render json: { error: "Invalid or expired tokens" }, status: :bad_request unless tokens
 
         calendar_id = params[:calendar_id]
         calendar_name = params[:calendar_name]
@@ -95,9 +100,9 @@ module Api
         credential = current_user.google_calendar_credential || current_user.build_google_calendar_credential
 
         credential.assign_attributes(
-          access_token: tokens["access_token"],
-          refresh_token: tokens["refresh_token"],
-          token_expires_at: Time.zone.parse(tokens["expires_at"]),
+          access_token: tokens[:access_token],
+          refresh_token: tokens[:refresh_token],
+          token_expires_at: tokens[:expires_at],
           calendar_id: calendar_id,
           calendar_name: calendar_name,
           google_email: google_email,
@@ -106,10 +111,6 @@ module Api
         )
 
         if credential.save
-          # Clear session tokens
-          session.delete(:google_calendar_tokens)
-          session.delete(:google_oauth_state)
-
           # Trigger initial sync
           CalendarInitialSyncJob.perform_later(current_user.id)
 
@@ -123,6 +124,8 @@ module Api
         else
           render json: { errors: credential.errors.full_messages }, status: :unprocessable_content
         end
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage
+        render json: { error: "Invalid or expired tokens" }, status: :bad_request
       end
 
       # DELETE /users/me/google_calendar
@@ -179,17 +182,69 @@ module Api
 
       class InvalidOAuthStateError < StandardError; end
 
-      def generate_oauth_state
-        SecureRandom.urlsafe_base64(32)
+      # State token expiry (10 minutes should be plenty for OAuth flow)
+      STATE_EXPIRY = 10.minutes
+      # Token expiry for encrypted tokens passed to frontend (5 minutes)
+      TOKEN_EXPIRY = 5.minutes
+
+      def generate_signed_state(user_id)
+        payload = {
+          user_id: user_id,
+          nonce: SecureRandom.urlsafe_base64(16),
+          exp: STATE_EXPIRY.from_now.to_i
+        }
+        message_encryptor.encrypt_and_sign(payload.to_json)
       end
 
-      def validate_oauth_state!
-        received_state = params[:state]
-        expected_state = session[:google_oauth_state]
+      def verify_signed_state(state)
+        return nil if state.blank?
 
-        return unless received_state.blank? || expected_state.blank? || received_state != expected_state
+        payload = JSON.parse(message_encryptor.decrypt_and_verify(state))
+        return nil if payload["exp"] < Time.current.to_i
 
+        payload
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage, JSON::ParserError
+        nil
+      end
+
+      def authenticate_user_from_state!
+        payload = verify_signed_state(params[:state])
+        raise InvalidOAuthStateError, "Invalid OAuth state parameter" unless payload
+
+        @current_user = User.find(payload["user_id"])
+      rescue ActiveRecord::RecordNotFound
         raise InvalidOAuthStateError, "Invalid OAuth state parameter"
+      end
+
+      def encrypt_tokens(tokens)
+        payload = {
+          access_token: tokens[:access_token],
+          refresh_token: tokens[:refresh_token],
+          expires_at: tokens[:expires_at].iso8601,
+          exp: TOKEN_EXPIRY.from_now.to_i
+        }
+        message_encryptor.encrypt_and_sign(payload.to_json)
+      end
+
+      def decrypt_tokens(encrypted)
+        return nil if encrypted.blank?
+
+        payload = JSON.parse(message_encryptor.decrypt_and_verify(encrypted))
+        return nil if payload["exp"] < Time.current.to_i
+
+        {
+          access_token: payload["access_token"],
+          refresh_token: payload["refresh_token"],
+          expires_at: Time.zone.parse(payload["expires_at"])
+        }
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage, JSON::ParserError
+        nil
+      end
+
+      def message_encryptor
+        @message_encryptor ||= ActiveSupport::MessageEncryptor.new(
+          Rails.application.secret_key_base[0..31]
+        )
       end
 
       def oauth_redirect_uri
@@ -224,9 +279,9 @@ module Api
 
       def build_temp_credential(tokens)
         TempCredential.new(
-          access_token: tokens["access_token"],
-          refresh_token: tokens["refresh_token"],
-          token_expires_at: Time.zone.parse(tokens["expires_at"])
+          access_token: tokens[:access_token],
+          refresh_token: tokens[:refresh_token],
+          token_expires_at: tokens[:expires_at]
         )
       end
     end

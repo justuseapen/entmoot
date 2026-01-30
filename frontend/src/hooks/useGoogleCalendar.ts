@@ -36,12 +36,12 @@ export function useGoogleCalendarAuthUrl() {
 }
 
 // Hook to list available calendars (after OAuth callback)
-export function useGoogleCalendarsList() {
+export function useGoogleCalendarsList(tokens: string | null) {
   return useQuery<CalendarListResponse>({
-    queryKey: GOOGLE_CALENDARS_LIST_KEY,
-    queryFn: getGoogleCalendars,
-    enabled: false, // Only fetch when explicitly called
-    retry: false, // Don't retry on failure (session may have expired)
+    queryKey: [...GOOGLE_CALENDARS_LIST_KEY, tokens],
+    queryFn: () => getGoogleCalendars(tokens!),
+    enabled: !!tokens, // Only fetch when tokens are provided
+    retry: false, // Don't retry on failure (tokens may have expired)
   });
 }
 

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,9 @@ import {
 
 export default function CalendarSelect() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tokens = searchParams.get("tokens");
+
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(
     null
   );
@@ -27,15 +30,9 @@ export default function CalendarSelect() {
     data: calendarsData,
     isLoading,
     error,
-    refetch,
-  } = useGoogleCalendarsList();
+  } = useGoogleCalendarsList(tokens);
 
   const connectMutation = useConnectGoogleCalendar();
-
-  // Fetch calendars on mount
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   // Compute the default calendar (primary or first available)
   const defaultCalendarId = useMemo(() => {
@@ -58,7 +55,7 @@ export default function CalendarSelect() {
   }, [effectiveCalendarId, calendarsData]);
 
   const handleConnect = () => {
-    if (!selectedCalendar) return;
+    if (!selectedCalendar || !tokens) return;
 
     connectMutation.mutate(
       {
@@ -68,6 +65,7 @@ export default function CalendarSelect() {
         google_email: selectedCalendar.primary
           ? selectedCalendar.id
           : undefined,
+        tokens,
       },
       {
         onSuccess: () => {
@@ -82,6 +80,33 @@ export default function CalendarSelect() {
   const handleCancel = () => {
     navigate("/settings/notifications");
   };
+
+  // No tokens in URL - redirect back
+  if (!tokens) {
+    return (
+      <div className="container max-w-lg py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Select Calendar
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No authorization data found. Please try connecting again.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={handleCancel} variant="outline">
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

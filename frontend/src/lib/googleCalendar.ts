@@ -58,19 +58,28 @@ export async function getGoogleCalendarAuthUrl(): Promise<AuthUrlResponse> {
   return apiFetch<AuthUrlResponse>("/users/me/google_calendar/auth_url");
 }
 
-export async function getGoogleCalendars(): Promise<CalendarListResponse> {
-  return apiFetch<CalendarListResponse>("/users/me/google_calendar/calendars");
+export async function getGoogleCalendars(
+  tokens: string
+): Promise<CalendarListResponse> {
+  return apiFetch<CalendarListResponse>(
+    `/users/me/google_calendar/calendars?tokens=${encodeURIComponent(tokens)}`
+  );
 }
 
 export async function connectGoogleCalendar(params: {
   calendar_id: string;
   calendar_name?: string;
   google_email?: string;
+  tokens: string;
 }): Promise<ConnectResponse> {
-  return apiFetch<ConnectResponse>("/users/me/google_calendar/connect", {
-    method: "POST",
-    body: JSON.stringify(params),
-  });
+  const { tokens, ...rest } = params;
+  return apiFetch<ConnectResponse>(
+    `/users/me/google_calendar/connect?tokens=${encodeURIComponent(tokens)}`,
+    {
+      method: "POST",
+      body: JSON.stringify(rest),
+    }
+  );
 }
 
 export async function disconnectGoogleCalendar(): Promise<DisconnectResponse> {

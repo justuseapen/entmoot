@@ -104,12 +104,12 @@ RSpec.describe "Api::V1::GoogleCalendar" do
 
   describe "GET /api/v1/users/me/google_calendar/calendars" do
     context "when user is authenticated" do
-      context "when no OAuth session exists" do
+      context "when no tokens are provided" do
         it "returns bad request" do
           get "/api/v1/users/me/google_calendar/calendars", headers: auth_headers(user)
 
           expect(response).to have_http_status(:bad_request)
-          expect(json_response["error"]).to eq("No pending OAuth session")
+          expect(json_response["error"]).to eq("No OAuth tokens provided")
         end
       end
 
@@ -120,14 +120,14 @@ RSpec.describe "Api::V1::GoogleCalendar" do
 
   describe "POST /api/v1/users/me/google_calendar/connect" do
     context "when user is authenticated" do
-      context "when no OAuth session exists" do
+      context "when no tokens are provided" do
         it "returns bad request" do
           post "/api/v1/users/me/google_calendar/connect",
                params: { calendar_id: "primary" },
                headers: auth_headers(user)
 
           expect(response).to have_http_status(:bad_request)
-          expect(json_response["error"]).to eq("No pending OAuth session")
+          expect(json_response["error"]).to eq("No OAuth tokens provided")
         end
       end
 
