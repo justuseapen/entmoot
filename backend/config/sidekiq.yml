@@ -8,86 +8,8 @@
 
 :scheduler:
   :schedule:
-    send_morning_planning_reminders:
-      cron: '*/5 * * * *'
-      class: SendMorningPlanningRemindersJob
-      queue: default
-      description: "Check and send morning planning reminder emails"
-
-    send_evening_reflection_reminders:
-      cron: '*/5 * * * *'
-      class: SendEveningReflectionRemindersJob
-      queue: default
-      description: "Check and send evening reflection reminder emails"
-
-    send_weekly_review_reminders:
-      cron: '*/5 * * * *'
-      class: SendWeeklyReviewRemindersJob
-      queue: default
-      description: "Check and send weekly review reminder emails"
-
-    send_goal_check_in_reminders:
-      cron: '0 10 * * *'
-      class: SendGoalCheckInRemindersJob
-      queue: default
-      description: "Send goal check-in reminders for goals with upcoming due dates"
-
     send_onboarding_emails:
       cron: '0 9 * * *'
       class: SendOnboardingEmailsJob
       queue: default
       description: "Send onboarding email sequence to new users"
-
-    detect_missed_check_ins_noon:
-      cron: '0 12 * * *'
-      class: DetectMissedCheckInsJob
-      queue: default
-      description: "Detect users who missed morning check-in by noon"
-
-    detect_missed_check_ins_afternoon:
-      cron: '0 14 * * *'
-      class: DetectMissedCheckInsJob
-      queue: default
-      description: "Detect users who missed morning check-in by early afternoon"
-
-    detect_missed_reflections_evening:
-      cron: '0 21 * * *'
-      class: DetectMissedReflectionsJob
-      queue: default
-      description: "Detect users who missed evening reflection by 9pm"
-
-    detect_missed_reflections_night:
-      cron: '0 22 * * *'
-      class: DetectMissedReflectionsJob
-      queue: default
-      description: "Detect users who missed evening reflection by 10pm"
-
-    detect_inactive_users:
-      cron: '0 10 * * *'
-      class: DetectInactiveUsersJob
-      queue: default
-      description: "Detect and reach out to inactive users daily"
-
-    send_monthly_review_reminders:
-      cron: '0 9 * * *'
-      class: SendMonthlyReviewRemindersJob
-      queue: default
-      description: "Send monthly review reminders on configured day of month"
-
-    send_quarterly_review_reminders:
-      cron: '0 9 * * *'
-      class: SendQuarterlyReviewRemindersJob
-      queue: default
-      description: "Send quarterly review reminders during last week of quarter"
-
-    send_annual_review_reminders:
-      cron: '0 9 * * *'
-      class: SendAnnualReviewRemindersJob
-      queue: default
-      description: "Send annual review reminders December 20-31"
-
-    calendar_periodic_sync:
-      cron: '0 * * * *'
-      class: CalendarPeriodicSyncJob
-      queue: low
-      description: "Sync Google Calendar events for all active credentials hourly"

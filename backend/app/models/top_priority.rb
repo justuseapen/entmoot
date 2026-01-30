@@ -1,15 +1,9 @@
 # frozen_string_literal: true
 
 class TopPriority < ApplicationRecord
-  include Mentionable
-
   MAX_PRIORITIES = 3
 
   belongs_to :daily_plan
-  belongs_to :goal, optional: true
-
-  # Mentions association is provided by the Mentionable concern
-  mentionable_fields :title
 
   validates :title, presence: true
   validates :priority_order, presence: true,
