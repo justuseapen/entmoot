@@ -10,11 +10,11 @@ export function Families() {
   const { setCurrentFamily } = useFamilyStore();
   const navigate = useNavigate();
 
-  // If user has a family, redirect to its settings page
+  // If user has a family, redirect to the Focus Card
   useEffect(() => {
     if (!isLoading && families && families.length > 0) {
       setCurrentFamily(families[0]);
-      navigate(`/families/${families[0].id}`, { replace: true });
+      navigate(`/families/${families[0].id}/planner`, { replace: true });
     }
   }, [families, isLoading, navigate, setCurrentFamily]);
 
