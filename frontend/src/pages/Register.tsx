@@ -62,8 +62,8 @@ export function Register() {
     try {
       const response = await registerUser(data);
       setAuth(response.user, response.token);
-      // Redirect to onboarding for new users
-      navigate("/onboarding", { replace: true });
+      // Redirect to families for new users
+      navigate("/families", { replace: true });
     } catch (err) {
       const { message, suggestion } = getErrorMessage(err);
 

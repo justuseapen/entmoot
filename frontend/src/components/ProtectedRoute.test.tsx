@@ -26,10 +26,10 @@ describe("ProtectedRoute", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/dashboard"]}>
+      <MemoryRouter initialEntries={["/families"]}>
         <Routes>
           <Route
-            path="/dashboard"
+            path="/families"
             element={
               <ProtectedRoute>
                 <div>Protected Content</div>
@@ -47,10 +47,10 @@ describe("ProtectedRoute", () => {
 
   it("redirects to login when user is not authenticated", () => {
     render(
-      <MemoryRouter initialEntries={["/dashboard"]}>
+      <MemoryRouter initialEntries={["/families"]}>
         <Routes>
           <Route
-            path="/dashboard"
+            path="/families"
             element={
               <ProtectedRoute>
                 <div>Protected Content</div>

@@ -122,7 +122,7 @@ export function FamilySettings() {
     try {
       await deleteFamily.mutateAsync();
       clearFamily();
-      navigate("/dashboard");
+      navigate("/families");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete family");
       setShowDeleteDialog(false);
@@ -154,7 +154,7 @@ export function FamilySettings() {
                   : "Failed to load family"}
               </p>
               <Button asChild className="mt-4">
-                <Link to="/dashboard">Back to Dashboard</Link>
+                <Link to="/families">Back</Link>
               </Button>
             </CardContent>
           </Card>
@@ -173,13 +173,7 @@ export function FamilySettings() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link to={`/families/${familyId}/goals`}>View Goals</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to={`/families/${familyId}/leaderboard`}>Leaderboard</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/dashboard">Back to Dashboard</Link>
+              <Link to={`/families/${familyId}/planner`}>Focus Card</Link>
             </Button>
           </div>
         </div>

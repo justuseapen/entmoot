@@ -42,7 +42,7 @@ export function NotFound() {
               Go Back
             </Button>
             <Button asChild>
-              <Link to="/dashboard">Go to Dashboard</Link>
+              <Link to="/families">Go Home</Link>
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">

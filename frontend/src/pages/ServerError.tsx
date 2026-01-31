@@ -48,7 +48,7 @@ export function ServerError({ onRetry }: ServerErrorProps) {
               Try Again
             </Button>
             <Button asChild variant="outline">
-              <Link to="/dashboard">Go to Dashboard</Link>
+              <Link to="/families">Go Home</Link>
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">

@@ -15,7 +15,7 @@ export function Home() {
         <div className="flex flex-col items-center gap-4">
           <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
           <Button asChild>
-            <Link to="/dashboard">Go to Dashboard</Link>
+            <Link to="/families">Go to Focus Card</Link>
           </Button>
         </div>
       ) : (

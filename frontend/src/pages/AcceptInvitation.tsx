@@ -125,7 +125,7 @@ export function AcceptInvitation() {
           setCurrentFamily(result.family);
           setPageState("success");
           // Redirect after short delay
-          setTimeout(() => navigate("/dashboard"), 2000);
+          setTimeout(() => navigate("/families"), 2000);
         } else if ("requires_auth" in result && result.requires_auth) {
           // Need to authenticate
           setInvitationInfo(result.invitation);

@@ -19,7 +19,7 @@ export function Families() {
   }, [families, isLoading, navigate, setCurrentFamily]);
 
   const handleFamilyCreated = () => {
-    navigate("/dashboard");
+    navigate("/families");
   };
 
   if (isLoading) {

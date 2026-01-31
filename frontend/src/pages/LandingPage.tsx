@@ -19,9 +19,9 @@ import { HERITAGE_COLORS } from "@/components/landing/design-system";
 export function LandingPage() {
   const { isAuthenticated } = useAuthStore();
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to families
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/families" replace />;
   }
 
   return (
